@@ -1,10 +1,10 @@
-# 搭子GG (dazi-gg)
+# Agent-P
 
-> 🎮 "找搭子，上GG" — 游戏搭子众包平台
+> 🎮 游戏搭子众包平台 — AI Agent 驱动的陪玩匹配
 
-## What is 搭子GG?
+## What is Agent-P?
 
-搭子GG 是一个游戏陪玩众包平台，通过 AI Agent 对话交互，连接玩家（消费方）与搭子（服务方）。
+Agent-P 是一个游戏陪玩众包平台，通过 AI Agent 对话交互，连接玩家（消费方）与搭子（服务方）。
 
 **核心特点：**
 
@@ -17,7 +17,7 @@
 ## 项目结构
 
 ```
-dazi-gg/
+agent-p/
 ├── docs/
 │   └── PRD.md          # 产品需求文档
 ├── README.md
