@@ -90,7 +90,8 @@ export async function middleware(request: NextRequest) {
   }
 }
 
-export const runtime = "nodejs";
+// Edge runtime (default for middleware) — jose JWT, cookies, URL checks all Edge-compatible.
+// DO NOT switch to "nodejs" — it causes "Response body disturbed" errors with streaming in standalone mode.
 
 export const config = {
   matcher: ["/((?!_next/static|_next/image|favicon.ico).*)"],

@@ -1,10 +1,7 @@
 import type { NextConfig } from "next";
 
-const nextConfig = {
+const nextConfig: NextConfig = {
   output: "standalone",
-  experimental: {
-    nodeMiddleware: true,
-  },
-} satisfies NextConfig & { experimental: { nodeMiddleware?: boolean } };
+};
 
 export default nextConfig;

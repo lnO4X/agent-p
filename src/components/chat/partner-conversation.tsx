@@ -9,7 +9,7 @@ import { MessageBubble } from "./message-bubble";
 import { MemoryBanner } from "./memory-banner";
 import { PartnerSettingsSheet } from "./partner-settings-sheet";
 import { getPartnerIcon } from "./partner-icons";
-import { ArrowLeft, Settings } from "lucide-react";
+import { ArrowLeft, Settings, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Partner } from "@/types/partner";
 
@@ -45,6 +45,9 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
   const [settingsOpen, setSettingsOpen] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const [retrying, setRetrying] = useState(false);
+  const hasAutoRetriedRef = useRef(false);
+  const retryTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Load partner data
   useEffect(() => {
@@ -114,6 +117,35 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
       }
     };
   }, []);
+
+  // Auto-retry once on error (2s delay before showing error to user)
+  useEffect(() => {
+    if (!error || hasAutoRetriedRef.current) return;
+    hasAutoRetriedRef.current = true;
+    setRetrying(true);
+    retryTimerRef.current = setTimeout(() => {
+      const msgs = messagesRef.current;
+      const lastUser = msgs.filter((m) => m.role === "user").pop();
+      if (lastUser) {
+        const text = extractPartText(
+          lastUser.parts as Array<{ type: string; text?: string }>
+        );
+        if (text) sendMessage({ text });
+      }
+      setRetrying(false);
+    }, 2000);
+    return () => {
+      if (retryTimerRef.current) clearTimeout(retryTimerRef.current);
+    };
+  }, [error, sendMessage]);
+
+  // Reset retry state on successful response
+  useEffect(() => {
+    if (status === "streaming" || status === "ready") {
+      hasAutoRetriedRef.current = false;
+      setRetrying(false);
+    }
+  }, [status]);
 
   const handleSend = useCallback(() => {
     const text = input.trim();
@@ -229,7 +261,15 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
             </div>
           </div>
         )}
-        {error && (
+        {retrying && (
+          <div className="flex justify-center py-3">
+            <div className="flex items-center gap-2 text-xs text-muted-foreground">
+              <Loader2 className="w-3 h-3 animate-spin" />
+              <span>{isZh ? "正在重试..." : "Retrying..."}</span>
+            </div>
+          </div>
+        )}
+        {error && !retrying && (
           <div className="flex justify-center py-3">
             <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-muted/80 border border-foreground/5 max-w-xs">
               <div className="w-5 h-5 rounded-full bg-amber-500/15 flex items-center justify-center flex-shrink-0">

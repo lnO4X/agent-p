@@ -1,9 +1,5 @@
 import { NextRequest } from "next/server";
-import {
-  streamText,
-  convertToModelMessages,
-  createUIMessageStreamResponse,
-} from "ai";
+import { streamText, convertToModelMessages } from "ai";
 import { getModel } from "@/lib/ai";
 import { getAuthFromCookie } from "@/lib/auth";
 import {
@@ -102,12 +98,16 @@ export async function POST(request: NextRequest) {
       : String(msg.content || ""),
   }));
 
-  // Build system prompt layers + optional conversation summary in parallel
+  // Build system prompt layers + optional conversation summary in parallel.
+  // Summarization has a 5-second timeout — non-blocking if slow.
   const [talentCtx, userKnowledgeCtx, conversationSummary] = await Promise.all([
     loadTalentProfileContext(auth.sub),
     loadUserKnowledge(auth.sub),
     truncatedForSummary.length > 0
-      ? summarizeConversationContext(truncatedForSummary)
+      ? Promise.race([
+          summarizeConversationContext(truncatedForSummary),
+          new Promise<string>((resolve) => setTimeout(() => resolve(""), 5000)),
+        ])
       : Promise.resolve(""),
   ]);
   const systemPrompt = buildPartnerSystemPrompt(
@@ -118,20 +118,25 @@ export async function POST(request: NextRequest) {
     conversationSummary || undefined
   );
 
-  // Use createUIMessageStreamResponse to safely handle streaming errors.
-  // This avoids the "Response body object should not be disturbed or locked" error
-  // that can occur when streamText().toUIMessageStreamResponse() fails mid-stream
-  // in Next.js 15.5.
-  return createUIMessageStreamResponse({
-    status: 200,
-    stream: streamText({
-      model,
-      system: systemPrompt,
-      messages: modelMessages,
-      maxOutputTokens: 1500,
-      onError: (event) => {
-        console.error("[chat] Stream error:", event.error);
-      },
-    }).toUIMessageStream(),
+  // Stream response with retries and abort signal for graceful disconnection.
+  // maxRetries handles transient OpenRouter failures (429, 5xx).
+  // abortSignal handles client disconnections and 50s hard timeout.
+  const result = streamText({
+    model,
+    system: systemPrompt,
+    messages: modelMessages,
+    maxOutputTokens: 1500,
+    maxRetries: 3,
+    abortSignal: AbortSignal.any([
+      request.signal,
+      AbortSignal.timeout(50000),
+    ]),
+    onError: (event) => {
+      // Only log non-abort errors (client disconnects are expected)
+      if (event.error instanceof Error && event.error.name === "AbortError") return;
+      console.error("[chat] Stream error:", event.error);
+    },
   });
+
+  return result.toUIMessageStreamResponse();
 }
