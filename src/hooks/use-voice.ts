@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 
 interface UseVoiceOptions {
   onTranscript?: (text: string) => void;
@@ -41,12 +41,34 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isAvailable, setIsAvailable] = useState(true);
+  const [isAvailable, setIsAvailable] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
+
+  // Probe voice service availability on mount
+  useEffect(() => {
+    let cancelled = false;
+    async function probe() {
+      try {
+        // Check if the browser has mic support
+        if (!navigator.mediaDevices?.getUserMedia) return;
+
+        // Check if the voice service is up
+        const res = await fetch("/api/voice/health", { signal: AbortSignal.timeout(3000) });
+        if (!cancelled && res.ok) {
+          const data = await res.json();
+          if (data.available) setIsAvailable(true);
+        }
+      } catch {
+        // Voice service not available — button stays hidden
+      }
+    }
+    probe();
+    return () => { cancelled = true; };
+  }, []);
 
   const startRecording = useCallback(async () => {
     try {

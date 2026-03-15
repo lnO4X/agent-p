@@ -5,3 +5,7 @@ numpy<2.0
 fastapi==0.115.6
 uvicorn[standard]==0.34.0
 python-multipart==0.0.20
+
+# NVIDIA CUDA libraries for GPU acceleration (CTranslate2 needs these)
+nvidia-cublas-cu12
+nvidia-cudnn-cu12

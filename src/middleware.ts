@@ -9,6 +9,7 @@ const PUBLIC_PATHS = [
   "/api/auth/login",
   "/api/auth/register",
   "/api/auth/captcha",
+  "/api/voice/health",
 ];
 
 /** API paths that handle their own auth (Bearer token, cron secret, etc.) */

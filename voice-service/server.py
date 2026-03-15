@@ -11,8 +11,19 @@ Designed to run as a Docker service alongside the Next.js app.
 
 import io
 import os
+import sys
 import tempfile
 import logging
+
+# On Windows, add torch's lib directory to PATH so CTranslate2 can find CUDA DLLs
+# (cublas64_12.dll, etc.) bundled with PyTorch instead of requiring CUDA Toolkit install
+if sys.platform == "win32":
+    try:
+        import torch
+        torch_lib = os.path.join(os.path.dirname(torch.__file__), "lib")
+        os.environ["PATH"] = torch_lib + os.pathsep + os.environ.get("PATH", "")
+    except ImportError:
+        pass
 from contextlib import asynccontextmanager
 
 import numpy as np

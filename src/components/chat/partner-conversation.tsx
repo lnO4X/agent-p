@@ -9,6 +9,7 @@ import { MessageBubble } from "./message-bubble";
 import { MemoryBanner } from "./memory-banner";
 import { PartnerSettingsSheet } from "./partner-settings-sheet";
 import { getPartnerIcon } from "./partner-icons";
+import { VoiceButton } from "./voice-button";
 import { ArrowLeft, Settings, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Partner } from "@/types/partner";
@@ -169,6 +170,18 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
     sendMessage({ text: t(key) });
   };
 
+  // Get the last assistant message text for TTS
+  const lastAssistantText = (() => {
+    const last = messages.filter((m) => m.role === "assistant").pop();
+    if (!last) return undefined;
+    const text = extractPartText(last.parts as Array<{ type: string; text?: string }>);
+    return text || undefined;
+  })();
+
+  const handleVoiceTranscript = useCallback((text: string) => {
+    setInput((prev) => (prev ? prev + " " + text : text));
+  }, []);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -322,6 +335,11 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
       {/* Input area */}
       <div className="px-4 pt-2 pb-[calc(0.5rem_+_3.5rem_+_env(safe-area-inset-bottom))] md:pb-2 border-t border-foreground/10 glass-nav">
         <div className="flex items-end gap-2">
+          <VoiceButton
+            onTranscript={handleVoiceTranscript}
+            speakText={lastAssistantText}
+            disabled={isStreaming}
+          />
           <textarea
             ref={textareaRef}
             value={input}

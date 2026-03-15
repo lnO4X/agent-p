@@ -167,7 +167,7 @@ const isZh = locale === "zh";
 - Payload: `{ sub: userId, username }`
 - JWT_SECRET from env — **MUST be stable across restarts**
 - Math captcha: SVG-rendered, one-time use (deleted after any verification attempt)
-- Middleware: all routes protected EXCEPT `PUBLIC_PATHS`, `PUBLIC_PREFIXES` (`/profile/`, `/api/profile/`, `/quiz`), `SELF_AUTH_PREFIXES` (`/api/admin/`, `/api/cron/`)
+- Middleware: all routes protected EXCEPT `PUBLIC_PATHS` (includes `/api/voice/health`), `PUBLIC_PREFIXES` (`/profile/`, `/api/profile/`, `/quiz`), `SELF_AUTH_PREFIXES` (`/api/admin/`, `/api/cron/`)
 
 **Tier check pattern** (used by Partner/Billing domains):
 ```typescript
@@ -369,10 +369,21 @@ VOICE_SERVICE_SECRET=<shared secret for voice service auth>
 app:        Next.js standalone → port 3100:3000
 db:         PostgreSQL 16 → port 5433:5432
 redis:      Redis 8.4 → port 6379:6379
-voice:      Whisper STT + Kokoro TTS (GPU) → port 8100 (profile: voice)
 ```
 
-**Voice service**: Start with `docker compose --profile voice up -d`. Requires NVIDIA GPU + NVIDIA Container Toolkit.
+### Voice Service (Local GPU)
+```
+voice-service/       Python 3.11 venv, runs on host machine (not Docker)
+  .venv/             Python 3.11.9 virtual environment
+  server.py          FastAPI: Whisper STT + Kokoro TTS → port 8100
+  start.bat          Double-click to start
+  requirements.txt   Dependencies (faster-whisper, kokoro, torch cu128)
+```
+
+**Start**: `cd voice-service && start.bat` (or `.venv/Scripts/python.exe server.py`)
+**GPU**: NVIDIA RTX 5060 Ti 16GB (CUDA capability sm_120, requires PyTorch cu128+)
+**Models**: Whisper medium (~1.5GB, float16 CUDA) + Kokoro-82M (~300MB, CUDA)
+**Docker access**: App container reaches voice service via `host.docker.internal:8100`
 
 ### Cloudflare Tunnel (`~/.cloudflared/config.yml`)
 ```
@@ -437,7 +448,7 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
 - Phase 10E: Captcha anti-cache fix (force-dynamic, no-store headers, fetchingRef dedup, pre-submit validation)
 - Phase 10F: Login form bilingual rewrite (all strings i18n, loading guards)
 - Phase 10G: Chat conversation summary (Layer 5: truncated messages → Gemini Flash summary → injected into system prompt)
-- Phase 10H: Voice infrastructure (Whisper STT + Kokoro TTS Docker service, API proxy routes, useVoice hook, VoiceButton component)
+- Phase 10H: Voice infrastructure + deployment — Whisper STT + Kokoro TTS running locally on GPU (Python 3.11 venv, PyTorch cu128 for RTX 5060 Ti sm_120). API proxy routes (`/api/voice/stt`, `/api/voice/tts`, `/api/voice/health`), useVoice hook with health probe, VoiceButton in partner chat. Round-trip tested: TTS→STT transcription verified.
 - Phase 10I: Chat UX overhaul — typing indicator (bouncing dots on `status=submitted`), friendlier error display (toast-style with amber icon + inline retry), mobile layout fix (correct viewport height calc for top header + bottom tab bar, `enterKeyHint="send"` for mobile keyboards, `overscroll-contain` to prevent swipe-nav, safe-area-inset-bottom padding for notch devices), removed VoiceButton (hidden until voice service deployed), zh.json brand name fixed (游戏百宝箱 → GameTan)
 - Phase 10J: WeChat iOS login fix — dual cookie strategy (server-side HttpOnly + client-side `document.cookie`), JWT 30d expiry, remember-username checkbox with localStorage
 - Phase 10K: Chat streaming reliability — Root cause: `nodeMiddleware: true` + `standalone` mode caused undici "Response body disturbed" on ALL streaming. Fix: removed nodeMiddleware, middleware now Edge runtime (jose Edge-compatible). Added maxRetries: 3, AbortSignal.any([request.signal, timeout(50s)]), 5s summarization timeout, client-side auto-retry once before showing error
@@ -447,7 +458,6 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
 - Tests: 114 unit tests passing (scoring, game-logic, scorers)
 
 ### 🔲 Pending
-- Voice service GPU deployment: needs `docker compose --profile voice up` with NVIDIA GPU + Container Toolkit
 - Crawler automation (code exists in `lib/crawlers/`, no scheduler yet)
 - Stripe/payment integration (future phase)
 - Referral system (referralCode field exists, not implemented)
