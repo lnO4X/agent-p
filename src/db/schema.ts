@@ -21,6 +21,7 @@ export const users = pgTable(
     email: text("email"),
     emailVerifiedAt: timestamp("email_verified_at"),
     isProfilePublic: boolean("is_profile_public").default(true).notNull(),
+    isAdmin: boolean("is_admin").default(false).notNull(),
     tier: text("tier", { enum: ["free", "premium"] }).notNull().default("free"),
     tierExpiresAt: timestamp("tier_expires_at"),
     referralCode: text("referral_code"),

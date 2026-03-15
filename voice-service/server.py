@@ -209,12 +209,14 @@ async def text_to_speech(
         raise HTTPException(status_code=400, detail="Text too long (max 2000 chars)")
 
     # Determine language: explicit param > auto-detect from text
+    logger.info(f"TTS request: text={text[:50]!r}, language={language!r}, len={len(text)}")
     if language in ("zh", "z"):
         lang_code = "z"
     elif language in ("en", "a"):
         lang_code = "a"
     else:
         lang_code = detect_lang_code(text)
+    logger.info(f"TTS detected lang_code={lang_code!r}, voice={voice!r}")
 
     pipeline = get_tts_pipeline(lang_code)
     if pipeline is None:
