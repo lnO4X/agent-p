@@ -244,6 +244,7 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
 - CLAUDE.md modular split: architecture → docs/architecture.md, decisions → docs/decisions.md
 - Phase 10L: Voice UX redesign — Chinese TTS (multi-language Kokoro pipelines with auto-detection), STT auto-send (voice→transcribe→send, no manual click), per-message 🔊 TTS buttons, auto-play TTS when last input was voice
 - Phase 10M: Voice quality upgrade — Kokoro TTS → Edge TTS (Microsoft neural voices, free, much better prosody). STT fix: explicit `task="transcribe"` prevents Whisper from translating Chinese→English. Auto-play toggle (localStorage-persisted, Volume2/VolumeX icon in chat nav). Audio format: WAV → MP3. Removed Kokoro/numpy/soundfile/cn2an/jieba deps.
+- Phase 11: Admin dashboard full enhancement — Dashboard: 7 stat cards (clickable) + registration trend chart (30d bar) + conversion funnel (registered→tested→profiled→premium) + daily activity stacked chart (14d tests+challenges) + quick links. User detail page: click any user → full profile (info cards, talent radar, test sessions, partners with memory preview, challenges, codes used, knowledge graph). Game management: 127 games with search/filter (status: active/hidden/pending, source: seed/steam/taptap), toggle visibility. Nav: added Games tab (4 tabs total).
 
 ### 🔲 Pending
 - Crawler automation (code exists in `lib/crawlers/`, no scheduler yet)

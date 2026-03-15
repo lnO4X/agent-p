@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { BarChart3, Users, KeyRound, ArrowLeft, Shield } from "lucide-react";
+import { BarChart3, Users, KeyRound, ArrowLeft, Shield, Gamepad2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 interface AdminShellProps {
@@ -13,6 +13,7 @@ interface AdminShellProps {
 const NAV_ITEMS = [
   { href: "/admin", label: "Dashboard", icon: BarChart3, exact: true },
   { href: "/admin/users", label: "Users", icon: Users },
+  { href: "/admin/games", label: "Games", icon: Gamepad2 },
   { href: "/admin/codes", label: "Codes", icon: KeyRound },
 ];
 

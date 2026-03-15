@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { Search, Crown, Shield, ChevronLeft, ChevronRight } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -18,6 +19,7 @@ interface AdminUser {
 }
 
 export default function AdminUsersPage() {
+  const router = useRouter();
   const [users, setUsers] = useState<AdminUser[]>([]);
   const [total, setTotal] = useState(0);
   const [page, setPage] = useState(1);
@@ -127,7 +129,8 @@ export default function AdminUsersPage() {
                 : users.map((user) => (
                     <tr
                       key={user.id}
-                      className="border-b border-foreground/5 hover:bg-muted/20 transition-colors"
+                      onClick={() => router.push(`/admin/users/${user.id}`)}
+                      className="border-b border-foreground/5 hover:bg-muted/20 transition-colors cursor-pointer"
                     >
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-2">
