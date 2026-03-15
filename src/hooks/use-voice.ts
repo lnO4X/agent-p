@@ -20,7 +20,7 @@ interface UseVoiceReturn {
   /** Stop recording and transcribe */
   stopRecording: () => void;
   /** Play text as speech */
-  speak: (text: string, voice?: string) => Promise<void>;
+  speak: (text: string, options?: { voice?: string; language?: string }) => Promise<void>;
   /** Stop any playing audio */
   stopPlaying: () => void;
   /** Whether voice services are available (mic + service) */
@@ -165,7 +165,7 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
   }, []);
 
   const speak = useCallback(
-    async (text: string, voice = "af_heart") => {
+    async (text: string, options?: { voice?: string; language?: string }) => {
       // Stop any currently playing audio
       if (audioRef.current) {
         audioRef.current.pause();
@@ -174,10 +174,14 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
 
       setIsPlaying(true);
       try {
+        const payload: Record<string, unknown> = { text };
+        if (options?.voice) payload.voice = options.voice;
+        if (options?.language) payload.language = options.language;
+
         const res = await fetch("/api/voice/tts", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ text, voice }),
+          body: JSON.stringify(payload),
         });
 
         if (!res.ok) {

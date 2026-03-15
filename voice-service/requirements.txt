@@ -6,6 +6,11 @@ fastapi==0.115.6
 uvicorn[standard]==0.34.0
 python-multipart==0.0.20
 
-# NVIDIA CUDA libraries for GPU acceleration (CTranslate2 needs these)
-nvidia-cublas-cu12
-nvidia-cudnn-cu12
+# Chinese TTS dependencies (Kokoro zh pipeline)
+ordered_set
+pypinyin
+cn2an
+jieba
+
+# PyTorch with CUDA 12.8 (for RTX 5060 Ti sm_120)
+# Install separately: pip install torch --index-url https://mirror.sjtu.edu.cn/pytorch-wheels/cu128

@@ -10,6 +10,7 @@ import { MemoryBanner } from "./memory-banner";
 import { PartnerSettingsSheet } from "./partner-settings-sheet";
 import { getPartnerIcon } from "./partner-icons";
 import { VoiceButton } from "./voice-button";
+import { useVoice } from "@/hooks/use-voice";
 import { ArrowLeft, Settings, Loader2 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Partner } from "@/types/partner";
@@ -50,6 +51,29 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
   const hasAutoRetriedRef = useRef(false);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
+  // Voice state
+  const [lastInputWasVoice, setLastInputWasVoice] = useState(false);
+  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
+  const [speakLoading, setSpeakLoading] = useState(false);
+  const prevMsgCountRef = useRef(0);
+
+  const voiceHook = useVoice({
+    onTranscript: useCallback((text: string) => {
+      // Voice auto-send: transcript → direct send message
+      if (text.trim()) {
+        setLastInputWasVoice(true);
+        // We'll send via sendMessage in an effect
+        setPendingVoiceText(text.trim());
+      }
+    }, []),
+    onError: (err) => {
+      console.warn("[voice]", err);
+    },
+    language: isZh ? "zh" : "en",
+  });
+
+  const [pendingVoiceText, setPendingVoiceText] = useState<string | null>(null);
+
   // Load partner data
   useEffect(() => {
     async function loadPartner() {
@@ -89,10 +113,42 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
 
   const isStreaming = status === "submitted" || status === "streaming";
 
+  // Send pending voice text as soon as sendMessage is available
+  useEffect(() => {
+    if (pendingVoiceText && !isStreaming) {
+      sendMessage({ text: pendingVoiceText });
+      setPendingVoiceText(null);
+    }
+  }, [pendingVoiceText, isStreaming, sendMessage]);
+
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
+
+  // Auto-play TTS when AI finishes responding and last input was voice
+  useEffect(() => {
+    if (
+      lastInputWasVoice &&
+      status === "ready" &&
+      messages.length > prevMsgCountRef.current
+    ) {
+      const lastMsg = messages[messages.length - 1];
+      if (lastMsg?.role === "assistant") {
+        const text = extractPartText(
+          lastMsg.parts as Array<{ type: string; text?: string }>
+        );
+        if (text) {
+          // Auto-play TTS for the new assistant message
+          handleSpeak(lastMsg.id, text);
+        }
+      }
+      // Reset voice mode after auto-play trigger
+      setLastInputWasVoice(false);
+    }
+    prevMsgCountRef.current = messages.length;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [status, messages.length, lastInputWasVoice]);
 
   // Memory extraction on unmount
   const messagesRef = useRef(messages);
@@ -151,6 +207,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
   const handleSend = useCallback(() => {
     const text = input.trim();
     if (!text || isStreaming) return;
+    setLastInputWasVoice(false); // Text input — don't auto-play TTS
     sendMessage({ text });
     setInput("");
     // Reset textarea height
@@ -170,17 +227,39 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
     sendMessage({ text: t(key) });
   };
 
-  // Get the last assistant message text for TTS
-  const lastAssistantText = (() => {
-    const last = messages.filter((m) => m.role === "assistant").pop();
-    if (!last) return undefined;
-    const text = extractPartText(last.parts as Array<{ type: string; text?: string }>);
-    return text || undefined;
-  })();
+  // Per-message TTS: speak or stop
+  const handleSpeak = useCallback(
+    async (msgId: string, text: string) => {
+      if (speakingMsgId === msgId) {
+        // Stop current playback
+        voiceHook.stopPlaying();
+        setSpeakingMsgId(null);
+        return;
+      }
 
-  const handleVoiceTranscript = useCallback((text: string) => {
-    setInput((prev) => (prev ? prev + " " + text : text));
-  }, []);
+      // Stop any existing playback first
+      voiceHook.stopPlaying();
+      setSpeakingMsgId(msgId);
+      setSpeakLoading(true);
+
+      try {
+        await voiceHook.speak(text, { language: isZh ? "zh" : "en" });
+        setSpeakLoading(false);
+        // speakingMsgId will be cleared when audio ends
+      } catch {
+        setSpeakingMsgId(null);
+        setSpeakLoading(false);
+      }
+    },
+    [speakingMsgId, voiceHook, isZh]
+  );
+
+  // Clear speakingMsgId when voice stops playing
+  useEffect(() => {
+    if (!voiceHook.isPlaying && speakingMsgId && !speakLoading) {
+      setSpeakingMsgId(null);
+    }
+  }, [voiceHook.isPlaying, speakingMsgId, speakLoading]);
 
   if (loading) {
     return (
@@ -261,6 +340,10 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
               msg.id === messages[messages.length - 1]?.id &&
               msg.role === "assistant"
             }
+            voiceAvailable={voiceHook.isAvailable}
+            onSpeak={(text) => handleSpeak(msg.id, text)}
+            isSpeaking={speakingMsgId === msg.id && voiceHook.isPlaying}
+            isSpeakLoading={speakingMsgId === msg.id && speakLoading}
           />
         ))}
         {status === "submitted" && (
@@ -335,11 +418,15 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
       {/* Input area */}
       <div className="px-4 pt-2 pb-[calc(0.5rem_+_3.5rem_+_env(safe-area-inset-bottom))] md:pb-2 border-t border-foreground/10 glass-nav">
         <div className="flex items-end gap-2">
-          <VoiceButton
-            onTranscript={handleVoiceTranscript}
-            speakText={lastAssistantText}
-            disabled={isStreaming}
-          />
+          {voiceHook.isAvailable && (
+            <VoiceButton
+              isRecording={voiceHook.isRecording}
+              isTranscribing={voiceHook.isTranscribing}
+              onStartRecording={voiceHook.startRecording}
+              onStopRecording={voiceHook.stopRecording}
+              disabled={isStreaming}
+            />
+          )}
           <textarea
             ref={textareaRef}
             value={input}

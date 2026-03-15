@@ -233,7 +233,7 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
 - Phase 10E: Captcha anti-cache fix (force-dynamic, no-store headers, fetchingRef dedup, pre-submit validation)
 - Phase 10F: Login form bilingual rewrite (all strings i18n, loading guards)
 - Phase 10G: Chat conversation summary (Layer 5: truncated messages → Gemini Flash summary → injected into system prompt)
-- Phase 10H: Voice infrastructure + deployment — Whisper STT + Kokoro TTS running locally on GPU (Python 3.11 venv, PyTorch cu128 for RTX 5060 Ti sm_120). API proxy routes, useVoice hook with health probe, VoiceButton in partner chat. Round-trip tested.
+- Phase 10H: Voice infrastructure + deployment — Whisper STT + Kokoro TTS (English + Chinese) running locally on GPU (Python 3.11 venv, PyTorch cu128 for RTX 5060 Ti sm_120). API proxy routes, useVoice hook with health probe.
 - Phase 10I: Chat UX overhaul — typing indicator, friendlier error display, mobile layout fix, VoiceButton hidden until voice service deployed
 - Phase 10J: WeChat iOS login fix — dual cookie strategy, JWT 30d expiry, remember-username
 - Phase 10K: Chat streaming reliability — removed nodeMiddleware, Edge runtime middleware, maxRetries: 3, auto-retry
@@ -242,6 +242,7 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
 - Daily challenge system: fully implemented (13-talent cycle, streak, trend chart)
 - Tests: 114 unit tests passing (scoring, game-logic, scorers)
 - CLAUDE.md modular split: architecture → docs/architecture.md, decisions → docs/decisions.md
+- Phase 10L: Voice UX redesign — Chinese TTS (multi-language Kokoro pipelines with auto-detection), STT auto-send (voice→transcribe→send, no manual click), per-message 🔊 TTS buttons, auto-play TTS when last input was voice
 
 ### 🔲 Pending
 - Crawler automation (code exists in `lib/crawlers/`, no scheduler yet)

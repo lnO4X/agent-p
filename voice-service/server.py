@@ -37,7 +37,40 @@ logging.basicConfig(level=logging.INFO)
 
 # Global model references (loaded once at startup)
 whisper_model = None
-tts_pipeline = None
+tts_pipelines: dict = {}  # lang_code -> KPipeline (lazy-loaded)
+
+# Kokoro language codes: 'a'=American English, 'b'=British English, 'z'=Chinese, 'j'=Japanese, 'k'=Korean
+# Default voices per language
+DEFAULT_VOICES = {
+    "a": "af_heart",   # American English female
+    "z": "zf_xiaobei", # Chinese female
+    "j": "jf_alpha",   # Japanese female
+}
+
+import re
+_CJK_RANGE = re.compile(r'[\u4e00-\u9fff\u3400-\u4dbf]')
+
+def detect_lang_code(text: str) -> str:
+    """Detect Kokoro lang_code from text content. Returns 'z' for Chinese, 'a' for English."""
+    if _CJK_RANGE.search(text):
+        return "z"
+    return "a"
+
+def get_tts_pipeline(lang_code: str):
+    """Get or create a Kokoro TTS pipeline for the given language."""
+    if lang_code in tts_pipelines:
+        return tts_pipelines[lang_code]
+    try:
+        from kokoro import KPipeline
+        logger.info(f"Loading Kokoro TTS pipeline for lang={lang_code}...")
+        pipeline = KPipeline(lang_code=lang_code)
+        tts_pipelines[lang_code] = pipeline
+        logger.info(f"Kokoro TTS pipeline for lang={lang_code} loaded")
+        return pipeline
+    except Exception as e:
+        logger.error(f"Failed to load Kokoro pipeline for lang={lang_code}: {e}")
+        return None
+
 
 # ==================== Model Loading ====================
 
@@ -56,18 +89,12 @@ def load_whisper():
 
 
 def load_tts():
-    """Load Kokoro TTS pipeline."""
-    global tts_pipeline
+    """Pre-load default TTS pipelines (English + Chinese)."""
     try:
-        from kokoro import KPipeline
-
-        # Kokoro supports multiple languages. Use 'a' for auto-detect.
-        lang = os.environ.get("TTS_LANG", "a")
-        tts_pipeline = KPipeline(lang_code=lang)
-        logger.info("Kokoro TTS loaded successfully")
+        get_tts_pipeline("a")  # English
+        get_tts_pipeline("z")  # Chinese
     except Exception as e:
         logger.warning(f"Kokoro TTS failed to load: {e}. TTS will be unavailable.")
-        tts_pipeline = None
 
 
 @asynccontextmanager
@@ -105,7 +132,7 @@ async def health():
     return {
         "status": "ok",
         "stt": whisper_model is not None,
-        "tts": tts_pipeline is not None,
+        "tts": len(tts_pipelines) > 0,
     }
 
 
@@ -160,27 +187,47 @@ async def speech_to_text(
 @app.post("/tts")
 async def text_to_speech(
     text: str = Form(...),
-    voice: str = Form(default="af_heart"),
+    voice: str = Form(default=""),
     speed: float = Form(default=1.0),
+    language: str = Form(default=""),
     authorization: str | None = Form(default=None),
 ):
     """
     Convert text to speech using Kokoro TTS.
 
+    Auto-detects language (Chinese vs English) from text content.
+    Pass language='zh' or language='en' to override.
+
     Returns: audio/wav stream
     """
     verify_auth(authorization)
 
-    if tts_pipeline is None:
+    if len(tts_pipelines) == 0:
         raise HTTPException(status_code=503, detail="TTS model not loaded")
 
     if len(text) > 2000:
         raise HTTPException(status_code=400, detail="Text too long (max 2000 chars)")
 
+    # Determine language: explicit param > auto-detect from text
+    if language in ("zh", "z"):
+        lang_code = "z"
+    elif language in ("en", "a"):
+        lang_code = "a"
+    else:
+        lang_code = detect_lang_code(text)
+
+    pipeline = get_tts_pipeline(lang_code)
+    if pipeline is None:
+        raise HTTPException(status_code=503, detail=f"TTS pipeline for lang={lang_code} not available")
+
+    # Use language-appropriate default voice if none specified
+    if not voice:
+        voice = DEFAULT_VOICES.get(lang_code, "af_heart")
+
     try:
         # Generate audio samples
         audio_segments = []
-        for _, _, audio_np in tts_pipeline(text, voice=voice, speed=speed):
+        for _, _, audio_np in pipeline(text, voice=voice, speed=speed):
             audio_segments.append(audio_np)
 
         if not audio_segments:

@@ -12,6 +12,7 @@ const ttsSchema = z.object({
   text: z.string().min(1).max(2000),
   voice: z.string().max(50).optional(),
   speed: z.number().min(0.5).max(2.0).optional(),
+  language: z.string().max(10).optional(),
 });
 
 /**
@@ -46,14 +47,15 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { text, voice = "af_heart", speed = 1.0 } = parsed.data;
+  const { text, voice, speed = 1.0, language } = parsed.data;
 
   try {
     // Forward to voice service as form data
     const proxyForm = new FormData();
     proxyForm.append("text", text);
-    proxyForm.append("voice", voice);
+    if (voice) proxyForm.append("voice", voice);
     proxyForm.append("speed", String(speed));
+    if (language) proxyForm.append("language", language);
     proxyForm.append("authorization", `Bearer ${VOICE_SECRET}`);
 
     const res = await fetch(`${VOICE_SERVICE_URL}/tts`, {
