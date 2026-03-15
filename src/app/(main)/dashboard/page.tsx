@@ -1,0 +1,312 @@
+"use client";
+
+import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { useI18n } from "@/i18n/context";
+import { scoreToArchetype } from "@/lib/archetype";
+import type { Archetype } from "@/lib/archetype";
+import type { TalentCategory } from "@/types/talent";
+import {
+  Flame,
+  Zap,
+  Bot,
+  TrendingUp,
+  ChevronRight,
+  Swords,
+  Target,
+} from "lucide-react";
+
+interface PartnerPreview {
+  id: string;
+  name: string;
+  avatar: string;
+}
+
+export default function DashboardPage() {
+  const { t, locale } = useI18n();
+  const isZh = locale === "zh";
+
+  const [talents, setTalents] = useState<Partial<Record<TalentCategory, number>>>({});
+  const [partners, setPartners] = useState<PartnerPreview[]>([]);
+  const [challengeStreak, setChallengeStreak] = useState(0);
+  const [challengeCompleted, setChallengeCompleted] = useState(false);
+  const [challengeTalent, setChallengeTalent] = useState<string | null>(null);
+
+  const archetype = useMemo<Archetype | null>(() => {
+    const vals = Object.values(talents).filter((v): v is number => v != null);
+    if (vals.length < 3) return null;
+    return scoreToArchetype(talents);
+  }, [talents]);
+
+  useEffect(() => {
+    // Fetch leaderboard to get own talent profile
+    fetch("/api/leaderboard")
+      .then((r) => r.json())
+      .then(async (json) => {
+        if (!json.success) return;
+        const meRes = await fetch("/api/auth/me").then((r) => r.json()).catch(() => null);
+        const myUsername = meRes?.data?.username;
+        if (!myUsername) return;
+        const myEntry = json.data.find(
+          (e: { username: string }) => e.username === myUsername
+        );
+        if (myEntry?.talents) {
+          setTalents(myEntry.talents);
+        }
+      })
+      .catch(() => {});
+
+    // Fetch partners
+    fetch("/api/partners")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.data) {
+          setPartners(
+            json.data.slice(0, 3).map((p: { id: string; name: string; avatar: string }) => ({
+              id: p.id,
+              name: p.name,
+              avatar: p.avatar,
+            }))
+          );
+        }
+      })
+      .catch(() => {});
+
+    // Fetch challenge info
+    fetch("/api/challenge")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success) {
+          setChallengeStreak(json.data.streak);
+          setChallengeCompleted(json.data.completedToday);
+          setChallengeTalent(json.data.talentCategory);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  return (
+    <div className="max-w-lg mx-auto space-y-4">
+      {/* ─── Archetype Identity Card ─── */}
+      {archetype ? (
+        <Card
+          className="overflow-hidden"
+          style={{
+            background: `linear-gradient(135deg, ${archetype.gradient[0]}15, ${archetype.gradient[1]}15)`,
+          }}
+        >
+          <CardContent className="pt-5 pb-5">
+            <div className="flex items-center gap-4">
+              <div className="text-4xl">{archetype.icon}</div>
+              <div className="flex-1 min-w-0">
+                <div className="text-xs text-muted-foreground">
+                  {isZh ? "你的玩家原型" : "Your Archetype"}
+                </div>
+                <h1
+                  className="text-xl font-bold"
+                  style={{
+                    background: `linear-gradient(135deg, ${archetype.gradient[0]}, ${archetype.gradient[1]})`,
+                    WebkitBackgroundClip: "text",
+                    WebkitTextFillColor: "transparent",
+                  }}
+                >
+                  {isZh ? archetype.name : archetype.nameEn}
+                </h1>
+                <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 italic">
+                  {isZh ? archetype.tagline : archetype.taglineEn}
+                </p>
+              </div>
+              <Link href="/me">
+                <ChevronRight size={20} className="text-muted-foreground" />
+              </Link>
+            </div>
+
+            {/* Evolution hint */}
+            <div className="mt-3 pt-3 border-t border-border/50">
+              <div className="flex items-center gap-2 text-xs">
+                <TrendingUp size={12} className="text-primary shrink-0" />
+                <span className="text-muted-foreground line-clamp-1">
+                  {isZh ? archetype.evolutionHint : archetype.evolutionHintEn}
+                </span>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ) : (
+        /* No profile — compelling progress CTA */
+        <Card
+          className="overflow-hidden border-primary/30"
+          style={{
+            background: "linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.03))",
+          }}
+        >
+          <CardContent className="pt-6 pb-6 space-y-4">
+            <div className="text-center space-y-2">
+              <Target size={36} className="text-primary mx-auto" />
+              <h2 className="text-lg font-bold">
+                {isZh ? "你是什么类型的玩家？" : "What Kind of Gamer Are You?"}
+              </h2>
+              <p className="text-sm text-muted-foreground">
+                {isZh
+                  ? "完成 13 项天赋测试，揭示你独一无二的玩家原型"
+                  : "Complete 13 talent tests to reveal your unique gamer archetype"}
+              </p>
+            </div>
+
+            {/* Feature preview */}
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="p-2 rounded-lg bg-background/60">
+                <div className="text-lg font-bold text-primary">13</div>
+                <div className="text-[10px] text-muted-foreground">
+                  {isZh ? "趣味小游戏" : "Mini Games"}
+                </div>
+              </div>
+              <div className="p-2 rounded-lg bg-background/60">
+                <div className="text-lg font-bold text-primary">~25</div>
+                <div className="text-[10px] text-muted-foreground">
+                  {isZh ? "分钟" : "Minutes"}
+                </div>
+              </div>
+              <div className="p-2 rounded-lg bg-background/60">
+                <div className="text-lg font-bold text-primary">16</div>
+                <div className="text-[10px] text-muted-foreground">
+                  {isZh ? "种原型" : "Archetypes"}
+                </div>
+              </div>
+            </div>
+
+            <Link href="/test" className="block">
+              <Button size="lg" className="w-full h-12 text-base">
+                {isZh ? "开始测试" : "Start Test"}
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ─── Daily Challenge ─── */}
+      <Link href="/challenge">
+        <Card
+          className={`pressable ${
+            challengeCompleted
+              ? "border-green-500/30 bg-green-500/5"
+              : "border-primary/30 bg-primary/5"
+          }`}
+        >
+          <CardContent className="pt-4 pb-4">
+            <div className="flex items-center gap-3">
+              <div
+                className={`flex items-center justify-center w-10 h-10 rounded-xl ${
+                  challengeCompleted ? "bg-green-500/10" : "bg-primary/10"
+                }`}
+              >
+                <Zap
+                  size={20}
+                  className={
+                    challengeCompleted ? "text-green-500" : "text-primary"
+                  }
+                />
+              </div>
+              <div className="flex-1">
+                <div className="font-semibold text-sm">
+                  {challengeCompleted
+                    ? t("dashboard.challengeDone")
+                    : isZh
+                      ? "今日训练"
+                      : "Today's Training"}
+                </div>
+                {challengeTalent && (
+                  <div className="text-xs text-muted-foreground">
+                    {t(`talent.${challengeTalent}`)}
+                    {archetype && !challengeCompleted && (
+                      <span className="ml-1">
+                        ·{" "}
+                        {isZh ? "进化路径相关" : "Evolution path"}
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
+              {challengeStreak > 0 && (
+                <div className="flex items-center gap-1 text-orange-500">
+                  <Flame size={16} />
+                  <span className="text-sm font-bold">{challengeStreak}</span>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </Link>
+
+      {/* ─── AI Characters ─── */}
+      {partners.length > 0 && (
+        <Card>
+          <CardContent className="pt-4 pb-3">
+            <div className="flex items-center justify-between mb-3">
+              <h2 className="text-sm font-semibold flex items-center gap-1.5">
+                <Bot size={14} className="text-primary" />
+                {isZh ? "你的角色" : "Your Characters"}
+              </h2>
+              <Link
+                href="/chat"
+                className="text-xs text-muted-foreground hover:text-foreground"
+              >
+                {t("dashboard.viewAll")} →
+              </Link>
+            </div>
+            <div className="space-y-2">
+              {partners.map((p) => (
+                <Link key={p.id} href={`/chat/${p.id}`}>
+                  <div className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-muted/50 transition-colors pressable">
+                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
+                      {p.name.charAt(0)}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="text-sm font-medium truncate">
+                        {p.name}
+                      </div>
+                    </div>
+                    <ChevronRight
+                      size={16}
+                      className="text-muted-foreground"
+                    />
+                  </div>
+                </Link>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* ─── Quick actions ─── */}
+      <div className="grid grid-cols-2 gap-3">
+        <Link href="/test">
+          <Card className="pressable h-full">
+            <CardContent className="pt-4 pb-4 flex flex-col items-center gap-2">
+              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
+                <Target size={20} className="text-blue-500" />
+              </div>
+              <span className="text-xs font-medium">
+                {isZh ? "完整测试" : "Full Test"}
+              </span>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/chat">
+          <Card className="pressable h-full">
+            <CardContent className="pt-4 pb-4 flex flex-col items-center gap-2">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
+                <Swords size={20} className="text-purple-500" />
+              </div>
+              <span className="text-xs font-medium">
+                {isZh ? "AI 角色" : "AI Characters"}
+              </span>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
+    </div>
+  );
+}

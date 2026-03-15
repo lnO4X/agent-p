@@ -1,0 +1,125 @@
+import { NextResponse } from "next/server";
+import { nanoid } from "nanoid";
+import { db } from "@/db";
+import { testSessions } from "@/db/schema";
+import { eq, desc, and, sql } from "drizzle-orm";
+import { getAuthFromCookie } from "@/lib/auth";
+
+const MAX_COMPLETED_TESTS = 2;
+const isDev = process.env.NODE_ENV === "development";
+const noLimit = isDev || process.env.DISABLE_TEST_LIMIT === "true";
+
+export async function POST() {
+  try {
+    const auth = await getAuthFromCookie();
+    if (!auth) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "未登录" } },
+        { status: 401 }
+      );
+    }
+
+    // Check test limit: max 2 completed tests per user (skip in dev mode)
+    const completedCount = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(testSessions)
+      .where(
+        and(
+          eq(testSessions.userId, auth.sub),
+          eq(testSessions.status, "completed")
+        )
+      );
+
+    if (!noLimit && completedCount[0]?.count >= MAX_COMPLETED_TESTS) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "TEST_LIMIT_REACHED",
+            message: `每位用户最多完成 ${MAX_COMPLETED_TESTS} 次天赋测试`,
+          },
+        },
+        { status: 403 }
+      );
+    }
+
+    // Also clean up any existing in_progress sessions (only allow 1 active)
+    await db
+      .update(testSessions)
+      .set({ status: "abandoned" })
+      .where(
+        and(
+          eq(testSessions.userId, auth.sub),
+          eq(testSessions.status, "in_progress")
+        )
+      );
+
+    const id = nanoid();
+    await db.insert(testSessions).values({
+      id,
+      userId: auth.sub,
+      status: "in_progress",
+      startedAt: new Date(),
+    });
+
+    return NextResponse.json({ success: true, data: { id } });
+  } catch (error) {
+    console.error("Create session error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "创建测试失败" },
+      },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET() {
+  try {
+    const auth = await getAuthFromCookie();
+    if (!auth) {
+      return NextResponse.json(
+        { success: false, error: { code: "UNAUTHORIZED", message: "未登录" } },
+        { status: 401 }
+      );
+    }
+
+    const sessions = await db
+      .select()
+      .from(testSessions)
+      .where(eq(testSessions.userId, auth.sub))
+      .orderBy(desc(testSessions.startedAt))
+      .limit(20);
+
+    // Also return the completed count for client-side limit display
+    const completedCount = await db
+      .select({ count: sql<number>`count(*)::int` })
+      .from(testSessions)
+      .where(
+        and(
+          eq(testSessions.userId, auth.sub),
+          eq(testSessions.status, "completed")
+        )
+      );
+
+    return NextResponse.json({
+      success: true,
+      data: sessions,
+      meta: {
+        completedCount: completedCount[0]?.count || 0,
+        maxTests: noLimit ? 9999 : MAX_COMPLETED_TESTS,
+        devMode: isDev,
+      },
+    });
+  } catch (error) {
+    console.error("List sessions error:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: { code: "INTERNAL_ERROR", message: "获取测试记录失败" },
+      },
+      { status: 500 }
+    );
+  }
+}

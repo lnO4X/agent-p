@@ -1,0 +1,137 @@
+import { NextRequest } from "next/server";
+import {
+  streamText,
+  convertToModelMessages,
+  createUIMessageStreamResponse,
+} from "ai";
+import { getModel } from "@/lib/ai";
+import { getAuthFromCookie } from "@/lib/auth";
+import {
+  loadTalentProfileContext,
+  loadUserKnowledge,
+  buildPartnerSystemPrompt,
+  summarizeConversationContext,
+} from "@/lib/partner-prompts";
+import { db } from "@/db";
+import { partners } from "@/db/schema";
+import { eq, and } from "drizzle-orm";
+import { chatMessageSchema } from "@/lib/validations";
+
+// Allow longer streaming responses (up to 60 seconds)
+export const maxDuration = 60;
+
+export async function POST(request: NextRequest) {
+  // Read body early and defensively
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json(
+      { error: "Invalid JSON body" },
+      { status: 400 }
+    );
+  }
+
+  const auth = await getAuthFromCookie();
+  if (!auth) {
+    return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  const parsed = chatMessageSchema.safeParse(body);
+  if (!parsed.success) {
+    return Response.json(
+      { error: parsed.error.flatten() },
+      { status: 400 }
+    );
+  }
+
+  const { messages: clientMessages, partnerId } = parsed.data;
+
+  // Load partner (verify ownership)
+  const partner = await db
+    .select()
+    .from(partners)
+    .where(and(eq(partners.id, partnerId), eq(partners.userId, auth.sub)))
+    .limit(1);
+
+  if (partner.length === 0) {
+    return Response.json({ error: "Partner not found" }, { status: 404 });
+  }
+
+  const p = partner[0];
+
+  // Build model with optional per-partner override
+  const model = getModel(p.modelId);
+  if (!model) {
+    return Response.json(
+      { error: "AI model not configured" },
+      { status: 503 }
+    );
+  }
+
+  // Message window: keep last 10 messages for context window efficiency.
+  // If there are older messages beyond the window, summarize them.
+  const MESSAGE_WINDOW = 10;
+  const recentMessages = clientMessages.slice(-MESSAGE_WINDOW);
+  const truncatedMessages = clientMessages.length > MESSAGE_WINDOW
+    ? clientMessages.slice(0, -MESSAGE_WINDOW)
+    : [];
+
+  let modelMessages;
+  try {
+    // Convert UIMessages (v6 parts format) to model messages
+    modelMessages = await convertToModelMessages(
+      recentMessages as Parameters<typeof convertToModelMessages>[0]
+    );
+  } catch (err) {
+    console.error("[chat] convertToModelMessages error:", err);
+    return Response.json(
+      { error: "Failed to process messages" },
+      { status: 400 }
+    );
+  }
+
+  // Extract text from truncated messages for summarization
+  const truncatedForSummary = truncatedMessages.map((msg: Record<string, unknown>) => ({
+    role: (msg.role as string) || "user",
+    content: Array.isArray(msg.parts)
+      ? (msg.parts as Array<{ type?: string; text?: string }>)
+          .filter((p) => p.type === "text")
+          .map((p) => p.text || "")
+          .join("")
+      : String(msg.content || ""),
+  }));
+
+  // Build system prompt layers + optional conversation summary in parallel
+  const [talentCtx, userKnowledgeCtx, conversationSummary] = await Promise.all([
+    loadTalentProfileContext(auth.sub),
+    loadUserKnowledge(auth.sub),
+    truncatedForSummary.length > 0
+      ? summarizeConversationContext(truncatedForSummary)
+      : Promise.resolve(""),
+  ]);
+  const systemPrompt = buildPartnerSystemPrompt(
+    p.definition,
+    p.memory,
+    talentCtx,
+    userKnowledgeCtx,
+    conversationSummary || undefined
+  );
+
+  // Use createUIMessageStreamResponse to safely handle streaming errors.
+  // This avoids the "Response body object should not be disturbed or locked" error
+  // that can occur when streamText().toUIMessageStreamResponse() fails mid-stream
+  // in Next.js 15.5.
+  return createUIMessageStreamResponse({
+    status: 200,
+    stream: streamText({
+      model,
+      system: systemPrompt,
+      messages: modelMessages,
+      maxOutputTokens: 1500,
+      onError: (event) => {
+        console.error("[chat] Stream error:", event.error);
+      },
+    }).toUIMessageStream(),
+  });
+}

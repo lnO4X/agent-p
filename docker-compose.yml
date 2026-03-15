@@ -1,0 +1,69 @@
+services:
+  db:
+    image: postgres:16-alpine
+    ports:
+      - "5433:5432"
+    environment:
+      POSTGRES_DB: agent_p
+      POSTGRES_USER: agent_p
+      POSTGRES_PASSWORD: agent_p_dev
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U agent_p"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:8.4-alpine
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+    volumes:
+      - redisdata:/data
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    ports:
+      - "3100:3000"
+    env_file:
+      - .env.production
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+
+  voice:
+    build:
+      context: ./voice-service
+      dockerfile: Dockerfile
+    ports:
+      - "8100:8100"
+    environment:
+      - USE_GPU=1
+      - WHISPER_MODEL=medium
+      - TTS_LANG=a
+      - VOICE_SERVICE_SECRET=${VOICE_SERVICE_SECRET:-voice-dev-secret}
+    deploy:
+      resources:
+        reservations:
+          devices:
+            - driver: nvidia
+              count: 1
+              capabilities: [gpu]
+    restart: unless-stopped
+    profiles:
+      - voice  # Only start with: docker compose --profile voice up
+
+volumes:
+  pgdata:
+  redisdata:

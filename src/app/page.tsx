@@ -1,0 +1,86 @@
+"use client";
+
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
+import { getAllArchetypes } from "@/lib/archetype";
+import { useI18n } from "@/i18n/context";
+
+export default function Home() {
+  const archetypes = getAllArchetypes();
+  const { locale } = useI18n();
+  const isZh = locale === "zh";
+
+  return (
+    <div className="min-h-[100dvh] flex flex-col bg-background">
+      {/* Hero */}
+      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
+        <div className="max-w-md md:max-w-2xl text-center space-y-6 md:space-y-8 w-full">
+          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+            Game<span className="text-primary">Tan</span>
+          </h1>
+
+          <div className="space-y-2">
+            <p className="text-2xl md:text-3xl font-bold">
+              {isZh ? "你是什么类型的玩家？" : "What Kind of Gamer Are You?"}
+            </p>
+            <p className="text-base md:text-lg text-muted-foreground">
+              {isZh
+                ? "3分钟 · 3个小游戏 · 揭示你的游戏原型"
+                : "3 min · 3 games · Discover your gamer archetype"}
+            </p>
+          </div>
+
+          {/* Archetype icon parade */}
+          <div className="flex flex-wrap justify-center gap-2 py-2">
+            {archetypes.slice(0, 16).map((a) => (
+              <span
+                key={a.id}
+                className="text-2xl md:text-3xl"
+                title={isZh ? a.name : a.nameEn}
+              >
+                {a.icon}
+              </span>
+            ))}
+          </div>
+
+          <p className="text-sm text-muted-foreground">
+            {isZh
+              ? "16种玩家原型 — 你是哪一个？"
+              : "16 gamer archetypes — which one are you?"}
+          </p>
+
+          {/* Primary CTA */}
+          <Link href="/quiz" className="block">
+            <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-12">
+              {isZh ? "开始测试" : "Start Quiz"}
+            </Button>
+          </Link>
+
+          {/* Secondary */}
+          <div className="flex items-center justify-center gap-4 text-sm text-muted-foreground">
+            <span>{isZh ? "无需注册" : "No signup"}</span>
+            <span>·</span>
+            <span>{isZh ? "结果即时生成" : "Instant results"}</span>
+            <span>·</span>
+            <span>{isZh ? "可分享" : "Shareable"}</span>
+          </div>
+
+          {/* Login link */}
+          <div className="pt-4 flex items-center justify-center gap-3 text-sm">
+            <Link
+              href="/login"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isZh ? "已有账号？登录" : "Have an account? Sign in"}
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      {/* Footer */}
+      <div className="text-center text-xs text-muted-foreground py-4">
+        game.weda.ai
+      </div>
+    </div>
+  );
+}
