@@ -440,6 +440,7 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
 - Phase 10H: Voice infrastructure (Whisper STT + Kokoro TTS Docker service, API proxy routes, useVoice hook, VoiceButton component)
 - Phase 10I: Chat UX overhaul — typing indicator (bouncing dots on `status=submitted`), friendlier error display (toast-style with amber icon + inline retry), mobile layout fix (correct viewport height calc for top header + bottom tab bar, `enterKeyHint="send"` for mobile keyboards, `overscroll-contain` to prevent swipe-nav, safe-area-inset-bottom padding for notch devices), removed VoiceButton (hidden until voice service deployed), zh.json brand name fixed (游戏百宝箱 → GameTan)
 - Phase 10J: WeChat iOS login fix — dual cookie strategy (server-side HttpOnly + client-side `document.cookie`), JWT 30d expiry, remember-username checkbox with localStorage
+- Phase 10K: Chat streaming reliability — Root cause: `nodeMiddleware: true` + `standalone` mode caused undici "Response body disturbed" on ALL streaming. Fix: removed nodeMiddleware, middleware now Edge runtime (jose Edge-compatible). Added maxRetries: 3, AbortSignal.any([request.signal, timeout(50s)]), 5s summarization timeout, client-side auto-retry once before showing error
 - Brand: GameTalent → GameTan (unified globally)
 - Bilingual: Landing, Quiz, Test Session, Auth forms, Results, Register
 - Daily challenge system: fully implemented (13-talent cycle, streak, trend chart, dashboard + play + me integration)
