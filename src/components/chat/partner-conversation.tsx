@@ -11,7 +11,7 @@ import { PartnerSettingsSheet } from "./partner-settings-sheet";
 import { getPartnerIcon } from "./partner-icons";
 import { VoiceButton } from "./voice-button";
 import { useVoice } from "@/hooks/use-voice";
-import { ArrowLeft, Settings, Loader2 } from "lucide-react";
+import { ArrowLeft, Settings, Loader2, Volume2, VolumeX } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Partner } from "@/types/partner";
 
@@ -56,6 +56,12 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
   const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
   const [speakLoading, setSpeakLoading] = useState(false);
   const lastAutoPlayedRef = useRef<string | null>(null);
+  // Auto-play TTS toggle (persisted in localStorage)
+  const [autoPlayTts, setAutoPlayTts] = useState(() => {
+    if (typeof window === "undefined") return true;
+    const stored = localStorage.getItem("gametan-autoplay-tts");
+    return stored === null ? true : stored === "1";
+  });
 
   const voiceHook = useVoice({
     onTranscript: useCallback((text: string) => {
@@ -128,9 +134,10 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
   }, [messages]);
 
   // Auto-play TTS when AI finishes responding and last input was voice
+  // Only auto-plays if autoPlayTts is enabled
   // Uses message ID tracking instead of count comparison to avoid race conditions
   useEffect(() => {
-    if (!lastInputWasVoice || status !== "ready" || messages.length === 0) return;
+    if (!autoPlayTts || !lastInputWasVoice || status !== "ready" || messages.length === 0) return;
 
     const lastMsg = messages[messages.length - 1];
     if (
@@ -147,7 +154,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
       setLastInputWasVoice(false);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, messages.length, lastInputWasVoice]);
+  }, [status, messages.length, lastInputWasVoice, autoPlayTts]);
 
   // Memory extraction on unmount
   const messagesRef = useRef(messages);
@@ -301,6 +308,27 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
           <Icon className="w-4 h-4 text-primary" />
         </div>
         <span className="font-semibold text-sm flex-1">{partner.name}</span>
+        {voiceHook.isTtsAvailable && (
+          <button
+            type="button"
+            onClick={() => {
+              const next = !autoPlayTts;
+              setAutoPlayTts(next);
+              localStorage.setItem("gametan-autoplay-tts", next ? "1" : "0");
+            }}
+            className="pressable p-1"
+            title={autoPlayTts
+              ? (isZh ? "关闭语音自动播放" : "Turn off auto-play voice")
+              : (isZh ? "开启语音自动播放" : "Turn on auto-play voice")
+            }
+          >
+            {autoPlayTts ? (
+              <Volume2 className="w-4.5 h-4.5 text-primary" />
+            ) : (
+              <VolumeX className="w-4.5 h-4.5 text-muted-foreground" />
+            )}
+          </button>
+        )}
         {partner.slot !== 0 && (
           <button
             type="button"

@@ -129,7 +129,7 @@ const isZh = locale === "zh";
 | **Talent & Games** | `games/*`, `lib/scoring.ts` | 13 game plugins → 13-dim scores → S/A/B/C/D ranks |
 | **Archetype** | `lib/archetype.ts` (610行, pure) | 16 archetypes, 改动必查 4 页面 + 2 OG cards |
 | **AI Partners** | `lib/partner-prompts.ts`, `components/chat/*` | 五层 prompt, Vercel AI SDK v6, tier-based limits |
-| **Voice** | `voice-service/*`, `api/voice/*` | Whisper STT + Kokoro TTS, 本机 GPU port 8100 |
+| **Voice** | `voice-service/*`, `api/voice/*` | Whisper STT + Edge TTS (Microsoft neural voices), 本机 GPU port 8100 |
 | **Billing** | `api/billing/*`, `api/admin/codes/*` | 激活码模式, $4.99/month, Stripe 未接入 |
 | **Social** | `api/profile/*`, `api/messages/*` | 公开档案 + Redis 阅后即焚消息 + 排行榜 |
 
@@ -164,14 +164,14 @@ redis:      Redis 8.4 → port 6379:6379
 ```
 voice-service/       Python 3.11 venv, runs on host machine (not Docker)
   .venv/             Python 3.11.9 virtual environment
-  server.py          FastAPI: Whisper STT + Kokoro TTS → port 8100
+  server.py          FastAPI: Whisper STT + Edge TTS (Microsoft neural voices) → port 8100
   start.bat          Double-click to start
   requirements.txt   Dependencies (faster-whisper, kokoro, torch cu128)
 ```
 
 **Start**: `cd voice-service && start.bat` (or `.venv/Scripts/python.exe server.py`)
 **GPU**: NVIDIA RTX 5060 Ti 16GB (CUDA capability sm_120, requires PyTorch cu128+)
-**Models**: Whisper medium (~1.5GB, float16 CUDA) + Kokoro-82M (~300MB, CUDA)
+**Models**: Whisper medium (~1.5GB, float16 CUDA) + Edge TTS (cloud, Microsoft neural voices, free)
 **Docker access**: App container reaches voice service via `host.docker.internal:8100`
 
 ### Cloudflare Tunnel (`~/.cloudflared/config.yml`)
@@ -243,6 +243,7 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
 - Tests: 114 unit tests passing (scoring, game-logic, scorers)
 - CLAUDE.md modular split: architecture → docs/architecture.md, decisions → docs/decisions.md
 - Phase 10L: Voice UX redesign — Chinese TTS (multi-language Kokoro pipelines with auto-detection), STT auto-send (voice→transcribe→send, no manual click), per-message 🔊 TTS buttons, auto-play TTS when last input was voice
+- Phase 10M: Voice quality upgrade — Kokoro TTS → Edge TTS (Microsoft neural voices, free, much better prosody). STT fix: explicit `task="transcribe"` prevents Whisper from translating Chinese→English. Auto-play toggle (localStorage-persisted, Volume2/VolumeX icon in chat nav). Audio format: WAV → MP3. Removed Kokoro/numpy/soundfile/cn2an/jieba deps.
 
 ### 🔲 Pending
 - Crawler automation (code exists in `lib/crawlers/`, no scheduler yet)

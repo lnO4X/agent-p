@@ -19,9 +19,9 @@ const ttsSchema = z.object({
  * POST /api/voice/tts — Text-to-Speech
  *
  * Accepts: { text, voice?, speed? }
- * Returns: audio/wav stream
+ * Returns: audio/mpeg stream (MP3)
  *
- * Proxies to the voice-service Docker container running Kokoro TTS.
+ * Proxies to the voice-service running Edge TTS (Microsoft neural voices).
  */
 export async function POST(request: NextRequest) {
   const auth = await getAuthFromCookie();
@@ -77,7 +77,7 @@ export async function POST(request: NextRequest) {
     return new Response(audioBuffer, {
       status: 200,
       headers: {
-        "Content-Type": "audio/wav",
+        "Content-Type": res.headers.get("content-type") || "audio/mpeg",
         "Content-Length": String(audioBuffer.byteLength),
         "Cache-Control": "no-store",
       },

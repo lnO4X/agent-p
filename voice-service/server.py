@@ -1,22 +1,20 @@
 """
-GameTan Voice Service — Whisper STT + Kokoro TTS
+GameTan Voice Service — Whisper STT + Edge TTS
 
 Runs on GPU (NVIDIA 5060 Ti 16GB). Provides:
 - POST /stt  — Audio → Text (Whisper medium, ~2GB VRAM)
-- POST /tts  — Text → Audio (Kokoro, ~1GB VRAM)
+- POST /tts  — Text → Audio (Edge TTS, Microsoft neural voices, free)
 - GET  /health — Health check
-
-Designed to run as a Docker service alongside the Next.js app.
 """
 
 import io
 import os
+import re
 import sys
 import tempfile
 import logging
 
 # On Windows, add torch's lib directory to PATH so CTranslate2 can find CUDA DLLs
-# (cublas64_12.dll, etc.) bundled with PyTorch instead of requiring CUDA Toolkit install
 if sys.platform == "win32":
     try:
         import torch
@@ -24,10 +22,9 @@ if sys.platform == "win32":
         os.environ["PATH"] = torch_lib + os.pathsep + os.environ.get("PATH", "")
     except ImportError:
         pass
+
 from contextlib import asynccontextmanager
 
-import numpy as np
-import soundfile as sf
 from fastapi import FastAPI, UploadFile, File, Form, HTTPException
 from fastapi.responses import StreamingResponse, JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
@@ -35,44 +32,9 @@ from fastapi.middleware.cors import CORSMiddleware
 logger = logging.getLogger("voice-service")
 logging.basicConfig(level=logging.INFO)
 
-# Global model references (loaded once at startup)
+# ==================== STT (Whisper) ====================
+
 whisper_model = None
-tts_pipelines: dict = {}  # lang_code -> KPipeline (lazy-loaded)
-
-# Kokoro language codes: 'a'=American English, 'b'=British English, 'z'=Chinese, 'j'=Japanese, 'k'=Korean
-# Default voices per language
-DEFAULT_VOICES = {
-    "a": "af_heart",   # American English female
-    "z": "zf_xiaobei", # Chinese female
-    "j": "jf_alpha",   # Japanese female
-}
-
-import re
-_CJK_RANGE = re.compile(r'[\u4e00-\u9fff\u3400-\u4dbf]')
-
-def detect_lang_code(text: str) -> str:
-    """Detect Kokoro lang_code from text content. Returns 'z' for Chinese, 'a' for English."""
-    if _CJK_RANGE.search(text):
-        return "z"
-    return "a"
-
-def get_tts_pipeline(lang_code: str):
-    """Get or create a Kokoro TTS pipeline for the given language."""
-    if lang_code in tts_pipelines:
-        return tts_pipelines[lang_code]
-    try:
-        from kokoro import KPipeline
-        logger.info(f"Loading Kokoro TTS pipeline for lang={lang_code}...")
-        pipeline = KPipeline(lang_code=lang_code)
-        tts_pipelines[lang_code] = pipeline
-        logger.info(f"Kokoro TTS pipeline for lang={lang_code} loaded")
-        return pipeline
-    except Exception as e:
-        logger.error(f"Failed to load Kokoro pipeline for lang={lang_code}: {e}")
-        return None
-
-
-# ==================== Model Loading ====================
 
 def load_whisper():
     """Load Whisper model for speech-to-text."""
@@ -88,35 +50,77 @@ def load_whisper():
     logger.info("Whisper loaded successfully")
 
 
-def load_tts():
-    """Pre-load default TTS pipelines (English + Chinese)."""
-    try:
-        get_tts_pipeline("a")  # English
-        get_tts_pipeline("z")  # Chinese
-    except Exception as e:
-        logger.warning(f"Kokoro TTS failed to load: {e}. TTS will be unavailable.")
+# ==================== TTS (Edge TTS) ====================
 
+_CJK_RANGE = re.compile(r'[\u4e00-\u9fff\u3400-\u4dbf\u3000-\u303f\uff00-\uffef]')
+
+# Edge TTS voice shortcuts -> full voice names
+EDGE_VOICES = {
+    "zh-female":  "zh-CN-XiaoxiaoNeural",
+    "zh-male":    "zh-CN-YunxiNeural",
+    "en-female":  "en-US-JennyNeural",
+    "en-male":    "en-US-GuyNeural",
+}
+
+DEFAULT_VOICE = {
+    "zh": "zh-CN-XiaoxiaoNeural",
+    "en": "en-US-JennyNeural",
+}
+
+tts_available = False
+
+def check_tts():
+    """Verify edge-tts is importable."""
+    global tts_available
+    try:
+        import edge_tts  # noqa: F401
+        tts_available = True
+        logger.info("Edge TTS available (Microsoft neural voices)")
+    except ImportError:
+        logger.warning("edge-tts not installed. TTS unavailable.")
+
+
+def detect_language(text: str) -> str:
+    """Detect language from text content. Returns 'zh' or 'en'."""
+    if _CJK_RANGE.search(text):
+        return "zh"
+    return "en"
+
+
+async def edge_tts_generate(text: str, voice: str, speed: float = 1.0) -> bytes:
+    """Generate speech audio using Edge TTS. Returns MP3 bytes."""
+    import edge_tts
+
+    rate_pct = int((speed - 1.0) * 100)
+    rate_str = f"{rate_pct:+d}%"
+
+    communicate = edge_tts.Communicate(text, voice, rate=rate_str)
+    audio_chunks = []
+    async for chunk in communicate.stream():
+        if chunk["type"] == "audio":
+            audio_chunks.append(chunk["data"])
+    return b"".join(audio_chunks)
+
+
+# ==================== App Setup ====================
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     """Load models at startup."""
     load_whisper()
-    load_tts()
+    check_tts()
     yield
 
-
-# ==================== FastAPI App ====================
 
 app = FastAPI(title="GameTan Voice Service", lifespan=lifespan)
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Internal service — restricted by Docker network
+    allow_origins=["*"],
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Auth: simple shared secret (matches VOICE_SERVICE_SECRET env var)
 VOICE_SECRET = os.environ.get("VOICE_SERVICE_SECRET", "voice-dev-secret")
 
 
@@ -132,7 +136,7 @@ async def health():
     return {
         "status": "ok",
         "stt": whisper_model is not None,
-        "tts": len(tts_pipelines) > 0,
+        "tts": tts_available,
     }
 
 
@@ -144,8 +148,6 @@ async def speech_to_text(
 ):
     """
     Convert audio to text using Whisper.
-
-    Accepts: audio file (webm, wav, mp3, ogg, m4a)
     Returns: { text, language, duration_sec }
     """
     verify_auth(authorization)
@@ -153,7 +155,6 @@ async def speech_to_text(
     if whisper_model is None:
         raise HTTPException(status_code=503, detail="STT model not loaded")
 
-    # Save uploaded audio to temp file (faster-whisper needs file path)
     suffix = os.path.splitext(audio.filename or "audio.webm")[1] or ".webm"
     with tempfile.NamedTemporaryFile(suffix=suffix, delete=False) as tmp:
         content = await audio.read()
@@ -161,19 +162,26 @@ async def speech_to_text(
         tmp_path = tmp.name
 
     try:
+        lang_hint = language or None
+        logger.info(f"STT: file={audio.filename}, size={len(content)}, lang_hint={lang_hint!r}")
+
         segments, info = whisper_model.transcribe(
             tmp_path,
-            language=language or None,
+            language=lang_hint,
+            task="transcribe",   # NEVER "translate" — always transcribe in original language
             beam_size=5,
-            vad_filter=True,  # Skip silence
+            vad_filter=True,
         )
 
         text_parts = []
         for segment in segments:
             text_parts.append(segment.text.strip())
 
+        result_text = " ".join(text_parts)
+        logger.info(f"STT result: lang={info.language}, text={result_text[:80]!r}")
+
         return JSONResponse({
-            "text": " ".join(text_parts),
+            "text": result_text,
             "language": info.language,
             "duration_sec": round(info.duration, 2),
         })
@@ -193,60 +201,48 @@ async def text_to_speech(
     authorization: str | None = Form(default=None),
 ):
     """
-    Convert text to speech using Kokoro TTS.
-
-    Auto-detects language (Chinese vs English) from text content.
-    Pass language='zh' or language='en' to override.
-
-    Returns: audio/wav stream
+    Convert text to speech using Edge TTS (Microsoft neural voices).
+    Auto-detects language from text. Returns: audio/mpeg (MP3)
     """
     verify_auth(authorization)
 
-    if len(tts_pipelines) == 0:
-        raise HTTPException(status_code=503, detail="TTS model not loaded")
+    if not tts_available:
+        raise HTTPException(status_code=503, detail="TTS not available")
 
     if len(text) > 2000:
         raise HTTPException(status_code=400, detail="Text too long (max 2000 chars)")
 
-    # Determine language: explicit param > auto-detect from text
-    logger.info(f"TTS request: text={text[:50]!r}, language={language!r}, len={len(text)}")
-    if language in ("zh", "z"):
-        lang_code = "z"
-    elif language in ("en", "a"):
-        lang_code = "a"
+    # Language detection
+    if language in ("zh", "zh-CN", "chinese"):
+        detected_lang = "zh"
+    elif language in ("en", "en-US", "english"):
+        detected_lang = "en"
     else:
-        lang_code = detect_lang_code(text)
-    logger.info(f"TTS detected lang_code={lang_code!r}, voice={voice!r}")
+        detected_lang = detect_language(text)
 
-    pipeline = get_tts_pipeline(lang_code)
-    if pipeline is None:
-        raise HTTPException(status_code=503, detail=f"TTS pipeline for lang={lang_code} not available")
+    # Voice selection: shortcut > full name > language default
+    if voice in EDGE_VOICES:
+        selected_voice = EDGE_VOICES[voice]
+    elif voice and "-" in voice:
+        selected_voice = voice
+    else:
+        selected_voice = DEFAULT_VOICE.get(detected_lang, "en-US-JennyNeural")
 
-    # Use language-appropriate default voice if none specified
-    if not voice:
-        voice = DEFAULT_VOICES.get(lang_code, "af_heart")
+    logger.info(f"TTS: lang={detected_lang}, voice={selected_voice}, text={text[:60]!r}")
 
     try:
-        # Generate audio samples
-        audio_segments = []
-        for _, _, audio_np in pipeline(text, voice=voice, speed=speed):
-            audio_segments.append(audio_np)
+        audio_bytes = await edge_tts_generate(text, selected_voice, speed)
 
-        if not audio_segments:
+        if not audio_bytes:
             raise HTTPException(status_code=500, detail="No audio generated")
 
-        # Concatenate all segments
-        full_audio = np.concatenate(audio_segments)
-
-        # Convert to WAV bytes
-        buffer = io.BytesIO()
-        sf.write(buffer, full_audio, 24000, format="WAV")
-        buffer.seek(0)
-
         return StreamingResponse(
-            buffer,
-            media_type="audio/wav",
-            headers={"Content-Disposition": "inline; filename=speech.wav"},
+            io.BytesIO(audio_bytes),
+            media_type="audio/mpeg",
+            headers={
+                "Content-Disposition": "inline; filename=speech.mp3",
+                "Content-Length": str(len(audio_bytes)),
+            },
         )
     except HTTPException:
         raise

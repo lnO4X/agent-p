@@ -196,7 +196,8 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
         }
 
         const audioBuffer = await res.arrayBuffer();
-        const blob = new Blob([audioBuffer], { type: "audio/wav" });
+        const contentType = res.headers.get("content-type") || "audio/mpeg";
+        const blob = new Blob([audioBuffer], { type: contentType });
         const url = URL.createObjectURL(blob);
 
         const audio = new Audio(url);
