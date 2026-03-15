@@ -129,7 +129,7 @@ const isZh = locale === "zh";
 | **Talent & Games** | `games/*`, `lib/scoring.ts` | 13 game plugins → 13-dim scores → S/A/B/C/D ranks |
 | **Archetype** | `lib/archetype.ts` (610行, pure) | 16 archetypes, 改动必查 4 页面 + 2 OG cards |
 | **AI Partners** | `lib/partner-prompts.ts`, `components/chat/*` | 五层 prompt, Vercel AI SDK v6, tier-based limits |
-| **Voice** | `voice-service/*`, `api/voice/*` | Whisper STT + Edge TTS (Microsoft neural voices), 本机 GPU port 8100 |
+| **Voice** | `voice-service/*`, `api/voice/*` | Whisper STT + Qwen3-TTS 0.6B (emotion control, local GPU) + Edge TTS fallback, port 8100 |
 | **Billing** | `api/billing/*`, `api/admin/codes/*` | 激活码模式, $4.99/month, Stripe 未接入 |
 | **Social** | `api/profile/*`, `api/messages/*` | 公开档案 + Redis 阅后即焚消息 + 排行榜 |
 
@@ -171,7 +171,7 @@ voice-service/       Python 3.11 venv, runs on host machine (not Docker)
 
 **Start**: `cd voice-service && start.bat` (or `.venv/Scripts/python.exe server.py`)
 **GPU**: NVIDIA RTX 5060 Ti 16GB (CUDA capability sm_120, requires PyTorch cu128+)
-**Models**: Whisper medium (~1.5GB, float16 CUDA) + Edge TTS (cloud, Microsoft neural voices, free)
+**Models**: Whisper medium (~1.5GB, float16 CUDA) + Qwen3-TTS 0.6B-CustomVoice (~2GB, bfloat16 CUDA, 9 speakers, emotion instruct) + Edge TTS fallback (cloud, free)
 **Docker access**: App container reaches voice service via `host.docker.internal:8100`
 
 ### Cloudflare Tunnel (`~/.cloudflared/config.yml`)
@@ -245,11 +245,13 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
 - Phase 10L: Voice UX redesign — Chinese TTS (multi-language Kokoro pipelines with auto-detection), STT auto-send (voice→transcribe→send, no manual click), per-message 🔊 TTS buttons, auto-play TTS when last input was voice
 - Phase 10M: Voice quality upgrade — Kokoro TTS → Edge TTS (Microsoft neural voices, free, much better prosody). STT fix: explicit `task="transcribe"` prevents Whisper from translating Chinese→English. Auto-play toggle (localStorage-persisted, Volume2/VolumeX icon in chat nav). Audio format: WAV → MP3. Removed Kokoro/numpy/soundfile/cn2an/jieba deps.
 - Phase 11: Admin dashboard full enhancement — Dashboard: 7 stat cards (clickable) + registration trend chart (30d bar) + conversion funnel (registered→tested→profiled→premium) + daily activity stacked chart (14d tests+challenges) + quick links. User detail page: click any user → full profile (info cards, talent radar, test sessions, partners with memory preview, challenges, codes used, knowledge graph). Game management: 127 games with search/filter (status: active/hidden/pending, source: seed/steam/taptap), toggle visibility. Nav: added Games tab (4 tabs total).
+- Phase 12A: Qwen3-TTS integration — Upgraded from Edge TTS to Qwen3-TTS 0.6B-CustomVoice (Alibaba, local GPU, bfloat16). 9 built-in speakers (Vivian/Serena/Uncle_Fu/Dylan/Eric for Chinese, Ryan/Aiden for English, Ono_Anna for Japanese, Sohee for Korean). `instruct` param for emotion control (e.g. "用温柔的语气说", "speak excitedly"). Edge TTS as automatic fallback. TTS proxy updated with `instruct` + `engine` params.
+- Phase 12B: Partner proactive greetings — Enhanced greeting API (all users, not just premium). Fetches recent challenges (7 days), calculates streak, includes archetype info. Uses Gemini Flash for fast generation. Already wired in partner-conversation.tsx.
+- Phase 12C: Challenge leaderboard + streak rewards — New `/api/challenge/leaderboard` API (top 20 by total challenges, streak calculation, avg score). New `/challenge/leaderboard` page with rank icons (Crown/Medal), streak milestone badges (7d/14d/30d/60d/100d), my stats card. Link from challenge page.
 
 ### 🔲 Pending
 - Crawler automation (code exists in `lib/crawlers/`, no scheduler yet)
 - Stripe/payment integration (future phase)
 - Referral system (referralCode field exists, not implemented)
 - Email notifications (schema ready, not activated)
-- Challenge leaderboard + streak rewards
 - Backfill cron utility exists at `/api/cron/backfill-archetypes`

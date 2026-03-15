@@ -8,7 +8,7 @@ import { generateText } from "ai";
 
 /**
  * GET /api/partners/[id]/greeting — Generate a proactive greeting
- * Premium-only: based on recent events (challenge results, talent changes).
+ * Available for all users. Based on recent events (challenge results, talent changes, streaks).
  * Returns { greeting: string } or { greeting: null } if no events.
  */
 export async function GET(
@@ -23,26 +23,6 @@ export async function GET(
 
     const { id: partnerId } = await params;
 
-    // Check premium tier
-    const userResult = await db
-      .select({ tier: users.tier, tierExpiresAt: users.tierExpiresAt })
-      .from(users)
-      .where(eq(users.id, auth.sub))
-      .limit(1);
-
-    if (userResult.length === 0) {
-      return NextResponse.json({ greeting: null });
-    }
-
-    const user = userResult[0];
-    const isPremium =
-      user.tier === "premium" &&
-      (!user.tierExpiresAt || user.tierExpiresAt >= new Date());
-
-    if (!isPremium) {
-      return NextResponse.json({ greeting: null });
-    }
-
     // Load partner
     const partnerResult = await db
       .select({ name: partners.name, definition: partners.definition, memory: partners.memory })
@@ -56,11 +36,11 @@ export async function GET(
 
     const partner = partnerResult[0];
 
-    // Gather recent events (last 3 days)
-    const threeDaysAgo = new Date(Date.now() - 3 * 24 * 60 * 60 * 1000);
+    // Gather recent events (last 7 days)
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
     const events: string[] = [];
 
-    // Recent challenges
+    // Recent challenges (last 5)
     const challenges = await db
       .select({
         talentCategory: microChallenges.talentCategory,
@@ -70,19 +50,48 @@ export async function GET(
       .from(microChallenges)
       .where(eq(microChallenges.userId, auth.sub))
       .orderBy(desc(microChallenges.completedAt))
-      .limit(3);
+      .limit(5);
+
+    // Calculate streak (consecutive days with challenges)
+    let streak = 0;
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const challengeDates = new Set(
+      challenges
+        .filter((c) => c.completedAt)
+        .map((c) => {
+          const d = new Date(c.completedAt!);
+          d.setHours(0, 0, 0, 0);
+          return d.getTime();
+        })
+    );
+    for (let i = 0; i < 30; i++) {
+      const checkDate = new Date(today);
+      checkDate.setDate(checkDate.getDate() - i);
+      if (challengeDates.has(checkDate.getTime())) {
+        streak++;
+      } else if (i > 0) break; // Allow today to not be done yet
+    }
+
+    if (streak >= 3) {
+      events.push(`On a ${streak}-day challenge streak!`);
+    }
 
     for (const ch of challenges) {
-      if (ch.completedAt && ch.completedAt >= threeDaysAgo) {
+      if (ch.completedAt && ch.completedAt >= sevenDaysAgo) {
         events.push(
           `Completed a ${ch.talentCategory} challenge with score ${Math.round(ch.score)}`
         );
       }
     }
 
-    // Latest talent profile score
+    // Latest talent profile
     const profiles = await db
-      .select({ overallScore: talentProfiles.overallScore, overallRank: talentProfiles.overallRank })
+      .select({
+        overallScore: talentProfiles.overallScore,
+        overallRank: talentProfiles.overallRank,
+        archetypeId: talentProfiles.archetypeId,
+      })
       .from(talentProfiles)
       .where(eq(talentProfiles.userId, auth.sub))
       .orderBy(desc(talentProfiles.createdAt))
@@ -90,7 +99,8 @@ export async function GET(
 
     if (profiles.length > 0 && profiles[0].overallScore) {
       events.push(
-        `Overall talent rank: ${profiles[0].overallRank} (score ${Math.round(profiles[0].overallScore)})`
+        `Overall talent rank: ${profiles[0].overallRank} (score ${Math.round(profiles[0].overallScore)})` +
+          (profiles[0].archetypeId ? `, archetype: ${profiles[0].archetypeId}` : "")
       );
     }
 
@@ -99,24 +109,24 @@ export async function GET(
       return NextResponse.json({ greeting: null });
     }
 
-    // Generate greeting via AI
-    const model = getModel();
+    // Generate greeting via AI (fast model for quick response)
+    const model = getModel("google/gemini-2.0-flash-001");
     if (!model) {
       return NextResponse.json({ greeting: null });
     }
 
-    const prompt = `You are ${partner.name}. Your personality: ${partner.definition?.slice(0, 200) || "a friendly AI companion"}.
+    const prompt = `You are ${partner.name}. Your personality: ${partner.definition?.slice(0, 300) || "a friendly AI companion"}.
 
 ${partner.memory ? `You remember about the user:\n${partner.memory}\n` : ""}
 Recent user events:
 ${events.map((e) => `- ${e}`).join("\n")}
 
-Generate ONE short greeting (1-2 sentences, under 80 chars) that references one of these recent events. Be warm, natural, and in-character. Match the language the user typically uses (Chinese or English). Do NOT use emoji.`;
+Generate ONE short, natural greeting (1-2 sentences, max 100 chars) that references one of these recent events. Be warm, engaging, and in-character. If the user has a streak, acknowledge it enthusiastically. Detect and match the language from partner definition/memory (Chinese or English). Do NOT use emoji. Output ONLY the greeting text, nothing else.`;
 
     const result = await generateText({
       model,
       prompt,
-      maxOutputTokens: 100,
+      maxOutputTokens: 120,
     });
 
     const greeting = result.text?.trim() || null;

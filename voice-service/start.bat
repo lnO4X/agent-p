@@ -1,5 +1,5 @@
 @echo off
-echo Starting GameTan Voice Service (Whisper STT + Kokoro TTS)...
+echo Starting GameTan Voice Service (Whisper STT + Qwen3-TTS + Edge TTS)...
 echo.
 echo GPU: NVIDIA RTX 5060 Ti 16GB
 echo Port: 8100

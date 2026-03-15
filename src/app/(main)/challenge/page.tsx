@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
+import Link from "next/link";
 import { useI18n } from "@/i18n/context";
 import { useIsMobile } from "@/hooks/use-device";
 import { gameRegistry } from "@/games";
@@ -8,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TalentIcon } from "@/components/talent-icon";
 import { scoreToRank, RANK_COLORS } from "@/lib/scoring";
-import { Flame, CheckCircle2, TrendingUp, Zap } from "lucide-react";
+import { Flame, CheckCircle2, TrendingUp, Zap, Trophy } from "lucide-react";
 import {
   LineChart,
   Line,
@@ -386,6 +387,26 @@ export default function ChallengePage() {
 
       {/* Trend chart */}
       {data.history.length > 1 && <TrendChart data={data} t={t} />}
+
+      {/* Leaderboard link */}
+      <Link href="/challenge/leaderboard">
+        <Card className="pressable hover:bg-muted/30 transition-colors">
+          <CardContent className="py-3 flex items-center gap-3">
+            <div className="w-9 h-9 rounded-xl bg-yellow-500/10 flex items-center justify-center">
+              <Trophy size={18} className="text-yellow-500" />
+            </div>
+            <div className="flex-1">
+              <div className="text-sm font-semibold">
+                {locale === "zh" ? "挑战排行榜" : "Challenge Leaderboard"}
+              </div>
+              <div className="text-[10px] text-muted-foreground">
+                {locale === "zh" ? "看看谁坚持得最久" : "See who has the longest streak"}
+              </div>
+            </div>
+            <Zap size={16} className="text-muted-foreground" />
+          </CardContent>
+        </Card>
+      </Link>
     </div>
   );
 }
