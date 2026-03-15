@@ -23,8 +23,10 @@ interface UseVoiceReturn {
   speak: (text: string, options?: { voice?: string; language?: string }) => Promise<void>;
   /** Stop any playing audio */
   stopPlaying: () => void;
-  /** Whether voice services are available (mic + service) */
-  isAvailable: boolean;
+  /** Whether TTS is available (voice service up) */
+  isTtsAvailable: boolean;
+  /** Whether STT is available (mic + voice service) */
+  isSttAvailable: boolean;
 }
 
 /**
@@ -41,7 +43,8 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
   const [isRecording, setIsRecording] = useState(false);
   const [isTranscribing, setIsTranscribing] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
-  const [isAvailable, setIsAvailable] = useState(false);
+  const [isTtsAvailable, setIsTtsAvailable] = useState(false);
+  const [isSttAvailable, setIsSttAvailable] = useState(false);
 
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
   const chunksRef = useRef<Blob[]>([]);
@@ -53,17 +56,20 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
     let cancelled = false;
     async function probe() {
       try {
-        // Check if the browser has mic support
-        if (!navigator.mediaDevices?.getUserMedia) return;
-
-        // Check if the voice service is up
+        // Check if the voice service is up (TTS only needs service, not mic)
         const res = await fetch("/api/voice/health", { signal: AbortSignal.timeout(3000) });
         if (!cancelled && res.ok) {
           const data = await res.json();
-          if (data.available) setIsAvailable(true);
+          if (data.available) {
+            setIsTtsAvailable(true);
+            // STT also needs mic support (mediaDevices may not exist in insecure context)
+            if (typeof navigator.mediaDevices !== "undefined") {
+              setIsSttAvailable(true);
+            }
+          }
         }
       } catch {
-        // Voice service not available — button stays hidden
+        // Voice service not available — buttons stay hidden
       }
     }
     probe();
@@ -140,7 +146,8 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
           console.error("[voice] STT error:", err);
           const msg = err instanceof Error ? err.message : "Transcription failed";
           if (msg.includes("503") || msg.includes("unavailable")) {
-            setIsAvailable(false);
+            setIsTtsAvailable(false);
+            setIsSttAvailable(false);
           }
           onError?.(msg);
         } finally {
@@ -214,7 +221,8 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
         console.error("[voice] TTS error:", err);
         const msg = err instanceof Error ? err.message : "Speech failed";
         if (msg.includes("503") || msg.includes("unavailable")) {
-          setIsAvailable(false);
+          setIsTtsAvailable(false);
+          setIsSttAvailable(false);
         }
         onError?.(msg);
       }
@@ -238,6 +246,7 @@ export function useVoice(options: UseVoiceOptions = {}): UseVoiceReturn {
     stopRecording,
     speak,
     stopPlaying,
-    isAvailable,
+    isTtsAvailable,
+    isSttAvailable,
   };
 }

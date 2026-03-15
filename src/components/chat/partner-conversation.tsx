@@ -55,7 +55,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
   const [lastInputWasVoice, setLastInputWasVoice] = useState(false);
   const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
   const [speakLoading, setSpeakLoading] = useState(false);
-  const prevMsgCountRef = useRef(0);
+  const lastAutoPlayedRef = useRef<string | null>(null);
 
   const voiceHook = useVoice({
     onTranscript: useCallback((text: string) => {
@@ -69,7 +69,8 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
     onError: (err) => {
       console.warn("[voice]", err);
     },
-    language: isZh ? "zh" : "en",
+    // Don't pass language — let Whisper auto-detect from audio content
+    // UI locale ≠ speech language (user may speak Chinese with English UI)
   });
 
   const [pendingVoiceText, setPendingVoiceText] = useState<string | null>(null);
@@ -127,26 +128,24 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
   }, [messages]);
 
   // Auto-play TTS when AI finishes responding and last input was voice
+  // Uses message ID tracking instead of count comparison to avoid race conditions
   useEffect(() => {
+    if (!lastInputWasVoice || status !== "ready" || messages.length === 0) return;
+
+    const lastMsg = messages[messages.length - 1];
     if (
-      lastInputWasVoice &&
-      status === "ready" &&
-      messages.length > prevMsgCountRef.current
+      lastMsg?.role === "assistant" &&
+      lastMsg.id !== lastAutoPlayedRef.current
     ) {
-      const lastMsg = messages[messages.length - 1];
-      if (lastMsg?.role === "assistant") {
-        const text = extractPartText(
-          lastMsg.parts as Array<{ type: string; text?: string }>
-        );
-        if (text) {
-          // Auto-play TTS for the new assistant message
-          handleSpeak(lastMsg.id, text);
-        }
+      const text = extractPartText(
+        lastMsg.parts as Array<{ type: string; text?: string }>
+      );
+      if (text) {
+        lastAutoPlayedRef.current = lastMsg.id;
+        handleSpeak(lastMsg.id, text);
       }
-      // Reset voice mode after auto-play trigger
       setLastInputWasVoice(false);
     }
-    prevMsgCountRef.current = messages.length;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [status, messages.length, lastInputWasVoice]);
 
@@ -243,7 +242,8 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
       setSpeakLoading(true);
 
       try {
-        await voiceHook.speak(text, { language: isZh ? "zh" : "en" });
+        // Don't pass language — server auto-detects from text content
+        await voiceHook.speak(text);
         setSpeakLoading(false);
         // speakingMsgId will be cleared when audio ends
       } catch {
@@ -251,7 +251,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
         setSpeakLoading(false);
       }
     },
-    [speakingMsgId, voiceHook, isZh]
+    [speakingMsgId, voiceHook]
   );
 
   // Clear speakingMsgId when voice stops playing
@@ -340,7 +340,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
               msg.id === messages[messages.length - 1]?.id &&
               msg.role === "assistant"
             }
-            voiceAvailable={voiceHook.isAvailable}
+            voiceAvailable={voiceHook.isTtsAvailable}
             onSpeak={(text) => handleSpeak(msg.id, text)}
             isSpeaking={speakingMsgId === msg.id && voiceHook.isPlaying}
             isSpeakLoading={speakingMsgId === msg.id && speakLoading}
@@ -418,7 +418,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
       {/* Input area */}
       <div className="px-4 pt-2 pb-[calc(0.5rem_+_3.5rem_+_env(safe-area-inset-bottom))] md:pb-2 border-t border-foreground/10 glass-nav">
         <div className="flex items-end gap-2">
-          {voiceHook.isAvailable && (
+          {voiceHook.isSttAvailable && (
             <VoiceButton
               isRecording={voiceHook.isRecording}
               isTranscribing={voiceHook.isTranscribing}

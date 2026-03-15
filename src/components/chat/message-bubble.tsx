@@ -79,14 +79,14 @@ export function MessageBubble({
           )}
         </div>
 
-        {/* Action buttons — appear on hover/tap, not during streaming */}
+        {/* Action buttons — always visible on mobile, hover on desktop */}
         {!isStreaming && textContent && (
           <div
             className={cn(
-              "absolute -bottom-1 flex items-center gap-0.5",
-              "opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity",
+              "absolute -bottom-2 flex items-center gap-1 transition-opacity",
+              "opacity-60 md:opacity-0 md:group-hover:opacity-100 focus-within:opacity-100",
               isUser ? "right-0" : "left-0",
-              (copied || isSpeaking) && "opacity-100"
+              (copied || isSpeaking) && "!opacity-100"
             )}
           >
             {/* TTS button — assistant messages only */}
@@ -96,18 +96,19 @@ export function MessageBubble({
                 onClick={() => onSpeak(textContent)}
                 disabled={isSpeakLoading}
                 className={cn(
-                  "p-1 rounded-md bg-background/80 backdrop-blur-sm ring-1 ring-foreground/10",
+                  "p-1.5 rounded-lg bg-background/80 backdrop-blur-sm ring-1 ring-foreground/10",
                   "hover:bg-muted text-muted-foreground hover:text-foreground",
-                  isSpeaking && "text-primary"
+                  "active:scale-95 transition-transform",
+                  isSpeaking && "text-primary ring-primary/30"
                 )}
                 title={isSpeaking ? "Stop" : "Read aloud"}
               >
                 {isSpeakLoading ? (
-                  <Loader2 className="w-3 h-3 animate-spin" />
+                  <Loader2 className="w-4 h-4 animate-spin" />
                 ) : isSpeaking ? (
-                  <VolumeX className="w-3 h-3" />
+                  <VolumeX className="w-4 h-4" />
                 ) : (
-                  <Volume2 className="w-3 h-3" />
+                  <Volume2 className="w-4 h-4" />
                 )}
               </button>
             )}
@@ -116,15 +117,16 @@ export function MessageBubble({
               type="button"
               onClick={handleCopy}
               className={cn(
-                "p-1 rounded-md bg-background/80 backdrop-blur-sm ring-1 ring-foreground/10",
-                "hover:bg-muted text-muted-foreground hover:text-foreground"
+                "p-1.5 rounded-lg bg-background/80 backdrop-blur-sm ring-1 ring-foreground/10",
+                "hover:bg-muted text-muted-foreground hover:text-foreground",
+                "active:scale-95 transition-transform"
               )}
               title="Copy"
             >
               {copied ? (
-                <Check className="w-3 h-3 text-green-500" />
+                <Check className="w-4 h-4 text-green-500" />
               ) : (
-                <Copy className="w-3 h-3" />
+                <Copy className="w-4 h-4" />
               )}
             </button>
           </div>
