@@ -14,3 +14,10 @@ INFO:     127.0.0.1:55982 - "GET /health HTTP/1.1" 200 OK
 INFO:     127.0.0.1:52050 - "GET /health HTTP/1.1" 200 OK
 INFO:     127.0.0.1:58041 - "GET /health HTTP/1.1" 200 OK
 INFO:     127.0.0.1:58008 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:58492 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:49599 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65174 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:51936 - "GET /health HTTP/1.1" 200 OK
+INFO:     127.0.0.1:65407 - "GET /health HTTP/1.1" 200 OK
+INFO:voice-service:TTS: lang=zh, voice=zh-CN-XiaoxiaoNeural, text='哟，让我看看这是谁的天赋档案——\r\n\r\n**指挥官**，呵，这个名字起得倒是挺适合你的。毕竟你的手眼协调只有55.2，决'
+INFO:     127.0.0.1:65432 - "POST /tts HTTP/1.1" 200 OK
