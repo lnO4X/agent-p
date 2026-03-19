@@ -1,13 +1,29 @@
 import { NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 import { db } from "@/db";
-import { testSessions } from "@/db/schema";
+import { testSessions, users } from "@/db/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { getAuthFromCookie } from "@/lib/auth";
 
-const MAX_COMPLETED_TESTS = 2;
+/** Tier-based test limits: free=3, premium=unlimited */
+const MAX_TESTS = { free: 3, premium: 9999 } as const;
 const isDev = process.env.NODE_ENV === "development";
 const noLimit = isDev || process.env.DISABLE_TEST_LIMIT === "true";
+
+async function getUserTier(userId: string): Promise<"free" | "premium"> {
+  const result = await db
+    .select({ tier: users.tier, tierExpiresAt: users.tierExpiresAt })
+    .from(users)
+    .where(eq(users.id, userId))
+    .limit(1);
+  if (result.length === 0) return "free";
+  const user = result[0];
+  if (user.tier === "premium") {
+    if (user.tierExpiresAt && user.tierExpiresAt < new Date()) return "free";
+    return "premium";
+  }
+  return "free";
+}
 
 export async function POST() {
   try {
@@ -19,7 +35,10 @@ export async function POST() {
       );
     }
 
-    // Check test limit: max 2 completed tests per user (skip in dev mode)
+    // Tier-based test limit
+    const tier = await getUserTier(auth.sub);
+    const maxTests = MAX_TESTS[tier];
+
     const completedCount = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(testSessions)
@@ -30,20 +49,23 @@ export async function POST() {
         )
       );
 
-    if (!noLimit && completedCount[0]?.count >= MAX_COMPLETED_TESTS) {
+    if (!noLimit && completedCount[0]?.count >= maxTests) {
       return NextResponse.json(
         {
           success: false,
           error: {
             code: "TEST_LIMIT_REACHED",
-            message: `每位用户最多完成 ${MAX_COMPLETED_TESTS} 次天赋测试`,
+            message: tier === "free"
+              ? `免费用户最多完成 ${maxTests} 次天赋测试，升级Premium无限制`
+              : `已达到测试上限`,
           },
+          needsUpgrade: tier === "free",
         },
         { status: 403 }
       );
     }
 
-    // Also clean up any existing in_progress sessions (only allow 1 active)
+    // Clean up any existing in_progress sessions (only allow 1 active)
     await db
       .update(testSessions)
       .set({ status: "abandoned" })
@@ -85,6 +107,9 @@ export async function GET() {
       );
     }
 
+    const tier = await getUserTier(auth.sub);
+    const maxTests = MAX_TESTS[tier];
+
     const sessions = await db
       .select()
       .from(testSessions)
@@ -92,7 +117,6 @@ export async function GET() {
       .orderBy(desc(testSessions.startedAt))
       .limit(20);
 
-    // Also return the completed count for client-side limit display
     const completedCount = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(testSessions)
@@ -108,7 +132,8 @@ export async function GET() {
       data: sessions,
       meta: {
         completedCount: completedCount[0]?.count || 0,
-        maxTests: noLimit ? 9999 : MAX_COMPLETED_TESTS,
+        maxTests: noLimit ? 9999 : maxTests,
+        tier,
         devMode: isDev,
       },
     });

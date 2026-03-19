@@ -8,10 +8,14 @@ export const registerSchema = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, "用户名只能包含字母、数字和下划线"),
   password: z
     .string()
-    .min(6, "密码至少6个字符")
-    .max(50, "密码最多50个字符"),
+    .min(8, "密码至少8个字符 / Password must be at least 8 characters")
+    .max(50, "密码最多50个字符")
+    .regex(/[a-z]/, "密码需包含小写字母 / Must include a lowercase letter")
+    .regex(/[A-Z]/, "密码需包含大写字母 / Must include an uppercase letter")
+    .regex(/[0-9]/, "密码需包含数字 / Must include a digit"),
   captchaToken: z.string().min(1),
   captchaAnswer: z.string().min(1),
+  referredBy: z.string().max(8).optional(),
 });
 
 export const loginSchema = z.object({
@@ -25,8 +29,11 @@ export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "请输入当前密码"),
   newPassword: z
     .string()
-    .min(6, "新密码至少6个字符")
-    .max(50, "新密码最多50个字符"),
+    .min(8, "密码至少8个字符 / Password must be at least 8 characters")
+    .max(50, "新密码最多50个字符")
+    .regex(/[a-z]/, "密码需包含小写字母 / Must include a lowercase letter")
+    .regex(/[A-Z]/, "密码需包含大写字母 / Must include an uppercase letter")
+    .regex(/[0-9]/, "密码需包含数字 / Must include a digit"),
 });
 
 export const submitScoreSchema = z.object({

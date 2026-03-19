@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from "react";
+import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import Link from "next/link";
 import { useI18n } from "@/i18n/context";
 import { useIsMobile } from "@/hooks/use-device";
@@ -9,16 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TalentIcon } from "@/components/talent-icon";
 import { scoreToRank, RANK_COLORS } from "@/lib/scoring";
-import { Flame, CheckCircle2, TrendingUp, Zap, Trophy } from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-} from "recharts";
+import { Flame, CheckCircle2, TrendingUp, Zap, Trophy, Gift, Crown } from "lucide-react";
+import { LazyTrendChart } from "@/components/charts/trend-chart-lazy";
+import { quickCelebration, starBurst } from "@/lib/confetti";
 import type { TalentCategory } from "@/types/talent";
 import type { GameRawResult } from "@/types/game";
 
@@ -57,6 +50,11 @@ export default function ChallengePage() {
     score: number;
     rank: string;
   } | null>(null);
+  const [streakReward, setStreakReward] = useState<{
+    milestone: number;
+    rewardDays: number;
+  } | null>(null);
+  const confettiFiredRef = useRef(false);
 
   // Fetch today's challenge
   useEffect(() => {
@@ -67,10 +65,10 @@ export default function ChallengePage() {
           setData(json.data);
           setPhase("ready");
         } else {
-          setError(json.error?.message || "Failed to load");
+          setError(json.error?.message || (locale === "zh" ? "加载失败，请重试" : "Failed to load"));
         }
       })
-      .catch(() => setError("Network error"));
+      .catch(() => setError(locale === "zh" ? "网络错误，请重试" : "Network error"));
   }, []);
 
   // Get game component from registry
@@ -103,14 +101,20 @@ export default function ChallengePage() {
               rank: json.data.updatedRank,
             });
           }
+          // Capture streak reward if any
+          if (json.data.streakReward) {
+            setStreakReward(json.data.streakReward);
+          }
+
           // Update local data to reflect completion
+          const updatedStreak = json.data.newStreak ?? (data.streak + 1);
           setData((prev) =>
             prev
               ? {
                   ...prev,
                   completedToday: true,
                   todayScore: json.data.normalizedScore,
-                  streak: prev.streak + (prev.streak === 0 ? 1 : 0),
+                  streak: updatedStreak,
                   totalCompleted: prev.totalCompleted + 1,
                   history: [
                     ...prev.history,
@@ -123,12 +127,26 @@ export default function ChallengePage() {
               : prev
           );
           setPhase("result");
+
+          // Celebrate! S-rank = star burst, A/B rank = quick celebration
+          // Also celebrate streak milestones (7, 14, 30, 60, 100)
+          if (!confettiFiredRef.current) {
+            confettiFiredRef.current = true;
+            const rank = scoreToRank(json.data.normalizedScore);
+            const actualStreak = json.data.newStreak ?? (data.streak + 1);
+            const isStreakMilestone = [7, 14, 30, 60, 100].includes(actualStreak);
+            if (rank === "S" || isStreakMilestone) {
+              starBurst();
+            } else if (rank === "A" || rank === "B") {
+              quickCelebration();
+            }
+          }
         } else {
-          setError(json.error?.message || "Submit failed");
+          setError(json.error?.message || (locale === "zh" ? "提交失败，请重试" : "Submit failed"));
           setPhase("ready");
         }
       } catch {
-        setError("Network error");
+        setError(locale === "zh" ? "网络错误，请重试" : "Network error");
         setPhase("ready");
       }
     },
@@ -212,8 +230,43 @@ export default function ChallengePage() {
           </CardContent>
         </Card>
 
+        {/* Streak reward notification */}
+        {streakReward && (
+          <Card className="border-amber-500/30 bg-amber-500/5 animate-in fade-in-0 slide-in-from-bottom-4 duration-700">
+            <CardContent className="pt-5 pb-5">
+              <div className="flex items-center gap-4">
+                <div className="w-12 h-12 rounded-2xl bg-amber-500/15 flex items-center justify-center shrink-0">
+                  <Gift size={24} className="text-amber-500" />
+                </div>
+                <div className="flex-1">
+                  <div className="flex items-center gap-2 mb-0.5">
+                    <Crown size={14} className="text-amber-500" />
+                    <span className="text-sm font-semibold text-amber-600 dark:text-amber-400">
+                      {locale === "zh"
+                        ? `🔥 ${streakReward.milestone} 天连续挑战！`
+                        : `🔥 ${streakReward.milestone}-Day Streak!`}
+                    </span>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {locale === "zh"
+                      ? `恭喜！获得 ${streakReward.rewardDays} 天 Premium 会员奖励`
+                      : `Congrats! You earned ${streakReward.rewardDays} day${streakReward.rewardDays > 1 ? "s" : ""} of Premium`}
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         {/* Trend chart */}
-        {data.history.length > 1 && <TrendChart data={data} t={t} />}
+        {data.history.length > 1 && (
+          <LazyTrendChart
+            history={data.history}
+            talentCategory={data.talentCategory}
+            trendTitle={t("challenge.trendTitle")}
+            talentLabel={t(`talent.${data.talentCategory}`)}
+          />
+        )}
 
         <div className="text-center">
           <Button variant="outline" onClick={() => setPhase("ready")}>
@@ -386,7 +439,14 @@ export default function ChallengePage() {
       </Card>
 
       {/* Trend chart */}
-      {data.history.length > 1 && <TrendChart data={data} t={t} />}
+      {data.history.length > 1 && (
+          <LazyTrendChart
+            history={data.history}
+            talentCategory={data.talentCategory}
+            trendTitle={t("challenge.trendTitle")}
+            talentLabel={t(`talent.${data.talentCategory}`)}
+          />
+        )}
 
       {/* Leaderboard link */}
       <Link href="/challenge/leaderboard">
@@ -411,54 +471,4 @@ export default function ChallengePage() {
   );
 }
 
-// ─── Trend chart component ───
-function TrendChart({
-  data,
-  t,
-}: {
-  data: ChallengeData;
-  t: (key: string) => string;
-}) {
-  const chartData = data.history.map((h, i) => ({
-    label: `#${i + 1}`,
-    score: Math.round(h.score),
-  }));
-
-  return (
-    <Card>
-      <CardHeader className="pb-2">
-        <CardTitle className="text-sm flex items-center gap-2">
-          <TrendingUp size={16} />
-          {t("challenge.trendTitle")} — {t(`talent.${data.talentCategory}`)}
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="h-48">
-          <ResponsiveContainer width="100%" height="100%">
-            <LineChart data={chartData}>
-              <CartesianGrid strokeDasharray="3 3" opacity={0.3} />
-              <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-              <YAxis domain={[0, 100]} tick={{ fontSize: 11 }} />
-              <Tooltip
-                contentStyle={{
-                  borderRadius: "12px",
-                  fontSize: "12px",
-                  border: "1px solid hsl(var(--border))",
-                  background: "hsl(var(--background))",
-                }}
-              />
-              <Line
-                type="monotone"
-                dataKey="score"
-                stroke="hsl(var(--primary))"
-                strokeWidth={2}
-                dot={{ r: 4, fill: "hsl(var(--primary))" }}
-                activeDot={{ r: 6 }}
-              />
-            </LineChart>
-          </ResponsiveContainer>
-        </div>
-      </CardContent>
-    </Card>
-  );
-}
+// TrendChart is now lazy-loaded via LazyTrendChart from @/components/charts/trend-chart-lazy

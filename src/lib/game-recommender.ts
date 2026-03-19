@@ -1,10 +1,18 @@
 import { db } from "@/db";
-import { games, gameRecommendations } from "@/db/schema";
+import { games, gameRecommendations, recommendationFeedback } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import type { TalentCategory, GenreRecommendation } from "@/types/talent";
 import { GENRE_TALENT_MAP, TALENT_LABELS } from "./constants";
 import { scoreToRank } from "./scoring";
+
+/** Feedback signal → fitScore adjustment (closes the data flywheel) */
+const FEEDBACK_SCORE_ADJUSTMENTS: Record<string, number> = {
+  like: 8,
+  played: 10,
+  wishlisted: 6,
+  dislike: -15,
+};
 
 /**
  * Generate game recommendations for a talent profile.
@@ -172,9 +180,14 @@ function buildReason(
 
 /**
  * Get recommendations for a user's latest profile.
- * Used by the recommend API endpoint.
+ * When userId is provided, applies feedback-based re-ranking (data flywheel):
+ *   like → +8, played → +10, wishlisted → +6, dislike → -15
+ * This ensures the product gets smarter with each user interaction.
  */
-export async function getRecommendationsForProfile(profileId: string) {
+export async function getRecommendationsForProfile(
+  profileId: string,
+  userId?: string
+) {
   const recs = await db
     .select({
       id: gameRecommendations.id,
@@ -195,5 +208,32 @@ export async function getRecommendationsForProfile(profileId: string) {
     .where(eq(gameRecommendations.profileId, profileId))
     .orderBy(sql`${gameRecommendations.rank} ASC`);
 
-  return recs;
+  // ─── Data Flywheel: re-rank by user feedback signals ───
+  if (!userId) return recs;
+
+  const feedback = await db
+    .select({
+      gameId: recommendationFeedback.gameId,
+      signal: recommendationFeedback.signal,
+    })
+    .from(recommendationFeedback)
+    .where(eq(recommendationFeedback.userId, userId));
+
+  if (feedback.length === 0) return recs;
+
+  const feedbackMap = new Map(feedback.map((f) => [f.gameId, f.signal]));
+
+  const adjusted = recs.map((rec) => {
+    const signal = feedbackMap.get(rec.gameId);
+    const adjustment = signal ? (FEEDBACK_SCORE_ADJUSTMENTS[signal] ?? 0) : 0;
+    return {
+      ...rec,
+      fitScore: Math.round((rec.fitScore + adjustment) * 10) / 10,
+      feedbackSignal: signal || null,
+    };
+  });
+
+  // Re-sort by adjusted fitScore descending, re-assign ranks
+  adjusted.sort((a, b) => b.fitScore - a.fitScore);
+  return adjusted.map((rec, i) => ({ ...rec, rank: i + 1 }));
 }

@@ -38,7 +38,7 @@ export async function GET(request: Request) {
     }
 
     const profile = profiles[0];
-    const recs = await getRecommendationsForProfile(profile.id);
+    const recs = await getRecommendationsForProfile(profile.id, auth.sub);
 
     // Optional platform filter
     const url = new URL(request.url);

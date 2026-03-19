@@ -13,18 +13,15 @@ const ttsSchema = z.object({
   voice: z.string().max(50).optional(),
   speed: z.number().min(0.5).max(2.0).optional(),
   language: z.string().max(10).optional(),
-  instruct: z.string().max(200).optional(),
-  engine: z.enum(["auto", "qwen3", "edge"]).optional(),
 });
 
 /**
  * POST /api/voice/tts — Text-to-Speech
  *
- * Accepts: { text, voice?, speed?, instruct?, engine? }
- * Returns: audio/wav (Qwen3-TTS) or audio/mpeg (Edge TTS)
+ * Accepts: { text, voice?, speed?, language? }
+ * Returns: audio/mpeg (Edge TTS)
  *
- * Proxies to the voice-service. Engine priority: Qwen3-TTS → Edge TTS fallback.
- * The `instruct` param controls emotion/style (Qwen3 only): e.g. "用温柔的语气说"
+ * Proxies to the voice-service running on local GPU machine.
  */
 export async function POST(request: NextRequest) {
   const auth = await getAuthFromCookie();
@@ -50,7 +47,7 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  const { text, voice, speed = 1.0, language, instruct, engine } = parsed.data;
+  const { text, voice, speed = 1.0, language } = parsed.data;
 
   try {
     // Forward to voice service as form data
@@ -59,8 +56,6 @@ export async function POST(request: NextRequest) {
     if (voice) proxyForm.append("voice", voice);
     proxyForm.append("speed", String(speed));
     if (language) proxyForm.append("language", language);
-    if (instruct) proxyForm.append("instruct", instruct);
-    if (engine) proxyForm.append("engine", engine);
     proxyForm.append("authorization", `Bearer ${VOICE_SECRET}`);
 
     const res = await fetch(`${VOICE_SERVICE_URL}/tts`, {

@@ -3,7 +3,7 @@ import { talentProfiles, userKnowledge } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
 import { getArchetype } from "@/lib/archetype";
 import { generateText } from "ai";
-import { getModel } from "@/lib/ai";
+import { getModelSync } from "@/lib/ai";
 
 // ==================== WEDA BUILT-IN DEFINITION ====================
 
@@ -162,7 +162,7 @@ export async function summarizeConversationContext(
 ): Promise<string> {
   if (truncatedMessages.length === 0) return "";
 
-  const model = getModel("google/gemini-2.0-flash-001"); // Fast & cheap for summarization
+  const model = getModelSync("google/gemini-2.0-flash-001"); // Fast & cheap for summarization
   if (!model) return "";
 
   const conversationText = truncatedMessages
@@ -255,7 +255,8 @@ ${conversationSummary}`);
  */
 export function buildMemoryExtractionPrompt(
   existingMemory: string,
-  conversationText: string
+  conversationText: string,
+  maxMemoryItems: number = 30
 ): string {
   return `你是一个记忆提取系统。分析以下对话，提取关于用户的关键观察信息。
 
@@ -291,7 +292,7 @@ context|gaming_platform|PC
 2. 添加从新对话中发现的新观察
 3. 如果新信息与旧记忆冲突，以新信息为准
 4. 每条记忆应该简短（一句话）
-5. 最多保留20条记忆
+5. 最多保留${maxMemoryItems}条记忆
 6. 只记录有价值的长期信息（偏好、技能水平、常玩游戏等），忽略闲聊
 7. 如果对话没有新的有价值信息，记忆原样返回，knowledge 为空
 8. knowledge 只提取明确的、有信心的信息，不要猜测

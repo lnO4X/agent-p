@@ -54,7 +54,7 @@ export async function POST(request: Request) {
     }
 
     const profile = profiles[0];
-    const model = getModel();
+    const model = await getModel();
 
     if (!model) {
       return NextResponse.json(

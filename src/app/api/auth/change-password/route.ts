@@ -1,12 +1,13 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { changePasswordSchema } from "@/lib/validations";
 import { getAuthFromCookie } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/redis";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
     const auth = await getAuthFromCookie();
     if (!auth) {
@@ -16,6 +17,18 @@ export async function POST(request: Request) {
           error: { code: "UNAUTHORIZED", message: "未登录" },
         },
         { status: 401 }
+      );
+    }
+
+    // Rate limit: max 5 change-password attempts per user per 15 minutes
+    const { allowed } = await checkRateLimit(`rl:chpwd:${auth.sub}`, 5, 900);
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: "RATE_LIMITED", message: "修改密码过于频繁，请15分钟后再试 / Too many attempts, please retry in 15 minutes" },
+        },
+        { status: 429, headers: { "Retry-After": "900" } }
       );
     }
 

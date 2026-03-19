@@ -7,25 +7,27 @@ import { nanoid } from "nanoid";
 import { createPartnerSchema } from "@/lib/validations";
 import { WEDA_DEFINITION } from "@/lib/partner-prompts";
 
-/** Tier-based slot limits: free=1 custom, premium=5 custom */
-const SLOT_LIMITS = { free: 1, premium: 5 } as const;
+/** Tier-based slot limits: free=2 custom, premium=5 custom */
+const SLOT_LIMITS = { free: 2, premium: 5 } as const;
 
-async function getUserTier(userId: string): Promise<"free" | "premium"> {
+type TierInfo = { tier: "free" | "premium"; tierExpiresAt: Date | null };
+
+async function getUserTier(userId: string): Promise<TierInfo> {
   const result = await db
     .select({ tier: users.tier, tierExpiresAt: users.tierExpiresAt })
     .from(users)
     .where(eq(users.id, userId))
     .limit(1);
-  if (result.length === 0) return "free";
+  if (result.length === 0) return { tier: "free", tierExpiresAt: null };
   const user = result[0];
   if (user.tier === "premium") {
     // Check if premium has expired
     if (user.tierExpiresAt && user.tierExpiresAt < new Date()) {
-      return "free";
+      return { tier: "free", tierExpiresAt: null };
     }
-    return "premium";
+    return { tier: "premium", tierExpiresAt: user.tierExpiresAt };
   }
-  return "free";
+  return { tier: "free", tierExpiresAt: null };
 }
 
 /**
@@ -57,7 +59,7 @@ export async function GET() {
   // Ensure Weda exists
   await ensureWeda(auth.sub);
 
-  const [result, tier] = await Promise.all([
+  const [result, tierInfo] = await Promise.all([
     db
       .select({
         id: partners.id,
@@ -76,9 +78,16 @@ export async function GET() {
     getUserTier(auth.sub),
   ]);
 
+  const { tier, tierExpiresAt } = tierInfo;
   const maxSlots = 1 + SLOT_LIMITS[tier]; // 1 (Weda) + custom slots
 
-  return NextResponse.json({ success: true, data: result, tier, maxSlots });
+  return NextResponse.json({
+    success: true,
+    data: result,
+    tier,
+    tierExpiresAt: tierExpiresAt?.toISOString() ?? null,
+    maxSlots,
+  });
 }
 
 // POST /api/partners — Create a custom partner
@@ -98,7 +107,7 @@ export async function POST(request: Request) {
   }
 
   // Tier-based slot limits
-  const tier = await getUserTier(auth.sub);
+  const { tier } = await getUserTier(auth.sub);
   const maxCustomSlots = SLOT_LIMITS[tier];
 
   // Find next available slot
@@ -119,6 +128,7 @@ export async function POST(request: Request) {
   if (nextSlot === null) {
     return NextResponse.json(
       {
+        success: false,
         error: tier === "free"
           ? "免费版最多1个自定义伙伴，升级Premium解锁更多"
           : "已达到伙伴数量上限",

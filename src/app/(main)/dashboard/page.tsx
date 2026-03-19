@@ -16,6 +16,10 @@ import {
   ChevronRight,
   Swords,
   Target,
+  Sun,
+  Moon,
+  Sunrise,
+  Sunset,
 } from "lucide-react";
 
 interface PartnerPreview {
@@ -33,6 +37,7 @@ export default function DashboardPage() {
   const [challengeStreak, setChallengeStreak] = useState(0);
   const [challengeCompleted, setChallengeCompleted] = useState(false);
   const [challengeTalent, setChallengeTalent] = useState<string | null>(null);
+  const [loadingProfile, setLoadingProfile] = useState(true);
 
   const archetype = useMemo<Archetype | null>(() => {
     const vals = Object.values(talents).filter((v): v is number => v != null);
@@ -56,7 +61,8 @@ export default function DashboardPage() {
           setTalents(myEntry.talents);
         }
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoadingProfile(false));
 
     // Fetch partners
     fetch("/api/partners")
@@ -87,10 +93,63 @@ export default function DashboardPage() {
       .catch(() => {});
   }, []);
 
+  // Time-aware greeting
+  const hour = new Date().getHours();
+  const getGreeting = () => {
+    if (hour >= 5 && hour < 12) {
+      return {
+        text: isZh ? "早上好" : "Good Morning",
+        Icon: Sunrise,
+        suggestion: archetype
+          ? (isZh
+            ? `今天挑战一下${t(`talent.${archetype.weakTalent}`)}？`
+            : `Challenge your ${t(`talent.${archetype.weakTalent}`)} today?`)
+          : (isZh ? "新的一天，新的挑战" : "New day, new challenge"),
+      };
+    }
+    if (hour >= 12 && hour < 18) {
+      return {
+        text: isZh ? "下午好" : "Good Afternoon",
+        Icon: Sun,
+        suggestion: challengeCompleted
+          ? (isZh ? "今日挑战已完成，和伙伴聊聊？" : "Challenge done! Chat with a partner?")
+          : (isZh ? "别忘了今天的训练" : "Don't forget today's training"),
+      };
+    }
+    if (hour >= 18 && hour < 22) {
+      return {
+        text: isZh ? "晚上好" : "Good Evening",
+        Icon: Sunset,
+        suggestion: isZh ? "放松时间，来几局游戏" : "Relaxation time — play some games",
+      };
+    }
+    return {
+      text: isZh ? "夜深了" : "Late Night",
+      Icon: Moon,
+      suggestion: isZh ? "注意休息，明天继续" : "Rest well, continue tomorrow",
+    };
+  };
+
+  const greeting = getGreeting();
+  const GreetingIcon = greeting.Icon;
+
   return (
     <div className="max-w-lg mx-auto space-y-4">
+      {/* ─── Time-aware greeting ─── */}
+      <div className="flex items-center gap-3">
+        <GreetingIcon size={20} className="text-primary shrink-0" />
+        <div>
+          <h2 className="text-lg font-bold">
+            {greeting.text}{archetype ? `，${isZh ? archetype.name : archetype.nameEn}` : ""}
+          </h2>
+          <p className="text-xs text-muted-foreground">{greeting.suggestion}</p>
+        </div>
+      </div>
+
       {/* ─── Archetype Identity Card ─── */}
-      {archetype ? (
+      {loadingProfile ? (
+        <div className="h-36 bg-muted/60 rounded-2xl animate-pulse" />
+      ) : archetype ? (
         <Card
           className="overflow-hidden"
           style={{

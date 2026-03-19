@@ -212,6 +212,12 @@ export default function MultitaskGame({
 
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      const key = e.key.toLowerCase();
+      // Prevent A/D and arrow keys from typing into the math input
+      // A/D are used for basket movement only; math input is type="number"
+      if (key === "a" || key === "d" || key === "arrowleft" || key === "arrowright") {
+        e.preventDefault();
+      }
       keysRef.current.add(e.key);
     };
     const handleKeyUp = (e: KeyboardEvent) => {

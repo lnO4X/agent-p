@@ -11,13 +11,15 @@ import { ArrowLeft, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function PartnerInitFlow() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isZh = locale === "zh";
   const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [definition, setDefinition] = useState("");
   const [selectedIcon, setSelectedIcon] = useState("Brain");
   const [name, setName] = useState("");
   const [creating, setCreating] = useState(false);
+  const [createError, setCreateError] = useState<string | null>(null);
   const [input, setInput] = useState("");
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
@@ -79,6 +81,7 @@ export function PartnerInitFlow() {
   const handleCreate = async () => {
     if (!name.trim() || !definition.trim()) return;
     setCreating(true);
+    setCreateError(null);
 
     try {
       const res = await fetch("/api/partners", {
@@ -94,11 +97,11 @@ export function PartnerInitFlow() {
       if (res.ok) {
         router.push("/chat");
       } else {
-        const data = await res.json();
-        alert(data.error || "创建失败");
+        const data = await res.json().catch(() => ({}));
+        setCreateError(data.error || (isZh ? "创建失败，请重试" : "Failed to create, please retry"));
       }
     } catch {
-      alert("创建失败");
+      setCreateError(isZh ? "网络错误，请重试" : "Network error, please retry");
     } finally {
       setCreating(false);
     }
@@ -300,6 +303,13 @@ export function PartnerInitFlow() {
               )}
             />
           </div>
+
+          {/* Error message */}
+          {createError && (
+            <div className="max-w-xs mx-auto text-xs text-destructive bg-destructive/10 rounded-xl px-3 py-2 text-center">
+              {createError}
+            </div>
+          )}
 
           {/* Action buttons */}
           <div className="flex gap-3 max-w-xs mx-auto">

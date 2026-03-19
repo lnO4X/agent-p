@@ -4,8 +4,8 @@ import { useState, useRef, useCallback } from "react";
 import type { GameComponentProps } from "@/types/game";
 
 const TOTAL_ROUNDS = 10;
-const BASE_POP_CHANCE = 0.05;
-const POP_INCREMENT = 0.05;
+const SAFE_PUMPS = 2; // First 2 pumps per round guaranteed safe
+const POP_INCREMENT = 0.06; // After safe zone: 6%, 12%, 18%, ...
 
 export default function RiskGame({
   onComplete,
@@ -39,7 +39,9 @@ export default function RiskGame({
     if (phase !== "pumping") return;
 
     const newPumps = pumps + 1;
-    const popChance = BASE_POP_CHANCE + (newPumps - 1) * POP_INCREMENT;
+    // First SAFE_PUMPS pumps are guaranteed safe (0% pop chance)
+    const popChance =
+      newPumps <= SAFE_PUMPS ? 0 : (newPumps - SAFE_PUMPS) * POP_INCREMENT;
 
     // Random points per pump: 1-3
     const pointsAdded = Math.floor(Math.random() * 3) + 1;
@@ -107,9 +109,11 @@ export default function RiskGame({
     setPhase("pumping");
   }, [round, totalBanked, roundHistory, onComplete, phase]);
 
-  const popChanceDisplay = Math.round(
-    (BASE_POP_CHANCE + pumps * POP_INCREMENT) * 100
-  );
+  // Display the pop chance for the NEXT pump
+  const nextPumpNum = pumps + 1;
+  const nextPopChance =
+    nextPumpNum <= SAFE_PUMPS ? 0 : (nextPumpNum - SAFE_PUMPS) * POP_INCREMENT;
+  const popChanceDisplay = Math.round(nextPopChance * 100);
 
   if (phase === "idle") {
     return (
@@ -120,10 +124,10 @@ export default function RiskGame({
             给气球充气, 每次充气增加1-3分到奖池
           </p>
           <p className="text-sm text-muted-foreground">
-            气球随时可能爆炸(概率递增), 爆炸则本轮清零!
+            前{SAFE_PUMPS}次充气安全, 之后爆炸概率递增!
           </p>
           <p className="text-sm text-muted-foreground">
-            点击&quot;收钱&quot;将奖池收入囊中
+            先充气再点&quot;收钱&quot;将奖池收入囊中, 爆炸则清零
           </p>
           <p className="text-sm text-muted-foreground">共 {TOTAL_ROUNDS} 轮</p>
         </div>
@@ -202,7 +206,12 @@ export default function RiskGame({
                 奖池: {currentPot} 分
               </p>
               <p className="text-xs text-muted-foreground">
-                充气次数: {pumps} | 爆炸概率: ~{popChanceDisplay}%
+                充气次数: {pumps} | 下次爆炸概率:{" "}
+                {popChanceDisplay === 0 ? (
+                  <span className="text-green-400">安全</span>
+                ) : (
+                  <span className="text-red-400">~{popChanceDisplay}%</span>
+                )}
               </p>
             </div>
           </div>
@@ -223,7 +232,7 @@ export default function RiskGame({
             disabled={currentPot === 0}
             className="flex-1 py-4 bg-green-600 hover:bg-green-500 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl font-bold text-lg transition"
           >
-            💰 收钱
+            {currentPot === 0 ? "← 先充气" : "💰 收钱"}
           </button>
         </div>
       )}

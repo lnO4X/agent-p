@@ -9,9 +9,10 @@ import {
   summarizeConversationContext,
 } from "@/lib/partner-prompts";
 import { db } from "@/db";
-import { partners } from "@/db/schema";
+import { partners, users } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { chatMessageSchema } from "@/lib/validations";
+import { checkRateLimit } from "@/lib/redis";
 
 // Allow longer streaming responses (up to 60 seconds)
 export const maxDuration = 60;
@@ -31,6 +32,38 @@ export async function POST(request: NextRequest) {
   const auth = await getAuthFromCookie();
   if (!auth) {
     return Response.json({ error: "Unauthorized" }, { status: 401 });
+  }
+
+  // Per-user daily chat rate limiting (free=30/day, premium=unlimited)
+  const today = new Date().toISOString().slice(0, 10);
+  const userRow = await db
+    .select({ tier: users.tier, tierExpiresAt: users.tierExpiresAt })
+    .from(users)
+    .where(eq(users.id, auth.sub))
+    .limit(1);
+  const isPremium = userRow.length > 0 && userRow[0].tier === "premium" &&
+    (!userRow[0].tierExpiresAt || userRow[0].tierExpiresAt >= new Date());
+  const dailyLimit = isPremium ? 999 : 30;
+  const { allowed } = await checkRateLimit(
+    `rl:chat:${auth.sub}:${today}`,
+    dailyLimit,
+    86400
+  );
+  if (!allowed) {
+    return Response.json(
+      {
+        success: false,
+        error: {
+          code: "CHAT_LIMIT_REACHED",
+          message: isPremium
+            ? "Rate limited — please try again later"
+            : "今日对话次数已用完 / Daily chat limit reached",
+        },
+        needsUpgrade: !isPremium,
+        upgradeUrl: "/me/premium",
+      },
+      { status: 429, headers: { "Retry-After": "3600" } }
+    );
   }
 
   const parsed = chatMessageSchema.safeParse(body);
@@ -57,7 +90,7 @@ export async function POST(request: NextRequest) {
   const p = partner[0];
 
   // Build model with optional per-partner override
-  const model = getModel(p.modelId);
+  const model = await getModel(p.modelId);
   if (!model) {
     return Response.json(
       { error: "AI model not configured" },

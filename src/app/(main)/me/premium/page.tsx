@@ -13,6 +13,7 @@ import {
   Sparkles,
   Check,
   ArrowLeft,
+  Loader2,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
@@ -24,28 +25,30 @@ const FEATURES = [
   { icon: Sparkles, labelKey: "premium.feature4" },
 ];
 
+const PLANS = [
+  { id: "monthly", days: 30, priceZh: "¥9.9", priceEn: "$1.49", labelKey: "premium.monthly" },
+  { id: "quarterly", days: 90, priceZh: "¥24.9", priceEn: "$3.99", labelKey: "premium.quarterly", popular: true },
+  { id: "yearly", days: 365, priceZh: "¥79.9", priceEn: "$12.99", labelKey: "premium.yearly" },
+];
+
 export default function PremiumPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isZh = locale === "zh";
   const [code, setCode] = useState("");
   const [activating, setActivating] = useState(false);
+  const [purchasing, setPurchasing] = useState(false);
+  const [selectedPlan, setSelectedPlan] = useState("quarterly");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [currentTier, setCurrentTier] = useState<"free" | "premium">("free");
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
 
   useEffect(() => {
-    // Fetch current tier from auth/me
-    fetch("/api/auth/me")
+    fetch("/api/partners")
       .then((r) => r.json())
-      .then((json) => {
-        if (json.success && json.data) {
-          // Need to get tier info — check from partners endpoint
-          fetch("/api/partners")
-            .then((r) => r.json())
-            .then((pJson) => {
-              if (pJson.tier) setCurrentTier(pJson.tier);
-            });
-        }
+      .then((pJson) => {
+        if (pJson.tier) setCurrentTier(pJson.tier);
+        if (pJson.tierExpiresAt) setExpiresAt(pJson.tierExpiresAt);
       })
       .catch(() => {});
   }, []);
@@ -74,12 +77,41 @@ export default function PremiumPage() {
         );
         setCode("");
       } else {
-        setError(json.error?.message || "Activation failed");
+        setError(json.error?.message || (isZh ? "激活失败，请重试" : "Activation failed"));
       }
     } catch {
-      setError("Network error");
+      setError(isZh ? "网络错误，请重试" : "Network error");
     } finally {
       setActivating(false);
+    }
+  };
+
+  const handlePurchase = async () => {
+    setPurchasing(true);
+    setError(null);
+    setSuccess(null);
+
+    try {
+      const res = await fetch("/api/billing/mock-purchase", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ planId: selectedPlan }),
+      });
+      const json = await res.json();
+
+      if (json.success) {
+        setCurrentTier("premium");
+        setExpiresAt(json.data.expiresAt);
+        setSuccess(
+          t("premium.purchaseSuccess", { days: json.data.durationDays })
+        );
+      } else {
+        setError(json.error?.message || (isZh ? "开通失败，请重试" : "Purchase failed"));
+      }
+    } catch {
+      setError(isZh ? "网络错误，请重试" : "Network error");
+    } finally {
+      setPurchasing(false);
     }
   };
 
@@ -154,6 +186,68 @@ export default function PremiumPage() {
         </CardContent>
       </Card>
 
+      {/* Plan selection */}
+      <div className="space-y-3">
+        <h2 className="text-sm font-semibold">{t("premium.choosePlan")}</h2>
+        <div className="grid grid-cols-3 gap-2">
+          {PLANS.map((plan) => (
+            <button
+              key={plan.id}
+              onClick={() => setSelectedPlan(plan.id)}
+              className={cn(
+                "relative rounded-xl border-2 p-3 text-center transition-all pressable",
+                selectedPlan === plan.id
+                  ? "border-yellow-500 bg-yellow-500/5"
+                  : "border-border hover:border-yellow-500/40"
+              )}
+            >
+              {plan.popular && (
+                <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-semibold bg-yellow-500 text-white px-2 py-0.5 rounded-full">
+                  {t("premium.popular")}
+                </span>
+              )}
+              <div className="text-sm font-medium mt-1">{t(plan.labelKey)}</div>
+              <div className="text-lg font-bold mt-1">
+                {isZh ? plan.priceZh : plan.priceEn}
+              </div>
+              <div className="text-[11px] text-muted-foreground">
+                {t("premium.days", { days: plan.days })}
+              </div>
+            </button>
+          ))}
+        </div>
+
+        {/* Mock notice */}
+        <p className="text-xs text-center text-muted-foreground">
+          {t("premium.mockNotice")}
+        </p>
+
+        {/* Purchase button */}
+        <Button
+          onClick={handlePurchase}
+          disabled={purchasing}
+          className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+        >
+          {purchasing ? (
+            <Loader2 size={16} className="animate-spin mr-2" />
+          ) : (
+            <Crown size={16} className="mr-2" />
+          )}
+          {t("premium.buyNow")}
+        </Button>
+      </div>
+
+      {/* Success / Error messages */}
+      {error && (
+        <p className="text-xs text-red-500 text-center">{error}</p>
+      )}
+      {success && (
+        <p className="text-xs text-green-500 flex items-center justify-center gap-1">
+          <Check size={14} />
+          {success}
+        </p>
+      )}
+
       {/* Activation code input */}
       <Card>
         <CardContent className="pt-4 pb-4 space-y-3">
@@ -170,19 +264,11 @@ export default function PremiumPage() {
               onClick={handleActivate}
               disabled={activating || !code.trim()}
               className="flex-shrink-0"
+              variant="outline"
             >
               {activating ? "..." : t("common.confirm")}
             </Button>
           </div>
-          {error && (
-            <p className="text-xs text-red-500">{error}</p>
-          )}
-          {success && (
-            <p className="text-xs text-green-500 flex items-center gap-1">
-              <Check size={14} />
-              {success}
-            </p>
-          )}
         </CardContent>
       </Card>
     </div>

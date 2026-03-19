@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -22,7 +22,14 @@ export function RegisterForm() {
   const isZh = locale === "zh";
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [referredBy, setReferredBy] = useState("");
+
+  // Pre-fill referral code from URL ?ref= param
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const ref = params.get("ref");
+    if (ref) setReferredBy(ref.toUpperCase().slice(0, 8));
+  }, []);
   const [captchaToken, setCaptchaToken] = useState("");
   const [captchaAnswer, setCaptchaAnswer] = useState("");
   const [error, setError] = useState("");
@@ -41,8 +48,12 @@ export function RegisterForm() {
       setError(isZh ? "请输入验证码" : "Please enter the captcha");
       return;
     }
-    if (password !== confirmPassword) {
-      setError(isZh ? "两次密码输入不一致" : "Passwords do not match");
+    if (password.length < 8) {
+      setError(isZh ? "密码至少8个字符" : "Password must be at least 8 characters");
+      return;
+    }
+    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
+      setError(isZh ? "密码需包含大小写字母和数字" : "Password must include uppercase, lowercase, and a digit");
       return;
     }
     if (loading) return;
@@ -52,7 +63,10 @@ export function RegisterForm() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password, captchaToken, captchaAnswer }),
+        body: JSON.stringify({
+          username, password, captchaToken, captchaAnswer,
+          ...(referredBy.trim() ? { referredBy: referredBy.trim().toUpperCase() } : {}),
+        }),
       });
       const json = await res.json();
       if (json.success) {
@@ -112,21 +126,21 @@ export function RegisterForm() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder={isZh ? "至少6位" : "At least 6 characters"}
+              placeholder={isZh ? "至少8位含大小写和数字" : "8+ chars, upper/lower/digit"}
               autoComplete="new-password"
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="confirmPassword">
-              {isZh ? "确认密码" : "Confirm Password"}
+            <Label htmlFor="referral">
+              {isZh ? "邀请码 (选填)" : "Referral Code (optional)"}
             </Label>
             <Input
-              id="confirmPassword"
-              type="password"
-              value={confirmPassword}
-              onChange={(e) => setConfirmPassword(e.target.value)}
-              placeholder={isZh ? "再次输入密码" : "Enter password again"}
-              autoComplete="new-password"
+              id="referral"
+              value={referredBy}
+              onChange={(e) => setReferredBy(e.target.value.toUpperCase())}
+              placeholder={isZh ? "好友的邀请码" : "Friend's referral code"}
+              maxLength={8}
+              className="font-mono tracking-wider uppercase"
             />
           </div>
           <CaptchaInput

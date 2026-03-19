@@ -14,7 +14,7 @@ export interface GameRawResult {
 export interface GameScorer {
   normalize(
     rawScore: number,
-    durationMs: number,
+    durationMs?: number,
     metadata?: Record<string, unknown>
   ): number;
   perfectRawScore: number;

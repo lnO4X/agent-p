@@ -1,12 +1,21 @@
 import { NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 import { db } from "@/db";
-import { microChallenges, talentProfiles } from "@/db/schema";
+import { microChallenges, talentProfiles, users } from "@/db/schema";
 import { eq, and, desc, gte, sql } from "drizzle-orm";
 import { getAuthFromCookie } from "@/lib/auth";
 import { gameRegistry } from "@/games";
 import { TALENT_CATEGORIES, type TalentCategory } from "@/types/talent";
 import { scoreToRank, computeOverallScore } from "@/lib/scoring";
+
+/** Streak milestone → premium reward days */
+const STREAK_REWARDS: Record<number, number> = {
+  7: 1,
+  14: 3,
+  30: 7,
+  60: 14,
+  100: 30,
+};
 
 // Map talent category → talentProfiles column name
 const TALENT_COLUMN_MAP: Record<TalentCategory, string> = {
@@ -312,6 +321,63 @@ export async function POST(request: Request) {
         .where(eq(talentProfiles.id, profile.id));
     }
 
+    // ─── Streak reward: milestone → auto-extend premium ───
+    let streakReward: { milestone: number; rewardDays: number } | null = null;
+
+    // Calculate new streak after this completion
+    const recentDaysPost = await db
+      .select({
+        day: sql<string>`DATE(${microChallenges.completedAt})`,
+      })
+      .from(microChallenges)
+      .where(eq(microChallenges.userId, auth.sub))
+      .orderBy(desc(microChallenges.completedAt))
+      .limit(110);
+
+    const uniqueDaysPost = [...new Set(recentDaysPost.map((r) => r.day))];
+    let newStreak = 0;
+    const checkDatePost = new Date();
+    for (let i = 0; i < 110; i++) {
+      const dateStr = checkDatePost.toISOString().split("T")[0];
+      if (uniqueDaysPost.includes(dateStr)) {
+        newStreak++;
+        checkDatePost.setDate(checkDatePost.getDate() - 1);
+      } else {
+        break;
+      }
+    }
+
+    const rewardDays = STREAK_REWARDS[newStreak];
+    if (rewardDays) {
+      // Extend premium by rewardDays
+      const user = await db
+        .select({ tier: users.tier, tierExpiresAt: users.tierExpiresAt })
+        .from(users)
+        .where(eq(users.id, auth.sub))
+        .limit(1);
+
+      if (user.length > 0) {
+        const now = new Date();
+        const currentExpiry =
+          user[0].tier === "premium" && user[0].tierExpiresAt && user[0].tierExpiresAt > now
+            ? user[0].tierExpiresAt
+            : now;
+        const newExpiry = new Date(currentExpiry);
+        newExpiry.setDate(newExpiry.getDate() + rewardDays);
+
+        await db
+          .update(users)
+          .set({
+            tier: "premium",
+            tierExpiresAt: newExpiry,
+            updatedAt: now,
+          })
+          .where(eq(users.id, auth.sub));
+
+        streakReward = { milestone: newStreak, rewardDays };
+      }
+    }
+
     return NextResponse.json({
       success: true,
       data: {
@@ -320,6 +386,8 @@ export async function POST(request: Request) {
         talentCategory,
         updatedTalentScore,
         updatedRank,
+        newStreak,
+        streakReward,
       },
     });
   } catch (error) {

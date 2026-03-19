@@ -110,7 +110,7 @@ export async function GET(
     }
 
     // Generate greeting via AI (fast model for quick response)
-    const model = getModel("google/gemini-2.0-flash-001");
+    const model = await getModel("google/gemini-2.0-flash-001");
     if (!model) {
       return NextResponse.json({ greeting: null });
     }

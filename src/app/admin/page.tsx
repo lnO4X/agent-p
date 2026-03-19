@@ -13,6 +13,7 @@ import {
   TrendingUp,
   ArrowRight,
   Gamepad2,
+  Star,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -35,6 +36,13 @@ interface Analytics {
     premiumUsers: number;
   };
   dailyActivity: Array<{ date: string; tests: number; challenges: number }>;
+}
+
+interface ModelStat {
+  modelId: string;
+  count: number;
+  avgRating: number;
+  dist: number[];
 }
 
 const STAT_CARDS: Array<{
@@ -63,16 +71,19 @@ const FUNNEL_STEPS = [
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
+  const [modelStats, setModelStats] = useState<ModelStat[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     Promise.all([
       fetch("/api/admin/stats", { credentials: "include" }).then((r) => r.json()),
       fetch("/api/admin/analytics", { credentials: "include" }).then((r) => r.json()),
+      fetch("/api/admin/chat-model-stats", { credentials: "include" }).then((r) => r.json()),
     ])
-      .then(([statsData, analyticsData]) => {
+      .then(([statsData, analyticsData, modelData]) => {
         if (statsData.success) setStats(statsData.data);
         if (analyticsData.success) setAnalytics(analyticsData.data);
+        if (modelData.success) setModelStats(modelData.data.models || []);
       })
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -204,6 +215,62 @@ export default function AdminDashboard() {
               </div>
             </div>
             <StackedBarChart data={analytics.dailyActivity} height={100} />
+          </div>
+        </div>
+      )}
+
+      {/* Model Quality A/B Comparison */}
+      {modelStats.length > 0 && (
+        <div className="rounded-2xl border border-foreground/5 bg-muted/10 p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Star className="w-4 h-4 text-amber-500" />
+            <h2 className="text-sm font-semibold">AI 模型评分 Model Ratings</h2>
+          </div>
+          <div className="space-y-4">
+            {modelStats.map((m) => {
+              const shortModel = m.modelId.includes("/") ? m.modelId.split("/").pop()! : m.modelId;
+              return (
+                <div key={m.modelId}>
+                  <div className="flex items-center justify-between mb-1.5">
+                    <span className="text-xs font-mono text-muted-foreground truncate max-w-[60%]" title={m.modelId}>
+                      {shortModel}
+                    </span>
+                    <div className="flex items-center gap-2">
+                      <div className="flex items-center gap-0.5">
+                        {[1,2,3,4,5].map((s) => (
+                          <Star
+                            key={s}
+                            className={cn(
+                              "w-3 h-3",
+                              s <= Math.round(m.avgRating)
+                                ? "fill-amber-400 text-amber-400"
+                                : "text-muted-foreground/30"
+                            )}
+                          />
+                        ))}
+                      </div>
+                      <span className="text-sm font-semibold tabular-nums">{m.avgRating.toFixed(1)}</span>
+                      <span className="text-xs text-muted-foreground">({m.count})</span>
+                    </div>
+                  </div>
+                  {/* Rating distribution bar */}
+                  <div className="flex gap-0.5 h-2">
+                    {m.dist.map((cnt, i) => {
+                      const pct = m.count > 0 ? (cnt / m.count) * 100 : 0;
+                      const colors = ["bg-red-400", "bg-orange-400", "bg-yellow-400", "bg-lime-400", "bg-green-400"];
+                      return (
+                        <div
+                          key={i}
+                          className={cn("rounded-full", colors[i])}
+                          style={{ width: `${Math.max(pct, pct > 0 ? 2 : 0)}%`, minWidth: cnt > 0 ? 4 : 0 }}
+                          title={`${i+1}★: ${cnt}`}
+                        />
+                      );
+                    })}
+                  </div>
+                </div>
+              );
+            })}
           </div>
         </div>
       )}

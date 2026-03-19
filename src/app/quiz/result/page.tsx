@@ -19,6 +19,9 @@ import {
   Gamepad2,
   ArrowRight,
   RotateCcw,
+  Bot,
+  Crown,
+  Target,
 } from "lucide-react";
 
 function parseScores(s: string | null): [number, number, number] | null {
@@ -188,17 +191,17 @@ function QuizResultContent() {
           </CardContent>
         </Card>
 
-        {/* Weakness */}
-        <Card className="border-red-500/20 bg-red-500/5">
+        {/* Growth Edge (positive framing, matching main results page) */}
+        <Card className="border-purple-500/20 bg-purple-500/5">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-start gap-3">
               <TrendingUp
                 size={18}
-                className="text-red-400 mt-0.5 shrink-0"
+                className="text-purple-400 mt-0.5 shrink-0"
               />
               <div>
-                <div className="text-xs font-medium text-red-400 mb-1">
-                  {isZh ? "致命弱点" : "Fatal Weakness"}
+                <div className="text-xs font-medium text-purple-400 mb-1">
+                  {isZh ? "成长突破口" : "Growth Edge"}
                 </div>
                 <p className="text-sm text-foreground/80">
                   {isZh ? archetype.weakness : archetype.weaknessEn}
@@ -285,37 +288,67 @@ function QuizResultContent() {
           </div>
         </div>
 
-        {/* Action buttons */}
-        <div className="space-y-3 pt-2">
+        {/* ── Registration CTA — primary conversion hook ── */}
+        <Card className="border-primary/30 bg-primary/5 overflow-hidden">
+          <CardContent className="pt-5 pb-5">
+            <div className="text-center mb-4">
+              <div className="text-sm font-semibold mb-1">
+                {isZh
+                  ? `${archetype.name}，这只是冰山一角`
+                  : `${archetype.nameEn}, this is just the tip`}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {isZh
+                  ? "注册后解锁完整版 — 免费"
+                  : "Sign up to unlock the full experience — free"}
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="text-center">
+                <Target size={20} className="text-primary mx-auto mb-1" />
+                <div className="text-[10px] text-muted-foreground leading-tight">
+                  {isZh ? "13维天赋\n精准测试" : "13-Dimension\nDeep Test"}
+                </div>
+              </div>
+              <div className="text-center">
+                <Bot size={20} className="text-primary mx-auto mb-1" />
+                <div className="text-[10px] text-muted-foreground leading-tight">
+                  {isZh ? "AI伙伴\n游戏解读" : "AI Partner\nGame Insights"}
+                </div>
+              </div>
+              <div className="text-center">
+                <Crown size={20} className="text-primary mx-auto mb-1" />
+                <div className="text-[10px] text-muted-foreground leading-tight">
+                  {isZh ? "每日挑战\n连续签到" : "Daily Challenge\nStreak System"}
+                </div>
+              </div>
+            </div>
+            <Link href="/register" className="block">
+              <Button size="lg" className="w-full h-12 text-base">
+                {isZh ? "免费注册，解锁完整体验" : "Sign Up Free — Unlock Full Experience"}
+                <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
+        {/* Secondary actions */}
+        <div className="flex gap-3">
           <Button
-            size="lg"
-            className="w-full h-12"
+            variant="outline"
+            className="flex-1 h-10"
             onClick={handleShare}
           >
-            <Share2 size={18} className="mr-2" />
-            {isZh ? "分享我的原型" : "Share My Archetype"}
+            <Share2 size={16} className="mr-1.5" />
+            {isZh ? "分享" : "Share"}
           </Button>
-
-          <Link href="/register" className="block">
-            <Button
-              size="lg"
-              variant="outline"
-              className="w-full h-12"
-            >
-              {isZh
-                ? "注册解锁完整13维测试 + AI角色对话"
-                : "Sign up for full 13-dimension test + AI characters"}
-              <ArrowRight size={16} className="ml-2" />
-            </Button>
-          </Link>
-
-          <Link href="/quiz" className="block">
+          <Link href="/quiz" className="flex-1">
             <Button
               variant="ghost"
-              className="w-full text-muted-foreground"
+              className="w-full h-10 text-muted-foreground"
             >
-              <RotateCcw size={14} className="mr-2" />
-              {isZh ? "重新测试" : "Retake Quiz"}
+              <RotateCcw size={14} className="mr-1.5" />
+              {isZh ? "重测" : "Retake"}
             </Button>
           </Link>
         </div>

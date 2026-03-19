@@ -11,7 +11,8 @@ import { PartnerSettingsSheet } from "./partner-settings-sheet";
 import { getPartnerIcon } from "./partner-icons";
 import { VoiceButton } from "./voice-button";
 import { useVoice } from "@/hooks/use-voice";
-import { ArrowLeft, Settings, Loader2, Volume2, VolumeX } from "lucide-react";
+import Link from "next/link";
+import { ArrowLeft, Settings, Loader2, Volume2, VolumeX, Crown, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Partner } from "@/types/partner";
 
@@ -49,6 +50,11 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const [retrying, setRetrying] = useState(false);
   const hasAutoRetriedRef = useRef(false);
+
+  // Chat rating state — show after 5+ exchanges, once per session
+  const [hasRated, setHasRated] = useState(false);
+  const [hoverRating, setHoverRating] = useState(0);
+  const [submittingRating, setSubmittingRating] = useState(false);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
 
   // Voice state
@@ -268,6 +274,24 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
     }
   }, [voiceHook.isPlaying, speakingMsgId, speakLoading]);
 
+  const handleRating = useCallback(async (stars: number) => {
+    if (!partner || submittingRating || hasRated) return;
+    setSubmittingRating(true);
+    try {
+      await fetch("/api/feedback/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ partnerId: partner.id, rating: stars }),
+      });
+    } catch {
+      // ignore — non-critical
+    } finally {
+      setSubmittingRating(false);
+      setHasRated(true);
+    }
+  }, [partner, submittingRating, hasRated]);
+
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -346,15 +370,28 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-3 overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
         {messages.length === 0 && (
-          <div className="text-center text-muted-foreground text-sm py-12">
-            <Icon className="w-10 h-10 text-primary/30 mx-auto mb-3" />
-            <p>{partner.name}</p>
+          <div className="flex flex-col items-center justify-center min-h-[60vh] animate-in fade-in-0 slide-in-from-bottom-4 duration-500">
+            {/* Large partner avatar */}
+            <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mb-4 animate-in zoom-in-50 duration-700">
+              <Icon className="w-8 h-8 text-primary" />
+            </div>
+            {/* Partner name */}
+            <h2 className="text-lg font-semibold mb-1">{partner.name}</h2>
+            <p className="text-xs text-muted-foreground mb-6">
+              {isZh ? "你的 AI 游戏伙伴" : "Your AI gaming partner"}
+            </p>
+            {/* Greeting bubble */}
             {greeting && (
-              <div className="mt-4 mx-auto max-w-xs">
-                <div className="inline-block text-left bg-muted/60 rounded-2xl rounded-tl-sm px-4 py-2.5 text-sm text-foreground">
+              <div className="mx-auto max-w-sm animate-in fade-in-0 slide-in-from-bottom-2 duration-500 delay-300">
+                <div className="relative bg-muted/60 rounded-2xl rounded-tl-sm px-5 py-3.5 text-sm text-foreground leading-relaxed shadow-sm">
                   {greeting}
                 </div>
               </div>
+            )}
+            {!greeting && (
+              <p className="text-sm text-muted-foreground/60 italic">
+                {isZh ? "发条消息开始聊天吧" : "Send a message to start chatting"}
+              </p>
             )}
           </div>
         )}
@@ -395,29 +432,107 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
         )}
         {error && !retrying && (
           <div className="flex justify-center py-3">
-            <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-muted/80 border border-foreground/5 max-w-xs">
-              <div className="w-5 h-5 rounded-full bg-amber-500/15 flex items-center justify-center flex-shrink-0">
-                <span className="text-amber-600 dark:text-amber-400 text-xs font-bold">!</span>
-              </div>
-              <p className="text-xs text-muted-foreground flex-1">
-                {error.message === "Failed to fetch"
-                  ? (isZh ? "网络连接中断" : "Connection lost")
-                  : (isZh ? "发送失败，请重试" : "Failed to send")}
+            {(() => {
+              const msg = error.message || "";
+              // Exact match: our rate limit returns "CHAT_LIMIT_REACHED" or "对话次数"
+              const isRateLimit = msg.includes("CHAT_LIMIT") || msg.includes("对话次数") || msg.includes("429");
+              // AI service down: OpenRouter key exhausted or model unavailable
+              const isServiceDown = msg.includes("Key limit") || msg.includes("503") || msg.includes("model not configured");
+
+              if (isRateLimit) return (
+                /* Rate limit — show upgrade CTA */
+                <div className="flex flex-col items-center gap-2 px-5 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 max-w-xs">
+                  <Crown className="w-5 h-5 text-amber-500" />
+                  <p className="text-xs text-center text-muted-foreground">
+                    {isZh ? "今日对话次数已用完" : "Daily chat limit reached"}
+                  </p>
+                  <Link
+                    href="/me/premium"
+                    className="text-xs font-medium text-amber-500 pressable hover:underline"
+                  >
+                    {isZh ? "升级 Premium → 无限对话" : "Upgrade to Premium → Unlimited chats"}
+                  </Link>
+                </div>
+              );
+
+              if (isServiceDown) return (
+                /* AI service temporarily unavailable */
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-muted/80 border border-foreground/5 max-w-xs">
+                  <div className="w-5 h-5 rounded-full bg-orange-500/15 flex items-center justify-center flex-shrink-0">
+                    <span className="text-orange-600 dark:text-orange-400 text-xs font-bold">!</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground flex-1">
+                    {isZh ? "AI 服务暂时不可用，请稍后再试" : "AI service temporarily unavailable"}
+                  </p>
+                </div>
+              );
+
+              return (
+                /* Generic error */
+                <div className="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl bg-muted/80 border border-foreground/5 max-w-xs">
+                  <div className="w-5 h-5 rounded-full bg-amber-500/15 flex items-center justify-center flex-shrink-0">
+                    <span className="text-amber-600 dark:text-amber-400 text-xs font-bold">!</span>
+                  </div>
+                  <p className="text-xs text-muted-foreground flex-1">
+                    {error.message === "Failed to fetch"
+                      ? (isZh ? "网络连接中断" : "Connection lost")
+                      : (isZh ? "发送失败，请重试" : "Failed to send")}
+                  </p>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const last = messages.filter((m) => m.role === "user").pop();
+                      if (last) {
+                        const text = extractPartText(last.parts as Array<{ type: string; text?: string }>);
+                        if (text) sendMessage({ text });
+                      }
+                    }}
+                    className="text-xs text-primary font-medium pressable flex-shrink-0"
+                  >
+                    {isZh ? "重试" : "Retry"}
+                  </button>
+                </div>
+              );
+            })()}
+          </div>
+        )}
+        {/* Chat rating prompt — show after 5+ messages, once per session */}
+        {!hasRated && messages.length >= 5 && status === "ready" && (
+          <div className="flex justify-center py-3 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
+            <div className="flex flex-col items-center gap-2 px-4 py-3 rounded-2xl bg-muted/60 border border-foreground/5 max-w-xs">
+              <p className="text-xs text-muted-foreground">
+                {isZh ? "对话体验如何？" : "How's the chat?"}
               </p>
-              <button
-                type="button"
-                onClick={() => {
-                  const last = messages.filter((m) => m.role === "user").pop();
-                  if (last) {
-                    const text = extractPartText(last.parts as Array<{ type: string; text?: string }>);
-                    if (text) sendMessage({ text });
-                  }
-                }}
-                className="text-xs text-primary font-medium pressable flex-shrink-0"
-              >
-                {isZh ? "重试" : "Retry"}
-              </button>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map((star) => (
+                  <button
+                    key={star}
+                    type="button"
+                    disabled={submittingRating}
+                    onClick={() => handleRating(star)}
+                    onMouseEnter={() => setHoverRating(star)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    className="pressable disabled:opacity-50"
+                  >
+                    <Star
+                      className={cn(
+                        "w-6 h-6 transition-colors",
+                        star <= (hoverRating || 0)
+                          ? "fill-amber-400 text-amber-400"
+                          : "text-muted-foreground/40"
+                      )}
+                    />
+                  </button>
+                ))}
+              </div>
             </div>
+          </div>
+        )}
+        {hasRated && (
+          <div className="flex justify-center py-2 animate-in fade-in-0 duration-300">
+            <p className="text-xs text-muted-foreground">
+              {isZh ? "感谢评价 🎯" : "Thanks for the rating 🎯"}
+            </p>
           </div>
         )}
         <div ref={messagesEndRef} />
@@ -471,7 +586,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
             name="chat-message"
             rows={1}
             className={cn(
-              "flex-1 resize-none rounded-2xl px-4 py-2.5 text-sm",
+              "flex-1 resize-none rounded-2xl px-4 py-2.5 text-base md:text-sm",
               "bg-muted/50 border border-foreground/10",
               "focus:outline-none focus:ring-2 focus:ring-primary/30",
               "placeholder:text-muted-foreground/50",

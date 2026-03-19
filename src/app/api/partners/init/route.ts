@@ -11,7 +11,7 @@ export async function POST(request: NextRequest) {
     return new Response("Unauthorized", { status: 401 });
   }
 
-  const model = getModel();
+  const model = await getModel();
   if (!model) {
     return new Response("AI model not configured", { status: 503 });
   }

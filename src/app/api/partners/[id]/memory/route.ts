@@ -3,7 +3,7 @@ import { generateText } from "ai";
 import { getModel } from "@/lib/ai";
 import { getAuthFromCookie } from "@/lib/auth";
 import { db } from "@/db";
-import { partners, userKnowledge } from "@/db/schema";
+import { partners, users, userKnowledge } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { buildMemoryExtractionPrompt } from "@/lib/partner-prompts";
 import { memoryExtractionSchema } from "@/lib/validations";
@@ -77,7 +77,7 @@ export async function POST(
     return NextResponse.json({ error: "Partner not found" }, { status: 404 });
   }
 
-  const model = getModel(partner[0].modelId);
+  const model = await getModel(partner[0].modelId);
   if (!model) {
     return NextResponse.json(
       { error: "AI model not configured" },
@@ -85,9 +85,25 @@ export async function POST(
     );
   }
 
+  // Tier-based memory limit: free=20, premium=50
+  const userResult = await db
+    .select({ tier: users.tier, tierExpiresAt: users.tierExpiresAt })
+    .from(users)
+    .where(eq(users.id, auth.sub))
+    .limit(1);
+  const isPremium = userResult.length > 0 && userResult[0].tier === "premium" &&
+    (!userResult[0].tierExpiresAt || userResult[0].tierExpiresAt >= new Date());
+  const maxMemory = isPremium ? 50 : 20;
+
+  // Truncate conversation text to prevent token overflow (max ~8000 chars ≈ ~2000 tokens)
+  const conversationText = parsed.data.conversationText.length > 8000
+    ? parsed.data.conversationText.slice(-8000) // keep most recent part
+    : parsed.data.conversationText;
+
   const prompt = buildMemoryExtractionPrompt(
     partner[0].memory,
-    parsed.data.conversationText
+    conversationText,
+    maxMemory
   );
 
   try {

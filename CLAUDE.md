@@ -39,6 +39,8 @@ npx vitest run     # Unit tests (scoring, game logic, scorers)
 - **会话压缩前**: 必须更新 §7 Current Status。
 - **会话压缩后**: 必须读取 §7 Current Status 了解当前进度。
 - **中国镜像源**: 所有下载（pip/npm/HuggingFace/Docker）优先使用中国镜像，详见 §6。
+- **工具/MCP建议**: 当任务最佳实践需要新的AI模型、Skill、MCP Server或外部工具框架时，必须主动建议用户提供/安装，不要假设当前环境已有。
+- **工作量估算**: 按Claude Code单次上下文(~100K tokens)能力评估，而非人工天数。单个上下文通常可完成5-15个文件的修改+测试+部署。
 
 ---
 
@@ -125,13 +127,22 @@ const isZh = locale === "zh";
 
 | Domain | 入口文件 | 一句话 |
 |--------|---------|--------|
-| **Auth** | `lib/auth.ts`, `middleware.ts` | JWT + captcha, PUBLIC_PATHS 含 `/api/voice/health` |
+| **Auth** | `lib/auth.ts`, `middleware.ts` | JWT + captcha + Redis rate limiting, PUBLIC_PATHS 含 `/api/voice/health` |
+| **Rate Limiting** | `lib/redis.ts` | ioredis, `checkRateLimit()`, captcha/login/register/chat daily limits |
 | **Talent & Games** | `games/*`, `lib/scoring.ts` | 13 game plugins → 13-dim scores → S/A/B/C/D ranks |
 | **Archetype** | `lib/archetype.ts` (610行, pure) | 16 archetypes, 改动必查 4 页面 + 2 OG cards |
 | **AI Partners** | `lib/partner-prompts.ts`, `components/chat/*` | 五层 prompt, Vercel AI SDK v6, tier-based limits |
-| **Voice** | `voice-service/*`, `api/voice/*` | Whisper STT + Qwen3-TTS 0.6B (emotion control, local GPU) + Edge TTS fallback, port 8100 |
+| **Voice** | `voice-service/*`, `api/voice/*` | Whisper STT + Edge TTS (Microsoft neural voices), port 8100 |
 | **Billing** | `api/billing/*`, `api/admin/codes/*` | 激活码模式, $4.99/month, Stripe 未接入 |
 | **Social** | `api/profile/*`, `api/messages/*` | 公开档案 + Redis 阅后即焚消息 + 排行榜 |
+| **Referral** | `api/referral/*`, `api/cron/backfill-referral-codes/*` | 8-char codes, referrals tracking table, Me page card |
+| **Crawlers** | `lib/crawlers/*`, `api/cron/crawl-games/*` | Firecrawl-based Steam/TapTap game crawlers |
+| **Email** | `lib/email/*`, `api/cron/email-digest/*` | Resend API (weda.ai, Tokyo), weekly digest, streak milestones |
+| **Admin Settings** | `api/admin/settings/*`, `admin/settings/page.tsx` | Site settings (ai_model etc.), DB-backed key-value store with 60s cache |
+| **Feedback** | `api/feedback/*`, `api/talent-trends/*` | Game rec feedback (like/dislike/played), chat ratings (1-5), talent percentiles |
+| **Marketplace** | `api/marketplace/*`, `(main)/marketplace/page.tsx` | Shared partner definitions, likes, usage tracking |
+| **Steam** | `api/integrations/steam/*` | Steam ID linking, game library import via Steam Web API |
+| **Community** | `api/community/*`, `(main)/community/page.tsx` | Archetype-based posts, replies, likes |
 
 > 设计哲学与历史决策见 `docs/decisions.md`。做产品方向决策时参考。
 
@@ -146,8 +157,10 @@ REDIS_URL=redis://localhost:6379
 JWT_SECRET=<32+ char, MUST be stable>
 NEXT_PUBLIC_BASE_URL=https://game.weda.ai
 OPENROUTER_API_KEY=<for AI chat + analysis>
-AI_MODEL=anthropic/claude-sonnet-4
-FIRECRAWL_API_KEY=<for crawlers, optional>
+AI_MODEL=minimax/minimax-m2.5 (fallback; actual value from DB site_settings.ai_model)
+FIRECRAWL_API_KEY=<for game crawlers, optional>
+RESEND_API_KEY=<for email notifications, optional>
+STEAM_API_KEY=<for Steam game library import, optional>
 CRON_SECRET=<for /api/admin/* and /api/cron/*>
 VOICE_SERVICE_URL=http://localhost:8100
 VOICE_SERVICE_SECRET=<shared secret for voice service auth>
@@ -166,12 +179,12 @@ voice-service/       Python 3.11 venv, runs on host machine (not Docker)
   .venv/             Python 3.11.9 virtual environment
   server.py          FastAPI: Whisper STT + Edge TTS (Microsoft neural voices) → port 8100
   start.bat          Double-click to start
-  requirements.txt   Dependencies (faster-whisper, kokoro, torch cu128)
+  requirements.txt   Dependencies (faster-whisper, edge-tts, torch cu128)
 ```
 
 **Start**: `cd voice-service && start.bat` (or `.venv/Scripts/python.exe server.py`)
 **GPU**: NVIDIA RTX 5060 Ti 16GB (CUDA capability sm_120, requires PyTorch cu128+)
-**Models**: Whisper medium (~1.5GB, float16 CUDA) + Qwen3-TTS 0.6B-CustomVoice (~2GB, bfloat16 CUDA, 9 speakers, emotion instruct) + Edge TTS fallback (cloud, free)
+**Models**: Whisper medium (~1.5GB, float16 CUDA) + Edge TTS (cloud, free, ~2s latency)
 **Docker access**: App container reaches voice service via `host.docker.internal:8100`
 
 ### Cloudflare Tunnel (`~/.cloudflared/config.yml`)
@@ -219,39 +232,113 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
 ## 7. Current Status (会话压缩后必查)
 
 ### ✅ Completed
-- Phase 1-8: Core platform (13 games, talent test, AI partners, Premium codes, public profiles)
-- Phase 9A: 16 archetype system + dual mapping algorithms
-- Phase 9B: Public quiz funnel (/ → /quiz → /quiz/result → share) + OG share cards
-- Phase 9C: 8 character presets + partner gallery + INIT_AGENT_PROMPT unlocked
-- Phase 9D: Dashboard + Me page identity-driven redesign
-- Phase 9E: 13-game test results page → full archetype reveal experience
-- Phase 10A: AI partner archetype context (archetypeId in DB + partner prompts include archetype identity)
-- Phase 10B: Post-registration funnel (register → `/test?welcome=1` + welcome banner + dashboard progress card + Premium CTA on test limit)
-- Phase 10B-backfill: All existing talentProfiles backfilled with archetypeId
-- Phase 10C: Partner management UI (edit name/avatar/definition, delete with 2-step confirm, settings sheet)
-- Phase 10D: Chat stability (stream error fix, message copy, retry on error, 10-message window, maxDuration=60)
-- Phase 10E: Captcha anti-cache fix (force-dynamic, no-store headers, fetchingRef dedup, pre-submit validation)
-- Phase 10F: Login form bilingual rewrite (all strings i18n, loading guards)
-- Phase 10G: Chat conversation summary (Layer 5: truncated messages → Gemini Flash summary → injected into system prompt)
-- Phase 10H: Voice infrastructure + deployment — Whisper STT + Kokoro TTS (English + Chinese) running locally on GPU (Python 3.11 venv, PyTorch cu128 for RTX 5060 Ti sm_120). API proxy routes, useVoice hook with health probe.
-- Phase 10I: Chat UX overhaul — typing indicator, friendlier error display, mobile layout fix, VoiceButton hidden until voice service deployed
-- Phase 10J: WeChat iOS login fix — dual cookie strategy, JWT 30d expiry, remember-username
-- Phase 10K: Chat streaming reliability — removed nodeMiddleware, Edge runtime middleware, maxRetries: 3, auto-retry
-- Brand: GameTalent → GameTan (unified globally)
-- Bilingual: Landing, Quiz, Test Session, Auth forms, Results, Register
-- Daily challenge system: fully implemented (13-talent cycle, streak, trend chart)
-- Tests: 114 unit tests passing (scoring, game-logic, scorers)
-- CLAUDE.md modular split: architecture → docs/architecture.md, decisions → docs/decisions.md
-- Phase 10L: Voice UX redesign — Chinese TTS (multi-language Kokoro pipelines with auto-detection), STT auto-send (voice→transcribe→send, no manual click), per-message 🔊 TTS buttons, auto-play TTS when last input was voice
-- Phase 10M: Voice quality upgrade — Kokoro TTS → Edge TTS (Microsoft neural voices, free, much better prosody). STT fix: explicit `task="transcribe"` prevents Whisper from translating Chinese→English. Auto-play toggle (localStorage-persisted, Volume2/VolumeX icon in chat nav). Audio format: WAV → MP3. Removed Kokoro/numpy/soundfile/cn2an/jieba deps.
-- Phase 11: Admin dashboard full enhancement — Dashboard: 7 stat cards (clickable) + registration trend chart (30d bar) + conversion funnel (registered→tested→profiled→premium) + daily activity stacked chart (14d tests+challenges) + quick links. User detail page: click any user → full profile (info cards, talent radar, test sessions, partners with memory preview, challenges, codes used, knowledge graph). Game management: 127 games with search/filter (status: active/hidden/pending, source: seed/steam/taptap), toggle visibility. Nav: added Games tab (4 tabs total).
-- Phase 12A: Qwen3-TTS integration — Upgraded from Edge TTS to Qwen3-TTS 0.6B-CustomVoice (Alibaba, local GPU, bfloat16). 9 built-in speakers (Vivian/Serena/Uncle_Fu/Dylan/Eric for Chinese, Ryan/Aiden for English, Ono_Anna for Japanese, Sohee for Korean). `instruct` param for emotion control (e.g. "用温柔的语气说", "speak excitedly"). Edge TTS as automatic fallback. TTS proxy updated with `instruct` + `engine` params.
-- Phase 12B: Partner proactive greetings — Enhanced greeting API (all users, not just premium). Fetches recent challenges (7 days), calculates streak, includes archetype info. Uses Gemini Flash for fast generation. Already wired in partner-conversation.tsx.
-- Phase 12C: Challenge leaderboard + streak rewards — New `/api/challenge/leaderboard` API (top 20 by total challenges, streak calculation, avg score). New `/challenge/leaderboard` page with rank icons (Crown/Medal), streak milestone badges (7d/14d/30d/60d/100d), my stats card. Link from challenge page.
+- Phase 1-8: Core platform — 13 games, talent test, 16 archetypes, AI partners, Premium codes, public profiles
+- Phase 9: Quiz funnel + archetype system — public quiz → OG share cards, 8 character presets, dashboard + results redesign
+- Phase 10: AI + UX polish — partner archetype context, post-registration funnel, chat stability/streaming/summary, voice (Whisper STT + Edge TTS), WeChat iOS login fix, bilingual everything
+- Phase 11: Admin dashboard — 7 stat cards, user detail pages, 127-game management, conversion funnel chart
+- Phase 12: Partner proactive greetings (Gemini Flash) + challenge leaderboard
+- Phase 13: Referral system + Steam/TapTap crawlers + email notifications (Resend) + voice cleanup
+- Phase 14: Data flywheel tables + partner marketplace + Steam integration + archetype community
+- Phase 15: Security hardening — Redis rate limiting (captcha/login/register/chat), password complexity, healthchecks, ErrorBoundary, lazy-load Recharts
+- Phase 16: Conversion optimization — quiz CTA overhaul, chat rate limit upgrade CTA, celebration confetti, first-chat greeting animation, streak rewards (7d→1, 14d→3, 30d→7, 60d→14, 100d→30 premium days)
+- Phase 17: Flywheel activation + architecture cleanup — data flywheel closed (feedback re-ranking), 3 DB indexes, API envelope standardized, 138 tests
+- Phase 18: Chat error fix + iOS mobile UX + Admin settings + Results Premium CTA
+  - **Chat error misclassification fixed**: OpenRouter 403 "Key limit exceeded" was matching frontend `includes("limit")` → showing "对话次数已用完". Now uses precise matching: `CHAT_LIMIT` / `对话次数` / `429` only. Added separate "AI service unavailable" UI for provider errors.
+  - **iOS viewport**: Removed `maximumScale:1` + `userScalable:false` → allows pinch zoom (accessibility)
+  - **Bottom nav touch targets**: `py-1.5` → `py-2` + `min-h-[3rem]` (48px), icon 20→22px, label 10→11px
+  - **Chat input**: `text-sm` → `text-base md:text-sm` (16px on mobile prevents Safari auto-zoom)
+  - **Admin Settings overhaul**: API Key hot-swap from DB (no container restart), model selector simplified to 1 free preset (DeepSeek V3) + persistent custom models
+  - **Results page Premium CTA**: Yellow gradient card after AI Analysis, 4 feature highlights, Crown icon, routes to /me/premium. Only shows for free-tier users.
+  - **Dev cycle cron**: `gametan-dev-cycle` scheduled task, cron `*/30 * * * *`, auto smoke test → develop → deploy
+  - 114 unit tests passing
+- Phase 19: Referral UI optimization + type fix
+  - **GameScorer interface**: `durationMs` made optional (was causing TS errors in tests; scorers only use rawScore)
+  - **Referral card redesign**: Green-tinted card, better incentive copy, "Copy invite link" button, Web Share API button (mobile)
+  - **Register form**: Auto-fills referral code from `?ref=CODE` URL param (deep-link support)
+  - **i18n**: Added `me.referralCopyLink`, `me.referralLinkCopied` keys to both zh/en locale files
+- Phase 20: Community in-app notifications
+  - **notifications table**: New DB table (id, userId, type, postId, senderId, read, createdAt) with 2 indexes
+  - **Auto-created**: Like/reply on community posts creates notification for post author (skips self-actions)
+  - **API**: `GET /api/notifications` (list + unreadCount), `POST /api/notifications/mark-read`
+  - **/notifications page**: List view with like/reply icons, relative timestamps, unread blue dot, auto-marks-read on open
+  - **Bell icon**: Added to both mobile top bar and desktop nav with unread count badge, refreshes on route change
+  - 114 unit tests passing
+- Phase 21: Chat A/B model quality tracking
+  - **schema**: Added `model_id` column + index to `chat_feedback` table (nullable, backwards-compat)
+  - **Auto-resolve**: Feedback API auto-resolves partner.modelId → global site_settings ai_model → env fallback at submit time
+  - **Star rating UI**: Shows in chat after 5+ messages (status=ready), once per session, 5-star tap-to-rate
+  - **Admin endpoint**: `GET /api/admin/chat-model-stats` returns per-model count/avgRating/distribution
+  - **Admin dashboard**: "AI 模型评分 Model Ratings" card with star viz + rating distribution bars
+  - 114 unit tests passing
+- Phase 23: Community email alerts — like/reply email notifications
+  - **Templates**: `communityLikedHtml` + `communityRepliedHtml` added to `lib/email/templates.ts`
+  - **API route**: `api/community/[id]/route.ts` — like/reply actions now fetch author email via JOIN, send fire-and-forget email after in-app notification (bilingual zh+en subject + body)
+  - **Zero regression**: 114 unit tests passing, build clean
+  - **Deploy pending**: Docker Desktop was unresponsive; manual deploy needed
+- Phase 22: Infrastructure — Email service + Feishu notifications + OpenRouter key refresh
+  - **OpenRouter API key**: Refreshed via admin settings API (hot-swap, no restart)
+  - **Resend email service**: RESEND_API_KEY configured, domain `weda.ai` verified (Tokyo region), FROM: `noreply@weda.ai`
+  - **Feishu notifications**: `scripts/feishu-notify.py` script, integrated into `gametan-dev-cycle` scheduled task (STEP 8)
+  - **Dev cycle enhanced**: Now sends Feishu notification after every cycle (success/warning/error/info)
+  - **Steam API key**: STEAM_API_KEY configured, game library import feature unlocked
+
+- Phase 24: Steam game library import UX
+  - **Settings page**: New Steam section — link by 17-digit Steam ID, shows username + game count + total hours after linking, unlink button with confirm dialog
+  - **i18n**: Added `settings.steam*` keys to both zh.json and en.json (12 new keys each)
+  - **UX**: Error display for invalid Steam IDs, external link to Steam account page to find ID, loading state during import
+  - 114 unit tests passing, build clean
+  - **Deploy pending**: Docker Desktop unresponsive — needs `docker compose build app && docker compose up -d app`
+
+- Phase 25: Community replies UI
+  - **Reply threads**: Clicking comment icon on a post now expands an inline reply section with existing replies + reply input
+  - **Reply loading**: Fetches replies from `GET /api/community/[id]` on expand (cached, no re-fetch on collapse/re-expand)
+  - **Reply submission**: `POST /api/community/[id]` with `action: "reply"`, Enter key shortcut, local count update
+  - **UX**: CornerDownRight thread indicator, skeleton loaders, empty state, 300-char limit, pressable send button
+  - 114 unit tests passing, build clean
+  - **Deploy pending**: Docker Desktop unresponsive
+
+- Phase 26: Community sort toggle (Newest / Hot)
+  - **API**: `GET /api/community` now accepts `sort=newest|hot` query param; "hot" sorts by `likeCount DESC, createdAt DESC`
+  - **UI**: Two-button sort toggle (Clock/Newest + Flame/Hot) added above post list in community page; re-fetches on sort change
+  - **i18n**: Inline `isZh` ternary (最新/Newest, 热门/Hot) — no new i18n keys needed
+  - 114 unit tests passing, build clean
+
+- Phase 27: AI Partners + Chat UX fixes (dev-cycle Group B review)
+  - **`partner-init-flow.tsx`**: Replaced `alert()` calls (hardcoded Chinese, bad UX) with proper inline `createError` state — bilingual error shown below action buttons
+  - **`partner-hub.tsx`**: `createFromPreset()` was silently swallowing all errors; now shows bilingual error toast above gallery on failure
+  - Both fixes follow `isZh` bilingual convention; no new i18n keys needed
+  - 114 unit tests passing, build clean, deployed to port 3100
+
+- Phase 28: UX polish — i18n error messages + dashboard loading skeleton (dev-cycle Group E review)
+  - **Hardcoded English error fallbacks fixed**: `challenge/page.tsx` ("Failed to load" / "Network error" / "Submit failed"), `me/premium/page.tsx` ("Activation failed" / "Purchase failed" / "Network error"), `settings/page.tsx` ("Invalid Steam ID" / "Network error") — all now use `isZh ? "中文" : "English"` bilingual pattern
+  - **Dashboard loading skeleton**: Added `loadingProfile` state — renders `animate-pulse` skeleton card while leaderboard fetch is in-flight, preventing flash of "no archetype" CTA before data arrives
+  - **Settings page**: Added `locale` + `isZh` destructure from `useI18n()` (was only using `t`)
+  - 114 unit tests passing, build clean, deployed to port 3100
+
+- Phase 29: Auth + Security review (dev-cycle Group A)
+  - **register-form.tsx**: Frontend password check was `length < 6` — mismatched with backend's 8-char+complexity requirement. Fixed to check 8+ and complexity (uppercase/lowercase/digit) with bilingual error messages. Updated placeholder to match.
+  - **change-password-form.tsx**: Fully hardcoded Chinese UI — bilingual (`isZh` ternary) for all labels, errors, success, buttons, placeholder. Password check upgraded to 8-char+complexity matching backend. Now imports `useI18n`.
+  - **api/auth/change-password/route.ts**: Missing rate limiting — added user-scoped limit (`rl:chpwd:{userId}`, max 5 per 15min) with `Retry-After: 900` header. Changed `Request` → `NextRequest`.
+  - 114 unit tests passing, build clean, deployed to port 3100
+
+- Phase 30: Community + Social review (dev-cycle Group D)
+  - **`api/community/route.ts`**: GET + POST handlers had no try-catch — unhandled DB errors would crash; added try-catch with `{success:false, error:{code,message}}` envelope
+  - **`api/community/[id]/route.ts`**: 4 responses were using bare `{error:"..."}` without envelope (`NOT_FOUND`, `UNAUTHORIZED`, `VALIDATION_ERROR`, `BAD_REQUEST`); wrapped GET + POST in try-catch; all errors now follow standard envelope
+  - **`api/notifications/route.ts`**: 401 response used bare `{error:"Unauthorized"}` → fixed to envelope
+  - **`api/notifications/mark-read/route.ts`**: Same 401 envelope fix
+  - **`leaderboard/page.tsx`**: Date hardcoded to `zh-CN` locale; now respects `locale` from `useI18n()` → `zh-CN` or `en-US`; added `locale` to destructure
+  - **`community/page.tsx`**: Redundant `/api/auth/me` fetch (result ignored) before `/api/talent-trends`; removed wasteful prefetch
+  - 114 unit tests passing, build clean, deployed to port 3100
+
+- Phase 31: Billing + Growth hardening (dev-cycle Group G review)
+  - **`api/billing/activate/route.ts`**: Wrapped all DB operations in try-catch; fixed 401 to use `{success:false}` envelope
+  - **`api/billing/mock-purchase/route.ts`**: Same try-catch + envelope fix
+  - **`api/referral/route.ts`**: Wrapped DB queries in try-catch with proper error envelope
+  - **`api/marketplace/[id]/route.ts`**: Fixed not-found response to use `{success:false,error}` envelope; added `action` validation (returns 400 on invalid action); wrapped like/unlike in try-catch
+  - **`api/integrations/steam/route.ts`**: Added try-catch to GET + DELETE handlers; fixed bare `{error}` envelopes to `{success:false,error}`
+  - **`api/partners/route.ts`**: `getUserTier()` now returns `{tier, tierExpiresAt}` object (was just string); GET response now includes `tierExpiresAt` ISO string; POST slot-limit error now uses `{success:false}` envelope
+  - **`(main)/me/premium/page.tsx`**: Fixed `useEffect` — removed redundant `/api/auth/me` prefetch; now also picks up `tierExpiresAt` from `/api/partners` response so expiry date shows on page load
+  - 114 unit tests passing, build clean, deployed to port 3100
 
 ### 🔲 Pending
-- Crawler automation (code exists in `lib/crawlers/`, no scheduler yet)
-- Stripe/payment integration (future phase)
-- Referral system (referralCode field exists, not implemented)
-- Email notifications (schema ready, not activated)
-- Backfill cron utility exists at `/api/cron/backfill-archetypes`
+- Stripe/payment integration (critical — currently code-only Premium activation)

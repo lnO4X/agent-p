@@ -6,7 +6,8 @@ import { useI18n } from "@/i18n/context";
 import { PartnerCard } from "./partner-card";
 import { CHARACTER_PRESETS } from "@/lib/character-presets";
 import type { CharacterPreset } from "@/lib/character-presets";
-import { Plus, Crown, Lock, Swords, Flame, Heart, Star, Sparkles } from "lucide-react";
+import { Plus, Crown, Lock, Swords, Flame, Heart, Star, Sparkles, Store } from "lucide-react";
+import Link from "next/link";
 import { cn } from "@/lib/utils";
 import type { Partner } from "@/types/partner";
 
@@ -26,6 +27,7 @@ export function PartnerHub() {
   const [maxSlots, setMaxSlots] = useState(2);
   const [showGallery, setShowGallery] = useState(false);
   const [creating, setCreating] = useState<string | null>(null);
+  const [createError, setCreateError] = useState<string | null>(null);
 
   const isZh = locale === "zh";
 
@@ -55,6 +57,7 @@ export function PartnerHub() {
   async function createFromPreset(preset: CharacterPreset) {
     if (!canCreateMore || creating) return;
     setCreating(preset.id);
+    setCreateError(null);
     try {
       const res = await fetch("/api/partners", {
         method: "POST",
@@ -69,10 +72,15 @@ export function PartnerHub() {
         const data = await res.json();
         if (data.success && data.data?.id) {
           router.push(`/chat/${data.data.id}`);
+        } else {
+          setCreateError(isZh ? "创建失败，请重试" : "Failed to create, please retry");
         }
+      } else {
+        const data = await res.json().catch(() => ({}));
+        setCreateError(data.error || (isZh ? "创建失败，请重试" : "Failed to create, please retry"));
       }
     } catch {
-      // Silent
+      setCreateError(isZh ? "网络错误，请重试" : "Network error, please retry");
     } finally {
       setCreating(null);
     }
@@ -163,6 +171,31 @@ export function PartnerHub() {
           </p>
         )}
       </div>
+
+      {/* Marketplace link */}
+      <Link
+        href="/marketplace"
+        className="flex items-center gap-3 p-4 rounded-2xl bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-colors pressable"
+      >
+        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+          <Store size={20} className="text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="text-sm font-semibold">
+            {isZh ? "伙伴市场" : "Partner Market"}
+          </div>
+          <div className="text-xs text-muted-foreground">
+            {isZh ? "发现社区创建的角色" : "Discover community characters"}
+          </div>
+        </div>
+      </Link>
+
+      {/* Create error toast */}
+      {createError && (
+        <div className="text-xs text-destructive bg-destructive/10 rounded-xl px-3 py-2 text-center">
+          {createError}
+        </div>
+      )}
 
       {/* Character Gallery */}
       {showGallery && canCreateMore && (

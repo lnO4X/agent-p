@@ -25,47 +25,63 @@ export const users = pgTable(
     tier: text("tier", { enum: ["free", "premium"] }).notNull().default("free"),
     tierExpiresAt: timestamp("tier_expires_at"),
     referralCode: text("referral_code"),
+    steamId: text("steam_id"),
+    steamUsername: text("steam_username"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => [
     uniqueIndex("users_username_idx").on(table.username),
     uniqueIndex("users_referral_code_idx").on(table.referralCode),
+    uniqueIndex("users_steam_id_idx").on(table.steamId),
   ]
 );
 
 // ==================== TEST SESSIONS ====================
-export const testSessions = pgTable("test_sessions", {
-  id: text("id").primaryKey(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id),
-  status: text("status", {
-    enum: ["in_progress", "completed", "abandoned"],
-  })
-    .notNull()
-    .default("in_progress"),
-  startedAt: timestamp("started_at").defaultNow().notNull(),
-  completedAt: timestamp("completed_at"),
-});
+export const testSessions = pgTable(
+  "test_sessions",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    status: text("status", {
+      enum: ["in_progress", "completed", "abandoned"],
+    })
+      .notNull()
+      .default("in_progress"),
+    startedAt: timestamp("started_at").defaultNow().notNull(),
+    completedAt: timestamp("completed_at"),
+  },
+  (table) => [
+    index("test_sessions_user_idx").on(table.userId),
+  ]
+);
 
 // ==================== GAME SCORES ====================
-export const gameScores = pgTable("game_scores", {
-  id: text("id").primaryKey(),
-  sessionId: text("session_id")
-    .notNull()
-    .references(() => testSessions.id),
-  userId: text("user_id")
-    .notNull()
-    .references(() => users.id),
-  gameId: text("game_id").notNull(),
-  talentCategory: text("talent_category").notNull(),
-  rawScore: real("raw_score").notNull(),
-  normalizedScore: real("normalized_score").notNull(),
-  metadata: jsonb("metadata"),
-  playedAt: timestamp("played_at").defaultNow().notNull(),
-  durationMs: integer("duration_ms").notNull(),
-});
+export const gameScores = pgTable(
+  "game_scores",
+  {
+    id: text("id").primaryKey(),
+    sessionId: text("session_id")
+      .notNull()
+      .references(() => testSessions.id),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    gameId: text("game_id").notNull(),
+    talentCategory: text("talent_category").notNull(),
+    rawScore: real("raw_score").notNull(),
+    normalizedScore: real("normalized_score").notNull(),
+    metadata: jsonb("metadata"),
+    playedAt: timestamp("played_at").defaultNow().notNull(),
+    durationMs: integer("duration_ms").notNull(),
+  },
+  (table) => [
+    index("game_scores_session_idx").on(table.sessionId),
+    index("game_scores_user_idx").on(table.userId),
+  ]
+);
 
 // ==================== TALENT PROFILES ====================
 export const talentProfiles = pgTable(
@@ -98,7 +114,10 @@ export const talentProfiles = pgTable(
     genreRecommendations: jsonb("genre_recommendations"),
     createdAt: timestamp("created_at").defaultNow().notNull(),
   },
-  (table) => [uniqueIndex("talent_profiles_session_idx").on(table.sessionId)]
+  (table) => [
+    uniqueIndex("talent_profiles_session_idx").on(table.sessionId),
+    index("talent_profiles_user_idx").on(table.userId),
+  ]
 );
 
 // ==================== CAPTCHA SESSIONS ====================
@@ -238,6 +257,217 @@ export const gameRecommendations = pgTable(
     index("game_recs_profile_idx").on(table.profileId, table.rank),
   ]
 );
+
+// ==================== REFERRALS ====================
+export const referrals = pgTable(
+  "referrals",
+  {
+    id: text("id").primaryKey(),
+    referrerId: text("referrer_id")
+      .notNull()
+      .references(() => users.id),
+    referredUserId: text("referred_user_id")
+      .notNull()
+      .references(() => users.id),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("referrals_referred_user_idx").on(table.referredUserId),
+    index("referrals_referrer_idx").on(table.referrerId),
+  ]
+);
+
+// ==================== COMMUNITY POSTS ====================
+export const communityPosts = pgTable(
+  "community_posts",
+  {
+    id: text("id").primaryKey(),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => users.id),
+    archetypeId: text("archetype_id").notNull(),
+    content: text("content").notNull(),
+    likeCount: integer("like_count").default(0).notNull(),
+    replyCount: integer("reply_count").default(0).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("community_posts_archetype_idx").on(table.archetypeId, table.createdAt),
+    index("community_posts_author_idx").on(table.authorId),
+  ]
+);
+
+export const communityReplies = pgTable(
+  "community_replies",
+  {
+    id: text("id").primaryKey(),
+    postId: text("post_id")
+      .notNull()
+      .references(() => communityPosts.id, { onDelete: "cascade" }),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => users.id),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("community_replies_post_idx").on(table.postId, table.createdAt),
+  ]
+);
+
+export const communityPostLikes = pgTable(
+  "community_post_likes",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    postId: text("post_id")
+      .notNull()
+      .references(() => communityPosts.id, { onDelete: "cascade" }),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("community_post_likes_unique_idx").on(table.userId, table.postId),
+    index("community_post_likes_user_idx").on(table.userId),
+  ]
+);
+
+// ==================== NOTIFICATIONS ====================
+export const notifications = pgTable(
+  "notifications",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type", { enum: ["post_liked", "post_replied"] }).notNull(),
+    postId: text("post_id").references(() => communityPosts.id, {
+      onDelete: "cascade",
+    }),
+    senderId: text("sender_id").references(() => users.id, {
+      onDelete: "cascade",
+    }),
+    read: boolean("read").notNull().default(false),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("notifications_user_idx").on(table.userId, table.createdAt),
+    index("notifications_unread_idx").on(table.userId, table.read),
+  ]
+);
+
+// ==================== STEAM GAME LIBRARY ====================
+export const steamGameLibrary = pgTable(
+  "steam_game_library",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    steamAppId: integer("steam_app_id").notNull(),
+    name: text("name").notNull(),
+    playtimeMinutes: integer("playtime_minutes").default(0).notNull(),
+    lastPlayed: timestamp("last_played"),
+    iconUrl: text("icon_url"),
+    syncedAt: timestamp("synced_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("steam_lib_user_app_idx").on(table.userId, table.steamAppId),
+    index("steam_lib_user_idx").on(table.userId),
+  ]
+);
+
+// ==================== FEEDBACK (data flywheel) ====================
+export const recommendationFeedback = pgTable(
+  "recommendation_feedback",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    gameId: text("game_id")
+      .notNull()
+      .references(() => games.id),
+    signal: text("signal", { enum: ["like", "dislike", "played", "wishlisted"] }).notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("rec_feedback_user_game_idx").on(table.userId, table.gameId),
+    index("rec_feedback_game_idx").on(table.gameId),
+  ]
+);
+
+export const chatFeedback = pgTable(
+  "chat_feedback",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    partnerId: text("partner_id")
+      .notNull()
+      .references(() => partners.id),
+    rating: integer("rating").notNull(), // 1-5 stars
+    modelId: text("model_id"), // resolved AI model used (e.g. "anthropic/claude-sonnet-4")
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("chat_feedback_user_idx").on(table.userId),
+    index("chat_feedback_partner_idx").on(table.partnerId),
+    index("chat_feedback_model_idx").on(table.modelId),
+  ]
+);
+
+// ==================== SHARED PARTNER DEFINITIONS (marketplace) ====================
+export const sharedPartners = pgTable(
+  "shared_partners",
+  {
+    id: text("id").primaryKey(),
+    authorId: text("author_id")
+      .notNull()
+      .references(() => users.id),
+    name: text("name").notNull(),
+    avatar: text("avatar").notNull(),
+    description: text("description").notNull(), // Short pitch (max 200 chars)
+    definition: text("definition").notNull(),
+    tags: jsonb("tags").$type<string[]>().default([]),
+    usageCount: integer("usage_count").default(0).notNull(),
+    likeCount: integer("like_count").default(0).notNull(),
+    status: text("status", { enum: ["active", "hidden", "reported"] }).notNull().default("active"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("shared_partners_author_idx").on(table.authorId),
+    index("shared_partners_popular_idx").on(table.likeCount),
+  ]
+);
+
+export const sharedPartnerLikes = pgTable(
+  "shared_partner_likes",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id),
+    sharedPartnerId: text("shared_partner_id")
+      .notNull()
+      .references(() => sharedPartners.id),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("shared_partner_likes_unique_idx").on(table.userId, table.sharedPartnerId),
+    index("shared_partner_likes_user_idx").on(table.userId),
+  ]
+);
+
+// ==================== SITE SETTINGS (key-value config) ====================
+export const siteSettings = pgTable("site_settings", {
+  key: text("key").primaryKey(),
+  value: text("value").notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
 
 // ==================== ACTIVATION CODES ====================
 export const activationCodes = pgTable(

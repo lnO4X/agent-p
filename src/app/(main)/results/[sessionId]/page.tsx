@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo, use } from "react";
-import { TalentRadar } from "@/components/charts/talent-radar";
+import { useState, useEffect, useMemo, useRef, use } from "react";
+import { useRouter } from "next/navigation";
+import { LazyTalentRadar } from "@/components/charts/talent-radar-lazy";
 import { RankBadge } from "@/components/charts/rank-badge";
 import { AiAnalysis } from "@/components/results/ai-analysis";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +11,8 @@ import { useI18n } from "@/i18n/context";
 import { scoreToRank } from "@/lib/scoring";
 import { scoreToArchetype, getArchetype } from "@/lib/archetype";
 import type { Archetype } from "@/lib/archetype";
-import { Swords, Heart, TrendingUp, Gamepad2 } from "lucide-react";
+import { Swords, Heart, TrendingUp, Gamepad2, Crown, MessageSquare, Users, Brain, Sparkles } from "lucide-react";
+import { celebrationBurst, starBurst } from "@/lib/confetti";
 import type { TalentCategory, Rank, GenreRecommendation } from "@/types/talent";
 
 interface ProfileData {
@@ -54,9 +56,11 @@ export default function ResultDetailPage({
   params: Promise<{ sessionId: string }>;
 }) {
   const { sessionId } = use(params);
+  const router = useRouter();
   const { t, locale } = useI18n();
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [tier, setTier] = useState<"free" | "premium">("free");
   const isZh = locale === "zh";
 
   useEffect(() => {
@@ -68,6 +72,13 @@ export default function ResultDetailPage({
         }
       })
       .finally(() => setLoading(false));
+    // Fetch tier for Premium CTA visibility
+    fetch("/api/auth/me", { credentials: "include" })
+      .then((r) => r.json())
+      .then((res) => {
+        if (res.success && res.data?.tier) setTier(res.data.tier);
+      })
+      .catch(() => {});
   }, [sessionId]);
 
   // Extract talent scores (memoized to stabilize downstream hooks)
@@ -99,6 +110,21 @@ export default function ResultDetailPage({
     () => (archetype ? getArchetype(archetype.allyId) : null),
     [archetype]
   );
+
+  // Fire confetti when archetype is revealed
+  const confettiFiredRef = useRef(false);
+  useEffect(() => {
+    if (!archetype || confettiFiredRef.current) return;
+    confettiFiredRef.current = true;
+    // S-rank gets star burst, everyone else gets celebration burst
+    const rank = profile?.overallRank;
+    if (rank === "S") {
+      starBurst();
+      setTimeout(() => celebrationBurst(), 300);
+    } else {
+      celebrationBurst();
+    }
+  }, [archetype, profile?.overallRank]);
 
   if (loading) {
     return (
@@ -175,20 +201,25 @@ export default function ResultDetailPage({
             </CardContent>
           </Card>
 
-          {/* Weakness */}
-          <Card className="border-red-500/20 bg-red-500/5">
+          {/* Growth Edge (reframed from weakness — positive framing) */}
+          <Card className="border-purple-500/20 bg-purple-500/5">
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-3">
                 <TrendingUp
                   size={18}
-                  className="text-red-400 mt-0.5 shrink-0"
+                  className="text-purple-400 mt-0.5 shrink-0"
                 />
                 <div>
-                  <div className="text-xs font-medium text-red-400 mb-1">
-                    {isZh ? "致命弱点" : "Fatal Weakness"}
+                  <div className="text-xs font-medium text-purple-400 mb-1">
+                    {isZh ? "成长突破口" : "Growth Edge"}
                   </div>
                   <p className="text-sm text-foreground/80">
                     {isZh ? archetype.weakness : archetype.weaknessEn}
+                  </p>
+                  <p className="text-xs text-purple-400/70 mt-1.5 italic">
+                    {isZh
+                      ? "突破这一点，你将进化为更强的原型"
+                      : "Break through this, and you'll evolve into a stronger archetype"}
                   </p>
                 </div>
               </div>
@@ -297,7 +328,7 @@ export default function ResultDetailPage({
           <CardTitle className="text-lg">{t("results.radarChart")}</CardTitle>
         </CardHeader>
         <CardContent>
-          <TalentRadar scores={talentScores} />
+          <LazyTalentRadar scores={talentScores} />
         </CardContent>
       </Card>
 
@@ -367,6 +398,47 @@ export default function ResultDetailPage({
 
       {/* AI Analysis */}
       <AiAnalysis sessionId={sessionId} />
+
+      {/* Premium CTA — only show to free tier users */}
+      {tier === "free" && (
+        <Card className="border-yellow-500/20 bg-gradient-to-br from-yellow-500/5 to-amber-500/5 overflow-hidden">
+          <CardContent className="pt-6 pb-6">
+            <div className="flex items-start gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-yellow-500/15 flex items-center justify-center shrink-0">
+                <Crown size={20} className="text-yellow-500" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-base font-semibold mb-1">
+                  {t("results.premiumCta")}
+                </h3>
+                <p className="text-sm text-muted-foreground mb-4">
+                  {t("results.premiumCtaDesc")}
+                </p>
+                <div className="grid grid-cols-2 gap-2 mb-5">
+                  {[
+                    { icon: MessageSquare, key: "results.premiumFeature1" },
+                    { icon: Users, key: "results.premiumFeature2" },
+                    { icon: Brain, key: "results.premiumFeature3" },
+                    { icon: Sparkles, key: "results.premiumFeature4" },
+                  ].map(({ icon: Icon, key }) => (
+                    <div key={key} className="flex items-center gap-2 text-xs text-foreground/80">
+                      <Icon size={14} className="text-yellow-500 shrink-0" />
+                      <span>{t(key)}</span>
+                    </div>
+                  ))}
+                </div>
+                <button
+                  onClick={() => router.push("/me/premium")}
+                  className="pressable w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-500 text-white text-sm font-semibold shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/30 transition-all"
+                >
+                  <Crown size={16} />
+                  {t("results.upgradeCta")}
+                </button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 }

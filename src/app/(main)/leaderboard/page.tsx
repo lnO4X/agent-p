@@ -25,7 +25,7 @@ export default function LeaderboardPage() {
   const [entries, setEntries] = useState<LeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(true);
   const [expandedId, setExpandedId] = useState<string | null>(null);
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
 
   useEffect(() => {
     fetch("/api/leaderboard")
@@ -164,7 +164,7 @@ export default function LeaderboardPage() {
                     </div>
                     {entry.completedAt && (
                       <div className="text-xs text-muted-foreground mt-3 pt-2 border-t border-border/30">
-                        {t("leaderboard.completedAt")} {new Date(entry.completedAt).toLocaleDateString("zh-CN", {
+                        {t("leaderboard.completedAt")} {new Date(entry.completedAt).toLocaleDateString(locale === "zh" ? "zh-CN" : "en-US", {
                           year: "numeric",
                           month: "long",
                           day: "numeric",

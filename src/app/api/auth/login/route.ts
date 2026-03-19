@@ -1,4 +1,4 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import bcrypt from "bcryptjs";
 import { db } from "@/db";
 import { users } from "@/db/schema";
@@ -6,9 +6,25 @@ import { eq } from "drizzle-orm";
 import { loginSchema } from "@/lib/validations";
 import { verifyCaptcha } from "@/lib/captcha";
 import { createToken, setAuthCookie } from "@/lib/auth";
+import { checkRateLimit } from "@/lib/redis";
 
-export async function POST(request: Request) {
+export async function POST(request: NextRequest) {
   try {
+    // IP-based rate limiting: max 10 login attempts per 5 minutes
+    const ip = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
+      || request.headers.get("x-real-ip")
+      || "unknown";
+    const { allowed } = await checkRateLimit(`rl:login:${ip}`, 10, 300);
+    if (!allowed) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: "RATE_LIMITED", message: "登录尝试过于频繁，请5分钟后再试" },
+        },
+        { status: 429, headers: { "Retry-After": "300" } }
+      );
+    }
+
     const body = await request.json();
     const parsed = loginSchema.safeParse(body);
     if (!parsed.success) {
