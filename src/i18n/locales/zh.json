@@ -26,6 +26,8 @@
   "common.search": "搜索",
   "common.noData": "暂无数据",
   "common.score": "分",
+  "common.login": "登录",
+  "common.register": "注册",
 
   "dashboard.title": "GameTan",
   "dashboard.subtitle": "发现你的游戏天赋，找到最适合你的游戏",
@@ -287,5 +289,32 @@
   "settings.steamGames": "{count} 个游戏",
   "settings.steamHours": "已玩 {hours} 小时",
   "settings.steamFindId": "如何查找我的 Steam ID",
-  "settings.steamUnlinkConfirm": "确定解绑 Steam 账号并删除游戏库？"
+  "settings.steamUnlinkConfirm": "确定解绑 Steam 账号并删除游戏库？",
+
+  "archetype.allTypes": "16 种玩家原型",
+  "archetype.allTypesDesc": "每种原型代表一种独特的游戏风格和天赋组合",
+  "archetype.strength": "核心优势",
+  "archetype.weakness": "致命弱点",
+  "archetype.nemesis": "天敌原型",
+  "archetype.ally": "默契搭档",
+  "archetype.evolution": "进化路径",
+  "archetype.recGenres": "推荐游戏类型",
+  "archetype.takeQuiz": "测测你是哪种原型",
+  "archetype.compatibility": "原型兼容性",
+  "archetype.compatibilityDesc": "选择两个原型，查看配对分析",
+  "archetype.selectType": "选择原型",
+  "archetype.vsLabel": "VS",
+  "archetype.checkCompat": "查看兼容性",
+  "archetype.compatScore": "默契指数",
+  "archetype.compatAnalysis": "配对分析",
+  "archetype.shareResult": "分享结果",
+  "archetype.exploreAll": "查看所有原型",
+
+  "compat.soulmate": "灵魂搭档",
+  "compat.great": "绝佳拍档",
+  "compat.good": "不错的组合",
+  "compat.neutral": "有待磨合",
+  "compat.challenging": "充满挑战",
+  "compat.rival": "宿命对手",
+  "compat.mirror": "镜像映射"
 }

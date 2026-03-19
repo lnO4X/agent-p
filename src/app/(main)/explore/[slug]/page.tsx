@@ -7,6 +7,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Gamepad2, Calendar, Building2, ArrowLeft } from "lucide-react";
 import { useI18n } from "@/i18n/context";
+import { getAllArchetypes } from "@/lib/archetype";
 
 interface GameData {
   id: string;
@@ -148,6 +149,41 @@ export default function GameDetailPage({
         ))}
       </div>
 
+      {/* Best for archetypes */}
+      {(() => {
+        const allTypes = getAllArchetypes();
+        const matched = allTypes
+          .map((a) => ({
+            archetype: a,
+            overlap: a.genres.filter((g) => game.genres.includes(g)).length,
+          }))
+          .filter((s) => s.overlap > 0)
+          .sort((a, b) => b.overlap - a.overlap)
+          .slice(0, 4);
+
+        if (matched.length === 0) return null;
+        return (
+          <div className="space-y-2">
+            <p className="text-xs text-muted-foreground font-medium">
+              {locale === "zh" ? "最适合的玩家原型" : "Best for archetypes"}
+            </p>
+            <div className="flex flex-wrap gap-2">
+              {matched.map(({ archetype: a }) => (
+                <Link
+                  key={a.id}
+                  href={`/archetype/${a.id}`}
+                  className="pressable flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs border hover:border-primary/30 transition-colors"
+                  style={{ borderColor: `${a.gradient[0]}30` }}
+                >
+                  <span>{a.icon}</span>
+                  <span>{locale === "zh" ? a.name : a.nameEn}</span>
+                </Link>
+              ))}
+            </div>
+          </div>
+        );
+      })()}
+
       {/* Stats */}
       <div className="grid grid-cols-3 gap-3">
         {game.rating != null && (
@@ -195,7 +231,7 @@ export default function GameDetailPage({
 
       {/* CTA */}
       <div className="flex gap-3">
-        <Link href="/test" className="flex-1">
+        <Link href="/quiz" className="flex-1">
           <Button className="w-full pressable">{t("game.testMatch")}</Button>
         </Link>
         <Button variant="outline" className="pressable" onClick={() => router.back()}>

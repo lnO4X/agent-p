@@ -5,6 +5,21 @@ import Link from "next/link";
 import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/i18n/context";
 import { Star, Gamepad2 } from "lucide-react";
+import { getAllArchetypes } from "@/lib/archetype";
+
+/** Find top 2 archetypes whose recommended genres overlap most with a game's genres */
+function getMatchingArchetypes(gameGenres: string[]) {
+  const all = getAllArchetypes();
+  const scored = all.map((a) => {
+    const overlap = a.genres.filter((g) => gameGenres.includes(g)).length;
+    return { archetype: a, overlap };
+  });
+  return scored
+    .filter((s) => s.overlap > 0)
+    .sort((a, b) => b.overlap - a.overlap)
+    .slice(0, 2)
+    .map((s) => s.archetype);
+}
 
 /** Genre-based gradient fallback when image fails to load */
 const GENRE_GRADIENTS: Record<string, string> = {
@@ -39,7 +54,9 @@ interface GameCardProps {
 export function GameCard({ game, fitScore, compact }: GameCardProps) {
   const [imgError, setImgError] = useState(false);
   const { t, locale } = useI18n();
+  const isZh = locale === "zh";
   const primaryGenre = game.genres[0] || "";
+  const matchArchetypes = compact ? [] : getMatchingArchetypes(game.genres);
   // Locale-aware game name: show English name first when UI is English
   const primaryName = locale === "en" && game.nameEn ? game.nameEn : game.name;
   const secondaryName = locale === "en" ? null : game.nameEn;
@@ -107,13 +124,22 @@ export function GameCard({ game, fitScore, compact }: GameCardProps) {
               ))}
             </div>
 
-            {/* Rating + Like ratio */}
+            {/* Rating + archetype match */}
             {!compact && (
-              <div className="flex items-center gap-2 text-[10px] text-muted-foreground pt-0.5">
-                {game.rating != null && (
-                  <span className="flex items-center gap-0.5">
-                    <Star size={12} fill="currentColor" /> {game.rating.toFixed(1)}
-                  </span>
+              <div className="flex items-center justify-between text-[10px] text-muted-foreground pt-0.5">
+                <div className="flex items-center gap-2">
+                  {game.rating != null && (
+                    <span className="flex items-center gap-0.5">
+                      <Star size={12} fill="currentColor" /> {game.rating.toFixed(1)}
+                    </span>
+                  )}
+                </div>
+                {matchArchetypes.length > 0 && (
+                  <div className="flex items-center gap-0.5" title={matchArchetypes.map((a) => isZh ? a.name : a.nameEn).join(" · ")}>
+                    {matchArchetypes.map((a) => (
+                      <span key={a.id} className="text-xs">{a.icon}</span>
+                    ))}
+                  </div>
                 )}
               </div>
             )}

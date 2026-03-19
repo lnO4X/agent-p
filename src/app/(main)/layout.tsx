@@ -57,8 +57,13 @@ export default function MainLayout({
   const { logout } = useAuth();
   const { t, locale, setLocale } = useI18n();
   const [unreadCount, setUnreadCount] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
+    // Check if user has auth cookie (client-side detection)
+    const hasToken = document.cookie.includes("auth-token=");
+    setIsLoggedIn(hasToken);
+    if (!hasToken) return;
     fetch("/api/notifications?limit=1")
       .then((r) => r.json())
       .then((json) => {
@@ -97,22 +102,24 @@ export default function MainLayout({
               );
             })}
 
-            {/* Notification bell */}
-            <Link
-              href="/notifications"
-              className={`relative pressable flex items-center justify-center w-8 h-8 rounded-xl transition-colors ${
-                pathname.startsWith("/notifications")
-                  ? "bg-primary/10 text-primary"
-                  : "text-muted-foreground hover:text-foreground"
-              }`}
-            >
-              <Bell size={16} strokeWidth={1.8} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center leading-none">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </Link>
+            {/* Notification bell (logged-in only) */}
+            {isLoggedIn && (
+              <Link
+                href="/notifications"
+                className={`relative pressable flex items-center justify-center w-8 h-8 rounded-xl transition-colors ${
+                  pathname.startsWith("/notifications")
+                    ? "bg-primary/10 text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                }`}
+              >
+                <Bell size={16} strokeWidth={1.8} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center leading-none">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* Language switcher */}
             <div className="ml-2 flex items-center gap-0.5">
@@ -131,14 +138,22 @@ export default function MainLayout({
               ))}
             </div>
 
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={logout}
-              className="ml-1 text-muted-foreground"
-            >
-              {t("nav.logout")}
-            </Button>
+            {isLoggedIn ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                className="ml-1 text-muted-foreground"
+              >
+                {t("nav.logout")}
+              </Button>
+            ) : (
+              <Link href="/login">
+                <Button variant="default" size="sm" className="ml-1">
+                  {t("auth.login")}
+                </Button>
+              </Link>
+            )}
           </nav>
         </div>
       </header>
@@ -148,18 +163,20 @@ export default function MainLayout({
         <div className="flex h-11 items-center justify-between px-4">
           <span className="font-semibold text-sm">{t("app.name")}</span>
           <div className="flex items-center gap-2">
-            {/* Notification bell (mobile) */}
-            <Link
-              href="/notifications"
-              className="relative flex items-center justify-center w-7 h-7 rounded-xl text-muted-foreground"
-            >
-              <Bell size={18} strokeWidth={1.8} />
-              {unreadCount > 0 && (
-                <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center leading-none">
-                  {unreadCount > 9 ? "9+" : unreadCount}
-                </span>
-              )}
-            </Link>
+            {/* Notification bell (mobile, logged-in only) */}
+            {isLoggedIn && (
+              <Link
+                href="/notifications"
+                className="relative flex items-center justify-center w-7 h-7 rounded-xl text-muted-foreground"
+              >
+                <Bell size={18} strokeWidth={1.8} />
+                {unreadCount > 0 && (
+                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center leading-none">
+                    {unreadCount > 9 ? "9+" : unreadCount}
+                  </span>
+                )}
+              </Link>
+            )}
             {/* Language toggle */}
             <button
               onClick={() => setLocale(locale === "zh" ? "en" : "zh")}
@@ -167,14 +184,22 @@ export default function MainLayout({
             >
               {locale === "zh" ? "EN" : "中"}
             </button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={logout}
-              className="text-muted-foreground text-xs h-7 px-2"
-            >
-              {t("nav.logout")}
-            </Button>
+            {isLoggedIn ? (
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={logout}
+                className="text-muted-foreground text-xs h-7 px-2"
+              >
+                {t("nav.logout")}
+              </Button>
+            ) : (
+              <Link href="/login">
+                <Button size="sm" className="text-xs h-7 px-3">
+                  {t("auth.login")}
+                </Button>
+              </Link>
+            )}
           </div>
         </div>
       </header>

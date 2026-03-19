@@ -30,24 +30,28 @@ export default function Home() {
             </p>
           </div>
 
-          {/* Archetype icon parade */}
+          {/* Archetype icon parade — clickable */}
           <div className="flex flex-wrap justify-center gap-2 py-2">
             {archetypes.slice(0, 16).map((a) => (
-              <span
+              <Link
                 key={a.id}
-                className="text-2xl md:text-3xl"
+                href={`/archetype/${a.id}`}
+                className="text-2xl md:text-3xl pressable hover:scale-125 transition-transform"
                 title={isZh ? a.name : a.nameEn}
               >
                 {a.icon}
-              </span>
+              </Link>
             ))}
           </div>
 
-          <p className="text-sm text-muted-foreground">
+          <Link
+            href="/archetype"
+            className="text-sm text-muted-foreground hover:text-primary transition-colors"
+          >
             {isZh
               ? "16种玩家原型 — 你是哪一个？"
               : "16 gamer archetypes — which one are you?"}
-          </p>
+          </Link>
 
           {/* Primary CTA */}
           <Link href="/quiz" className="block">
@@ -65,13 +69,27 @@ export default function Home() {
             <span>{isZh ? "可分享" : "Shareable"}</span>
           </div>
 
-          {/* Login link */}
-          <div className="pt-4 flex items-center justify-center gap-3 text-sm">
+          {/* Secondary links */}
+          <div className="pt-4 flex items-center justify-center gap-4 text-sm">
+            <Link
+              href="/explore"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isZh ? "浏览游戏库" : "Browse Games"}
+            </Link>
+            <span className="text-muted-foreground">·</span>
+            <Link
+              href="/archetype/compatibility"
+              className="text-muted-foreground hover:text-foreground transition-colors"
+            >
+              {isZh ? "原型兼容性" : "Compatibility"}
+            </Link>
+            <span className="text-muted-foreground">·</span>
             <Link
               href="/login"
               className="text-muted-foreground hover:text-foreground transition-colors"
             >
-              {isZh ? "已有账号？登录" : "Have an account? Sign in"}
+              {isZh ? "登录" : "Sign in"}
             </Link>
           </div>
         </div>

@@ -340,5 +340,22 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
   - **`(main)/me/premium/page.tsx`**: Fixed `useEffect` — removed redundant `/api/auth/me` prefetch; now also picks up `tierExpiresAt` from `/api/partners` response so expiry date shows on page load
   - 114 unit tests passing, build clean, deployed to port 3100
 
+- Phase 32: Product defensibility — public content + archetype culture
+  - **Product analysis**: Scored 4/16 on defensibility framework. Core problem: "测完就走" — no retention after quiz. Strategy: pivot to "游戏版 MBTI 文化" — build identity culture, not just a test tool.
+  - **`middleware.ts`**: Opened `/explore`, `/api/games/catalog`, `/archetype` to public access (no login required). Removed the login wall that was killing exploration.
+  - **`(main)/layout.tsx`**: Auth-aware navigation — anonymous users see "Login" button instead of logout/notifications. Detects `auth-token` cookie client-side.
+  - **`/archetype` (new)**: Public archetype index page — 16 archetypes in a grid with gradient cards, icons, taglines. Links to quiz + compatibility.
+  - **`/archetype/[id]` (new)**: Rich archetype detail page — hero gradient banner, description, strength/weakness, nemesis/ally relationship cards (clickable), evolution path, recommended genres (linked to /explore), compatibility CTA, other archetypes grid.
+  - **`/archetype/compatibility` (new)**: Two-archetype compatibility checker — dropdown selectors, animated result card with score (0-100), label (Soulmates→Rivals), dynamic bilingual analysis text, strengths/challenges lists, shareable URL.
+  - **`lib/archetype-compat.ts` (new)**: Compatibility algorithm — scores based on nemesis/ally relationship, genre overlap, talent complementarity, evolution connection. Generates dynamic bilingual analysis text.
+  - **`components/games/game-card.tsx`**: Added archetype match badges — shows top 2 archetype icons whose genres overlap with the game's genres. Uses `getAllArchetypes()` for matching.
+  - **`(main)/explore/[slug]/page.tsx`**: Added "Best for archetypes" section showing top 4 matching archetypes as clickable pills linking to `/archetype/[id]`. CTA changed from `/test` to `/quiz` (works for anonymous users).
+  - **`app/page.tsx` (landing)**: Archetype icons now clickable (link to detail pages), added "Browse Games" + "Compatibility" links below main CTA.
+  - **i18n**: Added `archetype.*` (18 keys) + `compat.*` (7 keys) to both zh.json and en.json.
+  - Build clean, deployed to port 3100
+
 ### 🔲 Pending
 - Stripe/payment integration (critical — currently code-only Premium activation)
+- More quiz questions/games for deeper MBTI-like profiling
+- Social PK feature (invite friend to play same mini-game, compare scores)
+- Daily challenge global ranking + share card

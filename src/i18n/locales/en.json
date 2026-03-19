@@ -26,6 +26,8 @@
   "common.search": "Search",
   "common.noData": "No data",
   "common.score": "pts",
+  "common.login": "Log In",
+  "common.register": "Sign Up",
 
   "dashboard.title": "GameTan",
   "dashboard.subtitle": "Discover your gaming talent, find the games that suit you best",
@@ -287,5 +289,32 @@
   "settings.steamGames": "{count} games",
   "settings.steamHours": "{hours}h played",
   "settings.steamFindId": "How to find your Steam ID",
-  "settings.steamUnlinkConfirm": "Unlink Steam account and remove game library?"
+  "settings.steamUnlinkConfirm": "Unlink Steam account and remove game library?",
+
+  "archetype.allTypes": "16 Gamer Archetypes",
+  "archetype.allTypesDesc": "Each archetype represents a unique gaming style and talent combination",
+  "archetype.strength": "Core Strength",
+  "archetype.weakness": "Fatal Weakness",
+  "archetype.nemesis": "Nemesis",
+  "archetype.ally": "Best Ally",
+  "archetype.evolution": "Evolution Path",
+  "archetype.recGenres": "Recommended Genres",
+  "archetype.takeQuiz": "Discover Your Archetype",
+  "archetype.compatibility": "Archetype Compatibility",
+  "archetype.compatibilityDesc": "Select two archetypes to see their compatibility analysis",
+  "archetype.selectType": "Select Archetype",
+  "archetype.vsLabel": "VS",
+  "archetype.checkCompat": "Check Compatibility",
+  "archetype.compatScore": "Compatibility Score",
+  "archetype.compatAnalysis": "Pair Analysis",
+  "archetype.shareResult": "Share Result",
+  "archetype.exploreAll": "View All Archetypes",
+
+  "compat.soulmate": "Soulmates",
+  "compat.great": "Great Match",
+  "compat.good": "Good Pair",
+  "compat.neutral": "Needs Work",
+  "compat.challenging": "Challenging",
+  "compat.rival": "Rivals",
+  "compat.mirror": "Mirror Match"
 }

@@ -16,7 +16,12 @@ const PUBLIC_PATHS = [
 const SELF_AUTH_PREFIXES = ["/api/admin/", "/api/cron/"];
 
 /** Public prefixes — no auth required (shareable pages + their APIs) */
-const PUBLIC_PREFIXES = ["/profile/", "/api/profile/", "/quiz", "/api/quiz/"];
+const PUBLIC_PREFIXES = [
+  "/profile/", "/api/profile/",
+  "/quiz", "/api/quiz/",
+  "/explore", "/api/games/catalog",
+  "/archetype",
+];
 
 /** Cache the encoded secret to avoid re-encoding on every request */
 let cachedSecret: Uint8Array | null = null;
