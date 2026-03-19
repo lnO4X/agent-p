@@ -354,8 +354,13 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
   - **i18n**: Added `archetype.*` (18 keys) + `compat.*` (7 keys) to both zh.json and en.json.
   - Build clean, deployed to port 3100
 
+- Phase 33: Questionnaire + Social PK + Daily ranking + Share cards
+  - **Questionnaire test (MBTI-style)**: 39 questions (3 per talent), Likert 1-5 scale. `lib/questionnaire.ts` (question bank + `answersToScores()` + `getShuffledQuestions()`), `/quiz/questions/page.tsx` (full UI with progress, auto-advance, dot navigation). Quiz intro `/quiz/page.tsx` now offers dual mode: "Quick Test" (3 games) + "Full Questionnaire (39Q · 5min)". Result page handles both modes.
+  - **Social PK system**: `pk_challenges` DB table. Public `/pk` page (select game → play → get share link), `/pk/[id]` page (accept challenge → play same game → compare scores). API: `POST /api/pk` (create), `GET/POST /api/pk/[id]` (get/submit). No auth required — designed for viral sharing.
+  - **Daily score ranking**: `GET /api/challenge/daily-ranking` — today's top 20 scores, public. Challenge page now shows daily ranking + PK link + share button.
+  - **OG share card**: `GET /api/challenge/card?score=82&talent=reaction_speed&streak=5&name=Player` — Wordle-style 1200×630 image with score grid, rank, streak badge.
+  - **Middleware**: Opened `/pk`, `/api/pk`, `/api/challenge/daily-ranking`, `/api/challenge/card` to public access.
+  - 114 unit tests passing, build clean, deployed to port 3100
+
 ### 🔲 Pending
 - Stripe/payment integration (critical — currently code-only Premium activation)
-- More quiz questions/games for deeper MBTI-like profiling
-- Social PK feature (invite friend to play same mini-game, compare scores)
-- Daily challenge global ranking + share card

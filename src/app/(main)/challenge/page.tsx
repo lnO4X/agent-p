@@ -9,7 +9,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { TalentIcon } from "@/components/talent-icon";
 import { scoreToRank, RANK_COLORS } from "@/lib/scoring";
-import { Flame, CheckCircle2, TrendingUp, Zap, Trophy, Gift, Crown } from "lucide-react";
+import { Flame, CheckCircle2, TrendingUp, Zap, Trophy, Gift, Crown, Share2, Swords } from "lucide-react";
 import { LazyTrendChart } from "@/components/charts/trend-chart-lazy";
 import { quickCelebration, starBurst } from "@/lib/confetti";
 import type { TalentCategory } from "@/types/talent";
@@ -55,6 +55,10 @@ export default function ChallengePage() {
     rewardDays: number;
   } | null>(null);
   const confettiFiredRef = useRef(false);
+  const [dailyRanking, setDailyRanking] = useState<
+    Array<{ rank: number; displayName: string | null; username: string; score: number }> | null
+  >(null);
+  const [dailyParticipants, setDailyParticipants] = useState(0);
 
   // Fetch today's challenge
   useEffect(() => {
@@ -70,6 +74,46 @@ export default function ChallengePage() {
       })
       .catch(() => setError(locale === "zh" ? "网络错误，请重试" : "Network error"));
   }, []);
+
+  // Fetch daily ranking
+  useEffect(() => {
+    fetch("/api/challenge/daily-ranking")
+      .then((r) => r.json())
+      .then((json) => {
+        if (json.success) {
+          setDailyRanking(json.data.ranking);
+          setDailyParticipants(json.data.totalParticipants);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  async function handleShareResult() {
+    if (!data) return;
+    const score = resultScore || data.todayScore || 0;
+    const dayOfYear = Math.floor(
+      (new Date().getTime() - new Date(new Date().getFullYear(), 0, 0).getTime()) / 86400000
+    );
+    const rank = scoreToRank(score);
+    // Wordle-style text grid
+    const blocks = ["⬛", "🟨", "🟩", "🟦", "🟪"];
+    const blockIdx = Math.min(4, Math.floor(score / 20));
+    const grid = `${"🟩".repeat(Math.ceil(score / 20))}${"⬛".repeat(5 - Math.ceil(score / 20))}`;
+    const text = locale === "zh"
+      ? `GameTan 每日挑战 #${dayOfYear}\n${grid}\n${t(`talent.${data.talentCategory}`)} ${Math.round(score)}分 (${rank})\n🔥 ${data.streak}天连续\ngame.weda.ai/challenge`
+      : `GameTan Daily #${dayOfYear}\n${grid}\n${t(`talent.${data.talentCategory}`)} ${Math.round(score)} (${rank})\n🔥 ${data.streak} day streak\ngame.weda.ai/challenge`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: locale === "zh" ? "GameTan 每日挑战" : "GameTan Daily Challenge",
+          text,
+        });
+      } catch { /* cancelled */ }
+    } else {
+      await navigator.clipboard.writeText(text);
+    }
+  }
 
   // Get game component from registry
   const GameComponent = useMemo(() => {
@@ -268,8 +312,13 @@ export default function ChallengePage() {
           />
         )}
 
-        <div className="text-center">
-          <Button variant="outline" onClick={() => setPhase("ready")}>
+        {/* Actions */}
+        <div className="flex gap-3 justify-center">
+          <Button onClick={handleShareResult} className="flex-1 max-w-[200px]">
+            <Share2 size={16} className="mr-1.5" />
+            {locale === "zh" ? "分享结果" : "Share"}
+          </Button>
+          <Button variant="outline" onClick={() => setPhase("ready")} className="flex-1 max-w-[200px]">
             {t("common.back")}
           </Button>
         </div>
@@ -448,25 +497,86 @@ export default function ChallengePage() {
           />
         )}
 
-      {/* Leaderboard link */}
-      <Link href="/challenge/leaderboard">
-        <Card className="pressable hover:bg-muted/30 transition-colors">
-          <CardContent className="py-3 flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-yellow-500/10 flex items-center justify-center">
-              <Trophy size={18} className="text-yellow-500" />
-            </div>
-            <div className="flex-1">
-              <div className="text-sm font-semibold">
-                {locale === "zh" ? "挑战排行榜" : "Challenge Leaderboard"}
+      {/* Daily Ranking */}
+      {dailyRanking && dailyRanking.length > 0 && (
+        <Card>
+          <CardContent className="pt-4 pb-3">
+            <div className="flex items-center justify-between mb-3">
+              <div className="text-sm font-semibold flex items-center gap-1.5">
+                <Trophy size={14} className="text-yellow-500" />
+                {locale === "zh" ? "今日排行" : "Today's Ranking"}
               </div>
-              <div className="text-[10px] text-muted-foreground">
-                {locale === "zh" ? "看看谁坚持得最久" : "See who has the longest streak"}
-              </div>
+              <span className="text-[10px] text-muted-foreground">
+                {dailyParticipants} {locale === "zh" ? "人参与" : "players"}
+              </span>
             </div>
-            <Zap size={16} className="text-muted-foreground" />
+            <div className="space-y-1.5">
+              {dailyRanking.slice(0, 5).map((entry) => (
+                <div
+                  key={`${entry.rank}-${entry.username}`}
+                  className="flex items-center gap-2 text-sm"
+                >
+                  <span
+                    className={`w-5 text-center font-bold text-xs ${
+                      entry.rank === 1
+                        ? "text-yellow-500"
+                        : entry.rank === 2
+                          ? "text-gray-400"
+                          : entry.rank === 3
+                            ? "text-amber-600"
+                            : "text-muted-foreground"
+                    }`}
+                  >
+                    {entry.rank <= 3
+                      ? ["🥇", "🥈", "🥉"][entry.rank - 1]
+                      : entry.rank}
+                  </span>
+                  <span className="flex-1 truncate">
+                    {entry.displayName || entry.username}
+                  </span>
+                  <span className={`font-bold text-xs ${RANK_COLORS[scoreToRank(entry.score)]}`}>
+                    {Math.round(entry.score)}
+                  </span>
+                </div>
+              ))}
+            </div>
           </CardContent>
         </Card>
-      </Link>
+      )}
+
+      {/* Links row */}
+      <div className="grid grid-cols-2 gap-3">
+        <Link href="/challenge/leaderboard">
+          <Card className="pressable hover:bg-muted/30 transition-colors h-full">
+            <CardContent className="py-3 flex items-center gap-2">
+              <Trophy size={16} className="text-yellow-500 shrink-0" />
+              <div>
+                <div className="text-xs font-semibold">
+                  {locale === "zh" ? "总排行榜" : "Leaderboard"}
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  {locale === "zh" ? "连续挑战排名" : "Streak rankings"}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+        <Link href="/pk">
+          <Card className="pressable hover:bg-muted/30 transition-colors h-full">
+            <CardContent className="py-3 flex items-center gap-2">
+              <Swords size={16} className="text-primary shrink-0" />
+              <div>
+                <div className="text-xs font-semibold">
+                  {locale === "zh" ? "邀请 PK" : "Challenge a Friend"}
+                </div>
+                <div className="text-[10px] text-muted-foreground">
+                  {locale === "zh" ? "和好友比分数" : "Compare scores"}
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      </div>
     </div>
   );
 }

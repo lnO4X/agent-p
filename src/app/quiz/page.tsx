@@ -6,8 +6,9 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n/context";
 import { gameRegistry } from "@/games";
 import { QUICK_TEST_GAMES } from "@/lib/archetype";
-import { Zap, Brain, Dice5, ArrowRight } from "lucide-react";
+import { Zap, Brain, Dice5, ArrowRight, ClipboardList } from "lucide-react";
 import type { GameRawResult } from "@/types/game";
+import Link from "next/link";
 
 type Phase = "intro" | "playing" | "transition";
 
@@ -117,14 +118,30 @@ export default function QuizPage() {
             })}
           </div>
 
-          <Button
-            size="lg"
-            className="w-full h-14 text-lg"
-            onClick={() => setPhase("playing")}
-          >
-            {locale === "zh" ? "开始测试" : "Start Quiz"}
-            <ArrowRight size={20} className="ml-2" />
-          </Button>
+          {/* Two modes */}
+          <div className="space-y-3">
+            <Button
+              size="lg"
+              className="w-full h-14 text-lg"
+              onClick={() => setPhase("playing")}
+            >
+              {locale === "zh" ? "开始快速测试" : "Quick Test"}
+              <ArrowRight size={20} className="ml-2" />
+            </Button>
+
+            <Link href="/quiz/questions" className="block">
+              <Button
+                size="lg"
+                variant="outline"
+                className="w-full h-12 text-base pressable"
+              >
+                <ClipboardList size={18} className="mr-2" />
+                {locale === "zh"
+                  ? "精确问卷 (39题 · 5分钟)"
+                  : "Full Questionnaire (39Q · 5min)"}
+              </Button>
+            </Link>
+          </div>
 
           <p className="text-xs text-muted-foreground">
             {locale === "zh"

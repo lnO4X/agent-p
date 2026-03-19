@@ -237,6 +237,32 @@ export const microChallenges = pgTable(
   ]
 );
 
+// ==================== PK CHALLENGES (Social 1v1) ====================
+export const pkChallenges = pgTable(
+  "pk_challenges",
+  {
+    id: text("id").primaryKey(),
+    gameId: text("game_id").notNull(), // maps to game registry ID
+    creatorId: text("creator_id").references(() => users.id), // null = anonymous
+    creatorName: text("creator_name").notNull(), // display name (works without login)
+    creatorScore: real("creator_score").notNull(), // normalized 0-100
+    challengerId: text("challenger_id").references(() => users.id),
+    challengerName: text("challenger_name"),
+    challengerScore: real("challenger_score"),
+    status: text("status", {
+      enum: ["pending", "completed"],
+    })
+      .notNull()
+      .default("pending"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    completedAt: timestamp("completed_at"),
+  },
+  (table) => [
+    index("pk_challenges_creator_idx").on(table.creatorId),
+    index("pk_challenges_status_idx").on(table.status, table.createdAt),
+  ]
+);
+
 // ==================== GAME RECOMMENDATIONS ====================
 export const gameRecommendations = pgTable(
   "game_recommendations",

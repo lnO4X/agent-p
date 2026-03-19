@@ -21,6 +21,9 @@ const PUBLIC_PREFIXES = [
   "/quiz", "/api/quiz/",
   "/explore", "/api/games/catalog",
   "/archetype",
+  "/pk", "/api/pk",
+  "/api/challenge/daily-ranking",
+  "/api/challenge/card",
 ];
 
 /** Cache the encoded secret to avoid re-encoding on every request */

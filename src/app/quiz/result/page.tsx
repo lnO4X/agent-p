@@ -8,9 +8,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/i18n/context";
 import {
   quickScoresToArchetype,
+  scoreToArchetype,
   getArchetype,
 } from "@/lib/archetype";
 import type { Archetype } from "@/lib/archetype";
+import type { TalentCategory } from "@/types/talent";
 import {
   Share2,
   Swords,
@@ -23,6 +25,22 @@ import {
   Crown,
   Target,
 } from "lucide-react";
+
+const TALENT_LABELS_ZH: Record<string, string> = {
+  reaction_speed: "反应速度",
+  hand_eye_coord: "手眼协调",
+  spatial_awareness: "空间感知",
+  memory: "记忆力",
+  strategy_logic: "策略逻辑",
+  rhythm_sense: "节奏感",
+  pattern_recog: "图案识别",
+  multitasking: "多任务",
+  decision_speed: "决策速度",
+  emotional_control: "情绪控制",
+  teamwork_tendency: "团队协作",
+  risk_assessment: "风险评估",
+  resource_mgmt: "资源管理",
+};
 
 function parseScores(s: string | null): [number, number, number] | null {
   if (!s) return null;
@@ -45,16 +63,38 @@ export default function QuizResultPage() {
   );
 }
 
+/** Parse questionnaire talent scores from URL: "reaction_speed:75,memory:60,..." */
+function parseTalentScores(s: string | null): Partial<Record<TalentCategory, number>> | null {
+  if (!s) return null;
+  const result: Partial<Record<TalentCategory, number>> = {};
+  for (const pair of s.split(",")) {
+    const [key, val] = pair.split(":");
+    if (key && val && !isNaN(Number(val))) {
+      result[key as TalentCategory] = Number(val);
+    }
+  }
+  return Object.keys(result).length > 0 ? result : null;
+}
+
 function QuizResultContent() {
   const searchParams = useSearchParams();
   const { locale } = useI18n();
 
+  const mode = searchParams.get("mode"); // "q" = questionnaire
   const scores = parseScores(searchParams.get("s"));
+  const talentScores = parseTalentScores(searchParams.get("scores"));
 
   const archetype = useMemo<Archetype | null>(() => {
+    if (mode === "q") {
+      // Questionnaire mode: use archetype from URL or compute from scores
+      const aId = searchParams.get("archetype");
+      if (aId) return getArchetype(aId) ?? null;
+      if (talentScores) return scoreToArchetype(talentScores);
+      return null;
+    }
     if (!scores) return null;
     return quickScoresToArchetype(scores[0], scores[1], scores[2]);
-  }, [scores]);
+  }, [scores, mode, searchParams, talentScores]);
 
   const nemesis = useMemo(
     () => (archetype ? getArchetype(archetype.nemesisId) : null),
@@ -67,9 +107,10 @@ function QuizResultContent() {
   );
 
   const isZh = locale === "zh";
+  const isQuestionnaire = mode === "q";
 
-  // No scores → redirect to quiz
-  if (!scores || !archetype) {
+  // No data → redirect to quiz
+  if ((!scores && !isQuestionnaire) || !archetype) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="text-center space-y-4">
@@ -86,7 +127,9 @@ function QuizResultContent() {
 
   const shareUrl =
     typeof window !== "undefined"
-      ? `${window.location.origin}/quiz/result?s=${scores.join("-")}`
+      ? isQuestionnaire
+        ? `${window.location.origin}/archetype/${archetype.id}`
+        : `${window.location.origin}/quiz/result?s=${scores!.join("-")}`
       : "";
 
   const shareText = isZh
@@ -161,25 +204,52 @@ function QuizResultContent() {
       <div className="px-6 py-6 max-w-lg mx-auto w-full space-y-5">
         {/* Score bars */}
         <div className="space-y-2">
-          {scores.map((score, i) => (
-            <div key={i} className="flex items-center gap-3">
-              <span className="text-xs text-muted-foreground w-16 text-right">
-                {isZh ? SCORE_LABELS[i].zh : SCORE_LABELS[i].en}
-              </span>
-              <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
-                <div
-                  className="h-full rounded-full transition-all duration-1000"
-                  style={{
-                    width: `${Math.round(score)}%`,
-                    background: `linear-gradient(90deg, ${archetype.gradient[0]}, ${archetype.gradient[1]})`,
-                  }}
-                />
+          {isQuestionnaire && talentScores ? (
+            // Questionnaire mode: show top 5 talents
+            Object.entries(talentScores)
+              .sort(([, a], [, b]) => (b ?? 0) - (a ?? 0))
+              .slice(0, 5)
+              .map(([talent, score]) => (
+                <div key={talent} className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground w-20 text-right truncate">
+                    {isZh ? TALENT_LABELS_ZH[talent] || talent : talent.replace(/_/g, " ")}
+                  </span>
+                  <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
+                    <div
+                      className="h-full rounded-full transition-all duration-1000"
+                      style={{
+                        width: `${Math.round(score ?? 0)}%`,
+                        background: `linear-gradient(90deg, ${archetype.gradient[0]}, ${archetype.gradient[1]})`,
+                      }}
+                    />
+                  </div>
+                  <span className="text-xs font-bold w-8">
+                    {Math.round(score ?? 0)}
+                  </span>
+                </div>
+              ))
+          ) : scores ? (
+            // Game mode: show 3 game scores
+            scores.map((score, i) => (
+              <div key={i} className="flex items-center gap-3">
+                <span className="text-xs text-muted-foreground w-16 text-right">
+                  {isZh ? SCORE_LABELS[i].zh : SCORE_LABELS[i].en}
+                </span>
+                <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="h-full rounded-full transition-all duration-1000"
+                    style={{
+                      width: `${Math.round(score)}%`,
+                      background: `linear-gradient(90deg, ${archetype.gradient[0]}, ${archetype.gradient[1]})`,
+                    }}
+                  />
+                </div>
+                <span className="text-xs font-bold w-8">
+                  {Math.round(score)}
+                </span>
               </div>
-              <span className="text-xs font-bold w-8">
-                {Math.round(score)}
-              </span>
-            </div>
-          ))}
+            ))
+          ) : null}
         </div>
 
         {/* Description */}
@@ -331,6 +401,28 @@ function QuizResultContent() {
             </Link>
           </CardContent>
         </Card>
+
+        {/* PK Challenge CTA */}
+        <Link href="/pk" className="block">
+          <Card className="pressable border-primary/20 hover:border-primary/40 transition-colors">
+            <CardContent className="py-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                  <Swords size={18} className="text-primary" />
+                </div>
+                <div className="flex-1">
+                  <div className="text-sm font-semibold">
+                    {isZh ? "邀请好友 PK" : "Challenge a Friend"}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground">
+                    {isZh ? "和好友玩同一个游戏，比比谁更强" : "Play the same game and compare scores"}
+                  </div>
+                </div>
+                <ArrowRight size={16} className="text-muted-foreground" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
 
         {/* Secondary actions */}
         <div className="flex gap-3">
