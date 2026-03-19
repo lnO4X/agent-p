@@ -41,6 +41,62 @@ function parseKnowledgeEntries(
   return entries;
 }
 
+// DELETE /api/partners/[id]/memory — Clear partner memory
+export async function DELETE(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = await getAuthFromCookie();
+  if (!auth) {
+    return NextResponse.json(
+      { success: false, error: "Unauthorized" },
+      { status: 401 }
+    );
+  }
+
+  const { id } = await params;
+
+  // Verify ownership
+  const partner = await db
+    .select({ id: partners.id })
+    .from(partners)
+    .where(and(eq(partners.id, id), eq(partners.userId, auth.sub)))
+    .limit(1);
+
+  if (partner.length === 0) {
+    return NextResponse.json(
+      { success: false, error: "Partner not found" },
+      { status: 404 }
+    );
+  }
+
+  try {
+    // Clear partner memory
+    await db
+      .update(partners)
+      .set({ memory: "", updatedAt: new Date() })
+      .where(eq(partners.id, id));
+
+    // Clear associated knowledge entries
+    await db
+      .delete(userKnowledge)
+      .where(
+        and(
+          eq(userKnowledge.userId, auth.sub),
+          eq(userKnowledge.source, id)
+        )
+      );
+
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("Memory clear failed:", err);
+    return NextResponse.json(
+      { success: false, error: "Failed to clear memory" },
+      { status: 500 }
+    );
+  }
+}
+
 // POST /api/partners/[id]/memory — Extract and update memory + knowledge graph
 export async function POST(
   request: Request,

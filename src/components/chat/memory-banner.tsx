@@ -3,16 +3,21 @@
 import { useState } from "react";
 import { cn } from "@/lib/utils";
 import { useI18n } from "@/i18n/context";
-import { Lightbulb, ChevronDown, ChevronUp } from "lucide-react";
+import { Lightbulb, ChevronDown, ChevronUp, Trash2 } from "lucide-react";
 
 interface MemoryBannerProps {
   memory: string;
   partnerName: string;
+  partnerId?: string;
+  onMemoryCleared?: () => void;
 }
 
-export function MemoryBanner({ memory, partnerName }: MemoryBannerProps) {
-  const { t } = useI18n();
+export function MemoryBanner({ memory, partnerName, partnerId, onMemoryCleared }: MemoryBannerProps) {
+  const { t, locale } = useI18n();
+  const isZh = locale === "zh";
   const [expanded, setExpanded] = useState(false);
+  const [clearing, setClearing] = useState(false);
+  const [confirmClear, setConfirmClear] = useState(false);
 
   const lines = memory
     .split("\n")
@@ -55,6 +60,54 @@ export function MemoryBanner({ memory, partnerName }: MemoryBannerProps) {
               {line}
             </p>
           ))}
+          {partnerId && (
+            <div className="pt-2 flex justify-end">
+              {confirmClear ? (
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] text-destructive">
+                    {isZh ? "确认清除所有记忆？" : "Clear all memory?"}
+                  </span>
+                  <button
+                    type="button"
+                    disabled={clearing}
+                    onClick={async () => {
+                      setClearing(true);
+                      try {
+                        const res = await fetch(`/api/partners/${partnerId}/memory`, { method: "DELETE" });
+                        if (res.ok) {
+                          onMemoryCleared?.();
+                        }
+                      } finally {
+                        setClearing(false);
+                        setConfirmClear(false);
+                      }
+                    }}
+                    className="text-[10px] text-destructive font-medium hover:underline pressable"
+                  >
+                    {clearing
+                      ? (isZh ? "清除中..." : "Clearing...")
+                      : (isZh ? "确认" : "Confirm")}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setConfirmClear(false)}
+                    className="text-[10px] text-muted-foreground hover:underline"
+                  >
+                    {isZh ? "取消" : "Cancel"}
+                  </button>
+                </div>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => setConfirmClear(true)}
+                  className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-destructive transition-colors pressable"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  {isZh ? "清除记忆" : "Clear memory"}
+                </button>
+              )}
+            </div>
+          )}
         </div>
       )}
     </div>

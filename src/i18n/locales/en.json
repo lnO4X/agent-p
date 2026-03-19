@@ -44,7 +44,8 @@
   "dashboard.challengeDone": "Today's Challenge Done",
 
   "explore.title": "Explore Games",
-  "explore.subtitle": "Browse {count} popular games and find the one for you",
+  "explore.subtitle": "{count} games total",
+  "explore.subtitleFiltered": "{count} results",
   "explore.searchPlaceholder": "Search games...",
   "explore.prevPage": "Previous",
   "explore.nextPage": "Next",

@@ -44,7 +44,8 @@
   "dashboard.challengeDone": "今日挑战已完成",
 
   "explore.title": "发现游戏",
-  "explore.subtitle": "浏览 {count} 款热门游戏，找到最适合你的那一款",
+  "explore.subtitle": "共 {count} 款游戏",
+  "explore.subtitleFiltered": "筛选结果：{count} 款",
   "explore.searchPlaceholder": "搜索游戏名称...",
   "explore.prevPage": "上一页",
   "explore.nextPage": "下一页",

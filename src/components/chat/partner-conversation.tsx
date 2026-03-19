@@ -365,7 +365,12 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
       </div>
 
       {/* Memory banner */}
-      <MemoryBanner memory={partner.memory} partnerName={partner.name} />
+      <MemoryBanner
+        memory={partner.memory}
+        partnerName={partner.name}
+        partnerId={partner.id}
+        onMemoryCleared={() => setPartner((p) => p ? { ...p, memory: "" } : p)}
+      />
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto px-4 py-3 overscroll-contain [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">

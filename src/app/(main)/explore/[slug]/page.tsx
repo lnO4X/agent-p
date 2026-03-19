@@ -2,9 +2,10 @@
 
 import { useState, useEffect, use } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Gamepad2, Calendar, Building2 } from "lucide-react";
+import { Gamepad2, Calendar, Building2, ArrowLeft } from "lucide-react";
 import { useI18n } from "@/i18n/context";
 
 interface GameData {
@@ -30,6 +31,7 @@ export default function GameDetailPage({
   params: Promise<{ slug: string }>;
 }) {
   const { slug } = use(params);
+  const router = useRouter();
   const { t, locale } = useI18n();
   const [game, setGame] = useState<GameData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -81,12 +83,14 @@ export default function GameDetailPage({
   return (
     <div className="max-w-2xl mx-auto space-y-6">
       {/* Back */}
-      <Link
-        href="/explore"
-        className="text-sm text-muted-foreground hover:text-foreground"
+      <button
+        type="button"
+        onClick={() => router.back()}
+        className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground pressable"
       >
-        {"← " + t("game.backToCatalog")}
-      </Link>
+        <ArrowLeft className="w-4 h-4" />
+        {t("game.backToCatalog")}
+      </button>
 
       {/* Cover */}
       <div className="aspect-video bg-gradient-to-br from-muted to-muted/50 rounded-lg flex items-center justify-center overflow-hidden">
@@ -192,11 +196,11 @@ export default function GameDetailPage({
       {/* CTA */}
       <div className="flex gap-3">
         <Link href="/test" className="flex-1">
-          <Button className="w-full">{t("game.testMatch")}</Button>
+          <Button className="w-full pressable">{t("game.testMatch")}</Button>
         </Link>
-        <Link href="/explore">
-          <Button variant="outline">{t("game.browseMore")}</Button>
-        </Link>
+        <Button variant="outline" className="pressable" onClick={() => router.back()}>
+          {t("game.browseMore")}
+        </Button>
       </div>
     </div>
   );

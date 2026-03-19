@@ -110,7 +110,9 @@ export default function ExplorePage() {
       <div className="space-y-1">
         <h1 className="text-2xl font-bold">{t("explore.title")}</h1>
         <p className="text-sm text-muted-foreground">
-          {t("explore.subtitle", { count: total })}
+          {platform || genre || debouncedSearch
+            ? t("explore.subtitleFiltered", { count: total })
+            : t("explore.subtitle", { count: total })}
         </p>
       </div>
 
