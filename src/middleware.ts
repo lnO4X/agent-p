@@ -13,7 +13,7 @@ const PUBLIC_PATHS = [
 ];
 
 /** API paths that handle their own auth (Bearer token, cron secret, etc.) */
-const SELF_AUTH_PREFIXES = ["/api/admin/", "/api/cron/"];
+const SELF_AUTH_PREFIXES = ["/api/admin/", "/api/cron/", "/api/webhooks/"];
 
 /** Public prefixes — no auth required (shareable pages + their APIs) */
 const PUBLIC_PREFIXES = [

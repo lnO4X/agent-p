@@ -25,11 +25,11 @@ const FEATURES = [
   { icon: Sparkles, labelKey: "premium.feature4" },
 ];
 
-const PLANS = [
-  { id: "monthly", days: 30, priceZh: "¥9.9", priceEn: "$1.49", labelKey: "premium.monthly" },
-  { id: "quarterly", days: 90, priceZh: "¥24.9", priceEn: "$3.99", labelKey: "premium.quarterly", popular: true },
-  { id: "yearly", days: 365, priceZh: "¥79.9", priceEn: "$12.99", labelKey: "premium.yearly" },
-];
+const PRODUCT = {
+  priceZh: "¥29.9",
+  priceEn: "$4.99",
+  days: 365,
+};
 
 export default function PremiumPage() {
   const { t, locale } = useI18n();
@@ -37,13 +37,20 @@ export default function PremiumPage() {
   const [code, setCode] = useState("");
   const [activating, setActivating] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
-  const [selectedPlan, setSelectedPlan] = useState("quarterly");
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
   const [currentTier, setCurrentTier] = useState<"free" | "premium">("free");
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
 
   useEffect(() => {
+    // Check for successful purchase redirect
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("purchased") === "1") {
+      setSuccess(isZh ? "🎉 购买成功！Premium 已激活" : "🎉 Purchase successful! Premium activated");
+      // Clean URL
+      window.history.replaceState({}, "", "/me/premium");
+    }
+
     fetch("/api/partners")
       .then((r) => r.json())
       .then((pJson) => {
@@ -51,7 +58,7 @@ export default function PremiumPage() {
         if (pJson.tierExpiresAt) setExpiresAt(pJson.tierExpiresAt);
       })
       .catch(() => {});
-  }, []);
+  }, [isZh]);
 
   const handleActivate = async () => {
     const trimmed = code.trim().toUpperCase();
@@ -92,21 +99,19 @@ export default function PremiumPage() {
     setSuccess(null);
 
     try {
-      const res = await fetch("/api/billing/mock-purchase", {
+      const res = await fetch("/api/billing/checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ planId: selectedPlan }),
+        body: JSON.stringify({ productType: "deep_report" }),
       });
       const json = await res.json();
 
-      if (json.success) {
-        setCurrentTier("premium");
-        setExpiresAt(json.data.expiresAt);
-        setSuccess(
-          t("premium.purchaseSuccess", { days: json.data.durationDays })
-        );
+      if (json.success && json.data?.url) {
+        // Redirect to LemonSqueezy checkout
+        window.location.href = json.data.url;
+        return; // Don't set purchasing=false — page is navigating away
       } else {
-        setError(json.error?.message || (isZh ? "开通失败，请重试" : "Purchase failed"));
+        setError(json.error || (isZh ? "开通失败，请重试" : "Purchase failed"));
       }
     } catch {
       setError(isZh ? "网络错误，请重试" : "Network error");
@@ -186,56 +191,40 @@ export default function PremiumPage() {
         </CardContent>
       </Card>
 
-      {/* Plan selection */}
-      <div className="space-y-3">
-        <h2 className="text-sm font-semibold">{t("premium.choosePlan")}</h2>
-        <div className="grid grid-cols-3 gap-2">
-          {PLANS.map((plan) => (
-            <button
-              key={plan.id}
-              onClick={() => setSelectedPlan(plan.id)}
-              className={cn(
-                "relative rounded-xl border-2 p-3 text-center transition-all pressable",
-                selectedPlan === plan.id
-                  ? "border-yellow-500 bg-yellow-500/5"
-                  : "border-border hover:border-yellow-500/40"
-              )}
-            >
-              {plan.popular && (
-                <span className="absolute -top-2.5 left-1/2 -translate-x-1/2 text-[10px] font-semibold bg-yellow-500 text-white px-2 py-0.5 rounded-full">
-                  {t("premium.popular")}
-                </span>
-              )}
-              <div className="text-sm font-medium mt-1">{t(plan.labelKey)}</div>
-              <div className="text-lg font-bold mt-1">
-                {isZh ? plan.priceZh : plan.priceEn}
-              </div>
-              <div className="text-[11px] text-muted-foreground">
-                {t("premium.days", { days: plan.days })}
-              </div>
-            </button>
-          ))}
-        </div>
+      {/* Purchase */}
+      <Card className="border-yellow-500/30 bg-yellow-500/5">
+        <CardContent className="pt-4 pb-4 space-y-4">
+          <div className="text-center">
+            <div className="text-3xl font-bold">
+              {isZh ? PRODUCT.priceZh : PRODUCT.priceEn}
+            </div>
+            <div className="text-sm text-muted-foreground mt-1">
+              {isZh ? "一次购买，365天 Premium" : "One-time purchase, 365 days Premium"}
+            </div>
+          </div>
 
-        {/* Mock notice */}
-        <p className="text-xs text-center text-muted-foreground">
-          {t("premium.mockNotice")}
-        </p>
+          <Button
+            onClick={handlePurchase}
+            disabled={purchasing || currentTier === "premium"}
+            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+          >
+            {purchasing ? (
+              <Loader2 size={16} className="animate-spin mr-2" />
+            ) : (
+              <Crown size={16} className="mr-2" />
+            )}
+            {currentTier === "premium"
+              ? (isZh ? "已是 Premium" : "Already Premium")
+              : (isZh ? "立即购买" : "Buy Now")}
+          </Button>
 
-        {/* Purchase button */}
-        <Button
-          onClick={handlePurchase}
-          disabled={purchasing}
-          className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
-        >
-          {purchasing ? (
-            <Loader2 size={16} className="animate-spin mr-2" />
-          ) : (
-            <Crown size={16} className="mr-2" />
-          )}
-          {t("premium.buyNow")}
-        </Button>
-      </div>
+          <p className="text-[11px] text-center text-muted-foreground">
+            {isZh
+              ? "安全支付由 LemonSqueezy 提供 · 支持信用卡/PayPal"
+              : "Secure checkout by LemonSqueezy · Credit card & PayPal"}
+          </p>
+        </CardContent>
+      </Card>
 
       {/* Success / Error messages */}
       {error && (
