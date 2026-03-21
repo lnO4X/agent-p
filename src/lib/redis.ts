@@ -1,22 +1,20 @@
-import Redis from "ioredis";
+import { Redis } from "@upstash/redis";
 
 let redis: Redis | null = null;
 
-export function getRedis(): Redis {
-  if (!redis) {
-    const url = process.env.REDIS_URL || "redis://localhost:6379";
-    redis = new Redis(url, {
-      maxRetriesPerRequest: 3,
-      lazyConnect: true,
-      retryStrategy(times) {
-        if (times > 3) return null; // stop retrying
-        return Math.min(times * 200, 2000);
-      },
-    });
-    redis.on("error", (err) => {
-      console.error("[redis] Connection error:", err.message);
-    });
+export function getRedis(): Redis | null {
+  if (redis) return redis;
+
+  const url = process.env.UPSTASH_REDIS_REST_URL;
+  const token = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+  // Legacy ioredis-style REDIS_URL not supported — use Upstash REST API
+  if (!url || !token) {
+    console.warn("[redis] UPSTASH_REDIS_REST_URL or TOKEN not set — rate limiting disabled");
+    return null;
   }
+
+  redis = new Redis({ url, token });
   return redis;
 }
 
@@ -31,6 +29,11 @@ export async function checkRateLimit(
 ): Promise<{ allowed: boolean; remaining: number; resetInSeconds: number }> {
   try {
     const r = getRedis();
+    if (!r) {
+      // No Redis configured — fail open (allow the request)
+      return { allowed: true, remaining: maxRequests, resetInSeconds: windowSeconds };
+    }
+
     const current = await r.incr(key);
     if (current === 1) {
       await r.expire(key, windowSeconds);

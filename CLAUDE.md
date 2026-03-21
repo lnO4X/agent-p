@@ -129,7 +129,7 @@ const isZh = locale === "zh";
 | Domain | 入口文件 | 一句话 |
 |--------|---------|--------|
 | **Auth** | `lib/auth.ts`, `middleware.ts` | JWT + captcha + Redis rate limiting, PUBLIC_PATHS 含 `/api/voice/health` |
-| **Rate Limiting** | `lib/redis.ts` | ioredis, `checkRateLimit()`, captcha/login/register/chat daily limits |
+| **Rate Limiting** | `lib/redis.ts` | @upstash/redis (HTTP REST), `checkRateLimit()`, captcha/login/register/chat daily limits |
 | **Talent & Games** | `games/*`, `lib/scoring.ts` | 13 game plugins → 13-dim scores → S/A/B/C/D ranks |
 | **Archetype** | `lib/archetype.ts` (610行, pure) | 16 archetypes, 改动必查 4 页面 + 2 OG cards |
 | **AI Partners** | `lib/partner-prompts.ts`, `components/chat/*` | 五层 prompt, Vercel AI SDK v6, tier-based limits |
@@ -154,7 +154,8 @@ const isZh = locale === "zh";
 ### Environment Variables
 ```
 DATABASE_URL=postgres://agent_p:agent_p_dev@localhost:5433/agent_p
-REDIS_URL=redis://localhost:6379
+UPSTASH_REDIS_REST_URL=https://xxx.upstash.io
+UPSTASH_REDIS_REST_TOKEN=xxx
 JWT_SECRET=<32+ char, MUST be stable>
 NEXT_PUBLIC_BASE_URL=https://game.weda.ai
 OPENROUTER_API_KEY=<for AI chat + analysis>
@@ -196,7 +197,7 @@ Tunnel: dev-local (ID: e7a5faf4-dad8-4a54-bb7e-3c57be346ed1)
 ```
 
 ### Tech Stack
-Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · Redis + ioredis · Vercel AI SDK v6 + OpenRouter · Tailwind CSS v4 + shadcn/ui · Lucide React · Recharts · next/og (ImageResponse) · Zod · Vitest
+Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · Upstash Redis (REST) · Vercel AI SDK v6 + OpenRouter · Tailwind CSS v4 + shadcn/ui · Lucide React · Recharts · next/og (ImageResponse) · Zod · Vitest
 
 ---
 
