@@ -18,7 +18,7 @@ RUN apk add --no-cache python3 make g++ && \
 
 # Build args for NEXT_PUBLIC_* (inlined at build time by Next.js)
 ARG NEXT_PUBLIC_APP_NAME=GameTan
-ARG NEXT_PUBLIC_APP_URL=https://game.weda.ai
+ARG NEXT_PUBLIC_APP_URL=https://gametan.ai
 ENV NEXT_PUBLIC_APP_NAME=$NEXT_PUBLIC_APP_NAME
 ENV NEXT_PUBLIC_APP_URL=$NEXT_PUBLIC_APP_URL
 

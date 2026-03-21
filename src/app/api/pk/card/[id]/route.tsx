@@ -248,7 +248,7 @@ export async function GET(
           >
             <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
               <span style={{ fontSize: "13px", color: "#475569", display: "flex" }}>
-                game.weda.ai
+                gametan.ai
               </span>
             </div>
             <div

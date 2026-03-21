@@ -52,3 +52,4 @@ next-env.d.ts
 voice-service/.venv/
 voice-service/__pycache__/
 voice-service/*.wav
+.env.production

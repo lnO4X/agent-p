@@ -63,7 +63,7 @@ export async function GET(
               </span>
               <span style={{ fontSize: "14px", color: "#475569" }}>|</span>
               <span style={{ fontSize: "14px", color: "#475569" }}>
-                game.weda.ai
+                gametan.ai
               </span>
             </div>
 
@@ -139,7 +139,7 @@ export async function GET(
                   fontWeight: 600,
                 }}
               >
-                What&apos;s yours? game.weda.ai/quiz
+                What&apos;s yours? gametan.ai/quiz
               </div>
             </div>
           </div>

@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 
-const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://game.weda.ai";
+const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
 
 export const metadata: Metadata = {
   title: "My Gamer Archetype — GameTan",

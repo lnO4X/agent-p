@@ -68,7 +68,7 @@
 | Workflow depth | 1 | Quiz → archetype → share. Dashboard redesign adds paths |
 | Switching cost | 1 | AI partner memories + identity attachment |
 | Content/community | 1 | Community posts, archetypes as culture. Early stage |
-| Brand identity | 1 | "Gaming MBTI" positioning clear. game.weda.ai |
+| Brand identity | 1 | "Gaming MBTI" positioning clear. gametan.ai |
 | Technical edge | 0.5 | 13-game talent measurement unique but replicable |
 | Distribution | 0.5 | OG cards wired to all shareable pages, SEO sitemap+robots |
 | **Total** | **7/16** | |

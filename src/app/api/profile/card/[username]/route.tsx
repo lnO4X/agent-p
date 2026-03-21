@@ -288,7 +288,7 @@ export async function GET(
             {/* Footer */}
             <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
               <span style={{ fontSize: "16px", color: "#475569" }}>
-                game.weda.ai
+                gametan.ai
               </span>
             </div>
           </div>

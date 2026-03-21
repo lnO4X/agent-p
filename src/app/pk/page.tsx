@@ -224,7 +224,7 @@ export default function PkCreatePage() {
           </div>
 
           <div className="text-center text-xs text-muted-foreground pt-2">
-            game.weda.ai
+            gametan.ai
           </div>
         </div>
       </div>

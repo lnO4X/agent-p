@@ -1,4 +1,4 @@
-const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://game.weda.ai";
+const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
 
 /**
  * Community post liked email notification
@@ -28,7 +28,7 @@ export function communityLikedHtml(opts: {
     <a href="${postUrl}" style="display: inline-block; background: #007AFF; color: white; text-decoration: none; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;">
       查看社区 / View Community
     </a>
-    <p style="margin: 16px 0 0; font-size: 11px; color: #999;">GameTan · game.weda.ai · ${authorUsername}</p>
+    <p style="margin: 16px 0 0; font-size: 11px; color: #999;">GameTan · gametan.ai · ${authorUsername}</p>
   </div>
 </body>
 </html>`;
@@ -69,7 +69,7 @@ export function communityRepliedHtml(opts: {
     <a href="${postUrl}" style="display: inline-block; background: #007AFF; color: white; text-decoration: none; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;">
       查看回复 / View Reply
     </a>
-    <p style="margin: 16px 0 0; font-size: 11px; color: #999;">GameTan · game.weda.ai · ${authorUsername}</p>
+    <p style="margin: 16px 0 0; font-size: 11px; color: #999;">GameTan · gametan.ai · ${authorUsername}</p>
   </div>
 </body>
 </html>`;
@@ -127,7 +127,7 @@ export function weeklyDigestHtml(opts: {
       ${ctaText}
     </a>
     <p style="margin: 16px 0 0; font-size: 11px; color: #999;">
-      GameTan · game.weda.ai
+      GameTan · gametan.ai
     </p>
   </div>
 </body>
@@ -166,7 +166,7 @@ export function streakMilestoneHtml(opts: {
     <a href="${ctaUrl}" style="display: inline-block; background: #007AFF; color: white; text-decoration: none; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;">
       ${ctaText}
     </a>
-    <p style="margin: 16px 0 0; font-size: 11px; color: #999;">GameTan · game.weda.ai</p>
+    <p style="margin: 16px 0 0; font-size: 11px; color: #999;">GameTan · gametan.ai</p>
   </div>
 </body>
 </html>`;

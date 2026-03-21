@@ -2,7 +2,7 @@ import type { MetadataRoute } from "next";
 import { getAllArchetypes } from "@/lib/archetype";
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://game.weda.ai";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
   const archetypes = getAllArchetypes();
 
   const staticPages: MetadataRoute.Sitemap = [

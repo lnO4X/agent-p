@@ -69,7 +69,7 @@
 | PostgreSQL | 本机 Docker :5433 | **Neon** (free tier) | $0 → $19/mo | Serverless PG, 自动备份, 0.5GB free |
 | Redis | 本机 Docker :6379 | **Upstash** (free tier) | $0 → $10/mo | Serverless Redis, 10K cmd/day free |
 | Voice STT/TTS | 本机 GPU :8100 | **降级/移除** | - | 见下方分析 |
-| Domain | game.weda.ai (tunnel) | game.weda.ai (Vercel) | $0 | DNS 指向 Vercel |
+| Domain | gametan.ai (tunnel) | gametan.ai (Vercel) | $0 | DNS 指向 Vercel |
 | Tunnel | cloudflared | 不需要 | -$0 | Vercel 自带域名 |
 
 **Voice 服务决策** ⚠️ 战略问题:
@@ -82,7 +82,7 @@
 1. Neon 创建 PG 实例 → `pg_dump` 导出 → `pg_restore` 导入 → 更新 DATABASE_URL
 2. Upstash 创建 Redis → 更新 REDIS_URL (rate limiting + sessions 会自动重建)
 3. Vercel 连接 GitHub repo → 配置环境变量 → 部署
-4. Cloudflare DNS: game.weda.ai CNAME → Vercel
+4. Cloudflare DNS: gametan.ai CNAME → Vercel
 5. 验证所有 API 端点 + OG cards + Auth flow
 
 ### A2: Stripe 支付集成
@@ -125,7 +125,7 @@
 
 - **Vercel Analytics** (free): 页面访问量、Web Vitals
 - **Sentry** (free tier): 错误追踪
-- **Uptime Robot** (free): game.weda.ai 可用性监控
+- **Uptime Robot** (free): gametan.ai 可用性监控
 - **GitHub Actions**: PR → build + test → Vercel preview deploy
 - **Drizzle migrations**: 从 `drizzle-kit push` 切换到 `drizzle-kit generate` + `migrate` (生产环境不能用 push)
 
@@ -210,7 +210,7 @@ GameTan 深度报告内容 (PDF/网页):
 ### C2: SEO 内容矩阵
 
 ```
-                    game.weda.ai
+                    gametan.ai
                          │
          ┌───────────────┼───────────────┐
          │               │               │
@@ -260,7 +260,7 @@ Day 30 → "新测试上线" (再激活)
 ### D1: 白标测试引擎
 
 - 游戏厂商/媒体可以嵌入 GameTan 测试到自己的网站
-- `<iframe src="game.weda.ai/embed/quiz/valorant">`
+- `<iframe src="gametan.ai/embed/quiz/valorant">`
 - 厂商自定义品牌色 + 结果页
 - 按测试次数收费
 

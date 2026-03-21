@@ -100,8 +100,8 @@ export default function ChallengePage() {
     const blockIdx = Math.min(4, Math.floor(score / 20));
     const grid = `${"🟩".repeat(Math.ceil(score / 20))}${"⬛".repeat(5 - Math.ceil(score / 20))}`;
     const text = locale === "zh"
-      ? `GameTan 每日挑战 #${dayOfYear}\n${grid}\n${t(`talent.${data.talentCategory}`)} ${Math.round(score)}分 (${rank})\n🔥 ${data.streak}天连续\ngame.weda.ai/challenge`
-      : `GameTan Daily #${dayOfYear}\n${grid}\n${t(`talent.${data.talentCategory}`)} ${Math.round(score)} (${rank})\n🔥 ${data.streak} day streak\ngame.weda.ai/challenge`;
+      ? `GameTan 每日挑战 #${dayOfYear}\n${grid}\n${t(`talent.${data.talentCategory}`)} ${Math.round(score)}分 (${rank})\n🔥 ${data.streak}天连续\ngametan.ai/challenge`
+      : `GameTan Daily #${dayOfYear}\n${grid}\n${t(`talent.${data.talentCategory}`)} ${Math.round(score)} (${rank})\n🔥 ${data.streak} day streak\ngametan.ai/challenge`;
 
     if (navigator.share) {
       try {

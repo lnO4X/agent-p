@@ -11,7 +11,7 @@ interface Props {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id } = await params;
-  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://game.weda.ai";
+  const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
 
   try {
     const rows = await db

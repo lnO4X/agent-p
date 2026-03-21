@@ -68,7 +68,7 @@ export async function GET(request: Request) {
               </span>
               <span style={{ fontSize: "14px", color: "#475569" }}>|</span>
               <span style={{ fontSize: "14px", color: "#475569" }}>
-                game.weda.ai/quiz
+                gametan.ai/quiz
               </span>
             </div>
 

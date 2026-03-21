@@ -451,7 +451,7 @@ function QuizResultContent() {
 
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground pt-4 pb-8">
-          game.weda.ai
+          gametan.ai
         </div>
       </div>
     </div>

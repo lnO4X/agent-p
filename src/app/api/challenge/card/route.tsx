@@ -220,7 +220,7 @@ export async function GET(request: Request) {
                 fontWeight: 600,
               }}
             >
-              Can you beat this? game.weda.ai
+              Can you beat this? gametan.ai
             </div>
           </div>
         </div>

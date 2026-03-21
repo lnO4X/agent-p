@@ -337,7 +337,7 @@ export default function PkPage({
           </div>
 
           <div className="text-center text-xs text-muted-foreground pt-2">
-            game.weda.ai
+            gametan.ai
           </div>
         </div>
       </div>
@@ -470,7 +470,7 @@ export default function PkPage({
         </div>
 
         <div className="text-center text-xs text-muted-foreground">
-          game.weda.ai
+          gametan.ai
         </div>
       </div>
     </div>

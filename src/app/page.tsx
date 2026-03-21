@@ -97,7 +97,7 @@ export default function Home() {
 
       {/* Footer */}
       <div className="text-center text-xs text-muted-foreground py-4">
-        game.weda.ai
+        gametan.ai
       </div>
     </div>
   );

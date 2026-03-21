@@ -446,7 +446,7 @@ export default function MePage() {
               <button
                 type="button"
                 onClick={async () => {
-                  const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://game.weda.ai"}/register?ref=${referralCode}`;
+                  const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai"}/register?ref=${referralCode}`;
                   await navigator.clipboard.writeText(inviteLink);
                   setLinkCopied(true);
                   setTimeout(() => setLinkCopied(false), 1500);
@@ -460,7 +460,7 @@ export default function MePage() {
                 <button
                   type="button"
                   onClick={async () => {
-                    const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://game.weda.ai"}/register?ref=${referralCode}`;
+                    const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai"}/register?ref=${referralCode}`;
                     await navigator.share({
                       title: isZh ? "GameTan — 发现你的玩家原型" : "GameTan — Discover Your Gamer Archetype",
                       text: isZh ? `用我的邀请码 ${referralCode} 注册 GameTan，测测你的游戏天赋！` : `Join me on GameTan! Use my code ${referralCode} to discover your gamer archetype.`,

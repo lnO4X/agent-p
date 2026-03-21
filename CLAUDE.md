@@ -1,6 +1,6 @@
 # GameTan — 玩家身份发现器
 
-**Brand**: GameTan (game.weda.ai)
+**Brand**: GameTan (gametan.ai)
 **定位**: "16personalities for gamers" — 玩家身份系统（不是游戏平台）
 **核心循环**: Quiz → Archetype reveal → Content depth → Share → Register → Premium report
 **变现**: 峰值变现（测完买深度报告 ¥29.9）> 订阅
@@ -21,7 +21,7 @@ curl -X POST http://localhost:3000/api/admin/seed  # Seed 127 games
 **Production:**
 ```bash
 docker compose build app && docker compose up -d app
-cloudflared tunnel run dev-local        # game.weda.ai → localhost:3100
+cloudflared tunnel run dev-local        # gametan.ai → localhost:3100
 ```
 
 **Build & Type Check:**
@@ -157,7 +157,7 @@ DATABASE_URL=postgres://agent_p:agent_p_dev@localhost:5433/agent_p
 UPSTASH_REDIS_REST_URL=https://xxx.upstash.io
 UPSTASH_REDIS_REST_TOKEN=xxx
 JWT_SECRET=<32+ char, MUST be stable>
-NEXT_PUBLIC_BASE_URL=https://game.weda.ai
+NEXT_PUBLIC_BASE_URL=https://gametan.ai
 OPENROUTER_API_KEY=<for AI chat + analysis>
 AI_MODEL=minimax/minimax-m2.5 (fallback; actual value from DB site_settings.ai_model)
 FIRECRAWL_API_KEY=<for game crawlers, optional>
@@ -168,11 +168,19 @@ VOICE_SERVICE_URL=http://localhost:8100
 VOICE_SERVICE_SECRET=<shared secret for voice service auth>
 ```
 
-### Docker Services
+### Production (Cloud)
+```
+App:    Vercel (auto-deploy from GitHub main branch)
+DB:     Neon PostgreSQL 17 (ap-southeast-1, Singapore)
+Redis:  Upstash (REST API, ap-southeast-1)
+Domain: gametan.ai (Cloudflare DNS → Vercel)
+```
+
+### Local Dev (Docker, optional)
 ```
 app:        Next.js standalone → port 3100:3000
 db:         PostgreSQL 16 → port 5433:5432
-redis:      Redis 8.4 → port 6379:6379
+redis:      (not needed — Upstash REST used directly)
 ```
 
 ### Voice Service (Local GPU)
@@ -191,7 +199,7 @@ voice-service/       Python 3.11 venv, runs on host machine (not Docker)
 
 ### Cloudflare Tunnel (`~/.cloudflared/config.yml`)
 ```
-game.weda.ai → http://localhost:3100  (production)
+gametan.ai → http://localhost:3100  (production)
 dev.weda.ai  → http://localhost:3001  (dev, optional)
 Tunnel: dev-local (ID: e7a5faf4-dad8-4a54-bb7e-3c57be346ed1)
 ```
@@ -234,6 +242,7 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
 ## 7. Current Status (会话压缩后必查)
 
 ### ✅ Completed
+- Phase A1: Cloud migration — gametan.ai on Vercel + Neon PG (Singapore) + Upstash Redis (Singapore). Domain bought, DB migrated (28 tables), DNS configured, SSL active. ioredis→@upstash/redis (HTTP REST). All game.weda.ai references updated to gametan.ai. Local Docker no longer needed for production.
 - Phase 1-8: Core platform — 13 games, talent test, 16 archetypes, AI partners, Premium codes, public profiles
 - Phase 9: Quiz funnel + archetype system — public quiz → OG share cards, 8 character presets, dashboard + results redesign
 - Phase 10: AI + UX polish — partner archetype context, post-registration funnel, chat stability/streaming/summary, voice (Whisper STT + Edge TTS), WeChat iOS login fix, bilingual everything
@@ -390,7 +399,7 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
   - 114 unit tests passing, build clean, deployed to port 3100
 
 ### 🔲 Pending — 阶段 A: 基础加固 + 上云 (详见 docs/roadmap.md)
-- **A1: 云部署迁移** — Vercel (app) + Neon (PG) + Upstash (Redis), 摆脱本机依赖
+- ~~A1: 云部署迁移~~ ✅ 已完成 — gametan.ai on Vercel + Neon + Upstash
 - **A2: Stripe 支付** — 峰值变现: 测试结果页直接购买深度报告 (¥29.9)
 - **A3: 功能精简** — 暂停 Voice, 简化社区, 聚焦 测试→身份→内容→支付
 - **A4: 监控 + CI/CD** — Sentry + GitHub Actions + Vercel auto-deploy
