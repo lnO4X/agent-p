@@ -102,7 +102,7 @@ export async function GET(request: Request) {
           >
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <span style={{ fontSize: "18px", fontWeight: 700 }}>
-                GameTan Daily Challenge #{dayOfYear}
+                {`GameTan Daily Challenge #${dayOfYear}`}
               </span>
             </div>
             <div

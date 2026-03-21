@@ -40,8 +40,11 @@
 | **Voice** | `voice-service/*`, `api/voice/*`, `hooks/use-voice.ts`, `components/chat/voice-button.tsx` | STT, TTS, voice recording | AI Partners (uses chat UI) |
 | **Billing** | `api/billing/*`, `api/admin/codes/*` | Tier check, activation | — |
 | **Social/Profile** | `api/profile/*`, `api/messages/*`, `api/leaderboard/*`, `app/profile/*` | Public profiles, messaging | — |
+| **PK Challenge** | `api/pk/*`, `app/pk/*`, `db/schema.ts (pkChallenges)` | 1v1 viral challenges, no auth | Game plugins |
+| **Daily Challenge** | `api/challenge/*`, `app/(main)/challenge/*` | Daily training + ranking + streak | Game plugins |
+| **Quiz (Public)** | `app/quiz/*`, `api/quiz/*`, `lib/questionnaire.ts` | 3-game quick quiz + 39Q questionnaire | Archetype |
 
-**Dependency chain**: Auth ← all domains | Talent → Archetype → Partner prompts | Billing → User tier checks | Voice → AI Partners
+**Dependency chain**: Auth ← all domains | Talent → Archetype → Partner prompts | Billing → User tier checks | Voice → AI Partners | PK/Quiz → Game plugins + Archetype
 
 ---
 
@@ -110,6 +113,9 @@ src/games/<game-id>/
 **OG cards** (change archetype definitions → must verify):
 - `/api/quiz/card?s=78-45-62` — quiz share card
 - `/api/profile/card/[username]` — profile share card
+- `/api/archetype/card/[id]` — archetype detail share card
+- `/api/pk/card/[id]` — PK challenge share card
+- `/api/challenge/card?score=&talent=&streak=&name=` — daily challenge share card
 
 ---
 
@@ -196,6 +202,7 @@ Backend: convertToModelMessages() (async), maxOutputTokens (not maxTokens), toUI
 | `userKnowledge` | Shared knowledge graph | -> users |
 | `activationCodes` | Premium codes | -> users (usedBy) |
 | `captchaSessions` | One-time captcha tokens | — |
+| `pkChallenges` | Social PK 1v1 challenges | -> users (creator/challenger), games |
 
 **Key fields on `users`**: id, username(unique), passwordHash, tier(free/premium), tierExpiresAt, referralCode, isProfilePublic, displayName, email
 
@@ -231,3 +238,6 @@ const NAV_ITEMS = [
 | `/me`, `/results/*`, `/leaderboard`, `/settings` | Me | Profile + history + settings |
 | `/quiz/*` | — | Public, no nav (standalone layout) |
 | `/profile/[username]` | — | Public, no nav (standalone layout) |
+| `/pk`, `/pk/[id]` | — | Public, no nav (PK challenge) |
+| `/archetype`, `/archetype/[id]` | — | Public, no nav (archetype pages) |
+| `/archetype/compatibility` | — | Public, no nav (compatibility tool) |

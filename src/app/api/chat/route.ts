@@ -24,23 +24,31 @@ export async function POST(request: NextRequest) {
     body = await request.json();
   } catch {
     return Response.json(
-      { error: "Invalid JSON body" },
+      { success: false, error: "Invalid JSON body" },
       { status: 400 }
     );
   }
 
   const auth = await getAuthFromCookie();
   if (!auth) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   // Per-user daily chat rate limiting (free=30/day, premium=unlimited)
   const today = new Date().toISOString().slice(0, 10);
-  const userRow = await db
-    .select({ tier: users.tier, tierExpiresAt: users.tierExpiresAt })
-    .from(users)
-    .where(eq(users.id, auth.sub))
-    .limit(1);
+  let userRow;
+  try {
+    userRow = await db
+      .select({ tier: users.tier, tierExpiresAt: users.tierExpiresAt })
+      .from(users)
+      .where(eq(users.id, auth.sub))
+      .limit(1);
+  } catch {
+    return Response.json(
+      { success: false, error: "Database error" },
+      { status: 503 }
+    );
+  }
   const isPremium = userRow.length > 0 && userRow[0].tier === "premium" &&
     (!userRow[0].tierExpiresAt || userRow[0].tierExpiresAt >= new Date());
   const dailyLimit = isPremium ? 999 : 30;
@@ -69,7 +77,7 @@ export async function POST(request: NextRequest) {
   const parsed = chatMessageSchema.safeParse(body);
   if (!parsed.success) {
     return Response.json(
-      { error: parsed.error.flatten() },
+      { success: false, error: parsed.error.flatten() },
       { status: 400 }
     );
   }
@@ -77,14 +85,22 @@ export async function POST(request: NextRequest) {
   const { messages: clientMessages, partnerId } = parsed.data;
 
   // Load partner (verify ownership)
-  const partner = await db
-    .select()
-    .from(partners)
-    .where(and(eq(partners.id, partnerId), eq(partners.userId, auth.sub)))
-    .limit(1);
+  let partner;
+  try {
+    partner = await db
+      .select()
+      .from(partners)
+      .where(and(eq(partners.id, partnerId), eq(partners.userId, auth.sub)))
+      .limit(1);
+  } catch {
+    return Response.json(
+      { success: false, error: "Database error" },
+      { status: 503 }
+    );
+  }
 
   if (partner.length === 0) {
-    return Response.json({ error: "Partner not found" }, { status: 404 });
+    return Response.json({ success: false, error: "Partner not found" }, { status: 404 });
   }
 
   const p = partner[0];
@@ -93,7 +109,7 @@ export async function POST(request: NextRequest) {
   const model = await getModel(p.modelId);
   if (!model) {
     return Response.json(
-      { error: "AI model not configured" },
+      { success: false, error: "AI model not configured" },
       { status: 503 }
     );
   }
@@ -115,7 +131,7 @@ export async function POST(request: NextRequest) {
   } catch (err) {
     console.error("[chat] convertToModelMessages error:", err);
     return Response.json(
-      { error: "Failed to process messages" },
+      { success: false, error: "Failed to process messages" },
       { status: 400 }
     );
   }

@@ -1,9 +1,9 @@
 "use client";
 
 import { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AlertTriangle, Crown, Sparkles, ArrowRight } from "lucide-react";
+import { AlertTriangle, Crown, ArrowRight } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Card,
@@ -27,11 +27,9 @@ export default function TestHubPage() {
 
 function TestHubContent() {
   const router = useRouter();
-  const searchParams = useSearchParams();
   const isMobile = useIsMobile();
   const { t, locale } = useI18n();
   const isZh = locale === "zh";
-  const isWelcome = searchParams.get("welcome") === "1";
   const [loading, setLoading] = useState(false);
   const [completedCount, setCompletedCount] = useState(0);
   const [maxTests, setMaxTests] = useState(2);
@@ -82,27 +80,6 @@ function TestHubContent() {
 
   return (
     <div className="space-y-6 md:space-y-8">
-      {/* Welcome banner for new registrants */}
-      {isWelcome && (
-        <Card className="border-primary/30 bg-primary/5">
-          <CardContent className="pt-5 pb-5">
-            <div className="flex items-start gap-3">
-              <Sparkles size={24} className="text-primary shrink-0 mt-0.5" />
-              <div>
-                <h2 className="font-bold text-base">
-                  {isZh ? "🎉 欢迎加入 GameTan！" : "🎉 Welcome to GameTan!"}
-                </h2>
-                <p className="text-sm text-muted-foreground mt-1">
-                  {isZh
-                    ? "完成以下 13 项趣味小游戏（约 25 分钟），系统将为你揭示专属的玩家原型 + 解锁 AI 角色伙伴。"
-                    : "Complete these 13 mini-games (~25 min) to discover your gamer archetype and unlock AI character companions."}
-                </p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
       <div className="text-center space-y-3">
         <h1 className="text-2xl md:text-3xl font-bold">{t("test.title")}</h1>
         <p className="text-sm md:text-base text-muted-foreground">

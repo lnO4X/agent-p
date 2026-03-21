@@ -8,29 +8,41 @@ import { INIT_AGENT_PROMPT } from "@/lib/partner-prompts";
 export async function POST(request: NextRequest) {
   const auth = await getAuthFromCookie();
   if (!auth) {
-    return new Response("Unauthorized", { status: 401 });
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const model = await getModel();
   if (!model) {
-    return new Response("AI model not configured", { status: 503 });
+    return Response.json({ success: false, error: "AI model not configured" }, { status: 503 });
   }
 
-  const body = await request.json();
-  const { messages: clientMessages } = body;
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return Response.json({ success: false, error: "Invalid JSON body" }, { status: 400 });
+  }
+
+  const { messages: clientMessages } = body as { messages?: unknown };
 
   if (
     !clientMessages ||
     !Array.isArray(clientMessages) ||
     clientMessages.length === 0
   ) {
-    return new Response("Messages required", { status: 400 });
+    return Response.json({ success: false, error: "Messages required" }, { status: 400 });
   }
 
   const recentMessages = clientMessages.slice(-10);
-  const modelMessages = await convertToModelMessages(
-    recentMessages as Parameters<typeof convertToModelMessages>[0]
-  );
+  let modelMessages;
+  try {
+    modelMessages = await convertToModelMessages(
+      recentMessages as Parameters<typeof convertToModelMessages>[0]
+    );
+  } catch (err) {
+    console.error("[partners/init] convertToModelMessages error:", err);
+    return Response.json({ success: false, error: "Failed to process messages" }, { status: 400 });
+  }
 
   const result = streamText({
     model,

@@ -11,7 +11,17 @@ import { weeklyDigestHtml } from "@/lib/email/templates";
  * Auth: Bearer CRON_SECRET
  * Should be called weekly (e.g., every Monday).
  */
+// GET handler for Vercel Cron (sends GET with Authorization: Bearer CRON_SECRET)
+export async function GET(request: NextRequest) {
+  return handleDigest(request);
+}
+
+// POST handler for manual invocation
 export async function POST(request: NextRequest) {
+  return handleDigest(request);
+}
+
+async function handleDigest(request: NextRequest) {
   const auth = request.headers.get("authorization");
   if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

@@ -39,6 +39,9 @@ RUN apk add --no-cache curl && \
 
 # Copy standalone output
 COPY --from=builder /app/.next/standalone ./
+# next/og (satori) requires files not traced by standalone
+COPY --from=builder /app/node_modules/next/dist/compiled/@vercel/og/satori \
+  ./node_modules/next/dist/compiled/@vercel/og/satori
 COPY --from=builder /app/.next/static ./.next/static
 
 # Copy public assets (covers, etc.)

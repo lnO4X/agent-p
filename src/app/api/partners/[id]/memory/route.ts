@@ -104,7 +104,7 @@ export async function POST(
 ) {
   const auth = await getAuthFromCookie();
   if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
@@ -113,7 +113,7 @@ export async function POST(
   const parsed = memoryExtractionSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.flatten() },
+      { success: false, error: parsed.error.flatten() },
       { status: 400 }
     );
   }
@@ -130,7 +130,7 @@ export async function POST(
     .limit(1);
 
   if (partner.length === 0) {
-    return NextResponse.json({ error: "Partner not found" }, { status: 404 });
+    return NextResponse.json({ success: false, error: "Partner not found" }, { status: 404 });
   }
 
   const model = await getModel(partner[0].modelId);

@@ -1,10 +1,11 @@
 # GameTan — 玩家身份发现器
 
 **Brand**: GameTan (game.weda.ai)
-**定位**: "16personalities for gamers" — 玩家版 MBTI
-**核心循环**: 3-minute quiz → archetype reveal → share → register → AI characters
+**定位**: "16personalities for gamers" — 玩家身份系统（不是游戏平台）
+**核心循环**: Quiz → Archetype reveal → Content depth → Share → Register → Premium report
+**变现**: 峰值变现（测完买深度报告 ¥29.9）> 订阅
 
-16 gamer archetypes (like MBTI) from 13 talent dimensions. AI character gallery (rivals, mentors, companions). Premium tier ($4.99/mo).
+16 gamer archetypes from 13 talent dimensions. Identity content (96+ SEO pages). Game-specific quizzes (viral). See `docs/roadmap.md` for full plan.
 
 ---
 
@@ -362,5 +363,38 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
   - **Middleware**: Opened `/pk`, `/api/pk`, `/api/challenge/daily-ranking`, `/api/challenge/card` to public access.
   - 114 unit tests passing, build clean, deployed to port 3100
 
-### 🔲 Pending
-- Stripe/payment integration (critical — currently code-only Premium activation)
+- Phase 34: Viral loop fix + onboarding redesign
+  - **OG metadata wired to all shareable pages**: `archetype/[id]/layout.tsx`, `pk/[id]/layout.tsx`, `quiz/result/layout.tsx` now export `generateMetadata()` with dynamic OG images. Social media shares now show personalized preview cards instead of generic "GameTan" text.
+  - **New OG card generators**: `GET /api/archetype/card/[id]` (archetype identity card: icon + gradient + name + tagline), `GET /api/pk/card/[id]` (PK challenge card: game icon + creator score + VS + CTA).
+  - **Middleware**: Added `/api/archetype/card`, `/api/pk/card` to PUBLIC_PREFIXES.
+  - **Registration redirect fixed**: `register-form.tsx` now redirects to `/dashboard?welcome=1` instead of `/test?welcome=1`. Removes 25-min test wall for new users.
+  - **Dashboard "no archetype" redesign**: Three lighter paths (Quick Quiz 3min, Questionnaire 5min, Explore First) replace the single 25-min commitment CTA. Welcome banner for `?welcome=1`. Share archetype link for users who have one.
+  - **Test page cleanup**: Removed welcome banner logic (migrated to dashboard).
+  - **Quick actions updated**: "Full Test" replaced with "PK Challenge", "AI 角色" icon fixed to Bot.
+  - **docs/ updated**: `architecture.md` — PK/Quiz/Challenge domains, new OG cards, pkChallenges table, new routes. `decisions.md` — decisions #14-18 (PK no-auth, questionnaire, OG metadata, register redirect, public pages), defensibility score table.
+  - 114 unit tests passing, build clean, deployed to port 3100
+- Phase 35: Docker OG fix + share URL fix + SEO + i18n
+  - **next/og ImageResponse Docker fix**: Root cause was satori's strict JSX validation — mixed text+expression children (e.g. `\u201C{value}\u201D`) create multiple child nodes in a `<div>` without `display: flex`. Fixed all 4 card endpoints (quiz, archetype, challenge, profile) by converting to template literals (`{`\u201C${value}\u201D`}`). All cards now return `image/png` in Docker standalone mode.
+  - **Questionnaire share URL fix**: `quiz/result/page.tsx` — questionnaire mode share URL now includes `?mode=q&archetype=id&scores=key:val,...` instead of generic `/archetype/{id}`. Registration CTA moved above fold (after score bars).
+  - **Results page i18n**: `(main)/results/page.tsx` — 6 hardcoded Chinese strings replaced with `isZh` bilingual ternaries, date locale respects user language.
+  - **SEO metadata**: New layouts for `/explore`, `/community`, `/archetype/compatibility` with OG metadata. New `sitemap.ts` (static pages + 16 archetypes) and `robots.ts`.
+  - 114 unit tests passing, build clean, deployed to port 3100
+
+- Phase 36: AI Chat+Voice hardening (dev-cycle Group B review)
+  - **`api/chat/route.ts`**: Fixed 6 bare `{error}` responses → `{success:false,error}` envelope (401/400/404/503). Added try-catch around user-tier DB query and partner DB query (previously unguarded — DB failure would crash handler).
+  - **`api/partners/init/route.ts`**: Changed 401/503/400 from plain-text `new Response()` to JSON envelopes. Added try-catch around `convertToModelMessages()` which can throw on malformed client messages.
+  - **`api/partners/[id]/memory/route.ts`**: Fixed POST's 401/400/404 bare `{error}` → `{success:false,error}` envelope.
+  - **`api/voice/stt/route.ts`** + **`api/voice/tts/route.ts`**: Fixed 401 responses to use `{success:false,error}` envelope.
+  - **`partner-conversation.tsx`**: Hardcoded English "Partner not found" → bilingual `isZh ? "找不到该角色" : "Partner not found"`.
+  - 114 unit tests passing, build clean, deployed to port 3100
+
+### 🔲 Pending — 阶段 A: 基础加固 + 上云 (详见 docs/roadmap.md)
+- **A1: 云部署迁移** — Vercel (app) + Neon (PG) + Upstash (Redis), 摆脱本机依赖
+- **A2: Stripe 支付** — 峰值变现: 测试结果页直接购买深度报告 (¥29.9)
+- **A3: 功能精简** — 暂停 Voice, 简化社区, 聚焦 测试→身份→内容→支付
+- **A4: 监控 + CI/CD** — Sentry + GitHub Actions + Vercel auto-deploy
+
+### 🗓️ 中长期路线
+- **阶段 B (Month 2-4)**: 原型内容深度 (96 SEO页) + 游戏专属测试 (病毒传播) + 深度报告 (PDF)
+- **阶段 C (Month 4-8)**: 英文市场 + SEO矩阵 + 邮件营销 + 游戏厂商合作
+- **阶段 D (Month 8-12)**: 白标引擎 + UGC测试 + API开放 + 数据变现

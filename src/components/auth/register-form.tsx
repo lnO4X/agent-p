@@ -74,7 +74,7 @@ export function RegisterForm() {
         if (json.data?.token) {
           setClientAuthCookie(json.data.token);
         }
-        window.location.href = "/test?welcome=1";
+        window.location.href = "/dashboard?welcome=1";
         return; // Keep loading=true — button stays disabled during navigation
       } else {
         setError(json.error?.message || (isZh ? "注册失败" : "Registration failed"));

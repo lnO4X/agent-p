@@ -1,0 +1,17 @@
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "crons": [
+    {
+      "path": "/api/cron/backfill-archetypes",
+      "schedule": "0 2 * * *"
+    },
+    {
+      "path": "/api/cron/backfill-referral-codes",
+      "schedule": "0 3 * * *"
+    },
+    {
+      "path": "/api/cron/email-digest",
+      "schedule": "0 9 * * 1"
+    }
+  ]
+}

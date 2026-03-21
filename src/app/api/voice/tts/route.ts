@@ -26,7 +26,7 @@ const ttsSchema = z.object({
 export async function POST(request: NextRequest) {
   const auth = await getAuthFromCookie();
   if (!auth) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   let body: unknown;

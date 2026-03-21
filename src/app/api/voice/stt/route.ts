@@ -18,7 +18,7 @@ const VOICE_SECRET = process.env.VOICE_SERVICE_SECRET || "voice-dev-secret";
 export async function POST(request: NextRequest) {
   const auth = await getAuthFromCookie();
   if (!auth) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   try {

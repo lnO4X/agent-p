@@ -218,7 +218,7 @@ export async function GET(
                       {rank}
                     </span>
                     <span style={{ fontSize: "20px", color: "#cbd5e1" }}>
-                      {score} pts
+                      {`${score} pts`}
                     </span>
                   </div>
                 </div>

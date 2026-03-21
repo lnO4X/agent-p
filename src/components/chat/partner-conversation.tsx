@@ -303,7 +303,9 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
   if (!partner) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3">
-        <p className="text-sm text-muted-foreground">Partner not found</p>
+        <p className="text-sm text-muted-foreground">
+          {isZh ? "找不到该角色" : "Partner not found"}
+        </p>
         <button
           type="button"
           onClick={() => router.push("/chat")}

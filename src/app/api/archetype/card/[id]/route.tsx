@@ -1,27 +1,22 @@
 import { ImageResponse } from "next/og";
-import { quickScoresToArchetype } from "@/lib/archetype";
+import { getArchetype } from "@/lib/archetype";
 
 export const runtime = "nodejs";
 
 /**
- * GET /api/quiz/card?s=78-45-62 — Generate archetype OG share card (1200×630)
+ * GET /api/archetype/card/[id] — Generate archetype OG share card (1200×630)
  */
-export async function GET(request: Request) {
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
   try {
-    const { searchParams } = new URL(request.url);
-    const s = searchParams.get("s");
+    const { id } = await params;
+    const archetype = getArchetype(id);
 
-    if (!s) {
-      return new Response("Missing scores", { status: 400 });
+    if (!archetype) {
+      return new Response("Archetype not found", { status: 404 });
     }
-
-    const parts = s.split("-").map(Number);
-    if (parts.length !== 3 || parts.some(isNaN)) {
-      return new Response("Invalid scores", { status: 400 });
-    }
-
-    const [reaction, pattern, risk] = parts;
-    const archetype = quickScoresToArchetype(reaction, pattern, risk);
 
     return new ImageResponse(
       (
@@ -68,13 +63,13 @@ export async function GET(request: Request) {
               </span>
               <span style={{ fontSize: "14px", color: "#475569" }}>|</span>
               <span style={{ fontSize: "14px", color: "#475569" }}>
-                game.weda.ai/quiz
+                game.weda.ai
               </span>
             </div>
 
             {/* Center — Archetype */}
             <div style={{ display: "flex", alignItems: "center", gap: "40px" }}>
-              <div style={{ fontSize: "100px", display: "flex" }}>
+              <div style={{ fontSize: "120px", display: "flex" }}>
                 {archetype.icon}
               </div>
               <div
@@ -86,7 +81,7 @@ export async function GET(request: Request) {
               >
                 <div
                   style={{
-                    fontSize: "48px",
+                    fontSize: "52px",
                     fontWeight: 800,
                     lineHeight: 1.1,
                     background: `linear-gradient(135deg, ${archetype.gradient[0]}, ${archetype.gradient[1]})`,
@@ -98,7 +93,7 @@ export async function GET(request: Request) {
                 </div>
                 <div
                   style={{
-                    fontSize: "28px",
+                    fontSize: "32px",
                     fontWeight: 600,
                     color: "#cbd5e1",
                   }}
@@ -119,7 +114,7 @@ export async function GET(request: Request) {
               </div>
             </div>
 
-            {/* Bottom — Scores + CTA */}
+            {/* Bottom — CTA */}
             <div
               style={{
                 display: "flex",
@@ -127,39 +122,11 @@ export async function GET(request: Request) {
                 alignItems: "flex-end",
               }}
             >
-              {/* Score pills */}
-              <div style={{ display: "flex", gap: "20px" }}>
-                {[
-                  { label: "Reaction", score: reaction },
-                  { label: "Pattern", score: pattern },
-                  { label: "Risk", score: risk },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    style={{
-                      display: "flex",
-                      flexDirection: "column",
-                      alignItems: "center",
-                      gap: "4px",
-                    }}
-                  >
-                    <span
-                      style={{
-                        fontSize: "28px",
-                        fontWeight: 700,
-                        color: "white",
-                      }}
-                    >
-                      {Math.round(item.score)}
-                    </span>
-                    <span style={{ fontSize: "12px", color: "#64748b" }}>
-                      {item.label}
-                    </span>
-                  </div>
-                ))}
+              <div style={{ display: "flex", flexDirection: "column", gap: "4px" }}>
+                <span style={{ fontSize: "14px", color: "#64748b", display: "flex" }}>
+                  1 of 16 Gamer Archetypes
+                </span>
               </div>
-
-              {/* CTA */}
               <div
                 style={{
                   display: "flex",
@@ -172,7 +139,7 @@ export async function GET(request: Request) {
                   fontWeight: 600,
                 }}
               >
-                What&apos;s yours? Take the quiz
+                What&apos;s yours? game.weda.ai/quiz
               </div>
             </div>
           </div>

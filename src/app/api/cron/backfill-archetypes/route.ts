@@ -5,7 +5,17 @@ import { eq, or, isNull } from "drizzle-orm";
 import { scoreToArchetype } from "@/lib/archetype";
 import type { TalentCategory } from "@/types/talent";
 
+// GET handler for Vercel Cron (sends GET with Authorization: Bearer CRON_SECRET)
+export async function GET(request: Request) {
+  return handleBackfill(request);
+}
+
+// POST handler for manual invocation
 export async function POST(request: Request) {
+  return handleBackfill(request);
+}
+
+async function handleBackfill(request: Request) {
   // Verify cron secret
   const authHeader = request.headers.get("authorization");
   if (authHeader !== `Bearer ${process.env.CRON_SECRET}`) {

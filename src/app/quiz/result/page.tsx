@@ -128,7 +128,11 @@ function QuizResultContent() {
   const shareUrl =
     typeof window !== "undefined"
       ? isQuestionnaire
-        ? `${window.location.origin}/archetype/${archetype.id}`
+        ? `${window.location.origin}/quiz/result?mode=q&archetype=${archetype.id}${
+            talentScores
+              ? `&scores=${Object.entries(talentScores).map(([k, v]) => `${k}:${v}`).join(",")}`
+              : ""
+          }`
         : `${window.location.origin}/quiz/result?s=${scores!.join("-")}`
       : "";
 
@@ -252,6 +256,50 @@ function QuizResultContent() {
           ) : null}
         </div>
 
+        {/* ── Registration CTA — primary conversion hook ── */}
+        <Card className="border-primary/30 bg-primary/5 overflow-hidden">
+          <CardContent className="pt-5 pb-5">
+            <div className="text-center mb-4">
+              <div className="text-sm font-semibold mb-1">
+                {isZh
+                  ? `${archetype.name}，这只是冰山一角`
+                  : `${archetype.nameEn}, this is just the tip`}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {isZh
+                  ? "注册后解锁完整版 — 免费"
+                  : "Sign up to unlock the full experience — free"}
+              </p>
+            </div>
+            <div className="grid grid-cols-3 gap-3 mb-4">
+              <div className="text-center">
+                <Target size={20} className="text-primary mx-auto mb-1" />
+                <div className="text-[10px] text-muted-foreground leading-tight">
+                  {isZh ? "13维天赋\n精准测试" : "13-Dimension\nDeep Test"}
+                </div>
+              </div>
+              <div className="text-center">
+                <Bot size={20} className="text-primary mx-auto mb-1" />
+                <div className="text-[10px] text-muted-foreground leading-tight">
+                  {isZh ? "AI伙伴\n游戏解读" : "AI Partner\nGame Insights"}
+                </div>
+              </div>
+              <div className="text-center">
+                <Crown size={20} className="text-primary mx-auto mb-1" />
+                <div className="text-[10px] text-muted-foreground leading-tight">
+                  {isZh ? "每日挑战\n连续签到" : "Daily Challenge\nStreak System"}
+                </div>
+              </div>
+            </div>
+            <Link href="/register" className="block">
+              <Button size="lg" className="w-full h-12 text-base">
+                {isZh ? "免费注册，解锁完整体验" : "Sign Up Free — Unlock Full Experience"}
+                <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+
         {/* Description */}
         <Card>
           <CardContent className="pt-5 pb-5">
@@ -357,50 +405,6 @@ function QuizResultContent() {
             ))}
           </div>
         </div>
-
-        {/* ── Registration CTA — primary conversion hook ── */}
-        <Card className="border-primary/30 bg-primary/5 overflow-hidden">
-          <CardContent className="pt-5 pb-5">
-            <div className="text-center mb-4">
-              <div className="text-sm font-semibold mb-1">
-                {isZh
-                  ? `${archetype.name}，这只是冰山一角`
-                  : `${archetype.nameEn}, this is just the tip`}
-              </div>
-              <p className="text-xs text-muted-foreground">
-                {isZh
-                  ? "注册后解锁完整版 — 免费"
-                  : "Sign up to unlock the full experience — free"}
-              </p>
-            </div>
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="text-center">
-                <Target size={20} className="text-primary mx-auto mb-1" />
-                <div className="text-[10px] text-muted-foreground leading-tight">
-                  {isZh ? "13维天赋\n精准测试" : "13-Dimension\nDeep Test"}
-                </div>
-              </div>
-              <div className="text-center">
-                <Bot size={20} className="text-primary mx-auto mb-1" />
-                <div className="text-[10px] text-muted-foreground leading-tight">
-                  {isZh ? "AI伙伴\n游戏解读" : "AI Partner\nGame Insights"}
-                </div>
-              </div>
-              <div className="text-center">
-                <Crown size={20} className="text-primary mx-auto mb-1" />
-                <div className="text-[10px] text-muted-foreground leading-tight">
-                  {isZh ? "每日挑战\n连续签到" : "Daily Challenge\nStreak System"}
-                </div>
-              </div>
-            </div>
-            <Link href="/register" className="block">
-              <Button size="lg" className="w-full h-12 text-base">
-                {isZh ? "免费注册，解锁完整体验" : "Sign Up Free — Unlock Full Experience"}
-                <ArrowRight size={18} className="ml-2" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
 
         {/* PK Challenge CTA */}
         <Link href="/pk" className="block">

@@ -17,7 +17,17 @@ function generateReferralCode(): string {
  * Backfill referral codes for existing users who don't have one.
  * Auth: Bearer CRON_SECRET
  */
+// GET handler for Vercel Cron (sends GET with Authorization: Bearer CRON_SECRET)
+export async function GET(request: NextRequest) {
+  return handleBackfill(request);
+}
+
+// POST handler for manual invocation
 export async function POST(request: NextRequest) {
+  return handleBackfill(request);
+}
+
+async function handleBackfill(request: NextRequest) {
   const auth = request.headers.get("authorization");
   if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });

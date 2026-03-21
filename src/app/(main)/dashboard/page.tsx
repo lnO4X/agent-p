@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo, Suspense } from "react";
 import Link from "next/link";
-import { Button } from "@/components/ui/button";
+import { useSearchParams } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/i18n/context";
 import { scoreToArchetype } from "@/lib/archetype";
@@ -20,6 +20,10 @@ import {
   Moon,
   Sunrise,
   Sunset,
+  Sparkles,
+  ClipboardList,
+  Compass,
+  Share2,
 } from "lucide-react";
 
 interface PartnerPreview {
@@ -29,8 +33,18 @@ interface PartnerPreview {
 }
 
 export default function DashboardPage() {
+  return (
+    <Suspense fallback={<div className="max-w-lg mx-auto"><div className="h-36 bg-muted/60 rounded-2xl animate-pulse" /></div>}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+function DashboardContent() {
   const { t, locale } = useI18n();
   const isZh = locale === "zh";
+  const searchParams = useSearchParams();
+  const isWelcome = searchParams.get("welcome") === "1";
 
   const [talents, setTalents] = useState<Partial<Record<TalentCategory, number>>>({});
   const [partners, setPartners] = useState<PartnerPreview[]>([]);
@@ -194,55 +208,98 @@ export default function DashboardPage() {
           </CardContent>
         </Card>
       ) : (
-        /* No profile — compelling progress CTA */
-        <Card
-          className="overflow-hidden border-primary/30"
-          style={{
-            background: "linear-gradient(135deg, hsl(var(--primary) / 0.08), hsl(var(--primary) / 0.03))",
-          }}
-        >
-          <CardContent className="pt-6 pb-6 space-y-4">
-            <div className="text-center space-y-2">
-              <Target size={36} className="text-primary mx-auto" />
-              <h2 className="text-lg font-bold">
-                {isZh ? "你是什么类型的玩家？" : "What Kind of Gamer Are You?"}
+        /* No profile — three paths to discover archetype */
+        <div className="space-y-3">
+          {isWelcome && (
+            <Card className="border-primary/30 bg-primary/5">
+              <CardContent className="pt-4 pb-4 text-center">
+                <h2 className="text-lg font-bold">
+                  {isZh ? "🎉 欢迎加入 GameTan！" : "🎉 Welcome to GameTan!"}
+                </h2>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {isZh
+                    ? "选择一种方式发现你的玩家原型"
+                    : "Choose a way to discover your gamer archetype"}
+                </p>
+              </CardContent>
+            </Card>
+          )}
+
+          {!isWelcome && (
+            <div className="text-center space-y-1 py-2">
+              <Target size={28} className="text-primary mx-auto" />
+              <h2 className="text-base font-bold">
+                {isZh ? "发现你的玩家原型" : "Discover Your Archetype"}
               </h2>
-              <p className="text-sm text-muted-foreground">
-                {isZh
-                  ? "完成 13 项天赋测试，揭示你独一无二的玩家原型"
-                  : "Complete 13 talent tests to reveal your unique gamer archetype"}
-              </p>
             </div>
+          )}
 
-            {/* Feature preview */}
-            <div className="grid grid-cols-3 gap-2 text-center">
-              <div className="p-2 rounded-lg bg-background/60">
-                <div className="text-lg font-bold text-primary">13</div>
-                <div className="text-[10px] text-muted-foreground">
-                  {isZh ? "趣味小游戏" : "Mini Games"}
+          {/* Quick Quiz — 3 games, 3 min */}
+          <Link href="/quiz" className="block">
+            <Card className="pressable border-primary/20 hover:border-primary/40 transition-colors">
+              <CardContent className="pt-4 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <Sparkles size={20} className="text-primary" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-sm">
+                      {isZh ? "快速测试" : "Quick Quiz"}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {isZh ? "3 个小游戏 · 3 分钟" : "3 mini games · 3 min"}
+                    </div>
+                  </div>
+                  <ChevronRight size={16} className="text-muted-foreground shrink-0" />
                 </div>
-              </div>
-              <div className="p-2 rounded-lg bg-background/60">
-                <div className="text-lg font-bold text-primary">~25</div>
-                <div className="text-[10px] text-muted-foreground">
-                  {isZh ? "分钟" : "Minutes"}
-                </div>
-              </div>
-              <div className="p-2 rounded-lg bg-background/60">
-                <div className="text-lg font-bold text-primary">16</div>
-                <div className="text-[10px] text-muted-foreground">
-                  {isZh ? "种原型" : "Archetypes"}
-                </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
+          </Link>
 
-            <Link href="/test" className="block">
-              <Button size="lg" className="w-full h-12 text-base">
-                {isZh ? "开始测试" : "Start Test"}
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+          {/* Questionnaire — 39 questions, 5 min */}
+          <Link href="/quiz/questions" className="block">
+            <Card className="pressable hover:border-primary/30 transition-colors">
+              <CardContent className="pt-4 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
+                    <ClipboardList size={20} className="text-purple-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-sm">
+                      {isZh ? "问卷测试" : "Questionnaire"}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {isZh ? "39 道题 · 5 分钟" : "39 questions · 5 min"}
+                    </div>
+                  </div>
+                  <ChevronRight size={16} className="text-muted-foreground shrink-0" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+
+          {/* Explore first */}
+          <Link href="/explore" className="block">
+            <Card className="pressable hover:border-primary/30 transition-colors">
+              <CardContent className="pt-4 pb-4">
+                <div className="flex items-center gap-3">
+                  <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
+                    <Compass size={20} className="text-green-500" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-sm">
+                      {isZh ? "先逛逛" : "Explore First"}
+                    </div>
+                    <div className="text-xs text-muted-foreground">
+                      {isZh ? "300+ 游戏 · 16 种原型" : "300+ games · 16 archetypes"}
+                    </div>
+                  </div>
+                  <ChevronRight size={16} className="text-muted-foreground shrink-0" />
+                </div>
+              </CardContent>
+            </Card>
+          </Link>
+        </div>
       )}
 
       {/* ─── Daily Challenge ─── */}
@@ -341,14 +398,14 @@ export default function DashboardPage() {
 
       {/* ─── Quick actions ─── */}
       <div className="grid grid-cols-2 gap-3">
-        <Link href="/test">
+        <Link href="/pk">
           <Card className="pressable h-full">
             <CardContent className="pt-4 pb-4 flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 flex items-center justify-center">
-                <Target size={20} className="text-blue-500" />
+              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
+                <Swords size={20} className="text-red-500" />
               </div>
               <span className="text-xs font-medium">
-                {isZh ? "完整测试" : "Full Test"}
+                {isZh ? "PK 挑战" : "PK Challenge"}
               </span>
             </CardContent>
           </Card>
@@ -357,7 +414,7 @@ export default function DashboardPage() {
           <Card className="pressable h-full">
             <CardContent className="pt-4 pb-4 flex flex-col items-center gap-2">
               <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                <Swords size={20} className="text-purple-500" />
+                <Bot size={20} className="text-purple-500" />
               </div>
               <span className="text-xs font-medium">
                 {isZh ? "AI 角色" : "AI Characters"}
@@ -366,6 +423,23 @@ export default function DashboardPage() {
           </Card>
         </Link>
       </div>
+
+      {/* ─── Share archetype (only if has one) ─── */}
+      {archetype && (
+        <Link href={`/archetype/${archetype.id}`}>
+          <Card className="pressable">
+            <CardContent className="pt-3 pb-3">
+              <div className="flex items-center gap-3">
+                <Share2 size={16} className="text-primary shrink-0" />
+                <span className="text-sm font-medium flex-1">
+                  {isZh ? "分享你的原型给朋友" : "Share your archetype with friends"}
+                </span>
+                <ChevronRight size={16} className="text-muted-foreground" />
+              </div>
+            </CardContent>
+          </Card>
+        </Link>
+      )}
     </div>
   );
 }
