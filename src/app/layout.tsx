@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { Analytics } from "@vercel/analytics/next";
 import { I18nProvider } from "@/i18n/context";
 import "./globals.css";
 
@@ -117,6 +118,7 @@ export default function RootLayout({
       >
         <script dangerouslySetInnerHTML={{ __html: APP_INIT_SCRIPT }} />
         <I18nProvider>{children}</I18nProvider>
+        <Analytics />
       </body>
     </html>
   );
