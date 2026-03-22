@@ -14,6 +14,7 @@ import type { Archetype } from "@/lib/archetype";
 import { Swords, Heart, TrendingUp, Gamepad2, Crown, MessageSquare, Users, Brain, Sparkles } from "lucide-react";
 import { celebrationBurst, starBurst } from "@/lib/confetti";
 import type { TalentCategory, Rank, GenreRecommendation } from "@/types/talent";
+import { GameRecommendations } from "@/components/game-recommendations";
 
 interface ProfileData {
   reactionSpeed: number | null;
@@ -285,23 +286,14 @@ export default function ResultDetailPage({
             </CardContent>
           </Card>
 
-          {/* Recommended genres */}
-          <div>
-            <div className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5">
-              <Gamepad2 size={12} />
-              {isZh ? "推荐游戏类型" : "Recommended Genres"}
-            </div>
-            <div className="flex flex-wrap gap-2">
-              {archetype.genres.map((genre) => (
-                <span
-                  key={genre}
-                  className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium"
-                >
-                  {genre.toUpperCase()}
-                </span>
-              ))}
-            </div>
-          </div>
+          {/* Recommended games for this archetype */}
+          <GameRecommendations
+            genres={archetype.genres}
+            archetypeName={archetype.name}
+            archetypeNameEn={archetype.nameEn}
+            gradient={archetype.gradient}
+            isZh={isZh}
+          />
         </div>
       ) : (
         /* No archetype — show basic score header */

@@ -29,6 +29,7 @@ import {
 } from "lucide-react";
 import { parseScores, parseTalentScores } from "@/lib/quiz-utils";
 import { NpsPrompt } from "@/components/nps-prompt";
+import { GameRecommendations } from "@/components/game-recommendations";
 
 const TALENT_LABELS_ZH: Record<string, string> = {
   reaction_speed: "反应速度",
@@ -452,23 +453,14 @@ function QuizResultContent() {
         </Card>
         </motion.div>
 
-        {/* Recommended genres */}
-        <div>
-          <div className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5">
-            <Gamepad2 size={12} />
-            {isZh ? "推荐游戏类型" : "Recommended Genres"}
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {archetype.genres.map((genre) => (
-              <span
-                key={genre}
-                className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium"
-              >
-                {genre.toUpperCase()}
-              </span>
-            ))}
-          </div>
-        </div>
+        {/* Recommended games for this archetype */}
+        <GameRecommendations
+          genres={archetype.genres}
+          archetypeName={archetype.name}
+          archetypeNameEn={archetype.nameEn}
+          gradient={archetype.gradient}
+          isZh={isZh}
+        />
 
         {/* PK Challenge CTA — hidden, feature paused */}
 
