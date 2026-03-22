@@ -34,15 +34,17 @@ function QuestionnaireContent() {
   const total = questions.length;
   const answered = Object.keys(answers).length;
   const progress = Math.round((answered / total) * 100);
-  const q = questions[currentIndex];
+  // Clamp index defensively in case a stale timeout pushed it out of bounds
+  const safeIndex = Math.min(currentIndex, total - 1);
+  const q = questions[safeIndex];
 
   const likertLabels = isZh ? LIKERT_LABELS_ZH : LIKERT_LABELS_EN;
 
   const handleAnswer = (value: number) => {
     setAnswers((prev) => ({ ...prev, [q.id]: value }));
-    // Auto-advance after 300ms
+    // Auto-advance after 300ms (clamp to last question to prevent out-of-bounds)
     if (currentIndex < total - 1) {
-      setTimeout(() => setCurrentIndex((i) => i + 1), 300);
+      setTimeout(() => setCurrentIndex((i) => Math.min(total - 1, i + 1)), 300);
     }
   };
 

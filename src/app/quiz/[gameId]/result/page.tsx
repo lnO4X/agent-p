@@ -1,7 +1,7 @@
 "use client";
 
-import { Suspense, useMemo } from "react";
-import { useParams, useSearchParams } from "next/navigation";
+import { Suspense, useMemo, useEffect } from "react";
+import { useParams, useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -73,6 +73,7 @@ export default function GameQuizResultPage() {
 function GameQuizResultContent() {
   const params = useParams<{ gameId: string }>();
   const searchParams = useSearchParams();
+  const router = useRouter();
   const { locale } = useI18n();
   const isZh = locale === "zh";
 
@@ -106,6 +107,14 @@ function GameQuizResultContent() {
     typeof document !== "undefined" &&
     document.cookie.includes("auth-token=");
 
+  // Archetype exists but no matching character for this game → fall back to generic result page
+  useEffect(() => {
+    if (quiz && archetype && !character) {
+      const fallbackParams = new URLSearchParams(searchParams.toString());
+      router.replace(`/quiz/result?${fallbackParams.toString()}`);
+    }
+  }, [quiz, archetype, character, searchParams, router]);
+
   // Not found: no quiz config
   if (!quiz) {
     return (
@@ -122,17 +131,14 @@ function GameQuizResultContent() {
     );
   }
 
-  // Not found: no archetype/character match
+  // Not found: no archetype/character match (shows briefly during redirect to generic result page)
   if (!archetype || !character) {
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="text-center space-y-4">
-          <p className="text-muted-foreground">
-            {isZh ? "没有测试数据" : "No quiz data found"}
+          <p className="text-sm text-muted-foreground">
+            {isZh ? "正在加载..." : "Loading..."}
           </p>
-          <Link href={`/quiz/${gameId}`}>
-            <Button>{isZh ? "开始测试" : "Take the Quiz"}</Button>
-          </Link>
         </div>
       </div>
     );
