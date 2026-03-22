@@ -11,6 +11,7 @@
  */
 
 const COOKIE_NAME = "auth-token";
+const LOGGED_IN_COOKIE = "logged-in";
 const MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
 /**
@@ -20,6 +21,7 @@ const MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 export function setClientAuthCookie(token: string) {
   const secure = window.location.protocol === "https:" ? "; Secure" : "";
   document.cookie = `${COOKIE_NAME}=${token}; path=/; max-age=${MAX_AGE}; SameSite=Lax${secure}`;
+  document.cookie = `${LOGGED_IN_COOKIE}=1; path=/; max-age=${MAX_AGE}; SameSite=Lax${secure}`;
 }
 
 /**
@@ -28,4 +30,5 @@ export function setClientAuthCookie(token: string) {
  */
 export function clearClientAuthCookie() {
   document.cookie = `${COOKIE_NAME}=; path=/; max-age=0`;
+  document.cookie = `${LOGGED_IN_COOKIE}=; path=/; max-age=0`;
 }

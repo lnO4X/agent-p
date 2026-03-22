@@ -60,8 +60,8 @@ export default function MainLayout({
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
-    // Check if user has auth cookie (client-side detection)
-    const hasToken = document.cookie.includes("auth-token=");
+    // Check if user has login indicator cookie (non-httpOnly, set alongside auth token)
+    const hasToken = document.cookie.includes("logged-in=");
     setIsLoggedIn(hasToken);
     if (!hasToken) return;
     fetch("/api/notifications?limit=1")

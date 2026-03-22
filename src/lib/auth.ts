@@ -2,6 +2,7 @@ import { SignJWT, jwtVerify } from "jose";
 import { cookies } from "next/headers";
 
 const COOKIE_NAME = "auth-token";
+const LOGGED_IN_COOKIE = "logged-in"; // non-httpOnly indicator for client JS
 const JWT_EXPIRY = "30d";
 const COOKIE_MAX_AGE = 60 * 60 * 24 * 30; // 30 days
 
@@ -42,6 +43,14 @@ export async function setAuthCookie(token: string) {
     maxAge: COOKIE_MAX_AGE,
     path: "/",
   });
+  // Non-httpOnly indicator so client JS can detect login state
+  cookieStore.set(LOGGED_IN_COOKIE, "1", {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge: COOKIE_MAX_AGE,
+    path: "/",
+  });
 }
 
 /**
@@ -51,10 +60,12 @@ export async function setAuthCookie(token: string) {
  */
 export const AUTH_COOKIE_NAME = COOKIE_NAME;
 export const AUTH_COOKIE_MAX_AGE = COOKIE_MAX_AGE;
+export const LOGGED_IN_COOKIE_NAME = LOGGED_IN_COOKIE;
 
 export async function clearAuthCookie() {
   const cookieStore = await cookies();
   cookieStore.delete(COOKIE_NAME);
+  cookieStore.delete(LOGGED_IN_COOKIE);
 }
 
 export async function getAuthFromCookie(): Promise<{

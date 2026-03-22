@@ -3,7 +3,7 @@ import { nanoid } from "nanoid";
 import { db } from "@/db";
 import { users, referrals } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
-import { createToken, AUTH_COOKIE_NAME, AUTH_COOKIE_MAX_AGE } from "@/lib/auth";
+import { createToken, AUTH_COOKIE_NAME, AUTH_COOKIE_MAX_AGE, LOGGED_IN_COOKIE_NAME } from "@/lib/auth";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
 
@@ -194,6 +194,14 @@ export async function GET(request: NextRequest) {
     const response = NextResponse.redirect(`${BASE_URL}/dashboard`);
     response.cookies.set(AUTH_COOKIE_NAME, jwt, {
       httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: AUTH_COOKIE_MAX_AGE,
+      path: "/",
+    });
+    // Non-httpOnly indicator so client JS can detect login state
+    response.cookies.set(LOGGED_IN_COOKIE_NAME, "1", {
+      httpOnly: false,
       secure: process.env.NODE_ENV === "production",
       sameSite: "lax",
       maxAge: AUTH_COOKIE_MAX_AGE,
