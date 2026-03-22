@@ -82,6 +82,25 @@ export default function ArchetypeDetailPage({
         </CardContent>
       </Card>
 
+      {/* Deep dive sections */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+        {[
+          { section: "games", icon: "🎮", zh: "推荐游戏", en: "Games" },
+          { section: "relationships", icon: "💞", zh: "关系图谱", en: "Relationships" },
+          { section: "growth", icon: "📈", zh: "进化之路", en: "Growth" },
+          { section: "characters", icon: "🎭", zh: "角色匹配", en: "Characters" },
+        ].map(({ section, icon, zh, en }) => (
+          <Link
+            key={section}
+            href={`/archetype/${id}/${section}`}
+            className="pressable flex flex-col items-center gap-1.5 p-3 rounded-xl border hover:bg-muted/50 transition-colors"
+          >
+            <span className="text-xl">{icon}</span>
+            <span className="text-xs font-medium">{isZh ? zh : en}</span>
+          </Link>
+        ))}
+      </div>
+
       {/* Strength & Weakness */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
         <Card>
