@@ -25,6 +25,21 @@ export const loginSchema = z.object({
   captchaAnswer: z.string().min(1),
 });
 
+export const forgotPasswordSchema = z.object({
+  email: z.string().email("请输入有效的邮箱 / Please enter a valid email"),
+});
+
+export const resetPasswordSchema = z.object({
+  token: z.string().min(1, "Token is required"),
+  password: z
+    .string()
+    .min(8, "密码至少8个字符 / Password must be at least 8 characters")
+    .max(50, "密码最多50个字符")
+    .regex(/[a-z]/, "密码需包含小写字母 / Must include a lowercase letter")
+    .regex(/[A-Z]/, "密码需包含大写字母 / Must include an uppercase letter")
+    .regex(/[0-9]/, "密码需包含数字 / Must include a digit"),
+});
+
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "请输入当前密码"),
   newPassword: z

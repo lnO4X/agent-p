@@ -16,10 +16,14 @@ export const users = pgTable(
   {
     id: text("id").primaryKey(),
     username: text("username").notNull(),
-    passwordHash: text("password_hash").notNull(),
+    passwordHash: text("password_hash"), // nullable: OAuth users don't have passwords
     displayName: text("display_name"),
     email: text("email"),
     emailVerifiedAt: timestamp("email_verified_at"),
+    googleId: text("google_id"),
+    avatarUrl: text("avatar_url"),
+    failedLoginAttempts: integer("failed_login_attempts").default(0).notNull(),
+    lockedUntil: timestamp("locked_until"),
     isProfilePublic: boolean("is_profile_public").default(true).notNull(),
     isAdmin: boolean("is_admin").default(false).notNull(),
     tier: text("tier", { enum: ["free", "premium"] }).notNull().default("free"),
@@ -34,6 +38,26 @@ export const users = pgTable(
     uniqueIndex("users_username_idx").on(table.username),
     uniqueIndex("users_referral_code_idx").on(table.referralCode),
     uniqueIndex("users_steam_id_idx").on(table.steamId),
+    uniqueIndex("users_google_id_idx").on(table.googleId),
+    uniqueIndex("users_email_idx").on(table.email),
+  ]
+);
+
+// ==================== VERIFICATION TOKENS ====================
+export const verificationTokens = pgTable(
+  "verification_tokens",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+    type: text("type", { enum: ["password_reset", "email_verify"] }).notNull(),
+    token: text("token").notNull(),
+    expiresAt: timestamp("expires_at").notNull(),
+    usedAt: timestamp("used_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("verification_tokens_token_idx").on(table.token),
+    index("verification_tokens_user_idx").on(table.userId),
   ]
 );
 

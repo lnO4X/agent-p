@@ -171,3 +171,77 @@ export function streakMilestoneHtml(opts: {
 </body>
 </html>`;
 }
+
+/**
+ * Password reset email
+ */
+export function passwordResetHtml(opts: {
+  username: string;
+  resetUrl: string;
+  isZh: boolean;
+}): string {
+  const { username, resetUrl, isZh } = opts;
+
+  const title = isZh
+    ? `${username}，重置密码`
+    : `${username}, Reset Your Password`;
+
+  const body = isZh
+    ? "点击下方按钮重置你的密码。此链接将在 1 小时后过期。"
+    : "Click the button below to reset your password. This link expires in 1 hour.";
+
+  const ctaText = isZh ? "重置密码" : "Reset Password";
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; background: #f9fafb;">
+  <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <h2 style="margin: 0 0 12px; font-size: 18px; color: #111;">${title}</h2>
+    <p style="font-size: 14px; color: #333; margin: 0 0 16px;">${body}</p>
+    <a href="${resetUrl}" style="display: inline-block; background: #007AFF; color: white; text-decoration: none; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;">
+      ${ctaText}
+    </a>
+    <p style="margin: 16px 0 0; font-size: 11px; color: #999;">GameTan · gametan.ai</p>
+  </div>
+</body>
+</html>`;
+}
+
+/**
+ * Email verification email
+ */
+export function emailVerificationHtml(opts: {
+  username: string;
+  verifyUrl: string;
+  isZh: boolean;
+}): string {
+  const { username, verifyUrl, isZh } = opts;
+
+  const title = isZh
+    ? `${username}，验证邮箱`
+    : `${username}, Verify Your Email`;
+
+  const body = isZh
+    ? "点击下方按钮验证你的邮箱地址。"
+    : "Click the button below to verify your email address.";
+
+  const ctaText = isZh ? "验证邮箱" : "Verify Email";
+
+  return `
+<!DOCTYPE html>
+<html>
+<head><meta charset="utf-8"></head>
+<body style="font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif; max-width: 480px; margin: 0 auto; padding: 24px; background: #f9fafb;">
+  <div style="background: white; border-radius: 16px; padding: 24px; box-shadow: 0 1px 3px rgba(0,0,0,0.1);">
+    <h2 style="margin: 0 0 12px; font-size: 18px; color: #111;">${title}</h2>
+    <p style="font-size: 14px; color: #333; margin: 0 0 16px;">${body}</p>
+    <a href="${verifyUrl}" style="display: inline-block; background: #007AFF; color: white; text-decoration: none; padding: 10px 24px; border-radius: 10px; font-size: 14px; font-weight: 600;">
+      ${ctaText}
+    </a>
+    <p style="margin: 16px 0 0; font-size: 11px; color: #999;">GameTan · gametan.ai</p>
+  </div>
+</body>
+</html>`;
+}

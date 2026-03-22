@@ -66,6 +66,18 @@ export async function POST(request: NextRequest) {
     }
 
     const user = rows[0];
+
+    // OAuth-only users don't have a password
+    if (!user.passwordHash) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: "NO_PASSWORD", message: "此账号通过 Google 登录，无法修改密码 / This account uses Google sign-in" },
+        },
+        { status: 400 }
+      );
+    }
+
     const match = await bcrypt.compare(currentPassword, user.passwordHash);
     if (!match) {
       return NextResponse.json(

@@ -8,6 +8,9 @@ import { verifyCaptcha } from "@/lib/captcha";
 import { createToken, setAuthCookie } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/redis";
 
+const MAX_FAILED_ATTEMPTS = 5;
+const LOCKOUT_MINUTES = 15;
+
 export async function POST(request: NextRequest) {
   try {
     // IP-based rate limiting: max 10 login attempts per 5 minutes
@@ -72,24 +75,79 @@ export async function POST(request: NextRequest) {
     }
 
     const user = rows[0];
-    const passwordMatch = await bcrypt.compare(password, user.passwordHash);
-    if (!passwordMatch) {
+
+    // Check account lockout
+    if (user.lockedUntil && user.lockedUntil > new Date()) {
+      const minutesLeft = Math.ceil((user.lockedUntil.getTime() - Date.now()) / 60000);
       return NextResponse.json(
         {
           success: false,
-          error: { code: "UNAUTHORIZED", message: "用户名或密码错误" },
+          error: {
+            code: "ACCOUNT_LOCKED",
+            message: `账号已锁定，请${minutesLeft}分钟后再试 / Account locked, try again in ${minutesLeft} minutes`,
+          },
+        },
+        { status: 423 }
+      );
+    }
+
+    // Check if user has a password (OAuth-only users don't)
+    if (!user.passwordHash) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: {
+            code: "NO_PASSWORD",
+            message: "此账号通过 Google 登录，请使用 Google 登录 / This account uses Google sign-in",
+          },
+        },
+        { status: 400 }
+      );
+    }
+
+    const passwordMatch = await bcrypt.compare(password, user.passwordHash);
+    if (!passwordMatch) {
+      // Increment failed attempts
+      const newAttempts = user.failedLoginAttempts + 1;
+      const updates: Record<string, unknown> = {
+        failedLoginAttempts: newAttempts,
+        updatedAt: new Date(),
+      };
+
+      // Lock account after MAX_FAILED_ATTEMPTS
+      if (newAttempts >= MAX_FAILED_ATTEMPTS) {
+        updates.lockedUntil = new Date(Date.now() + LOCKOUT_MINUTES * 60 * 1000);
+      }
+
+      await db.update(users).set(updates).where(eq(users.id, user.id));
+
+      const remainingAttempts = MAX_FAILED_ATTEMPTS - newAttempts;
+      const message = remainingAttempts > 0
+        ? `用户名或密码错误 (剩余${remainingAttempts}次) / Wrong credentials (${remainingAttempts} attempts left)`
+        : `账号已锁定${LOCKOUT_MINUTES}分钟 / Account locked for ${LOCKOUT_MINUTES} minutes`;
+
+      return NextResponse.json(
+        {
+          success: false,
+          error: { code: "UNAUTHORIZED", message },
         },
         { status: 401 }
       );
+    }
+
+    // Reset failed attempts on successful login
+    if (user.failedLoginAttempts > 0) {
+      await db.update(users).set({
+        failedLoginAttempts: 0,
+        lockedUntil: null,
+        updatedAt: new Date(),
+      }).where(eq(users.id, user.id));
     }
 
     // Issue JWT
     const token = await createToken({ sub: user.id, username: user.username });
     await setAuthCookie(token);
 
-    // Return token in body so client can set cookie via document.cookie.
-    // WeChat WKWebView doesn't reliably sync Set-Cookie from fetch() responses
-    // to its navigation cookie store. Client-side cookie is the universal fix.
     return NextResponse.json({
       success: true,
       data: {

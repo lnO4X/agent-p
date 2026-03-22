@@ -6,9 +6,16 @@ const PUBLIC_PATHS = [
   "/",
   "/login",
   "/register",
+  "/forgot-password",
+  "/reset-password",
   "/api/auth/login",
   "/api/auth/register",
   "/api/auth/captcha",
+  "/api/auth/forgot-password",
+  "/api/auth/reset-password",
+  "/api/auth/google",
+  "/api/auth/callback/google",
+  "/api/auth/verify-email",
   "/api/voice/health",
 ];
 
