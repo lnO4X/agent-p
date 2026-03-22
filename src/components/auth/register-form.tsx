@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CaptchaInput } from "./captcha-input";
 import { useI18n } from "@/i18n/context";
 import { setClientAuthCookie } from "@/lib/client-auth";
 
@@ -30,30 +29,15 @@ export function RegisterForm() {
     const ref = params.get("ref");
     if (ref) setReferredBy(ref.toUpperCase().slice(0, 8));
   }, []);
-  const [captchaToken, setCaptchaToken] = useState("");
-  const [captchaAnswer, setCaptchaAnswer] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const captchaRefreshRef = useRef<(() => void) | null>(null);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError("");
 
-    if (!captchaToken) {
-      setError(isZh ? "验证码加载中，请稍候" : "Captcha loading, please wait");
-      return;
-    }
-    if (!captchaAnswer.trim()) {
-      setError(isZh ? "请输入验证码" : "Please enter the captcha");
-      return;
-    }
-    if (password.length < 8) {
-      setError(isZh ? "密码至少8个字符" : "Password must be at least 8 characters");
-      return;
-    }
-    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
-      setError(isZh ? "密码需包含大小写字母和数字" : "Password must include uppercase, lowercase, and a digit");
+    if (password.length < 6) {
+      setError(isZh ? "密码至少6个字符" : "Password must be at least 6 characters");
       return;
     }
     if (loading) return;
@@ -64,7 +48,7 @@ export function RegisterForm() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          username, password, captchaToken, captchaAnswer,
+          username, password,
           ...(referredBy.trim() ? { referredBy: referredBy.trim().toUpperCase() } : {}),
         }),
       });
@@ -78,12 +62,9 @@ export function RegisterForm() {
         return; // Keep loading=true — button stays disabled during navigation
       } else {
         setError(json.error?.message || (isZh ? "注册失败" : "Registration failed"));
-        setCaptchaAnswer("");
-        captchaRefreshRef.current?.();
       }
     } catch {
       setError(isZh ? "网络错误" : "Network error");
-      captchaRefreshRef.current?.();
     }
     setLoading(false);
   }
@@ -126,7 +107,7 @@ export function RegisterForm() {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder={isZh ? "至少8位含大小写和数字" : "8+ chars, upper/lower/digit"}
+              placeholder={isZh ? "至少6个字符" : "6+ characters"}
               autoComplete="new-password"
             />
           </div>
@@ -143,15 +124,6 @@ export function RegisterForm() {
               className="font-mono tracking-wider uppercase"
             />
           </div>
-          <CaptchaInput
-            token={captchaToken}
-            setToken={setCaptchaToken}
-            value={captchaAnswer}
-            onChange={setCaptchaAnswer}
-            onRefreshReady={(fn) => {
-              captchaRefreshRef.current = fn;
-            }}
-          />
         </CardContent>
         <CardFooter className="flex flex-col gap-3">
           <Button type="submit" className="w-full" disabled={loading}>

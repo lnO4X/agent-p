@@ -8,21 +8,14 @@ export const registerSchema = z.object({
     .regex(/^[a-zA-Z0-9_]+$/, "用户名只能包含字母、数字和下划线"),
   password: z
     .string()
-    .min(8, "密码至少8个字符 / Password must be at least 8 characters")
-    .max(50, "密码最多50个字符")
-    .regex(/[a-z]/, "密码需包含小写字母 / Must include a lowercase letter")
-    .regex(/[A-Z]/, "密码需包含大写字母 / Must include an uppercase letter")
-    .regex(/[0-9]/, "密码需包含数字 / Must include a digit"),
-  captchaToken: z.string().min(1),
-  captchaAnswer: z.string().min(1),
+    .min(6, "密码至少6个字符 / Password must be at least 6 characters")
+    .max(50, "密码最多50个字符"),
   referredBy: z.string().max(8).optional(),
 });
 
 export const loginSchema = z.object({
   username: z.string().min(1, "请输入用户名"),
   password: z.string().min(1, "请输入密码"),
-  captchaToken: z.string().min(1),
-  captchaAnswer: z.string().min(1),
 });
 
 export const forgotPasswordSchema = z.object({
@@ -33,22 +26,16 @@ export const resetPasswordSchema = z.object({
   token: z.string().min(1, "Token is required"),
   password: z
     .string()
-    .min(8, "密码至少8个字符 / Password must be at least 8 characters")
-    .max(50, "密码最多50个字符")
-    .regex(/[a-z]/, "密码需包含小写字母 / Must include a lowercase letter")
-    .regex(/[A-Z]/, "密码需包含大写字母 / Must include an uppercase letter")
-    .regex(/[0-9]/, "密码需包含数字 / Must include a digit"),
+    .min(6, "密码至少6个字符 / Password must be at least 6 characters")
+    .max(50, "密码最多50个字符"),
 });
 
 export const changePasswordSchema = z.object({
   currentPassword: z.string().min(1, "请输入当前密码"),
   newPassword: z
     .string()
-    .min(8, "密码至少8个字符 / Password must be at least 8 characters")
-    .max(50, "新密码最多50个字符")
-    .regex(/[a-z]/, "密码需包含小写字母 / Must include a lowercase letter")
-    .regex(/[A-Z]/, "密码需包含大写字母 / Must include an uppercase letter")
-    .regex(/[0-9]/, "密码需包含数字 / Must include a digit"),
+    .min(6, "密码至少6个字符 / Password must be at least 6 characters")
+    .max(50, "新密码最多50个字符"),
 });
 
 export const submitScoreSchema = z.object({

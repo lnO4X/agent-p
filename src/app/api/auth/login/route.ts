@@ -4,7 +4,6 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { loginSchema } from "@/lib/validations";
-import { verifyCaptcha } from "@/lib/captcha";
 import { createToken, setAuthCookie } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/redis";
 
@@ -43,19 +42,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { username, password, captchaToken, captchaAnswer } = parsed.data;
-
-    // Verify captcha
-    const captchaValid = await verifyCaptcha(captchaToken, captchaAnswer);
-    if (!captchaValid) {
-      return NextResponse.json(
-        {
-          success: false,
-          error: { code: "CAPTCHA_INVALID", message: "验证码错误或已过期" },
-        },
-        { status: 400 }
-      );
-    }
+    const { username, password } = parsed.data;
 
     // Find user
     const rows = await db

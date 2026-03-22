@@ -9,11 +9,8 @@ const resetPasswordSchema = z.object({
   token: z.string().min(1, "缺少令牌 / Token is required"),
   password: z
     .string()
-    .min(8, "密码至少8个字符 / Password must be at least 8 characters")
-    .max(50, "密码最多50个字符")
-    .regex(/[a-z]/, "密码需包含小写字母 / Must include a lowercase letter")
-    .regex(/[A-Z]/, "密码需包含大写字母 / Must include an uppercase letter")
-    .regex(/[0-9]/, "密码需包含数字 / Must include a digit"),
+    .min(6, "密码至少6个字符 / Password must be at least 6 characters")
+    .max(50, "密码最多50个字符"),
 });
 
 export async function POST(request: NextRequest) {

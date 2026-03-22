@@ -150,7 +150,7 @@ function DashboardContent() {
   return (
     <div className="max-w-lg mx-auto space-y-4">
       {/* ─── Time-aware greeting ─── */}
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-3 animate-fade-up">
         <GreetingIcon size={20} className="text-primary shrink-0" />
         <div>
           <h2 className="text-lg font-bold">
@@ -236,7 +236,7 @@ function DashboardContent() {
 
           {/* Quick Quiz — 3 games, 3 min */}
           <Link href="/quiz" className="block">
-            <Card className="pressable border-primary/20 hover:border-primary/40 transition-colors">
+            <Card className="pressable card-hover border-primary/20 hover:border-primary/40 transition-colors shadow-glow">
               <CardContent className="pt-4 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
@@ -258,7 +258,7 @@ function DashboardContent() {
 
           {/* Questionnaire — 39 questions, 5 min */}
           <Link href="/quiz/questions" className="block">
-            <Card className="pressable hover:border-primary/30 transition-colors">
+            <Card className="pressable card-hover hover:border-primary/30 transition-colors">
               <CardContent className="pt-4 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
@@ -280,7 +280,7 @@ function DashboardContent() {
 
           {/* Explore first */}
           <Link href="/explore" className="block">
-            <Card className="pressable hover:border-primary/30 transition-colors">
+            <Card className="pressable card-hover hover:border-primary/30 transition-colors">
               <CardContent className="pt-4 pb-4">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-green-500/10 flex items-center justify-center shrink-0">
@@ -305,10 +305,10 @@ function DashboardContent() {
       {/* ─── Daily Challenge ─── */}
       <Link href="/challenge">
         <Card
-          className={`pressable ${
+          className={`pressable card-hover ${
             challengeCompleted
               ? "border-green-500/30 bg-green-500/5"
-              : "border-primary/30 bg-primary/5"
+              : "border-primary/30 bg-primary/5 shadow-glow"
           }`}
         >
           <CardContent className="pt-4 pb-4">
@@ -397,9 +397,9 @@ function DashboardContent() {
       )}
 
       {/* ─── Quick actions ─── */}
-      <div className="grid grid-cols-2 gap-3">
+      <div className="grid grid-cols-2 gap-3 animate-fade-up" style={{ animationDelay: "0.1s" }}>
         <Link href="/pk">
-          <Card className="pressable h-full">
+          <Card className="pressable card-hover h-full">
             <CardContent className="pt-4 pb-4 flex flex-col items-center gap-2">
               <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
                 <Swords size={20} className="text-red-500" />
@@ -411,7 +411,7 @@ function DashboardContent() {
           </Card>
         </Link>
         <Link href="/chat">
-          <Card className="pressable h-full">
+          <Card className="pressable card-hover h-full">
             <CardContent className="pt-4 pb-4 flex flex-col items-center gap-2">
               <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
                 <Bot size={20} className="text-purple-500" />

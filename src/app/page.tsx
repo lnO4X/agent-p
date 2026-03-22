@@ -16,7 +16,7 @@ export default function Home() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="max-w-md md:max-w-2xl text-center space-y-6 md:space-y-8 w-full">
           <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
-            Game<span className="text-primary">Tan</span>
+            Game<span className="gradient-text">Tan</span>
           </h1>
 
           <div className="space-y-2">
@@ -36,7 +36,7 @@ export default function Home() {
               <Link
                 key={a.id}
                 href={`/archetype/${a.id}`}
-                className="text-2xl md:text-3xl pressable hover:scale-125 transition-transform"
+                className="text-2xl md:text-3xl pressable hover:scale-125 transition-transform card-hover inline-block"
                 title={isZh ? a.name : a.nameEn}
               >
                 {a.icon}
@@ -55,7 +55,7 @@ export default function Home() {
 
           {/* Primary CTA */}
           <Link href="/quiz" className="block">
-            <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-12">
+            <Button size="lg" className="w-full sm:w-auto text-lg h-14 px-12 shadow-glow-lg">
               {isZh ? "开始测试" : "Start Quiz"}
             </Button>
           </Link>

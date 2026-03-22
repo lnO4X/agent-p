@@ -1,6 +1,7 @@
 "use client";
 
-import { Suspense, useMemo } from "react";
+import { Suspense, useMemo, useEffect } from "react";
+import confetti from "canvas-confetti";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -108,6 +109,18 @@ function QuizResultContent() {
 
   const isZh = locale === "zh";
   const isQuestionnaire = mode === "q";
+
+  // Celebration confetti on mount
+  useEffect(() => {
+    if (archetype) {
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.3 },
+        colors: [archetype.gradient[0], archetype.gradient[1], '#FFD700'],
+      });
+    }
+  }, [archetype]);
 
   // No data → redirect to quiz
   if ((!scores && !isQuestionnaire) || !archetype) {

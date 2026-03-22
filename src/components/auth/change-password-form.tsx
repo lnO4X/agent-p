@@ -34,12 +34,8 @@ export function ChangePasswordForm() {
       setError(isZh ? "两次密码输入不一致" : "Passwords do not match");
       return;
     }
-    if (newPassword.length < 8) {
-      setError(isZh ? "新密码至少8个字符" : "New password must be at least 8 characters");
-      return;
-    }
-    if (!/[A-Z]/.test(newPassword) || !/[a-z]/.test(newPassword) || !/[0-9]/.test(newPassword)) {
-      setError(isZh ? "密码需包含大小写字母和数字" : "Password must include uppercase, lowercase, and a digit");
+    if (newPassword.length < 6) {
+      setError(isZh ? "新密码至少6个字符" : "New password must be at least 6 characters");
       return;
     }
 
@@ -107,7 +103,7 @@ export function ChangePasswordForm() {
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder={isZh ? "至少8位含大小写和数字" : "8+ chars, upper/lower/digit"}
+              placeholder={isZh ? "至少6个字符" : "6+ characters"}
               autoComplete="new-password"
             />
           </div>

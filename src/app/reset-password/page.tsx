@@ -42,12 +42,8 @@ function ResetPasswordForm() {
     setError("");
 
     // Client-side validation
-    if (password.length < 8) {
-      setError(isZh ? "密码至少8个字符" : "Password must be at least 8 characters");
-      return;
-    }
-    if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password)) {
-      setError(isZh ? "密码需包含大小写字母和数字" : "Password must include uppercase, lowercase, and a digit");
+    if (password.length < 6) {
+      setError(isZh ? "密码至少6个字符" : "Password must be at least 6 characters");
       return;
     }
     if (password !== confirmPassword) {
@@ -134,7 +130,7 @@ function ResetPasswordForm() {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={isZh ? "至少8位含大小写和数字" : "8+ chars, upper/lower/digit"}
+                placeholder={isZh ? "至少6个字符" : "6+ characters"}
                 autoComplete="new-password"
                 required
               />

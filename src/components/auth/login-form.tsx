@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,7 +13,6 @@ import {
   CardHeader,
   CardTitle,
 } from "@/components/ui/card";
-import { CaptchaInput } from "./captcha-input";
 import { useI18n } from "@/i18n/context";
 import { setClientAuthCookie } from "@/lib/client-auth";
 
@@ -25,12 +24,9 @@ export function LoginForm() {
 
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
-  const [captchaToken, setCaptchaToken] = useState("");
-  const [captchaAnswer, setCaptchaAnswer] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
-  const captchaRefreshRef = useRef<(() => void) | null>(null);
 
   // Restore remembered username on mount
   useEffect(() => {
@@ -48,15 +44,6 @@ export function LoginForm() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    // Prevent submit if captcha not ready
-    if (!captchaToken) {
-      setError(isZh ? "验证码加载中，请稍候" : "Captcha loading, please wait");
-      return;
-    }
-    if (!captchaAnswer.trim()) {
-      setError(isZh ? "请输入验证码" : "Please enter the captcha");
-      return;
-    }
     if (loading) return;
 
     setError("");
@@ -66,7 +53,7 @@ export function LoginForm() {
       const res = await fetch("/api/auth/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ username, password, captchaToken, captchaAnswer }),
+        body: JSON.stringify({ username, password }),
       });
       const json = await res.json();
       if (json.success) {
@@ -93,12 +80,9 @@ export function LoginForm() {
         return; // Keep loading=true — button stays disabled during navigation
       } else {
         setError(json.error?.message || (isZh ? "登录失败" : "Login failed"));
-        setCaptchaAnswer("");
-        captchaRefreshRef.current?.();
       }
     } catch {
       setError(isZh ? "网络错误，请重试" : "Network error, please retry");
-      captchaRefreshRef.current?.();
     }
     setLoading(false);
   }
@@ -152,15 +136,6 @@ export function LoginForm() {
               {isZh ? "忘记密码？" : "Forgot password?"}
             </Link>
           </div>
-          <CaptchaInput
-            token={captchaToken}
-            setToken={setCaptchaToken}
-            value={captchaAnswer}
-            onChange={setCaptchaAnswer}
-            onRefreshReady={(fn) => {
-              captchaRefreshRef.current = fn;
-            }}
-          />
           <label className="flex items-center gap-2 cursor-pointer select-none">
             <input
               type="checkbox"

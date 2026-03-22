@@ -65,7 +65,7 @@ export function GameCard({ game, fitScore, compact }: GameCardProps) {
 
   return (
     <Link href={`/explore/${game.slug}`}>
-      <Card className="group hover:border-primary/30 transition-colors h-full">
+      <Card className="group hover:border-primary/30 transition-colors h-full card-hover">
         <CardContent className={compact ? "p-2" : "p-3"}>
           {/* Cover */}
           <div
