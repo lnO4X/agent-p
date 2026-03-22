@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from "next/server";
-import { cookies } from "next/headers";
 
 export async function GET(request: NextRequest) {
   try {
@@ -22,16 +21,8 @@ export async function GET(request: NextRequest) {
       process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
     const redirectUri = `${baseUrl}/api/auth/callback/google`;
 
-    // Generate CSRF state and store in cookie
+    // Generate CSRF state
     const state = crypto.randomUUID();
-    const cookieStore = await cookies();
-    cookieStore.set("google_oauth_state", state, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 600, // 10 minutes
-      path: "/",
-    });
 
     const params = new URLSearchParams({
       client_id: clientId,
@@ -45,7 +36,17 @@ export async function GET(request: NextRequest) {
 
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?${params.toString()}`;
 
-    return NextResponse.redirect(googleAuthUrl);
+    // Set state cookie on the redirect response directly
+    // (cookies() API doesn't attach to NextResponse.redirect())
+    const response = NextResponse.redirect(googleAuthUrl);
+    response.cookies.set("google_oauth_state", state, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 600,
+      path: "/",
+    });
+    return response;
   } catch (error) {
     console.error("Google OAuth init error:", error);
     return NextResponse.json(

@@ -3,8 +3,7 @@ import { nanoid } from "nanoid";
 import { db } from "@/db";
 import { users, referrals } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
-import { createToken, setAuthCookie } from "@/lib/auth";
-import { cookies } from "next/headers";
+import { createToken, AUTH_COOKIE_NAME, AUTH_COOKIE_MAX_AGE } from "@/lib/auth";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
 
@@ -42,10 +41,8 @@ export async function GET(request: NextRequest) {
       return NextResponse.redirect(`${BASE_URL}/login?error=google`);
     }
 
-    // Validate CSRF state
-    const cookieStore = await cookies();
-    const storedState = cookieStore.get("google_oauth_state")?.value;
-    cookieStore.delete("google_oauth_state");
+    // Validate CSRF state (read from request cookies)
+    const storedState = request.cookies.get("google_oauth_state")?.value;
 
     if (!storedState || storedState !== state) {
       console.error("Google OAuth state mismatch");
@@ -190,11 +187,21 @@ export async function GET(request: NextRequest) {
       };
     }
 
-    // Issue JWT and set cookie
+    // Issue JWT and set cookie on the redirect response
+    // NOTE: Cannot use setAuthCookie() here because cookies() API writes to a
+    // separate response object that gets discarded when we return NextResponse.redirect().
     const jwt = await createToken({ sub: user.id, username: user.username });
-    await setAuthCookie(jwt);
-
-    return NextResponse.redirect(`${BASE_URL}/dashboard`);
+    const response = NextResponse.redirect(`${BASE_URL}/dashboard`);
+    response.cookies.set(AUTH_COOKIE_NAME, jwt, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: AUTH_COOKIE_MAX_AGE,
+      path: "/",
+    });
+    // Clean up OAuth state cookie
+    response.cookies.delete("google_oauth_state");
+    return response;
   } catch (error) {
     console.error("Google callback error:", error);
     return NextResponse.redirect(`${BASE_URL}/login?error=google`);
