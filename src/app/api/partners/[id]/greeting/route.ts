@@ -123,11 +123,13 @@ ${events.map((e) => `- ${e}`).join("\n")}
 
 Generate ONE short, natural greeting (1-2 sentences, max 100 chars) that references one of these recent events. Be warm, engaging, and in-character. If the user has a streak, acknowledge it enthusiastically. Detect and match the language from partner definition/memory (Chinese or English). Do NOT use emoji. Output ONLY the greeting text, nothing else.`;
 
-    const result = await generateText({
-      model,
-      prompt,
-      maxOutputTokens: 120,
-    });
+    // Race AI generation against 2s timeout — don't let greeting block experience
+    const result = await Promise.race([
+      generateText({ model, prompt, maxOutputTokens: 120 }),
+      new Promise<{ text?: string }>((resolve) =>
+        setTimeout(() => resolve({}), 2000)
+      ),
+    ]);
 
     const greeting = result.text?.trim() || null;
 

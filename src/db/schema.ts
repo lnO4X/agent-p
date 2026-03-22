@@ -519,6 +519,23 @@ export const siteSettings = pgTable("site_settings", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
+// ==================== PRODUCT FEEDBACK (NPS) ====================
+export const productFeedback = pgTable(
+  "product_feedback",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id").references(() => users.id), // nullable for anonymous
+    score: integer("score").notNull(), // 1-10 NPS score
+    comment: text("comment"), // optional text feedback
+    context: text("context").notNull(), // where: "quiz_complete", "first_chat", etc.
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("product_feedback_user_idx").on(table.userId),
+    index("product_feedback_context_idx").on(table.context),
+  ]
+);
+
 // ==================== ACTIVATION CODES ====================
 export const activationCodes = pgTable(
   "activation_codes",

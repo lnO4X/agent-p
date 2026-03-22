@@ -28,6 +28,7 @@ import {
   Target,
 } from "lucide-react";
 import { parseScores, parseTalentScores } from "@/lib/quiz-utils";
+import { NpsPrompt } from "@/components/nps-prompt";
 
 const TALENT_LABELS_ZH: Record<string, string> = {
   reaction_speed: "反应速度",
@@ -469,27 +470,7 @@ function QuizResultContent() {
           </div>
         </div>
 
-        {/* PK Challenge CTA */}
-        <Link href="/pk" className="block">
-          <Card className="pressable border-primary/20 hover:border-primary/40 transition-colors">
-            <CardContent className="py-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                  <Swords size={18} className="text-primary" />
-                </div>
-                <div className="flex-1">
-                  <div className="text-sm font-semibold">
-                    {isZh ? "邀请好友 PK" : "Challenge a Friend"}
-                  </div>
-                  <div className="text-[10px] text-muted-foreground">
-                    {isZh ? "和好友玩同一个游戏，比比谁更强" : "Play the same game and compare scores"}
-                  </div>
-                </div>
-                <ArrowRight size={16} className="text-muted-foreground" />
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+        {/* PK Challenge CTA — hidden, feature paused */}
 
         {/* Secondary actions */}
         <div className="flex gap-3">
@@ -517,6 +498,9 @@ function QuizResultContent() {
           gametan.ai
         </div>
       </div>
+
+      {/* NPS feedback — shows 3s after result reveal */}
+      <NpsPrompt context="quiz_complete" isZh={isZh} delay={3000} />
     </div>
   );
 }

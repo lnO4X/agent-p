@@ -561,21 +561,7 @@ export default function ChallengePage() {
             </CardContent>
           </Card>
         </Link>
-        <Link href="/pk">
-          <Card className="pressable hover:bg-muted/30 transition-colors h-full">
-            <CardContent className="py-3 flex items-center gap-2">
-              <Swords size={16} className="text-primary shrink-0" />
-              <div>
-                <div className="text-xs font-semibold">
-                  {locale === "zh" ? "邀请 PK" : "Challenge a Friend"}
-                </div>
-                <div className="text-[10px] text-muted-foreground">
-                  {locale === "zh" ? "和好友比分数" : "Compare scores"}
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-        </Link>
+        {/* PK link hidden — feature paused */}
       </div>
     </div>
   );

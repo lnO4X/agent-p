@@ -398,18 +398,6 @@ function DashboardContent() {
 
       {/* ─── Quick actions ─── */}
       <div className="grid grid-cols-2 gap-3 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-        <Link href="/pk">
-          <Card className="pressable card-hover h-full">
-            <CardContent className="pt-4 pb-4 flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-red-500/10 flex items-center justify-center">
-                <Swords size={20} className="text-red-500" />
-              </div>
-              <span className="text-xs font-medium">
-                {isZh ? "PK 挑战" : "PK Challenge"}
-              </span>
-            </CardContent>
-          </Card>
-        </Link>
         <Link href="/chat">
           <Card className="pressable card-hover h-full">
             <CardContent className="pt-4 pb-4 flex flex-col items-center gap-2">

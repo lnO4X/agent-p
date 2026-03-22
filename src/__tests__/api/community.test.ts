@@ -42,6 +42,7 @@ vi.mock("nanoid", () => ({
  * and awaiting the chain resolves to the given value.
  */
 function createThenableChain(resolvedValue: unknown) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const chain: Record<string, any> = {};
   const methods = [
     "from", "where", "limit", "offset", "orderBy",

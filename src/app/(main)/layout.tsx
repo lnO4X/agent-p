@@ -31,13 +31,13 @@ const NAV_ITEMS: NavItem[] = [
     href: "/chat",
     labelKey: "nav.partners",
     icon: Bot,
-    activePrefixes: ["/chat", "/marketplace"],
+    activePrefixes: ["/chat"],
   },
   {
     href: "/me",
     labelKey: "nav.me",
     icon: User,
-    activePrefixes: ["/me", "/results", "/leaderboard", "/settings", "/community"],
+    activePrefixes: ["/me", "/results", "/leaderboard", "/settings"],
   },
 ];
 

@@ -172,23 +172,7 @@ export function PartnerHub() {
         )}
       </div>
 
-      {/* Marketplace link */}
-      <Link
-        href="/marketplace"
-        className="flex items-center gap-3 p-4 rounded-2xl bg-primary/5 border border-primary/10 hover:bg-primary/10 transition-colors pressable"
-      >
-        <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-          <Store size={20} className="text-primary" />
-        </div>
-        <div className="flex-1 min-w-0">
-          <div className="text-sm font-semibold">
-            {isZh ? "伙伴市场" : "Partner Market"}
-          </div>
-          <div className="text-xs text-muted-foreground">
-            {isZh ? "发现社区创建的角色" : "Discover community characters"}
-          </div>
-        </div>
-      </Link>
+      {/* Marketplace link — hidden (feature paused, code preserved) */}
 
       {/* Create error toast */}
       {createError && (

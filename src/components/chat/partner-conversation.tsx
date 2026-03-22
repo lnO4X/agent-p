@@ -106,14 +106,19 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
       }
     }
     loadPartner();
+  }, [partnerId]);
 
-    // Fetch proactive greeting (Premium only, fire-and-forget)
-    fetch(`/api/partners/${partnerId}/greeting`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.greeting) setGreeting(data.greeting);
-      })
-      .catch(() => {});
+  // Deferred greeting — load after chat is interactive, not blocking UI
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fetch(`/api/partners/${partnerId}/greeting`)
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.greeting) setGreeting(data.greeting);
+        })
+        .catch(() => {});
+    }, 800); // Delay 800ms to let UI settle first
+    return () => clearTimeout(timer);
   }, [partnerId]);
 
   const { messages, sendMessage, status, error } = useChat({

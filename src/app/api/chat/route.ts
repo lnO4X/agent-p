@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  // Per-user daily chat rate limiting (free=30/day, premium=unlimited)
+  // Per-user daily chat rate limiting (free=5/day, premium=unlimited)
   const today = new Date().toISOString().slice(0, 10);
   let userRow;
   try {
@@ -51,7 +51,7 @@ export async function POST(request: NextRequest) {
   }
   const isPremium = userRow.length > 0 && userRow[0].tier === "premium" &&
     (!userRow[0].tierExpiresAt || userRow[0].tierExpiresAt >= new Date());
-  const dailyLimit = isPremium ? 999 : 30;
+  const dailyLimit = isPremium ? 999 : 5;
   const { allowed } = await checkRateLimit(
     `rl:chat:${auth.sub}:${today}`,
     dailyLimit,

@@ -62,13 +62,7 @@ const MENU_ITEMS = [
     color: "text-yellow-500",
     bg: "bg-yellow-500/10",
   },
-  {
-    href: "/community",
-    labelKey: "me.community",
-    icon: Users,
-    color: "text-green-500",
-    bg: "bg-green-500/10",
-  },
+  // Community link hidden — feature paused, code preserved
   {
     href: "/me/premium",
     labelKey: "me.premium",

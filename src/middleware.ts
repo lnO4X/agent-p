@@ -18,6 +18,7 @@ const PUBLIC_PATHS = [
   "/api/auth/callback/google",
   "/api/auth/verify-email",
   "/api/voice/health",
+  "/api/feedback",
 ];
 
 /** API paths that handle their own auth (Bearer token, cron secret, etc.) */
