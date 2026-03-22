@@ -1,6 +1,7 @@
 import type { MetadataRoute } from "next";
 import { getAllArchetypes } from "@/lib/archetype";
 import { ARCHETYPE_SECTIONS } from "@/lib/archetype-content";
+import { getAllGameQuizIds } from "@/lib/game-quizzes";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
@@ -35,5 +36,13 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }))
   );
 
-  return [...staticPages, ...archetypePages, ...archetypeSectionPages];
+  // Game-specific quiz pages (3 games)
+  const gameQuizPages: MetadataRoute.Sitemap = getAllGameQuizIds().map((gameId) => ({
+    url: `${baseUrl}/quiz/${gameId}`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.8,
+  }));
+
+  return [...staticPages, ...gameQuizPages, ...archetypePages, ...archetypeSectionPages];
 }

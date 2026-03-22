@@ -1,7 +1,7 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useMemo, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useI18n } from "@/i18n/context";
 import { Button } from "@/components/ui/button";
@@ -13,9 +13,19 @@ const LIKERT_LABELS_ZH = ["非常不同意", "不同意", "一般", "同意", "�
 const LIKERT_LABELS_EN = ["Strongly Disagree", "Disagree", "Neutral", "Agree", "Strongly Agree"];
 
 export default function QuestionnairePage() {
+  return (
+    <Suspense>
+      <QuestionnaireContent />
+    </Suspense>
+  );
+}
+
+function QuestionnaireContent() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { locale } = useI18n();
   const isZh = locale === "zh";
+  const gameId = searchParams.get("game");
 
   const questions = useMemo(() => getShuffledQuestions(), []);
   const [answers, setAnswers] = useState<Record<number, number>>({});
@@ -44,7 +54,8 @@ export default function QuestionnairePage() {
     const scoreStr = Object.entries(scores)
       .map(([k, v]) => `${k}:${v}`)
       .join(",");
-    router.push(`/quiz/result?mode=q&archetype=${archetype.id}&scores=${scoreStr}`);
+    const resultBase = gameId ? `/quiz/${gameId}/result` : "/quiz/result";
+    router.push(`${resultBase}?mode=q&archetype=${archetype.id}&scores=${scoreStr}`);
   };
 
   const canSubmit = answered >= total;
@@ -54,7 +65,7 @@ export default function QuestionnairePage() {
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <Link
-          href="/quiz"
+          href={gameId ? `/quiz/${gameId}` : "/quiz"}
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground pressable"
         >
           <ArrowLeft className="w-4 h-4" />

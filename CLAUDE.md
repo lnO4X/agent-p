@@ -398,13 +398,25 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
   - **`partner-conversation.tsx`**: Hardcoded English "Partner not found" → bilingual `isZh ? "找不到该角色" : "Partner not found"`.
   - 114 unit tests passing, build clean, deployed to port 3100
 
+- Phase 37: Auth system overhaul — Google OAuth + password reset + account lockout + email verification
+  - **Google OAuth**: Manual flow (no next-auth). `GET /api/auth/google` → Google consent → `GET /api/auth/callback/google` → find/create/link user → issue JWT. Handles 3 cases: existing by googleId, existing by email (link), new user (create). CSRF state via cookie.
+  - **Password reset**: `POST /api/auth/forgot-password` (rate-limited 3/hr, sends email via Resend, doesn't leak user existence) + `POST /api/auth/reset-password` (validates token, 1hr expiry, resets lockout). UI pages: `/forgot-password`, `/reset-password?token=xxx`.
+  - **Account lockout**: 5 failed attempts → 15 min lock. Shows remaining attempts. Resets on success. Login route fully rewritten.
+  - **Email verification**: `GET /api/auth/verify-email?token=xxx` → sets emailVerifiedAt → redirect to dashboard.
+  - **DB schema**: `googleId`, `avatarUrl`, `failedLoginAttempts`, `lockedUntil` on users table (passwordHash now nullable for OAuth). New `verification_tokens` table.
+  - **UI**: Google button on login + register forms, "Forgot password?" link, forgot/reset password pages.
+  - **Cookie fix**: `cookies().set()` + `NextResponse.redirect()` are incompatible — must use `response.cookies.set()` on the redirect response directly.
+  - 114 unit tests passing, build clean, deployed to Vercel
+  - **Google Cloud**: OAuth consent screen published (production mode), project "gametan", callback URI configured.
+
 ### 🔲 Pending — 阶段 A: 基础加固 + 上云 (详见 docs/roadmap.md)
 - ~~A1: 云部署迁移~~ ✅ 已完成 — gametan.ai on Vercel + Neon + Upstash
-- **A2: Stripe 支付** — 峰值变现: 测试结果页直接购买深度报告 (¥29.9)
+- ~~Auth overhaul~~ ✅ 已完成 — Google OAuth + password reset + account lockout + email verification
+- **A2: LemonSqueezy 支付** — 峰值变现: 测试结果页直接购买深度报告 (¥29.9). LemonSqueezy store created, identity verification may be complete.
 - **A3: 功能精简** — 暂停 Voice, 简化社区, 聚焦 测试→身份→内容→支付
 - **A4: 监控 + CI/CD** — Sentry + GitHub Actions + Vercel auto-deploy
 
 ### 🗓️ 中长期路线
-- **阶段 B (Month 2-4)**: 原型内容深度 (96 SEO页) + 游戏专属测试 (病毒传播) + 深度报告 (PDF)
+- **阶段 B (Month 2-4)**: 游戏专属测试 (病毒传播) + 深度报告 (PDF) + landing page SEO
 - **阶段 C (Month 4-8)**: 英文市场 + SEO矩阵 + 邮件营销 + 游戏厂商合作
 - **阶段 D (Month 8-12)**: 白标引擎 + UGC测试 + API开放 + 数据变现

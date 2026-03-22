@@ -6,7 +6,8 @@ import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n/context";
 import { gameRegistry } from "@/games";
 import { QUICK_TEST_GAMES } from "@/lib/archetype";
-import { Zap, Brain, Dice5, ArrowRight, ClipboardList } from "lucide-react";
+import { getAllGameQuizIds, getGameQuiz } from "@/lib/game-quizzes";
+import { Zap, Brain, Dice5, ArrowRight, ClipboardList, Gamepad2 } from "lucide-react";
 import type { GameRawResult } from "@/types/game";
 import Link from "next/link";
 
@@ -141,6 +142,30 @@ export default function QuizPage() {
                   : "Full Questionnaire (39Q · 5min)"}
               </Button>
             </Link>
+          </div>
+
+          {/* Game-specific quizzes */}
+          <div className="space-y-2 pt-4 border-t border-border">
+            <div className="flex items-center gap-2 justify-center text-sm text-muted-foreground">
+              <Gamepad2 size={16} />
+              {locale === "zh" ? "游戏专属测试" : "Game-Specific Quizzes"}
+            </div>
+            <div className="flex flex-wrap justify-center gap-2">
+              {getAllGameQuizIds().map((gameId) => {
+                const quiz = getGameQuiz(gameId);
+                if (!quiz) return null;
+                return (
+                  <Link
+                    key={gameId}
+                    href={`/quiz/${gameId}`}
+                    className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border text-sm hover:bg-muted transition-colors pressable"
+                  >
+                    <span>{quiz.icon}</span>
+                    <span>{locale === "zh" ? quiz.gameName : quiz.gameNameEn}</span>
+                  </Link>
+                );
+              })}
+            </div>
           </div>
 
           <p className="text-xs text-muted-foreground">
