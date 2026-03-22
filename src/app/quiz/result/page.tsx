@@ -27,6 +27,7 @@ import {
   Crown,
   Target,
 } from "lucide-react";
+import { parseScores, parseTalentScores } from "@/lib/quiz-utils";
 
 const TALENT_LABELS_ZH: Record<string, string> = {
   reaction_speed: "反应速度",
@@ -44,13 +45,6 @@ const TALENT_LABELS_ZH: Record<string, string> = {
   resource_mgmt: "资源管理",
 };
 
-function parseScores(s: string | null): [number, number, number] | null {
-  if (!s) return null;
-  const parts = s.split("-").map(Number);
-  if (parts.length !== 3 || parts.some(isNaN)) return null;
-  return parts as [number, number, number];
-}
-
 export default function QuizResultPage() {
   return (
     <Suspense
@@ -63,19 +57,6 @@ export default function QuizResultPage() {
       <QuizResultContent />
     </Suspense>
   );
-}
-
-/** Parse questionnaire talent scores from URL: "reaction_speed:75,memory:60,..." */
-function parseTalentScores(s: string | null): Partial<Record<TalentCategory, number>> | null {
-  if (!s) return null;
-  const result: Partial<Record<TalentCategory, number>> = {};
-  for (const pair of s.split(",")) {
-    const [key, val] = pair.split(":");
-    if (key && val && !isNaN(Number(val))) {
-      result[key as TalentCategory] = Number(val);
-    }
-  }
-  return Object.keys(result).length > 0 ? result : null;
 }
 
 function QuizResultContent() {
