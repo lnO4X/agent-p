@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Outfit } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { I18nProvider } from "@/i18n/context";
 import "./globals.css";
 
@@ -12,6 +13,12 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+const outfit = Outfit({
+  subsets: ["latin"],
+  weight: ["600", "700", "800"],
+  variable: "--font-outfit",
 });
 
 export const viewport: Viewport = {
@@ -110,7 +117,7 @@ export default function RootLayout({
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased overscroll-none`}
+        className={`${geistSans.variable} ${geistMono.variable} ${outfit.variable} antialiased overscroll-none`}
         style={{
           fontFamily:
             'var(--font-geist-sans), "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, -apple-system, sans-serif',
@@ -119,6 +126,7 @@ export default function RootLayout({
         <script dangerouslySetInnerHTML={{ __html: APP_INIT_SCRIPT }} />
         <I18nProvider>{children}</I18nProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );

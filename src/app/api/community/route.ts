@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getAuthFromCookie } from "@/lib/auth";
 import { db } from "@/db";
 import { communityPosts, communityPostLikes, users } from "@/db/schema";
-import { eq, desc, sql } from "drizzle-orm";
+import { eq, desc, sql, and, inArray } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { z } from "zod";
 
@@ -54,13 +54,16 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .offset(offset);
 
-    // Check which posts the current user liked
+    // Check which posts the current user liked (scoped to fetched post IDs only)
     let likedPostIds: Set<string> = new Set();
-    if (auth) {
+    if (auth && posts.length > 0) {
       const likes = await db
         .select({ postId: communityPostLikes.postId })
         .from(communityPostLikes)
-        .where(eq(communityPostLikes.userId, auth.sub));
+        .where(and(
+          eq(communityPostLikes.userId, auth.sub),
+          inArray(communityPostLikes.postId, posts.map(p => p.id))
+        ));
       likedPostIds = new Set(likes.map((l) => l.postId));
     }
 

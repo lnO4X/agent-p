@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useMemo, useEffect } from "react";
+import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
@@ -187,10 +188,22 @@ function QuizResultContent() {
         }}
       >
         {/* Archetype icon */}
-        <div className="text-6xl md:text-7xl mb-4">{archetype.icon}</div>
+        <motion.div
+          className="text-6xl md:text-7xl mb-4"
+          initial={{ scale: 0, rotate: -180 }}
+          animate={{ scale: 1, rotate: 0 }}
+          transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+        >
+          {archetype.icon}
+        </motion.div>
 
         {/* Archetype name */}
-        <div className="space-y-1 mb-4">
+        <motion.div
+          className="space-y-1 mb-4"
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.5 }}
+        >
           <div className="text-xs text-muted-foreground tracking-widest uppercase">
             {isZh ? "你的玩家原型" : "Your Gamer Archetype"}
           </div>
@@ -209,25 +222,45 @@ function QuizResultContent() {
               {archetype.nameEn}
             </div>
           )}
-        </div>
+        </motion.div>
 
         {/* Tagline */}
-        <p className="text-base md:text-lg text-foreground/80 italic max-w-md mx-auto">
+        <motion.p
+          className="text-base md:text-lg text-foreground/80 italic max-w-md mx-auto"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.6, delay: 0.8 }}
+        >
           &ldquo;{isZh ? archetype.tagline : archetype.taglineEn}&rdquo;
-        </p>
+        </motion.p>
       </div>
 
       {/* Content */}
       <div className="px-6 py-6 max-w-lg mx-auto w-full space-y-5">
         {/* Score bars */}
-        <div className="space-y-2">
+        <motion.div
+          className="space-y-2"
+          initial="hidden"
+          animate="visible"
+          variants={{
+            hidden: {},
+            visible: { transition: { staggerChildren: 0.1, delayChildren: 1.0 } }
+          }}
+        >
           {isQuestionnaire && talentScores ? (
             // Questionnaire mode: show top 5 talents
             Object.entries(talentScores)
               .sort(([, a], [, b]) => (b ?? 0) - (a ?? 0))
               .slice(0, 5)
               .map(([talent, score]) => (
-                <div key={talent} className="flex items-center gap-3">
+                <motion.div
+                  key={talent}
+                  className="flex items-center gap-3"
+                  variants={{
+                    hidden: { opacity: 0, x: -20 },
+                    visible: { opacity: 1, x: 0 }
+                  }}
+                >
                   <span className="text-xs text-muted-foreground w-20 text-right truncate">
                     {isZh ? TALENT_LABELS_ZH[talent] || talent : talent.replace(/_/g, " ")}
                   </span>
@@ -243,12 +276,19 @@ function QuizResultContent() {
                   <span className="text-xs font-bold w-8">
                     {Math.round(score ?? 0)}
                   </span>
-                </div>
+                </motion.div>
               ))
           ) : scores ? (
             // Game mode: show 3 game scores
             scores.map((score, i) => (
-              <div key={i} className="flex items-center gap-3">
+              <motion.div
+                key={i}
+                className="flex items-center gap-3"
+                variants={{
+                  hidden: { opacity: 0, x: -20 },
+                  visible: { opacity: 1, x: 0 }
+                }}
+              >
                 <span className="text-xs text-muted-foreground w-16 text-right">
                   {isZh ? SCORE_LABELS[i].zh : SCORE_LABELS[i].en}
                 </span>
@@ -264,12 +304,17 @@ function QuizResultContent() {
                 <span className="text-xs font-bold w-8">
                   {Math.round(score)}
                 </span>
-              </div>
+              </motion.div>
             ))
           ) : null}
-        </div>
+        </motion.div>
 
         {/* ── Registration CTA — primary conversion hook ── */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 1.5 }}
+        >
         <Card className="border-primary/30 bg-primary/5 overflow-hidden">
           <CardContent className="pt-5 pb-5">
             <div className="text-center mb-4">
@@ -312,8 +357,14 @@ function QuizResultContent() {
             </Link>
           </CardContent>
         </Card>
+        </motion.div>
 
         {/* Description */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 1.65 }}
+        >
         <Card>
           <CardContent className="pt-5 pb-5">
             <p className="text-sm leading-relaxed text-foreground/90">
@@ -321,8 +372,14 @@ function QuizResultContent() {
             </p>
           </CardContent>
         </Card>
+        </motion.div>
 
         {/* Growth Edge (positive framing, matching main results page) */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 1.8 }}
+        >
         <Card className="border-purple-500/20 bg-purple-500/5">
           <CardContent className="pt-4 pb-4">
             <div className="flex items-start gap-3">
@@ -341,9 +398,15 @@ function QuizResultContent() {
             </div>
           </CardContent>
         </Card>
+        </motion.div>
 
         {/* Nemesis & Ally */}
-        <div className="grid grid-cols-2 gap-3">
+        <motion.div
+          className="grid grid-cols-2 gap-3"
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 1.95 }}
+        >
           {nemesis && (
             <Card className="border-red-500/15">
               <CardContent className="pt-4 pb-4 text-center">
@@ -372,9 +435,14 @@ function QuizResultContent() {
               </CardContent>
             </Card>
           )}
-        </div>
+        </motion.div>
 
         {/* Evolution hint */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 2.1 }}
+        >
         <Card
           className="border-primary/20"
           style={{
@@ -400,6 +468,7 @@ function QuizResultContent() {
             </div>
           </CardContent>
         </Card>
+        </motion.div>
 
         {/* Recommended genres */}
         <div>

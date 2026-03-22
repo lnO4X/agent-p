@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { getAllArchetypes } from "@/lib/archetype";
+import { ArchetypeIcon } from "@/components/archetype-icon";
 import { useI18n } from "@/i18n/context";
 
 export default function Home() {
@@ -15,12 +16,12 @@ export default function Home() {
       {/* Hero */}
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="max-w-md md:max-w-2xl text-center space-y-6 md:space-y-8 w-full">
-          <h1 className="text-4xl md:text-5xl font-bold tracking-tight">
+          <h1 className="text-4xl md:text-6xl font-extrabold tracking-tight font-[family-name:var(--font-outfit)]">
             Game<span className="gradient-text">Tan</span>
           </h1>
 
           <div className="space-y-2">
-            <p className="text-2xl md:text-3xl font-bold">
+            <p className="text-2xl md:text-3xl font-bold font-[family-name:var(--font-outfit)]">
               {isZh ? "你是什么类型的玩家？" : "What Kind of Gamer Are You?"}
             </p>
             <p className="text-base md:text-lg text-muted-foreground">
@@ -31,15 +32,15 @@ export default function Home() {
           </div>
 
           {/* Archetype icon parade — clickable */}
-          <div className="flex flex-wrap justify-center gap-2 py-2">
+          <div className="flex flex-wrap justify-center gap-3 py-2">
             {archetypes.slice(0, 16).map((a) => (
               <Link
                 key={a.id}
                 href={`/archetype/${a.id}`}
-                className="text-2xl md:text-3xl pressable hover:scale-125 transition-transform card-hover inline-block"
+                className="pressable hover:scale-110 transition-transform card-hover inline-block"
                 title={isZh ? a.name : a.nameEn}
               >
-                {a.icon}
+                <ArchetypeIcon archetypeId={a.id} size={36} gradient={a.gradient as [string, string]} />
               </Link>
             ))}
           </div>
