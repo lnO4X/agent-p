@@ -15,6 +15,7 @@ export async function GET() {
     .select({
       email: users.email,
       emailVerifiedAt: users.emailVerifiedAt,
+      personalityType: users.personalityType,
     })
     .from(users)
     .where(eq(users.id, auth.sub))
