@@ -9,8 +9,9 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   ArrowLeft, Sparkles, Swords, Shield, Zap, Heart,
-  ArrowUpRight, Gamepad2,
+  ArrowUpRight, Gamepad2, Brain, Users, Eye, TrendingUp,
 } from "lucide-react";
+import { ARCHETYPE_NARRATIVES } from "@/lib/archetype-narratives";
 
 export default function ArchetypeDetailPage({
   params,
@@ -29,6 +30,7 @@ export default function ArchetypeDetailPage({
   const evolution = getArchetype(archetype.evolutionId);
   const allTypes = getAllArchetypes();
 
+  const narrative = ARCHETYPE_NARRATIVES[id];
   const name = isZh ? archetype.name : archetype.nameEn;
   const tagline = isZh ? archetype.tagline : archetype.taglineEn;
   const description = isZh ? archetype.description : archetype.descriptionEn;
@@ -81,6 +83,56 @@ export default function ArchetypeDetailPage({
           </p>
         </CardContent>
       </Card>
+
+      {/* Deep narrative — "this is me" content */}
+      {narrative && (
+        <div className="space-y-4">
+          {[
+            {
+              icon: <Brain className="w-4 h-4" />,
+              titleZh: "你的游戏本能",
+              titleEn: "Your Gaming Instinct",
+              content: isZh ? narrative.instinct : narrative.instinctEn,
+              color: archetype.gradient[0],
+            },
+            {
+              icon: <Eye className="w-4 h-4" />,
+              titleZh: "你的典型行为",
+              titleEn: "Your Typical Behaviors",
+              content: isZh ? narrative.behaviors : narrative.behaviorsEn,
+              color: archetype.gradient[1],
+            },
+            {
+              icon: <Users className="w-4 h-4" />,
+              titleZh: "队友眼中的你",
+              titleEn: "How Teammates See You",
+              content: isZh ? narrative.teamView : narrative.teamViewEn,
+              color: archetype.gradient[0],
+            },
+            {
+              icon: <TrendingUp className="w-4 h-4" />,
+              titleZh: "你的进化之路",
+              titleEn: "Your Growth Path",
+              content: isZh ? narrative.growthPath : narrative.growthPathEn,
+              color: archetype.gradient[1],
+            },
+          ].map(({ icon, titleZh, titleEn, content, color }) => (
+            <Card key={titleEn}>
+              <CardContent className="pt-4 space-y-2">
+                <div className="flex items-center gap-2">
+                  <div style={{ color }}>{icon}</div>
+                  <h3 className="font-semibold text-sm">
+                    {isZh ? titleZh : titleEn}
+                  </h3>
+                </div>
+                <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
+                  {content}
+                </p>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
 
       {/* Deep dive sections */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
