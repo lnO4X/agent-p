@@ -12,6 +12,8 @@ import {
   ArrowUpRight, Gamepad2, Brain, Users, Eye, TrendingUp,
 } from "lucide-react";
 import { ARCHETYPE_NARRATIVES } from "@/lib/archetype-narratives";
+import { getPlayersForArchetype } from "@/lib/hall-of-fame";
+import { Trophy } from "lucide-react";
 
 export default function ArchetypeDetailPage({
   params,
@@ -19,7 +21,7 @@ export default function ArchetypeDetailPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { t, locale } = useI18n();
+  const { t, locale, region } = useI18n();
   const isZh = locale === "zh";
 
   const archetype = getArchetype(id);
@@ -31,6 +33,7 @@ export default function ArchetypeDetailPage({
   const allTypes = getAllArchetypes();
 
   const narrative = ARCHETYPE_NARRATIVES[id];
+  const hallOfFamePlayers = getPlayersForArchetype(id, region).slice(0, 5);
   const name = isZh ? archetype.name : archetype.nameEn;
   const tagline = isZh ? archetype.tagline : archetype.taglineEn;
   const description = isZh ? archetype.description : archetype.descriptionEn;
@@ -132,6 +135,45 @@ export default function ArchetypeDetailPage({
             </Card>
           ))}
         </div>
+      )}
+
+      {/* Hall of Fame */}
+      {hallOfFamePlayers.length > 0 && (
+        <Card>
+          <CardContent className="pt-4 space-y-3">
+            <div className="flex items-center gap-2">
+              <Trophy className="w-4 h-4 text-primary" />
+              <h3 className="font-semibold text-sm">
+                {isZh ? "殿堂选手" : "Hall of Fame"}
+              </h3>
+              <span className="text-[10px] text-muted-foreground ml-auto">
+                {region === "cn" ? "🇨🇳 中国" : "🌍 Global"}
+              </span>
+            </div>
+            <div className="space-y-2">
+              {hallOfFamePlayers.map((player) => (
+                <div
+                  key={player.id}
+                  className="flex items-start gap-3 p-2 rounded-xl bg-muted/40"
+                >
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-medium text-sm truncate">
+                        {isZh ? player.name : player.nameEn}
+                      </span>
+                      <span className="text-[10px] text-muted-foreground shrink-0">
+                        {player.game}
+                      </span>
+                    </div>
+                    <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">
+                      {isZh ? player.signature : player.signatureEn}
+                    </p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
       )}
 
       {/* Deep dive sections */}

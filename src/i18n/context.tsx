@@ -4,9 +4,12 @@
  * I18n React Context + Provider + hook.
  *
  * Usage:
- *   const { t, locale, setLocale } = useI18n();
+ *   const { t, locale, setLocale, region, setRegion } = useI18n();
  *   <p>{t("dashboard.title")}</p>
  *   <p>{t("explore.subtitle", { count: 127 })}</p>
+ *
+ * Region: "cn" (中国) or "global" (🌍).
+ * Changing region also sets the locale: cn→zh, global→en.
  */
 
 import {
@@ -19,15 +22,20 @@ import {
 } from "react";
 import { translate, DEFAULT_LOCALE, type Locale } from "./index";
 
+export type Region = "cn" | "global";
+
 interface I18nContextValue {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: (key: string, params?: Record<string, string | number>) => string;
+  region: Region;
+  setRegion: (region: Region) => void;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 const STORAGE_KEY = "app-locale";
+const REGION_STORAGE_KEY = "app-region";
 
 function getInitialLocale(): Locale {
   if (typeof window === "undefined") return DEFAULT_LOCALE;
@@ -40,8 +48,20 @@ function getInitialLocale(): Locale {
   return DEFAULT_LOCALE;
 }
 
+function getInitialRegion(): Region {
+  if (typeof window === "undefined") return "cn";
+  try {
+    const stored = localStorage.getItem(REGION_STORAGE_KEY);
+    if (stored === "cn" || stored === "global") return stored;
+  } catch {
+    // localStorage unavailable
+  }
+  return "cn";
+}
+
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(getInitialLocale);
+  const [region, setRegionState] = useState<Region>(getInitialRegion);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
@@ -52,6 +72,21 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const setRegion = useCallback(
+    (newRegion: Region) => {
+      setRegionState(newRegion);
+      try {
+        localStorage.setItem(REGION_STORAGE_KEY, newRegion);
+      } catch {
+        // ignore
+      }
+      // Region also drives locale: cn→zh, global→en
+      const newLocale: Locale = newRegion === "cn" ? "zh" : "en";
+      setLocale(newLocale);
+    },
+    [setLocale]
+  );
+
   const t = useCallback(
     (key: string, params?: Record<string, string | number>) =>
       translate(locale, key, params),
@@ -59,8 +94,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
   );
 
   const value = useMemo(
-    () => ({ locale, setLocale, t }),
-    [locale, setLocale, t]
+    () => ({ locale, setLocale, t, region, setRegion }),
+    [locale, setLocale, t, region, setRegion]
   );
 
   return (

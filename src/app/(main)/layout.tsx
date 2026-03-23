@@ -8,8 +8,7 @@ import { useI18n } from "@/i18n/context";
 import { Button } from "@/components/ui/button";
 import { Home, Gamepad2, Bot, User, Bell } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { Locale } from "@/i18n/index";
-import { LOCALE_LABELS, getLocales } from "@/i18n/index";
+import type { Region } from "@/i18n/context";
 
 interface NavItem {
   href: string;
@@ -55,7 +54,7 @@ export default function MainLayout({
 }) {
   const pathname = usePathname();
   const { logout } = useAuth();
-  const { t, locale, setLocale } = useI18n();
+  const { t, locale, setLocale, region, setRegion } = useI18n();
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
@@ -71,8 +70,6 @@ export default function MainLayout({
       })
       .catch(() => {});
   }, []); // Mount only — was [pathname] which refetched on every navigation
-
-  const locales = getLocales();
 
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col">
@@ -121,19 +118,19 @@ export default function MainLayout({
               </Link>
             )}
 
-            {/* Language switcher */}
+            {/* Region selector */}
             <div className="ml-2 flex items-center gap-0.5">
-              {locales.map((l) => (
+              {(["cn", "global"] as Region[]).map((r) => (
                 <button
-                  key={l}
-                  onClick={() => setLocale(l as Locale)}
+                  key={r}
+                  onClick={() => setRegion(r)}
                   className={`px-2 py-1 rounded-lg text-xs transition-colors ${
-                    locale === l
+                    region === r
                       ? "bg-primary/10 text-primary font-medium"
                       : "text-muted-foreground hover:text-foreground"
                   }`}
                 >
-                  {LOCALE_LABELS[l as Locale]}
+                  {r === "cn" ? "🇨🇳" : "🌍"}
                 </button>
               ))}
             </div>
@@ -177,12 +174,12 @@ export default function MainLayout({
                 )}
               </Link>
             )}
-            {/* Language toggle */}
+            {/* Region toggle */}
             <button
-              onClick={() => setLocale(locale === "zh" ? "en" : "zh")}
+              onClick={() => setRegion(region === "cn" ? "global" : "cn")}
               className="text-muted-foreground text-xs px-1.5 py-0.5 rounded-md bg-muted"
             >
-              {locale === "zh" ? "EN" : "中"}
+              {region === "cn" ? "🌍" : "🇨🇳"}
             </button>
             {isLoggedIn ? (
               <Button
