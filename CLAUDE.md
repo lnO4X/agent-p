@@ -421,6 +421,14 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
   - **Valorant quiz**: E2E test confirms full 39-question flow + result works. Unmapped archetypes correctly redirect to generic result.
   - 380 unit tests + 34 E2E passing, build clean, deployed to Vercel
 
+- Phase 39: Product depth — personality matrix + Hall of Fame + region selector
+  - **Archetype deep narratives**: 16 archetypes × 4 sections (instinct/behaviors/teamView/growthPath), ~9000 words total bilingual. Integrated into `/archetype/[id]` detail page.
+  - **Personality type system (P0)**: 16 Jungian types (no MBTI trademark). `personality-types.ts` (types + gaming descriptions), `personality-archetype-matrix.ts` (algorithmic 256-combo generator: insight/superpower/blindspot), `POST /api/auth/personality`, `PersonalitySelector` component, `users.personality_type` DB column. Settings page integrated.
+  - **Pro Player Hall of Fame (P1)**: 80 curated entries across 16 archetypes, 6 regions, multiple games (LoL/CS2/Valorant/Dota2/osu!/PUBG). Bilingual signatures. Integrated into archetype detail page, filtered by region.
+  - **Region selector (P2)**: 🇨🇳/🌍 toggle replaces language switcher. Region auto-sets locale, persists to localStorage, exposed via `useI18n()`. Desktop two-button + mobile single-tap.
+  - **Roadmap updated**: `docs/roadmap.md` Phase B rewritten with B0-B3 strategy (personality matrix → deep content → Hall of Fame → region).
+  - Build clean, deployed to Vercel
+
 ### 🔲 Pending
 - ~~A1: 云部署迁移~~ ✅ 已完成
 - ~~Auth overhaul~~ ✅ 已完成
