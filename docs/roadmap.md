@@ -135,26 +135,74 @@
 
 **目标**: 每个原型从"一段描述" → "一个世界"。对标 16personalities 每个类型 5000+ 字。
 
-### B1: 原型深度内容页 (AI 生成 + 人工校准)
+### B0: 性格类型 × 原型矩阵 (P0 — 最高优先级)
 
-每个原型 (16个) 生成以下子页面:
+**核心决策**: 集成 16 性格类型（Jungian types, 非 MBTI 商标），创建 16×16=256 种组合。
 
-| 页面 | URL | 内容 | SEO 关键词 |
-|------|-----|------|-----------|
-| 总览 | `/archetype/duelist` | 已有 ✅ | "决斗者 玩家类型" |
-| 游戏推荐 | `/archetype/duelist/games` | Top 20 游戏 + 为什么适合 | "决斗者 推荐游戏 2025" |
-| 关系指南 | `/archetype/duelist/relationships` | 与每种原型的互动方式 | "决斗者 vs 神谕者" |
-| 进化路径 | `/archetype/duelist/growth` | 弱点分析 + 训练建议 + 进化条件 | "决斗者 如何进化" |
-| 名人/角色 | `/archetype/duelist/characters` | 游戏角色 + 主播 who match | "决斗者 型 游戏角色" |
-| 数据统计 | `/archetype/duelist/stats` | 全站该原型用户的天赋分布、常玩游戏 | "决斗者 数据" |
+**法律要点**:
+- "MBTI" 和 "Myers-Briggs" 是注册商标，**绝不使用**
+- 四字母代码 (INTJ, ENFP 等) 来自荣格公共域理论，可自由使用
+- 品牌名称: **"玩家性格分析 / Player Personality Profile"**
+- 问卷使用 IPIP 公共域题目 (ipip.ori.org)，或用户自选已知类型
 
-**16 原型 × 6 页 = 96 个 SEO 着陆页**
+**数据架构**:
+```
+用户自选性格类型 → 存入 user profile
+16 原型 × 16 性格类型 = 256 种组合
+每种组合 = 独特描述 + 游戏行为分析 + 推荐调整
+```
 
-**技术实现**:
-- 内容存储: MDX 文件 or DB (`archetype_content` 表)
-- AI 生成: 用 Claude/DeepSeek 批量生成初稿 → 人工校准关键信息
-- 路由: `/archetype/[id]/[section]` 动态路由
-- JSON-LD: `Person`/`Article` structured data for Google Rich Results
+**页面结构**:
+| 页面 | URL | 内容 |
+|------|-----|------|
+| 性格选择 | `/personality` | 用户选择/测试性格类型 |
+| 组合详情 | `/archetype/[id]/personality/[type]` | 256 个独特页面 |
+| 我的完整画像 | `/me/profile` | 原型 + 性格 + 天赋 综合视图 |
+
+**SEO 价值**: 256 个长尾页面 (e.g. "INTJ 闪电刺客 游戏风格")
+
+### B1: 原型深度内容页 (已部分完成)
+
+每个原型 (16个) 的子页面:
+
+| 页面 | URL | 状态 |
+|------|-----|------|
+| 总览 | `/archetype/duelist` | ✅ 已有 + 深度叙事 (4 章节) |
+| 游戏推荐 | `/archetype/duelist/games` | 🔲 待建 |
+| 关系指南 | `/archetype/duelist/relationships` | 🔲 待建 |
+| 进化路径 | `/archetype/duelist/growth` | 🔲 待建 |
+| 名人堂 | `/archetype/duelist/hall-of-fame` | 🔲 待建 (P1) |
+
+### B2: 原型名人堂 (P1 — 职业选手/主播映射)
+
+**设计原则**: 手动策展 + 管理后台可更新（非硬编码）
+
+**数据结构**:
+```typescript
+interface ProPlayer {
+  id: string;
+  name: string;           // 显示名
+  nameEn: string;
+  game: string;           // 主要游戏
+  role: string;           // "职业选手" | "主播" | "内容创作者"
+  region: "cn" | "kr" | "na" | "eu" | "sea" | "global";
+  archetypeId: string;    // 映射到哪个原型
+  signature: string;      // 标志性特点 (zh)
+  signatureEn: string;
+  imageUrl?: string;
+}
+```
+
+**初始数据**: 每原型 3-5 人，覆盖 CN + Global = ~80 条记录
+**更新机制**: Admin API 管理，无需改代码 → 长期可维护
+**展示**: 原型详情页 "名人堂" 区域 + 独立 `/hall-of-fame` 页
+
+### B3: 地区选择器 (P2)
+
+**右上角**: 🇨🇳 中国 | 🌍 Global (替代纯语言切换)
+- 地区决定: 语言 + 职业选手推荐 + 游戏偏好
+- 存储: localStorage + user profile
+- 影响: 名人堂显示、游戏推荐排序、内容本地化
 
 ### B2: 游戏专属测试 (病毒传播引擎)
 

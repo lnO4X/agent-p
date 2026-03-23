@@ -31,6 +31,7 @@ export const users = pgTable(
     referralCode: text("referral_code"),
     steamId: text("steam_id"),
     steamUsername: text("steam_username"),
+    personalityType: text("personality_type"), // "INTJ", "ENFP", etc. nullable — Jungian personality type
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

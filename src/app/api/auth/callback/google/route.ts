@@ -182,6 +182,7 @@ export async function GET(request: NextRequest) {
         referralCode,
         steamId: null,
         steamUsername: null,
+        personalityType: null,
         createdAt: now,
         updatedAt: now,
       };
