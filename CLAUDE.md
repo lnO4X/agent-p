@@ -409,11 +409,26 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
   - 114 unit tests passing, build clean, deployed to Vercel
   - **Google Cloud**: OAuth consent screen published (production mode), project "gametan", callback URI configured.
 
-### 🔲 Pending — 阶段 A: 基础加固 + 上云 (详见 docs/roadmap.md)
-- ~~A1: 云部署迁移~~ ✅ 已完成 — gametan.ai on Vercel + Neon + Upstash
-- ~~Auth overhaul~~ ✅ 已完成 — Google OAuth + password reset + account lockout + email verification
+- Phase 38: Product surgery + test coverage + performance
+  - **Test infrastructure**: Vitest integration tests (19 new: login/register/community API routes with Drizzle mock helpers) + Playwright E2E (34 tests against live gametan.ai). Total: 380 unit + 34 E2E = 414 tests.
+  - **Product surgery**: Hidden community/marketplace/PK from all navigation (code preserved). Based on product audit: these features had zero engagement, distracted from core loop.
+  - **Freemium model**: AI chat opened to free users (5 msgs/day, was fully paywalled). Premium: unlimited.
+  - **NPS feedback**: `product_feedback` DB table + `POST /api/feedback` (public) + `NpsPrompt` component (appears 3s after quiz result, 1-10 score + comment, once-per-day).
+  - **Chat performance**: Greeting AI deferred 800ms + 2s timeout. Single-partner GET `/api/partners/[id]` (was fetching full list).
+  - **Dashboard performance**: All 4 fetches parallelized via Promise.all (was: leaderboard → auth/me waterfall chain). Expected LCP -50%.
+  - **Layout performance**: Notification fetch runs on mount only (was per-route-change).
+  - **DESIGN.md**: Full design system document extracted from codebase (in `docs/DESIGN.md` per architecture rules).
+  - **Valorant quiz**: E2E test confirms full 39-question flow + result works. Unmapped archetypes correctly redirect to generic result.
+  - 380 unit tests + 34 E2E passing, build clean, deployed to Vercel
+
+### 🔲 Pending
+- ~~A1: 云部署迁移~~ ✅ 已完成
+- ~~Auth overhaul~~ ✅ 已完成
+- ~~A3: 功能精简~~ ✅ 已完成 (community/marketplace/PK hidden)
 - **A2: LemonSqueezy 支付** — 峰值变现: 测试结果页直接购买深度报告 (¥29.9). LemonSqueezy store created, identity verification may be complete.
-- **A3: 功能精简** — 暂停 Voice, 简化社区, 聚焦 测试→身份→内容→支付
+- **游戏数据引擎重构** — 当前游戏数量少,推荐引擎无法有效工作。考虑改为纯静态类型推荐(无需DB)。
+- **推荐奖励** — referral 有追踪无奖励,需加 invite→3天Premium 机制
+- **产品深度** — 核心循环完整但每个环节深度不足,需加强原型内容+测试体验+AI聊天质量
 - **A4: 监控 + CI/CD** — Sentry + GitHub Actions + Vercel auto-deploy
 
 ### 🗓️ 中长期路线
