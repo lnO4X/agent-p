@@ -59,8 +59,8 @@ export default function MainLayout({
   const [unreadCount, setUnreadCount] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // Check login on mount only (cookie doesn't change between routes)
   useEffect(() => {
-    // Check if user has login indicator cookie (non-httpOnly, set alongside auth token)
     const hasToken = document.cookie.includes("logged-in=");
     setIsLoggedIn(hasToken);
     if (!hasToken) return;
@@ -70,7 +70,7 @@ export default function MainLayout({
         if (json.unreadCount) setUnreadCount(json.unreadCount);
       })
       .catch(() => {});
-  }, [pathname]);
+  }, []); // Mount only — was [pathname] which refetched on every navigation
 
   const locales = getLocales();
 

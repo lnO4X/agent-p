@@ -5,6 +5,35 @@ import { partners } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { updatePartnerSchema } from "@/lib/validations";
 
+// GET /api/partners/[id] — Get a single partner (fast, for chat page)
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ id: string }> }
+) {
+  const auth = await getAuthFromCookie();
+  if (!auth) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
+  const { id } = await params;
+  const result = await db
+    .select({
+      id: partners.id,
+      slot: partners.slot,
+      name: partners.name,
+      avatar: partners.avatar,
+      modelId: partners.modelId,
+      definition: partners.definition,
+      memory: partners.memory,
+    })
+    .from(partners)
+    .where(and(eq(partners.id, id), eq(partners.userId, auth.sub)))
+    .limit(1);
+  if (result.length === 0) {
+    return NextResponse.json({ error: "Partner not found" }, { status: 404 });
+  }
+  return NextResponse.json({ success: true, data: result[0] });
+}
+
 // PUT /api/partners/[id] — Update a partner
 export async function PUT(
   request: Request,

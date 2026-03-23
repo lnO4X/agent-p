@@ -60,51 +60,38 @@ function DashboardContent() {
   }, [talents]);
 
   useEffect(() => {
-    // Fetch leaderboard to get own talent profile
-    fetch("/api/leaderboard")
-      .then((r) => r.json())
-      .then(async (json) => {
-        if (!json.success) return;
-        const meRes = await fetch("/api/auth/me").then((r) => r.json()).catch(() => null);
-        const myUsername = meRes?.data?.username;
-        if (!myUsername) return;
-        const myEntry = json.data.find(
-          (e: { username: string }) => e.username === myUsername
+    // Parallel fetch — eliminates waterfall chain (was: leaderboard → then auth/me)
+    Promise.all([
+      fetch("/api/leaderboard").then((r) => r.json()).catch(() => null),
+      fetch("/api/auth/me").then((r) => r.json()).catch(() => null),
+      fetch("/api/partners").then((r) => r.json()).catch(() => null),
+      fetch("/api/challenge").then((r) => r.json()).catch(() => null),
+    ]).then(([leaderboard, me, partnersRes, challenge]) => {
+      // Profile: match own username in leaderboard
+      if (leaderboard?.success && me?.data?.username) {
+        const myEntry = leaderboard.data.find(
+          (e: { username: string }) => e.username === me.data.username
         );
-        if (myEntry?.talents) {
-          setTalents(myEntry.talents);
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoadingProfile(false));
+        if (myEntry?.talents) setTalents(myEntry.talents);
+      }
+      setLoadingProfile(false);
 
-    // Fetch partners
-    fetch("/api/partners")
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.data) {
-          setPartners(
-            json.data.slice(0, 3).map((p: { id: string; name: string; avatar: string }) => ({
-              id: p.id,
-              name: p.name,
-              avatar: p.avatar,
-            }))
-          );
-        }
-      })
-      .catch(() => {});
+      // Partners
+      if (partnersRes?.data) {
+        setPartners(
+          partnersRes.data.slice(0, 3).map((p: { id: string; name: string; avatar: string }) => ({
+            id: p.id, name: p.name, avatar: p.avatar,
+          }))
+        );
+      }
 
-    // Fetch challenge info
-    fetch("/api/challenge")
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.success) {
-          setChallengeStreak(json.data.streak);
-          setChallengeCompleted(json.data.completedToday);
-          setChallengeTalent(json.data.talentCategory);
-        }
-      })
-      .catch(() => {});
+      // Challenge
+      if (challenge?.success) {
+        setChallengeStreak(challenge.data.streak);
+        setChallengeCompleted(challenge.data.completedToday);
+        setChallengeTalent(challenge.data.talentCategory);
+      }
+    });
   }, []);
 
   // Time-aware greeting

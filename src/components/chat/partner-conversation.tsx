@@ -87,25 +87,15 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
 
   const [pendingVoiceText, setPendingVoiceText] = useState<string | null>(null);
 
-  // Load partner data
+  // Load single partner (fast — 1 DB query vs full list)
   useEffect(() => {
-    async function loadPartner() {
-      try {
-        const res = await fetch("/api/partners");
-        if (res.ok) {
-          const data = await res.json();
-          const found = (data.data as Partner[]).find(
-            (p) => p.id === partnerId
-          );
-          setPartner(found || null);
-        }
-      } catch {
-        // ignore
-      } finally {
-        setLoading(false);
-      }
-    }
-    loadPartner();
+    fetch(`/api/partners/${partnerId}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success) setPartner(data.data as Partner);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
   }, [partnerId]);
 
   // Deferred greeting — load after chat is interactive, not blocking UI
