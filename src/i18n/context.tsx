@@ -37,6 +37,24 @@ const I18nContext = createContext<I18nContextValue | null>(null);
 const STORAGE_KEY = "app-locale";
 const REGION_STORAGE_KEY = "app-region";
 
+function detectLocaleFromBrowser(): Locale {
+  try {
+    const lang = navigator.language || navigator.languages?.[0] || "";
+    return lang.startsWith("zh") ? "zh" : "en";
+  } catch {
+    return DEFAULT_LOCALE;
+  }
+}
+
+function detectRegionFromBrowser(): Region {
+  try {
+    const lang = navigator.language || navigator.languages?.[0] || "";
+    return lang.startsWith("zh") ? "cn" : "global";
+  } catch {
+    return "cn";
+  }
+}
+
 function getInitialLocale(): Locale {
   if (typeof window === "undefined") return DEFAULT_LOCALE;
   try {
@@ -45,7 +63,8 @@ function getInitialLocale(): Locale {
   } catch {
     // localStorage unavailable
   }
-  return DEFAULT_LOCALE;
+  // Auto-detect from browser language
+  return detectLocaleFromBrowser();
 }
 
 function getInitialRegion(): Region {
@@ -56,7 +75,8 @@ function getInitialRegion(): Region {
   } catch {
     // localStorage unavailable
   }
-  return "cn";
+  // Auto-detect from browser language
+  return detectRegionFromBrowser();
 }
 
 export function I18nProvider({ children }: { children: ReactNode }) {

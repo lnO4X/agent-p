@@ -297,6 +297,9 @@ export async function GET(
       {
         width: 1200,
         height: 630,
+        headers: {
+          "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400",
+        },
       }
     );
   } catch (error) {

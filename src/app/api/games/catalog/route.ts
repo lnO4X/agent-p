@@ -3,6 +3,10 @@ import { db } from "@/db";
 import { games } from "@/db/schema";
 import { sql, and, ilike, eq } from "drizzle-orm";
 
+// In-memory cache for catalog queries (keyed by query string)
+const catalogCache = new Map<string, { data: unknown; timestamp: number }>();
+const CACHE_TTL = 3600_000; // 1 hour
+
 /**
  * GET /api/games/catalog
  *
@@ -28,6 +32,15 @@ export async function GET(request: Request) {
       Math.max(1, parseInt(url.searchParams.get("limit") || "20") || 20)
     );
     const offset = (page - 1) * limit;
+
+    // Check in-memory cache
+    const cacheKey = `${platform}|${genre}|${search}|${sort}|${page}|${limit}`;
+    const cached = catalogCache.get(cacheKey);
+    if (cached && Date.now() - cached.timestamp < CACHE_TTL) {
+      return NextResponse.json(cached.data, {
+        headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
+      });
+    }
 
     // Build WHERE conditions
     const conditions = [eq(games.status, "active")];
@@ -73,7 +86,7 @@ export async function GET(request: Request) {
 
     const total = Number(countResult[0]?.count ?? 0);
 
-    return NextResponse.json({
+    const responseData = {
       success: true,
       data: {
         items,
@@ -84,6 +97,21 @@ export async function GET(request: Request) {
           totalPages: Math.ceil(total / limit),
         },
       },
+    };
+
+    // Store in cache
+    catalogCache.set(cacheKey, { data: responseData, timestamp: Date.now() });
+
+    // Evict old entries if cache grows too large
+    if (catalogCache.size > 200) {
+      const now = Date.now();
+      for (const [key, val] of catalogCache) {
+        if (now - val.timestamp > CACHE_TTL) catalogCache.delete(key);
+      }
+    }
+
+    return NextResponse.json(responseData, {
+      headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
     });
   } catch (error) {
     console.error("Catalog error:", error);

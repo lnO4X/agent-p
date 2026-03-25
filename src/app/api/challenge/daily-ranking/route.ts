@@ -42,21 +42,26 @@ export async function GET() {
       .from(microChallenges)
       .where(gte(microChallenges.completedAt, today));
 
-    return NextResponse.json({
-      success: true,
-      data: {
-        ranking: ranking.map((r, i) => ({
-          rank: i + 1,
-          username: r.username,
-          displayName: r.displayName,
-          score: r.score,
-          gameId: r.gameId,
-          talentCategory: r.talentCategory,
-        })),
-        totalParticipants: Number(countResult[0]?.count ?? 0),
-        date: today.toISOString().slice(0, 10),
+    return NextResponse.json(
+      {
+        success: true,
+        data: {
+          ranking: ranking.map((r, i) => ({
+            rank: i + 1,
+            username: r.username,
+            displayName: r.displayName,
+            score: r.score,
+            gameId: r.gameId,
+            talentCategory: r.talentCategory,
+          })),
+          totalParticipants: Number(countResult[0]?.count ?? 0),
+          date: today.toISOString().slice(0, 10),
+        },
       },
-    });
+      {
+        headers: { "Cache-Control": "public, s-maxage=300, stale-while-revalidate=600" },
+      }
+    );
   } catch (error) {
     console.error("Daily ranking error:", error);
     return NextResponse.json(

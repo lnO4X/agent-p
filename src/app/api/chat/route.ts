@@ -9,8 +9,8 @@ import {
   summarizeConversationContext,
 } from "@/lib/partner-prompts";
 import { db } from "@/db";
-import { partners, users } from "@/db/schema";
-import { eq, and } from "drizzle-orm";
+import { partners, users, referrals } from "@/db/schema";
+import { eq, and, sql } from "drizzle-orm";
 import { chatMessageSchema } from "@/lib/validations";
 import { checkRateLimit } from "@/lib/redis";
 
@@ -51,7 +51,22 @@ export async function POST(request: NextRequest) {
   }
   const isPremium = userRow.length > 0 && userRow[0].tier === "premium" &&
     (!userRow[0].tierExpiresAt || userRow[0].tierExpiresAt >= new Date());
-  const dailyLimit = isPremium ? 999 : 5;
+
+  // Referral reward: users with 1+ successful referrals get 15 daily messages instead of 5
+  let dailyLimit = isPremium ? 999 : 5;
+  if (!isPremium) {
+    try {
+      const [refCount] = await db
+        .select({ count: sql<number>`count(*)` })
+        .from(referrals)
+        .where(eq(referrals.referrerId, auth.sub));
+      if (Number(refCount?.count ?? 0) >= 1) {
+        dailyLimit = 15;
+      }
+    } catch {
+      // Non-blocking: if referral check fails, use default limit
+    }
+  }
   const { allowed } = await checkRateLimit(
     `rl:chat:${auth.sub}:${today}`,
     dailyLimit,

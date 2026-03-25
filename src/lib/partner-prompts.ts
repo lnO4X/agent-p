@@ -57,6 +57,8 @@ export async function loadTalentProfileContext(
     // Archetype identity (most important context)
     const archetype = p.archetypeId ? getArchetype(p.archetypeId) : null;
     if (archetype) {
+      const nemesisArchetype = getArchetype(archetype.nemesisId);
+      const allyArchetype = getArchetype(archetype.allyId);
       parts.push(
         `## 用户玩家原型: ${archetype.name} (${archetype.nameEn}) ${archetype.icon}\n` +
         `- 原型口号: "${archetype.tagline}" / "${archetype.taglineEn}"\n` +
@@ -64,9 +66,15 @@ export async function loadTalentProfileContext(
         `- 致命弱点天赋: ${archetype.weakTalent}\n` +
         `- 弱点描述: ${archetype.weakness}\n` +
         `- 进化路径: ${archetype.evolutionHint}\n` +
-        `- 天敌原型: ${getArchetype(archetype.nemesisId)?.name ?? archetype.nemesisId}\n` +
-        `- 最佳搭档原型: ${getArchetype(archetype.allyId)?.name ?? archetype.allyId}\n` +
-        `- 擅长游戏类型: ${archetype.genres.join(", ")}`
+        `- 天敌原型: ${nemesisArchetype?.name ?? archetype.nemesisId} (${nemesisArchetype?.nameEn ?? ""})\n` +
+        `- 最佳搭档原型: ${allyArchetype?.name ?? archetype.allyId} (${allyArchetype?.nameEn ?? ""})\n` +
+        `- 擅长游戏类型: ${archetype.genres.join(", ")}\n\n` +
+        `### 原型互动指南\n` +
+        `- 自然地在对话中引用用户的原型身份。例如称他们为"${archetype.name}"，提到他们的${archetype.strongTalent}优势。\n` +
+        `- 当讨论游戏建议或提升方向时，主动建议针对弱点天赋(${archetype.weakTalent})的挑战和练习。\n` +
+        `- 鼓励用户的优势天赋(${archetype.strongTalent})，让他们感到被理解。\n` +
+        `- 适时提到天敌原型(${nemesisArchetype?.name ?? archetype.nemesisId})和搭档原型(${allyArchetype?.name ?? archetype.allyId})来丰富对话。\n` +
+        `- Reference their archetype naturally in conversations. Suggest challenges that target their weak talent (${archetype.weakTalent}). Be encouraging about their strengths (${archetype.strongTalent}).`
       );
     }
 

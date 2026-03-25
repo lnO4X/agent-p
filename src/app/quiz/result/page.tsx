@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useEffect } from "react";
+import { Suspense, useMemo, useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { useSearchParams } from "next/navigation";
@@ -14,18 +14,19 @@ import {
   getArchetype,
 } from "@/lib/archetype";
 import type { Archetype } from "@/lib/archetype";
-import type { TalentCategory } from "@/types/talent";
 import {
   Share2,
   Swords,
   Heart,
   TrendingUp,
-  Gamepad2,
   ArrowRight,
   RotateCcw,
   Bot,
   Crown,
   Target,
+  Copy,
+  Check,
+  Users,
 } from "lucide-react";
 import { parseScores, parseTalentScores } from "@/lib/quiz-utils";
 import { NpsPrompt } from "@/components/nps-prompt";
@@ -94,6 +95,58 @@ function QuizResultContent() {
   const isZh = locale === "zh";
   const isQuestionnaire = mode === "q";
 
+  const [copied, setCopied] = useState(false);
+
+  const shareUrl = useMemo(() => {
+    if (typeof window === "undefined" || !archetype) return "";
+    return isQuestionnaire
+      ? `${window.location.origin}/quiz/result?mode=q&archetype=${archetype.id}${
+          talentScores
+            ? `&scores=${Object.entries(talentScores).map(([k, v]) => `${k}:${v}`).join(",")}`
+            : ""
+        }`
+      : `${window.location.origin}/quiz/result?s=${scores!.join("-")}`;
+  }, [archetype, isQuestionnaire, talentScores, scores]);
+
+  const shareText = useMemo(() => {
+    if (!archetype) return "";
+    return isZh
+      ? `我是「${archetype.name}」${archetype.icon} — ${archetype.tagline} 你是什么类型的玩家？3分钟测出你的玩家原型：gametan.ai/quiz`
+      : `I'm a ${archetype.nameEn} ${archetype.icon} — ${archetype.taglineEn} What gamer archetype are you? Take the 3-min quiz: gametan.ai/quiz`;
+  }, [archetype, isZh]);
+
+  const challengeText = useMemo(() => {
+    if (!archetype) return "";
+    return isZh
+      ? `我是${archetype.name}${archetype.icon}，你敢来测测吗？`
+      : `I'm a ${archetype.nameEn} ${archetype.icon} — dare to find out yours?`;
+  }, [archetype, isZh]);
+
+  const handleShare = useCallback(async () => {
+    if (!archetype) return;
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: isZh
+            ? `我的玩家原型：${archetype.name}`
+            : `My Gamer Archetype: ${archetype.nameEn}`,
+          text: shareText,
+          url: shareUrl,
+        });
+        return;
+      } catch {
+        // User cancelled or share API failed — fall through to clipboard
+      }
+    }
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      // clipboard failed silently
+    }
+  }, [isZh, archetype, shareText, shareUrl]);
+
   // Celebration confetti on mount
   useEffect(() => {
     if (archetype) {
@@ -120,39 +173,6 @@ function QuizResultContent() {
         </div>
       </div>
     );
-  }
-
-  const shareUrl =
-    typeof window !== "undefined"
-      ? isQuestionnaire
-        ? `${window.location.origin}/quiz/result?mode=q&archetype=${archetype.id}${
-            talentScores
-              ? `&scores=${Object.entries(talentScores).map(([k, v]) => `${k}:${v}`).join(",")}`
-              : ""
-          }`
-        : `${window.location.origin}/quiz/result?s=${scores!.join("-")}`
-      : "";
-
-  const shareText = isZh
-    ? `我是「${archetype.name}」${archetype.icon}！${archetype.tagline} 你是什么类型的玩家？`
-    : `I'm a ${archetype.nameEn} ${archetype.icon}! ${archetype.taglineEn} What's your gamer archetype?`;
-
-  async function handleShare() {
-    if (navigator.share) {
-      try {
-        await navigator.share({
-          title: isZh
-            ? `我的玩家原型：${archetype!.name}`
-            : `My Gamer Archetype: ${archetype!.nameEn}`,
-          text: shareText,
-          url: shareUrl,
-        });
-      } catch {
-        // User cancelled share
-      }
-    } else {
-      await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
-    }
   }
 
   const SCORE_LABELS = [
@@ -216,6 +236,36 @@ function QuizResultContent() {
         >
           &ldquo;{isZh ? archetype.tagline : archetype.taglineEn}&rdquo;
         </motion.p>
+
+        {/* Primary share CTA — right after archetype reveal */}
+        <motion.div
+          className="pt-4"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 1.0 }}
+        >
+          <Button
+            size="lg"
+            className="h-12 px-8 text-base gap-2"
+            style={{
+              background: `linear-gradient(135deg, ${archetype.gradient[0]}, ${archetype.gradient[1]})`,
+              color: "white",
+            }}
+            onClick={handleShare}
+          >
+            {copied ? (
+              <>
+                <Check size={20} />
+                {isZh ? "已复制" : "Copied!"}
+              </>
+            ) : (
+              <>
+                <Share2 size={20} />
+                {isZh ? "分享我的原型" : "Share My Archetype"}
+              </>
+            )}
+          </Button>
+        </motion.div>
       </div>
 
       {/* Content */}
@@ -463,6 +513,51 @@ function QuizResultContent() {
         />
 
         {/* PK Challenge CTA — hidden, feature paused */}
+
+        {/* Challenge a friend */}
+        <motion.div
+          initial={{ opacity: 0, y: 15 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4, delay: 2.25 }}
+        >
+          <Card className="border-dashed border-primary/30">
+            <CardContent className="pt-4 pb-4 text-center">
+              <div className="flex items-center justify-center gap-2 mb-2">
+                <Users size={16} className="text-primary" />
+                <span className="text-sm font-medium">
+                  {isZh ? "邀请好友来测" : "Challenge a Friend"}
+                </span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                {isZh
+                  ? "把测试链接发给朋友，看看他们是什么原型"
+                  : "Send this to a friend who games — find out their archetype"}
+              </p>
+              <Button
+                variant="outline"
+                size="sm"
+                className="gap-1.5"
+                onClick={async () => {
+                  const url = typeof window !== "undefined" ? `${window.location.origin}/quiz` : "https://gametan.ai/quiz";
+                  if (navigator.share) {
+                    try {
+                      await navigator.share({ title: isZh ? "测测你的玩家原型" : "Find Your Gamer Archetype", text: challengeText, url });
+                      return;
+                    } catch { /* cancelled */ }
+                  }
+                  try {
+                    await navigator.clipboard.writeText(`${challengeText}\n${url}`);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  } catch { /* failed */ }
+                }}
+              >
+                {copied ? <Check size={14} /> : <Copy size={14} />}
+                {isZh ? "复制邀请链接" : "Copy Invite Link"}
+              </Button>
+            </CardContent>
+          </Card>
+        </motion.div>
 
         {/* Secondary actions */}
         <div className="flex gap-3">

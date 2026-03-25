@@ -7,6 +7,7 @@ import { getAuthFromCookie } from "@/lib/auth";
 import { gameRegistry } from "@/games";
 import { TALENT_CATEGORIES, type TalentCategory } from "@/types/talent";
 import { scoreToRank, computeOverallScore } from "@/lib/scoring";
+import { getArchetype } from "@/lib/archetype";
 
 /** Streak milestone → premium reward days */
 const STREAK_REWARDS: Record<number, number> = {
@@ -61,7 +62,28 @@ export async function GET() {
     }
 
     const challengeIndex = getTodayChallengeIndex();
-    const targetCategory = TALENT_CATEGORIES[challengeIndex];
+    let targetCategory = TALENT_CATEGORIES[challengeIndex];
+
+    // Bias toward user's weak talent if they have an archetype.
+    // Use day-of-year mod 5: if remainder < 2 (40% of days), target weak talent.
+    const latestProfileForBias = await db
+      .select({ archetypeId: talentProfiles.archetypeId })
+      .from(talentProfiles)
+      .where(eq(talentProfiles.userId, auth.sub))
+      .orderBy(desc(talentProfiles.createdAt))
+      .limit(1);
+
+    if (latestProfileForBias.length > 0 && latestProfileForBias[0].archetypeId) {
+      const archetype = getArchetype(latestProfileForBias[0].archetypeId);
+      if (archetype) {
+        const now = new Date();
+        const start = new Date(now.getFullYear(), 0, 0);
+        const dayOfYear = Math.floor((now.getTime() - start.getTime()) / 86400000);
+        if (dayOfYear % 5 < 2) {
+          targetCategory = archetype.weakTalent;
+        }
+      }
+    }
 
     // Find the primary game for this talent category
     const allGames = gameRegistry.getAll();

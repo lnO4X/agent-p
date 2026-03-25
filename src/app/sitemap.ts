@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { getAllArchetypes } from "@/lib/archetype";
 import { ARCHETYPE_SECTIONS } from "@/lib/archetype-content";
 import { getAllGameQuizIds } from "@/lib/game-quizzes";
+import { PERSONALITY_CODES } from "@/lib/personality-types";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
@@ -44,5 +45,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.8,
   }));
 
-  return [...staticPages, ...gameQuizPages, ...archetypePages, ...archetypeSectionPages];
+  // 16 personality index pages (one per archetype)
+  const personalityIndexPages: MetadataRoute.Sitemap = archetypes.map((a) => ({
+    url: `${baseUrl}/archetype/${a.id}/personality`,
+    lastModified: new Date(),
+    changeFrequency: "monthly" as const,
+    priority: 0.6,
+  }));
+
+  // 256 personality × archetype combo pages
+  const personalityComboPages: MetadataRoute.Sitemap = archetypes.flatMap((a) =>
+    PERSONALITY_CODES.map((code) => ({
+      url: `${baseUrl}/archetype/${a.id}/personality/${code.toLowerCase()}`,
+      lastModified: new Date(),
+      changeFrequency: "monthly" as const,
+      priority: 0.6,
+    }))
+  );
+
+  return [
+    ...staticPages,
+    ...gameQuizPages,
+    ...archetypePages,
+    ...archetypeSectionPages,
+    ...personalityIndexPages,
+    ...personalityComboPages,
+  ];
 }

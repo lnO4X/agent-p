@@ -1,6 +1,6 @@
 "use client";
 
-import { use } from "react";
+import { use, useState, useCallback } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { getArchetype, getAllArchetypes } from "@/lib/archetype";
@@ -10,6 +10,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import {
   ArrowLeft, Sparkles, Swords, Shield, Zap, Heart,
   ArrowUpRight, Gamepad2, Brain, Users, Eye, TrendingUp,
+  Share2, Check,
 } from "lucide-react";
 import { ARCHETYPE_NARRATIVES } from "@/lib/archetype-narratives";
 import { getPlayersForArchetype } from "@/lib/hall-of-fame";
@@ -40,6 +41,33 @@ export default function ArchetypeDetailPage({
   const weakness = isZh ? archetype.weakness : archetype.weaknessEn;
   const evolutionHint = isZh ? archetype.evolutionHint : archetype.evolutionHintEn;
 
+  const [copied, setCopied] = useState(false);
+
+  const handleShare = useCallback(async () => {
+    const shareUrl = typeof window !== "undefined"
+      ? `${window.location.origin}/archetype/${id}`
+      : `https://gametan.ai/archetype/${id}`;
+    const shareText = isZh
+      ? `${archetype.name}${archetype.icon} — ${archetype.tagline} 你是什么类型的玩家？测测看：gametan.ai/quiz`
+      : `${archetype.nameEn} ${archetype.icon} — ${archetype.taglineEn} What gamer archetype are you? gametan.ai/quiz`;
+
+    if (navigator.share) {
+      try {
+        await navigator.share({
+          title: isZh ? archetype.name : archetype.nameEn,
+          text: shareText,
+          url: shareUrl,
+        });
+        return;
+      } catch { /* cancelled */ }
+    }
+    try {
+      await navigator.clipboard.writeText(`${shareText}\n${shareUrl}`);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch { /* failed */ }
+  }, [id, isZh, archetype]);
+
   return (
     <div className="max-w-2xl mx-auto px-4 py-6 space-y-6">
       {/* Nav */}
@@ -51,12 +79,25 @@ export default function ArchetypeDetailPage({
           <ArrowLeft className="w-4 h-4" />
           {t("archetype.exploreAll")}
         </Link>
-        <Link href="/quiz">
-          <Button size="sm" variant="outline" className="pressable gap-1.5">
-            <Sparkles size={14} />
-            {t("archetype.takeQuiz")}
+        <div className="flex items-center gap-2">
+          <Button
+            size="sm"
+            variant="outline"
+            className="pressable gap-1.5"
+            onClick={handleShare}
+          >
+            {copied ? <Check size={14} /> : <Share2 size={14} />}
+            {copied
+              ? (isZh ? "已复制" : "Copied!")
+              : (isZh ? "分享" : "Share")}
           </Button>
-        </Link>
+          <Link href="/quiz">
+            <Button size="sm" variant="outline" className="pressable gap-1.5">
+              <Sparkles size={14} />
+              {t("archetype.takeQuiz")}
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Hero */}
