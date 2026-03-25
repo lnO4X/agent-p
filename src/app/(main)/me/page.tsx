@@ -63,13 +63,7 @@ const MENU_ITEMS = [
     bg: "bg-yellow-500/10",
   },
   // Community link hidden — feature paused, code preserved
-  {
-    href: "/me/premium",
-    labelKey: "me.premium",
-    icon: Crown,
-    color: "text-amber-500",
-    bg: "bg-amber-500/10",
-  },
+  // Premium link hidden — free model for now
   {
     href: "/settings",
     labelKey: "me.settings",

@@ -1,0 +1,559 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1600, height=1200">
+<title>GameTan Deep Archetype Report - Product Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    width: 1600px;
+    height: 1200px;
+    overflow: hidden;
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background: #0a0a0f;
+    color: #ffffff;
+  }
+  .canvas {
+    width: 1600px;
+    height: 1200px;
+    position: relative;
+    background:
+      radial-gradient(ellipse 900px 600px at 30% 25%, rgba(124,58,237,0.15) 0%, transparent 70%),
+      radial-gradient(ellipse 700px 500px at 75% 70%, rgba(6,182,212,0.10) 0%, transparent 70%),
+      radial-gradient(ellipse 400px 400px at 50% 50%, rgba(124,58,237,0.05) 0%, transparent 70%),
+      linear-gradient(160deg, #0a0a0f 0%, #0f0a1a 30%, #0a0a0f 60%, #0a1015 100%);
+    overflow: hidden;
+  }
+
+  /* Grid pattern overlay */
+  .grid-overlay {
+    position: absolute;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(124,58,237,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(124,58,237,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+  }
+
+  /* Decorative glow orbs */
+  .orb {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    pointer-events: none;
+  }
+  .orb-1 { width: 300px; height: 300px; background: rgba(124,58,237,0.2); top: -50px; right: 200px; }
+  .orb-2 { width: 200px; height: 200px; background: rgba(6,182,212,0.15); bottom: 100px; left: 100px; }
+  .orb-3 { width: 250px; height: 250px; background: rgba(124,58,237,0.1); bottom: -50px; right: 400px; }
+
+  /* Top bar */
+  .top-bar {
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #7c3aed, #06b6d4, #7c3aed, transparent);
+  }
+
+  /* Logo */
+  .logo {
+    position: absolute;
+    top: 48px;
+    left: 80px;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+  }
+  .logo-icon {
+    width: 48px;
+    height: 48px;
+    background: linear-gradient(135deg, #7c3aed, #06b6d4);
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 900;
+    letter-spacing: -2px;
+    box-shadow: 0 0 20px rgba(124,58,237,0.4);
+  }
+  .logo-text {
+    font-size: 32px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    background: linear-gradient(135deg, #ffffff, #c4b5fd);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Title section */
+  .title-section {
+    position: absolute;
+    top: 140px;
+    left: 80px;
+    right: 80px;
+  }
+  .subtitle-label {
+    font-size: 14px;
+    letter-spacing: 6px;
+    text-transform: uppercase;
+    color: #06b6d4;
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  .main-title {
+    font-size: 64px;
+    font-weight: 800;
+    line-height: 1.1;
+    background: linear-gradient(135deg, #ffffff 0%, #c4b5fd 50%, #06b6d4 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    margin-bottom: 20px;
+  }
+  .main-desc {
+    font-size: 20px;
+    color: rgba(255,255,255,0.5);
+    max-width: 600px;
+    line-height: 1.6;
+  }
+
+  /* Archetype card */
+  .archetype-card {
+    position: absolute;
+    top: 130px;
+    right: 80px;
+    width: 420px;
+    height: 520px;
+    border-radius: 24px;
+    background: linear-gradient(160deg, rgba(124,58,237,0.15), rgba(6,182,212,0.08));
+    border: 1px solid rgba(124,58,237,0.3);
+    padding: 3px;
+    box-shadow:
+      0 0 40px rgba(124,58,237,0.15),
+      0 20px 60px rgba(0,0,0,0.4),
+      inset 0 1px 0 rgba(255,255,255,0.05);
+  }
+  .archetype-card-inner {
+    width: 100%;
+    height: 100%;
+    border-radius: 21px;
+    background: linear-gradient(160deg, rgba(15,10,30,0.95), rgba(10,10,15,0.98));
+    padding: 36px;
+    display: flex;
+    flex-direction: column;
+    position: relative;
+    overflow: hidden;
+  }
+  .archetype-card-inner::before {
+    content: '';
+    position: absolute;
+    top: -50%;
+    left: -50%;
+    width: 200%;
+    height: 200%;
+    background: conic-gradient(from 180deg, transparent 0%, rgba(124,58,237,0.05) 25%, transparent 50%);
+    animation: none;
+    pointer-events: none;
+  }
+  .card-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(124,58,237,0.2);
+    border: 1px solid rgba(124,58,237,0.3);
+    border-radius: 20px;
+    padding: 6px 14px;
+    font-size: 12px;
+    color: #c4b5fd;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    width: fit-content;
+    margin-bottom: 24px;
+  }
+  .card-archetype-icon {
+    font-size: 72px;
+    margin-bottom: 16px;
+    filter: drop-shadow(0 0 20px rgba(251,191,36,0.4));
+  }
+  .card-archetype-name {
+    font-size: 32px;
+    font-weight: 800;
+    margin-bottom: 4px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+  .card-archetype-sub {
+    font-size: 14px;
+    color: rgba(255,255,255,0.4);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 28px;
+  }
+  .card-stats {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-top: auto;
+  }
+  .stat-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .stat-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.5);
+    width: 80px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .stat-bar-bg {
+    flex: 1;
+    height: 6px;
+    background: rgba(255,255,255,0.06);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .stat-bar-fill {
+    height: 100%;
+    border-radius: 3px;
+  }
+  .stat-bar-fill.s1 { width: 92%; background: linear-gradient(90deg, #7c3aed, #a78bfa); }
+  .stat-bar-fill.s2 { width: 88%; background: linear-gradient(90deg, #06b6d4, #67e8f9); }
+  .stat-bar-fill.s3 { width: 76%; background: linear-gradient(90deg, #f59e0b, #fbbf24); }
+  .stat-bar-fill.s4 { width: 85%; background: linear-gradient(90deg, #10b981, #34d399); }
+  .stat-bar-fill.s5 { width: 70%; background: linear-gradient(90deg, #ef4444, #f87171); }
+  .stat-val {
+    font-size: 13px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.7);
+    width: 32px;
+    text-align: right;
+  }
+
+  /* Radar chart (SVG) */
+  .radar-section {
+    position: absolute;
+    bottom: 180px;
+    left: 80px;
+    width: 440px;
+    height: 360px;
+  }
+  .radar-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+  .radar-container {
+    width: 400px;
+    height: 320px;
+    position: relative;
+  }
+  .radar-container svg {
+    width: 100%;
+    height: 100%;
+  }
+
+  /* Pro comparison section */
+  .pro-section {
+    position: absolute;
+    bottom: 180px;
+    left: 560px;
+    width: 480px;
+  }
+  .pro-title {
+    font-size: 16px;
+    font-weight: 700;
+    color: rgba(255,255,255,0.6);
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 24px;
+  }
+  .pro-card {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.06);
+    border-radius: 14px;
+    margin-bottom: 12px;
+  }
+  .pro-avatar {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 800;
+    flex-shrink: 0;
+  }
+  .pro-avatar.a1 { background: linear-gradient(135deg, #7c3aed, #5b21b6); }
+  .pro-avatar.a2 { background: linear-gradient(135deg, #06b6d4, #0e7490); }
+  .pro-avatar.a3 { background: linear-gradient(135deg, #f59e0b, #d97706); }
+  .pro-info { flex: 1; }
+  .pro-name { font-size: 15px; font-weight: 700; margin-bottom: 3px; }
+  .pro-detail { font-size: 12px; color: rgba(255,255,255,0.4); }
+  .pro-match {
+    font-size: 22px;
+    font-weight: 800;
+    background: linear-gradient(135deg, #06b6d4, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Bottom badges */
+  .bottom-bar {
+    position: absolute;
+    bottom: 48px;
+    left: 80px;
+    right: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .page-badge {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 28px;
+    background: rgba(124,58,237,0.1);
+    border: 1px solid rgba(124,58,237,0.25);
+    border-radius: 50px;
+  }
+  .page-badge-icon {
+    font-size: 20px;
+  }
+  .page-badge-text {
+    font-size: 16px;
+    font-weight: 600;
+    color: #c4b5fd;
+    letter-spacing: 1px;
+  }
+  .feature-tags {
+    display: flex;
+    gap: 12px;
+  }
+  .feature-tag {
+    padding: 10px 20px;
+    background: rgba(255,255,255,0.03);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 50px;
+    font-size: 13px;
+    color: rgba(255,255,255,0.5);
+    letter-spacing: 1px;
+  }
+  .price-badge {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    padding: 16px 36px;
+    background: linear-gradient(135deg, #7c3aed, #5b21b6);
+    border-radius: 50px;
+    box-shadow: 0 0 30px rgba(124,58,237,0.4), 0 8px 24px rgba(0,0,0,0.3);
+  }
+  .price-currency {
+    font-size: 18px;
+    font-weight: 600;
+    color: rgba(255,255,255,0.7);
+  }
+  .price-amount {
+    font-size: 36px;
+    font-weight: 900;
+    color: #ffffff;
+    letter-spacing: -1px;
+  }
+
+  /* Bottom accent line */
+  .bottom-line {
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #06b6d4, #7c3aed, #06b6d4, transparent);
+  }
+
+  /* Floating particles */
+  .particle {
+    position: absolute;
+    width: 3px;
+    height: 3px;
+    background: rgba(124,58,237,0.4);
+    border-radius: 50%;
+  }
+  .particle:nth-child(1) { top: 15%; left: 55%; background: rgba(6,182,212,0.3); width: 4px; height: 4px; }
+  .particle:nth-child(2) { top: 35%; left: 48%; background: rgba(124,58,237,0.3); }
+  .particle:nth-child(3) { top: 60%; left: 52%; background: rgba(6,182,212,0.2); width: 2px; height: 2px; }
+  .particle:nth-child(4) { top: 25%; left: 95%; background: rgba(124,58,237,0.25); width: 5px; height: 5px; }
+  .particle:nth-child(5) { top: 80%; left: 70%; background: rgba(6,182,212,0.2); }
+</style>
+</head>
+<body>
+<div class="canvas">
+  <div class="grid-overlay"></div>
+  <div class="orb orb-1"></div>
+  <div class="orb orb-2"></div>
+  <div class="orb orb-3"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+
+  <div class="top-bar"></div>
+
+  <!-- Logo -->
+  <div class="logo">
+    <div class="logo-icon">GT</div>
+    <div class="logo-text">GameTan</div>
+  </div>
+
+  <!-- Title -->
+  <div class="title-section">
+    <div class="subtitle-label">Player Intelligence Platform</div>
+    <div class="main-title">Deep Archetype<br>Report</div>
+    <div class="main-desc">AI-powered analysis of your unique gaming DNA. Discover your playstyle archetype, talent strengths, and pro player matches.</div>
+  </div>
+
+  <!-- Archetype Card -->
+  <div class="archetype-card">
+    <div class="archetype-card-inner">
+      <div class="card-badge">
+        <span>&#9670;</span> Primary Archetype
+      </div>
+      <div class="card-archetype-icon">&#9889;</div>
+      <div class="card-archetype-name">Lightning Assassin</div>
+      <div class="card-archetype-sub">Burst &middot; Flanker &middot; Playmaker</div>
+      <div class="card-stats">
+        <div class="stat-row">
+          <span class="stat-label">Reaction</span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill s1"></div></div>
+          <span class="stat-val">92</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Precision</span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill s2"></div></div>
+          <span class="stat-val">88</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Aggression</span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill s3"></div></div>
+          <span class="stat-val">76</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Adaption</span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill s4"></div></div>
+          <span class="stat-val">85</span>
+        </div>
+        <div class="stat-row">
+          <span class="stat-label">Teamwork</span>
+          <div class="stat-bar-bg"><div class="stat-bar-fill s5"></div></div>
+          <span class="stat-val">70</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Radar Chart -->
+  <div class="radar-section">
+    <div class="radar-title">Talent Radar Profile</div>
+    <div class="radar-container">
+      <svg viewBox="0 0 400 320" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="radarFill" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:0.3"/>
+            <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:0.15"/>
+          </linearGradient>
+          <linearGradient id="radarStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" style="stop-color:#7c3aed;stop-opacity:0.8"/>
+            <stop offset="100%" style="stop-color:#06b6d4;stop-opacity:0.8"/>
+          </linearGradient>
+        </defs>
+        <!-- Hex grid rings -->
+        <polygon points="200,40 330,105 330,235 200,300 70,235 70,105" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+        <polygon points="200,80 298,125 298,215 200,260 102,215 102,125" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+        <polygon points="200,120 265,145 265,195 200,220 135,195 135,145" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+        <!-- Axis lines -->
+        <line x1="200" y1="170" x2="200" y2="40" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <line x1="200" y1="170" x2="330" y2="105" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <line x1="200" y1="170" x2="330" y2="235" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <line x1="200" y1="170" x2="200" y2="300" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <line x1="200" y1="170" x2="70" y2="235" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <line x1="200" y1="170" x2="70" y2="105" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+        <!-- Data polygon -->
+        <polygon points="200,55 315,118 310,238 200,275 95,210 88,112"
+                 fill="url(#radarFill)" stroke="url(#radarStroke)" stroke-width="2"/>
+        <!-- Data points -->
+        <circle cx="200" cy="55" r="4" fill="#7c3aed" stroke="#c4b5fd" stroke-width="2"/>
+        <circle cx="315" cy="118" r="4" fill="#7c3aed" stroke="#c4b5fd" stroke-width="2"/>
+        <circle cx="310" cy="238" r="4" fill="#06b6d4" stroke="#67e8f9" stroke-width="2"/>
+        <circle cx="200" cy="275" r="4" fill="#06b6d4" stroke="#67e8f9" stroke-width="2"/>
+        <circle cx="95" cy="210" r="4" fill="#7c3aed" stroke="#c4b5fd" stroke-width="2"/>
+        <circle cx="88" cy="112" r="4" fill="#7c3aed" stroke="#c4b5fd" stroke-width="2"/>
+        <!-- Labels -->
+        <text x="200" y="28" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="11" font-family="Segoe UI, system-ui, sans-serif" letter-spacing="1">MECHANICS</text>
+        <text x="348" y="108" text-anchor="start" fill="rgba(255,255,255,0.5)" font-size="11" font-family="Segoe UI, system-ui, sans-serif" letter-spacing="1">DECISION</text>
+        <text x="348" y="242" text-anchor="start" fill="rgba(255,255,255,0.5)" font-size="11" font-family="Segoe UI, system-ui, sans-serif" letter-spacing="1">AWARENESS</text>
+        <text x="200" y="318" text-anchor="middle" fill="rgba(255,255,255,0.5)" font-size="11" font-family="Segoe UI, system-ui, sans-serif" letter-spacing="1">CREATIVITY</text>
+        <text x="52" y="242" text-anchor="end" fill="rgba(255,255,255,0.5)" font-size="11" font-family="Segoe UI, system-ui, sans-serif" letter-spacing="1">RESILIENCE</text>
+        <text x="52" y="108" text-anchor="end" fill="rgba(255,255,255,0.5)" font-size="11" font-family="Segoe UI, system-ui, sans-serif" letter-spacing="1">STRATEGY</text>
+      </svg>
+    </div>
+  </div>
+
+  <!-- Pro Player Comparison -->
+  <div class="pro-section">
+    <div class="pro-title">Pro Player Matches</div>
+    <div class="pro-card">
+      <div class="pro-avatar a1">F</div>
+      <div class="pro-info">
+        <div class="pro-name">Faker</div>
+        <div class="pro-detail">T1 &middot; League of Legends &middot; Mid Lane</div>
+      </div>
+      <div class="pro-match">94%</div>
+    </div>
+    <div class="pro-card">
+      <div class="pro-avatar a2">S</div>
+      <div class="pro-info">
+        <div class="pro-name">s1mple</div>
+        <div class="pro-detail">NAVI &middot; CS2 &middot; AWPer</div>
+      </div>
+      <div class="pro-match">87%</div>
+    </div>
+    <div class="pro-card">
+      <div class="pro-avatar a3">T</div>
+      <div class="pro-info">
+        <div class="pro-name">TenZ</div>
+        <div class="pro-detail">SEN &middot; VALORANT &middot; Duelist</div>
+      </div>
+      <div class="pro-match">82%</div>
+    </div>
+  </div>
+
+  <!-- Bottom bar -->
+  <div class="bottom-bar">
+    <div class="page-badge">
+      <span class="page-badge-icon">&#128214;</span>
+      <span class="page-badge-text">16-Page Personalized Analysis</span>
+    </div>
+    <div class="feature-tags">
+      <div class="feature-tag">AI-Powered</div>
+      <div class="feature-tag">6 Talent Dimensions</div>
+      <div class="feature-tag">Pro Comparisons</div>
+    </div>
+    <div class="price-badge">
+      <span class="price-currency">$</span>
+      <span class="price-amount">3.99</span>
+    </div>
+  </div>
+
+  <div class="bottom-line"></div>
+</div>
+</body>
+</html>

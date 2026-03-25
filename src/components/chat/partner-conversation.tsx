@@ -442,18 +442,11 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
               const isServiceDown = msg.includes("Key limit") || msg.includes("503") || msg.includes("model not configured");
 
               if (isRateLimit) return (
-                /* Rate limit — show upgrade CTA */
                 <div className="flex flex-col items-center gap-2 px-5 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 max-w-xs">
                   <Crown className="w-5 h-5 text-amber-500" />
                   <p className="text-xs text-center text-muted-foreground">
-                    {isZh ? "今日对话次数已用完" : "Daily chat limit reached"}
+                    {isZh ? "今日对话次数已用完，明天再来吧！" : "Daily chat limit reached. Come back tomorrow!"}
                   </p>
-                  <Link
-                    href="/me/premium"
-                    className="text-xs font-medium text-amber-500 pressable hover:underline"
-                  >
-                    {isZh ? "升级 Premium → 无限对话" : "Upgrade to Premium → Unlimited chats"}
-                  </Link>
                 </div>
               );
 

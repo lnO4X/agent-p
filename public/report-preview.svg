@@ -1,0 +1,293 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 1200" width="1600" height="1200">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0a0a0f"/>
+      <stop offset="30%" stop-color="#0f0a1a"/>
+      <stop offset="60%" stop-color="#0a0a0f"/>
+      <stop offset="100%" stop-color="#0a1015"/>
+    </linearGradient>
+    <linearGradient id="purpleCyan" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#06b6d4"/>
+    </linearGradient>
+    <linearGradient id="purpleGlow" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="transparent"/>
+      <stop offset="25%" stop-color="#7c3aed"/>
+      <stop offset="50%" stop-color="#06b6d4"/>
+      <stop offset="75%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="transparent"/>
+    </linearGradient>
+    <linearGradient id="cardBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.5"/>
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.3"/>
+    </linearGradient>
+    <linearGradient id="cardBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#110a20" stop-opacity="0.95"/>
+      <stop offset="100%" stop-color="#0a0a0f" stop-opacity="0.98"/>
+    </linearGradient>
+    <linearGradient id="radarFill" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.3"/>
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.15"/>
+    </linearGradient>
+    <linearGradient id="radarStroke" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.8"/>
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0.8"/>
+    </linearGradient>
+    <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#fbbf24"/>
+      <stop offset="100%" stop-color="#f59e0b"/>
+    </linearGradient>
+    <linearGradient id="bar1" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#7c3aed"/><stop offset="100%" stop-color="#a78bfa"/>
+    </linearGradient>
+    <linearGradient id="bar2" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4"/><stop offset="100%" stop-color="#67e8f9"/>
+    </linearGradient>
+    <linearGradient id="bar3" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#f59e0b"/><stop offset="100%" stop-color="#fbbf24"/>
+    </linearGradient>
+    <linearGradient id="bar4" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#10b981"/><stop offset="100%" stop-color="#34d399"/>
+    </linearGradient>
+    <linearGradient id="bar5" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ef4444"/><stop offset="100%" stop-color="#f87171"/>
+    </linearGradient>
+    <linearGradient id="priceBg" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#7c3aed"/>
+      <stop offset="100%" stop-color="#5b21b6"/>
+    </linearGradient>
+    <linearGradient id="matchGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#06b6d4"/>
+      <stop offset="100%" stop-color="#7c3aed"/>
+    </linearGradient>
+    <radialGradient id="orbPurple" cx="30%" cy="25%">
+      <stop offset="0%" stop-color="#7c3aed" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#7c3aed" stop-opacity="0"/>
+    </radialGradient>
+    <radialGradient id="orbCyan" cx="75%" cy="70%">
+      <stop offset="0%" stop-color="#06b6d4" stop-opacity="0.08"/>
+      <stop offset="100%" stop-color="#06b6d4" stop-opacity="0"/>
+    </radialGradient>
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="blur"/>
+      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+    </filter>
+    <filter id="softGlow">
+      <feGaussianBlur stdDeviation="8"/>
+    </filter>
+  </defs>
+
+  <!-- Background -->
+  <rect width="1600" height="1200" fill="url(#bgGrad)"/>
+  <!-- Ambient orbs -->
+  <ellipse cx="480" cy="300" rx="450" ry="300" fill="url(#orbPurple)"/>
+  <ellipse cx="1200" cy="840" rx="350" ry="250" fill="url(#orbCyan)"/>
+  <!-- Grid lines (subtle) -->
+  <g stroke="rgba(124,58,237,0.03)" stroke-width="0.5">
+    <line x1="0" y1="200" x2="1600" y2="200"/><line x1="0" y1="400" x2="1600" y2="400"/>
+    <line x1="0" y1="600" x2="1600" y2="600"/><line x1="0" y1="800" x2="1600" y2="800"/>
+    <line x1="0" y1="1000" x2="1600" y2="1000"/>
+    <line x1="200" y1="0" x2="200" y2="1200"/><line x1="400" y1="0" x2="400" y2="1200"/>
+    <line x1="600" y1="0" x2="600" y2="1200"/><line x1="800" y1="0" x2="800" y2="1200"/>
+    <line x1="1000" y1="0" x2="1000" y2="1200"/><line x1="1200" y1="0" x2="1200" y2="1200"/>
+    <line x1="1400" y1="0" x2="1400" y2="1200"/>
+  </g>
+
+  <!-- Top accent line -->
+  <rect x="0" y="0" width="1600" height="3" fill="url(#purpleGlow)"/>
+  <!-- Bottom accent line -->
+  <rect x="0" y="1197" width="1600" height="3" fill="url(#purpleGlow)"/>
+
+  <!-- Floating particles -->
+  <circle cx="880" cy="180" r="2.5" fill="#06b6d4" fill-opacity="0.3"/>
+  <circle cx="770" cy="420" r="1.5" fill="#7c3aed" fill-opacity="0.3"/>
+  <circle cx="830" cy="720" r="1" fill="#06b6d4" fill-opacity="0.2"/>
+  <circle cx="1520" cy="300" r="3" fill="#7c3aed" fill-opacity="0.2"/>
+  <circle cx="1120" cy="960" r="2" fill="#06b6d4" fill-opacity="0.2"/>
+
+  <!-- ===== LOGO ===== -->
+  <rect x="80" y="48" width="48" height="48" rx="12" fill="url(#purpleCyan)"/>
+  <text x="104" y="82" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="22" font-weight="900" fill="white" letter-spacing="-2">GT</text>
+  <text x="142" y="82" font-family="Segoe UI, system-ui, sans-serif" font-size="32" font-weight="700" fill="#e0d5f5" letter-spacing="2">GameTan</text>
+
+  <!-- ===== TITLE SECTION ===== -->
+  <text x="80" y="168" font-family="Segoe UI, system-ui, sans-serif" font-size="14" font-weight="600" fill="#06b6d4" letter-spacing="6">PLAYER INTELLIGENCE PLATFORM</text>
+  <text x="80" y="240" font-family="Segoe UI, system-ui, sans-serif" font-size="64" font-weight="800" fill="white">Deep Archetype</text>
+  <text x="80" y="310" font-family="Segoe UI, system-ui, sans-serif" font-size="64" font-weight="800" fill="url(#purpleCyan)">Report</text>
+  <text x="80" y="352" font-family="Segoe UI, system-ui, sans-serif" font-size="19" fill="rgba(255,255,255,0.45)" letter-spacing="0.3">
+    <tspan x="80">AI-powered analysis of your unique gaming DNA.</tspan>
+    <tspan x="80" dy="28">Discover your playstyle archetype, talent strengths,</tspan>
+    <tspan x="80" dy="28">and pro player matches.</tspan>
+  </text>
+
+  <!-- ===== ARCHETYPE CARD ===== -->
+  <!-- Card border -->
+  <rect x="1080" y="130" width="440" height="530" rx="24" fill="url(#cardBorder)"/>
+  <!-- Card inner -->
+  <rect x="1083" y="133" width="434" height="524" rx="21" fill="url(#cardBg)"/>
+
+  <!-- Card badge -->
+  <rect x="1116" y="168" width="155" height="30" rx="15" fill="rgba(124,58,237,0.2)" stroke="rgba(124,58,237,0.3)" stroke-width="1"/>
+  <text x="1135" y="188" font-family="Segoe UI, system-ui, sans-serif" font-size="11" fill="#c4b5fd" letter-spacing="2">PRIMARY ARCHETYPE</text>
+
+  <!-- Lightning icon -->
+  <text x="1116" y="290" font-family="Segoe UI, system-ui, sans-serif" font-size="68" filter="url(#glow)">&#9889;</text>
+
+  <!-- Archetype name -->
+  <text x="1116" y="340" font-family="Segoe UI, system-ui, sans-serif" font-size="32" font-weight="800" fill="url(#goldGrad)">Lightning Assassin</text>
+  <text x="1116" y="362" font-family="Segoe UI, system-ui, sans-serif" font-size="13" fill="rgba(255,255,255,0.4)" letter-spacing="3">BURST · FLANKER · PLAYMAKER</text>
+
+  <!-- Stat bars -->
+  <!-- Reaction -->
+  <text x="1116" y="408" font-family="Segoe UI, system-ui, sans-serif" font-size="11" fill="rgba(255,255,255,0.5)" letter-spacing="1">REACTION</text>
+  <rect x="1206" y="398" width="230" height="6" rx="3" fill="rgba(255,255,255,0.06)"/>
+  <rect x="1206" y="398" width="212" height="6" rx="3" fill="url(#bar1)"/>
+  <text x="1452" y="408" font-family="Segoe UI, system-ui, sans-serif" font-size="13" font-weight="700" fill="rgba(255,255,255,0.7)" text-anchor="end">92</text>
+  <!-- Precision -->
+  <text x="1116" y="442" font-family="Segoe UI, system-ui, sans-serif" font-size="11" fill="rgba(255,255,255,0.5)" letter-spacing="1">PRECISION</text>
+  <rect x="1206" y="432" width="230" height="6" rx="3" fill="rgba(255,255,255,0.06)"/>
+  <rect x="1206" y="432" width="202" height="6" rx="3" fill="url(#bar2)"/>
+  <text x="1452" y="442" font-family="Segoe UI, system-ui, sans-serif" font-size="13" font-weight="700" fill="rgba(255,255,255,0.7)" text-anchor="end">88</text>
+  <!-- Aggression -->
+  <text x="1116" y="476" font-family="Segoe UI, system-ui, sans-serif" font-size="11" fill="rgba(255,255,255,0.5)" letter-spacing="1">AGGRESSION</text>
+  <rect x="1206" y="466" width="230" height="6" rx="3" fill="rgba(255,255,255,0.06)"/>
+  <rect x="1206" y="466" width="175" height="6" rx="3" fill="url(#bar3)"/>
+  <text x="1452" y="476" font-family="Segoe UI, system-ui, sans-serif" font-size="13" font-weight="700" fill="rgba(255,255,255,0.7)" text-anchor="end">76</text>
+  <!-- Adaptation -->
+  <text x="1116" y="510" font-family="Segoe UI, system-ui, sans-serif" font-size="11" fill="rgba(255,255,255,0.5)" letter-spacing="1">ADAPTATION</text>
+  <rect x="1206" y="500" width="230" height="6" rx="3" fill="rgba(255,255,255,0.06)"/>
+  <rect x="1206" y="500" width="196" height="6" rx="3" fill="url(#bar4)"/>
+  <text x="1452" y="510" font-family="Segoe UI, system-ui, sans-serif" font-size="13" font-weight="700" fill="rgba(255,255,255,0.7)" text-anchor="end">85</text>
+  <!-- Teamwork -->
+  <text x="1116" y="544" font-family="Segoe UI, system-ui, sans-serif" font-size="11" fill="rgba(255,255,255,0.5)" letter-spacing="1">TEAMWORK</text>
+  <rect x="1206" y="534" width="230" height="6" rx="3" fill="rgba(255,255,255,0.06)"/>
+  <rect x="1206" y="534" width="161" height="6" rx="3" fill="url(#bar5)"/>
+  <text x="1452" y="544" font-family="Segoe UI, system-ui, sans-serif" font-size="13" font-weight="700" fill="rgba(255,255,255,0.7)" text-anchor="end">70</text>
+
+  <!-- Card glow effect -->
+  <rect x="1080" y="130" width="440" height="530" rx="24" fill="none" stroke="#7c3aed" stroke-opacity="0.15" stroke-width="1" filter="url(#softGlow)"/>
+
+  <!-- ===== RADAR CHART ===== -->
+  <text x="80" y="490" font-family="Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="rgba(255,255,255,0.6)" letter-spacing="3">TALENT RADAR PROFILE</text>
+
+  <g transform="translate(280, 700)">
+    <!-- Hexagonal grid rings -->
+    <polygon points="0,-130 112,-65 112,65 0,130 -112,65 -112,-65" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    <polygon points="0,-90 78,-45 78,45 0,90 -78,45 -78,-45" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    <polygon points="0,-50 43,-25 43,25 0,50 -43,25 -43,-25" fill="none" stroke="rgba(255,255,255,0.04)" stroke-width="1"/>
+    <!-- Axis lines -->
+    <line x1="0" y1="0" x2="0" y2="-130" stroke="rgba(255,255,255,0.06)"/>
+    <line x1="0" y1="0" x2="112" y2="-65" stroke="rgba(255,255,255,0.06)"/>
+    <line x1="0" y1="0" x2="112" y2="65" stroke="rgba(255,255,255,0.06)"/>
+    <line x1="0" y1="0" x2="0" y2="130" stroke="rgba(255,255,255,0.06)"/>
+    <line x1="0" y1="0" x2="-112" y2="65" stroke="rgba(255,255,255,0.06)"/>
+    <line x1="0" y1="0" x2="-112" y2="-65" stroke="rgba(255,255,255,0.06)"/>
+    <!-- Data shape -->
+    <polygon points="0,-120 100,-52 95,60 0,105 -90,45 -105,-58"
+             fill="url(#radarFill)" stroke="url(#radarStroke)" stroke-width="2"/>
+    <!-- Data points -->
+    <circle cx="0" cy="-120" r="4" fill="#7c3aed" stroke="#c4b5fd" stroke-width="2"/>
+    <circle cx="100" cy="-52" r="4" fill="#7c3aed" stroke="#c4b5fd" stroke-width="2"/>
+    <circle cx="95" cy="60" r="4" fill="#06b6d4" stroke="#67e8f9" stroke-width="2"/>
+    <circle cx="0" cy="105" r="4" fill="#06b6d4" stroke="#67e8f9" stroke-width="2"/>
+    <circle cx="-90" cy="45" r="4" fill="#7c3aed" stroke="#c4b5fd" stroke-width="2"/>
+    <circle cx="-105" cy="-58" r="4" fill="#7c3aed" stroke="#c4b5fd" stroke-width="2"/>
+    <!-- Labels -->
+    <text x="0" y="-145" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11" fill="rgba(255,255,255,0.5)" letter-spacing="1">MECHANICS</text>
+    <text x="130" y="-60" text-anchor="start" font-family="Segoe UI, system-ui, sans-serif" font-size="11" fill="rgba(255,255,255,0.5)" letter-spacing="1">DECISION</text>
+    <text x="130" y="70" text-anchor="start" font-family="Segoe UI, system-ui, sans-serif" font-size="11" fill="rgba(255,255,255,0.5)" letter-spacing="1">AWARENESS</text>
+    <text x="0" y="155" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="11" fill="rgba(255,255,255,0.5)" letter-spacing="1">CREATIVITY</text>
+    <text x="-130" y="70" text-anchor="end" font-family="Segoe UI, system-ui, sans-serif" font-size="11" fill="rgba(255,255,255,0.5)" letter-spacing="1">RESILIENCE</text>
+    <text x="-130" y="-60" text-anchor="end" font-family="Segoe UI, system-ui, sans-serif" font-size="11" fill="rgba(255,255,255,0.5)" letter-spacing="1">STRATEGY</text>
+  </g>
+
+  <!-- ===== PRO PLAYER MATCHES ===== -->
+  <text x="560" y="490" font-family="Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="rgba(255,255,255,0.6)" letter-spacing="3">PRO PLAYER MATCHES</text>
+
+  <!-- Pro card 1 - Faker -->
+  <rect x="560" y="510" width="480" height="76" rx="14" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <circle cx="604" cy="548" r="24" fill="url(#priceBg)"/>
+  <text x="604" y="555" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="18" font-weight="800" fill="white">F</text>
+  <text x="644" y="541" font-family="Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="white">Faker</text>
+  <text x="644" y="561" font-family="Segoe UI, system-ui, sans-serif" font-size="12" fill="rgba(255,255,255,0.4)">T1 · League of Legends · Mid Lane</text>
+  <text x="1016" y="555" text-anchor="end" font-family="Segoe UI, system-ui, sans-serif" font-size="22" font-weight="800" fill="url(#matchGrad)">94%</text>
+
+  <!-- Pro card 2 - s1mple -->
+  <rect x="560" y="598" width="480" height="76" rx="14" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <circle cx="604" cy="636" r="24" fill="#06b6d4"/>
+  <text x="604" y="643" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="18" font-weight="800" fill="white">S</text>
+  <text x="644" y="629" font-family="Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="white">s1mple</text>
+  <text x="644" y="649" font-family="Segoe UI, system-ui, sans-serif" font-size="12" fill="rgba(255,255,255,0.4)">NAVI · CS2 · AWPer</text>
+  <text x="1016" y="643" text-anchor="end" font-family="Segoe UI, system-ui, sans-serif" font-size="22" font-weight="800" fill="url(#matchGrad)">87%</text>
+
+  <!-- Pro card 3 - TenZ -->
+  <rect x="560" y="686" width="480" height="76" rx="14" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.06)" stroke-width="1"/>
+  <circle cx="604" cy="724" r="24" fill="url(#goldGrad)"/>
+  <text x="604" y="731" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="18" font-weight="800" fill="white">T</text>
+  <text x="644" y="717" font-family="Segoe UI, system-ui, sans-serif" font-size="15" font-weight="700" fill="white">TenZ</text>
+  <text x="644" y="737" font-family="Segoe UI, system-ui, sans-serif" font-size="12" fill="rgba(255,255,255,0.4)">SEN · VALORANT · Duelist</text>
+  <text x="1016" y="731" text-anchor="end" font-family="Segoe UI, system-ui, sans-serif" font-size="22" font-weight="800" fill="url(#matchGrad)">82%</text>
+
+  <!-- ===== SAMPLE PAGES PREVIEW (bottom middle) ===== -->
+  <g transform="translate(560, 810)">
+    <!-- Mini page mockups -->
+    <rect x="0" y="0" width="100" height="140" rx="6" fill="#12101e" stroke="rgba(124,58,237,0.2)" stroke-width="1"/>
+    <rect x="8" y="12" width="50" height="4" rx="2" fill="rgba(124,58,237,0.3)"/>
+    <rect x="8" y="22" width="84" height="3" rx="1.5" fill="rgba(255,255,255,0.08)"/>
+    <rect x="8" y="30" width="70" height="3" rx="1.5" fill="rgba(255,255,255,0.06)"/>
+    <rect x="8" y="42" width="84" height="50" rx="4" fill="rgba(124,58,237,0.08)"/>
+    <rect x="8" y="100" width="60" height="3" rx="1.5" fill="rgba(255,255,255,0.06)"/>
+    <rect x="8" y="108" width="84" height="3" rx="1.5" fill="rgba(255,255,255,0.04)"/>
+    <rect x="8" y="116" width="45" height="3" rx="1.5" fill="rgba(255,255,255,0.04)"/>
+
+    <rect x="115" y="0" width="100" height="140" rx="6" fill="#12101e" stroke="rgba(6,182,212,0.2)" stroke-width="1"/>
+    <rect x="123" y="12" width="40" height="4" rx="2" fill="rgba(6,182,212,0.3)"/>
+    <circle cx="165" cy="62" r="25" fill="none" stroke="rgba(6,182,212,0.15)" stroke-width="1"/>
+    <polygon points="165,40 178,52 175,68 155,68 152,52" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.2)" stroke-width="1"/>
+    <rect x="123" y="100" width="84" height="3" rx="1.5" fill="rgba(255,255,255,0.06)"/>
+    <rect x="123" y="108" width="60" height="3" rx="1.5" fill="rgba(255,255,255,0.04)"/>
+    <rect x="123" y="116" width="72" height="3" rx="1.5" fill="rgba(255,255,255,0.04)"/>
+
+    <rect x="230" y="0" width="100" height="140" rx="6" fill="#12101e" stroke="rgba(124,58,237,0.15)" stroke-width="1"/>
+    <rect x="238" y="12" width="55" height="4" rx="2" fill="rgba(124,58,237,0.25)"/>
+    <rect x="238" y="24" width="84" height="28" rx="3" fill="rgba(255,255,255,0.03)"/>
+    <rect x="238" y="58" width="84" height="28" rx="3" fill="rgba(255,255,255,0.03)"/>
+    <rect x="238" y="92" width="84" height="28" rx="3" fill="rgba(255,255,255,0.03)"/>
+    <rect x="238" y="126" width="40" height="3" rx="1.5" fill="rgba(255,255,255,0.04)"/>
+
+    <rect x="345" y="0" width="100" height="140" rx="6" fill="#12101e" stroke="rgba(6,182,212,0.15)" stroke-width="1" opacity="0.6"/>
+    <rect x="353" y="12" width="45" height="4" rx="2" fill="rgba(6,182,212,0.2)"/>
+    <rect x="353" y="24" width="84" height="3" rx="1.5" fill="rgba(255,255,255,0.05)"/>
+    <rect x="353" y="32" width="70" height="3" rx="1.5" fill="rgba(255,255,255,0.04)"/>
+    <rect x="353" y="44" width="84" height="40" rx="3" fill="rgba(124,58,237,0.06)"/>
+
+    <!-- Fade overlay on last cards -->
+    <rect x="380" y="0" width="100" height="140" fill="url(#bgGrad)" opacity="0.7"/>
+
+    <!-- "..." indicator -->
+    <text x="470" y="78" font-family="Segoe UI, system-ui, sans-serif" font-size="24" fill="rgba(255,255,255,0.2)" letter-spacing="4">...</text>
+  </g>
+
+  <!-- ===== BOTTOM BAR ===== -->
+  <!-- 16-page badge -->
+  <rect x="80" y="1100" width="350" height="52" rx="26" fill="rgba(124,58,237,0.1)" stroke="rgba(124,58,237,0.25)" stroke-width="1"/>
+  <text x="110" y="1132" font-family="Segoe UI, system-ui, sans-serif" font-size="18">&#128214;</text>
+  <text x="140" y="1132" font-family="Segoe UI, system-ui, sans-serif" font-size="16" font-weight="600" fill="#c4b5fd" letter-spacing="1">16-Page Personalized Analysis</text>
+
+  <!-- Feature tags -->
+  <rect x="460" y="1100" width="120" height="52" rx="26" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="520" y="1132" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="13" fill="rgba(255,255,255,0.5)" letter-spacing="1">AI-Powered</text>
+
+  <rect x="592" y="1100" width="185" height="52" rx="26" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="684" y="1132" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="13" fill="rgba(255,255,255,0.5)" letter-spacing="1">6 Talent Dimensions</text>
+
+  <rect x="789" y="1100" width="170" height="52" rx="26" fill="rgba(255,255,255,0.03)" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+  <text x="874" y="1132" text-anchor="middle" font-family="Segoe UI, system-ui, sans-serif" font-size="13" fill="rgba(255,255,255,0.5)" letter-spacing="1">Pro Comparisons</text>
+
+  <!-- Price badge -->
+  <rect x="1370" y="1092" width="150" height="66" rx="33" fill="url(#priceBg)"/>
+  <!-- Price glow -->
+  <rect x="1370" y="1092" width="150" height="66" rx="33" fill="none" stroke="#7c3aed" stroke-opacity="0.4" stroke-width="1" filter="url(#softGlow)"/>
+  <text x="1410" y="1134" font-family="Segoe UI, system-ui, sans-serif" font-size="18" font-weight="600" fill="rgba(255,255,255,0.7)">$</text>
+  <text x="1425" y="1136" font-family="Segoe UI, system-ui, sans-serif" font-size="36" font-weight="900" fill="white" letter-spacing="-1">3.99</text>
+</svg>

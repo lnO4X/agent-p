@@ -391,46 +391,7 @@ export default function ResultDetailPage({
       {/* AI Analysis */}
       <AiAnalysis sessionId={sessionId} />
 
-      {/* Premium CTA — only show to free tier users */}
-      {tier === "free" && (
-        <Card className="border-yellow-500/20 bg-gradient-to-br from-yellow-500/5 to-amber-500/5 overflow-hidden">
-          <CardContent className="pt-6 pb-6">
-            <div className="flex items-start gap-4">
-              <div className="w-10 h-10 rounded-2xl bg-yellow-500/15 flex items-center justify-center shrink-0">
-                <Crown size={20} className="text-yellow-500" />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-base font-semibold mb-1">
-                  {t("results.premiumCta")}
-                </h3>
-                <p className="text-sm text-muted-foreground mb-4">
-                  {t("results.premiumCtaDesc")}
-                </p>
-                <div className="grid grid-cols-2 gap-2 mb-5">
-                  {[
-                    { icon: MessageSquare, key: "results.premiumFeature1" },
-                    { icon: Users, key: "results.premiumFeature2" },
-                    { icon: Brain, key: "results.premiumFeature3" },
-                    { icon: Sparkles, key: "results.premiumFeature4" },
-                  ].map(({ icon: Icon, key }) => (
-                    <div key={key} className="flex items-center gap-2 text-xs text-foreground/80">
-                      <Icon size={14} className="text-yellow-500 shrink-0" />
-                      <span>{t(key)}</span>
-                    </div>
-                  ))}
-                </div>
-                <button
-                  onClick={() => router.push("/me/premium")}
-                  className="pressable w-full flex items-center justify-center gap-2 py-2.5 rounded-xl bg-gradient-to-r from-yellow-500 to-amber-500 text-white text-sm font-semibold shadow-lg shadow-yellow-500/20 hover:shadow-yellow-500/30 transition-all"
-                >
-                  <Crown size={16} />
-                  {t("results.upgradeCta")}
-                </button>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      )}
+      {/* Premium CTA removed — free model */}
     </div>
   );
 }
