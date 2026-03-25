@@ -165,14 +165,65 @@ Backend: convertToModelMessages() (async), maxOutputTokens (not maxTokens), toUI
 
 ## Domain: Billing / Premium
 
-**Files**: `src/app/api/billing/activate/route.ts`, `src/app/api/admin/codes/route.ts`, `src/app/(main)/me/premium/page.tsx`
+**Files**: `src/app/api/billing/activate/route.ts`, `src/app/api/admin/codes/route.ts`, `src/app/(main)/me/premium/page.tsx`, `src/app/api/webhooks/lemonsqueezy/route.ts` (TODO), `src/app/me/report/page.tsx` (TODO)
 
-**Current method**: Activation codes (no Stripe yet)
+### Payment Provider: LemonSqueezy
+
+| Config | Value |
+|--------|-------|
+| **Provider** | [LemonSqueezy](https://lemonsqueezy.com) |
+| **Store** | GameTan store (ID: TBD — get from dashboard) |
+| **Webhook endpoint** | `POST /api/webhooks/lemonsqueezy` |
+| **Webhook secret** | `LEMONSQUEEZY_WEBHOOK_SECRET` env var |
+| **API key** | `LEMONSQUEEZY_API_KEY` env var |
+
+### Products
+
+| Product | Type | Price | Tax Category | Status |
+|---------|------|-------|-------------|--------|
+| **Deep Archetype Report** | Single payment | $3.99 | Information Services | ✅ Published |
+| **Premium Subscription** | Subscription | $4.99/mo or $29.99/yr | SaaS - Personal | 🔲 TODO |
+
+### Purchase Flow: Deep Archetype Report
+
+```
+User takes quiz → sees result → clicks "Unlock Full Report $3.99"
+  → LemonSqueezy checkout overlay (or redirect)
+  → Payment complete → LemonSqueezy webhook fires
+  → POST /api/webhooks/lemonsqueezy
+    → Validate signature (HMAC SHA256)
+    → Extract order_id, customer_email, product_id
+    → Find/create user by email → mark report as purchased
+    → Generate personalized PDF report (archetype + talents + pro comparisons)
+  → User redirects to https://gametan.ai/me/report
+  → Page checks purchase status → shows/downloads report
+```
+
+### Post-Purchase Pages
+
+| Route | Purpose |
+|-------|---------|
+| `/me/report` | Report download page (checks purchase status, generates PDF on demand) |
+| Confirmation modal | Title: "Your Report is Ready!", Button: "View My Report" → `/me/report` |
+| Email receipt | Button: "Download My Report" → `/me/report` |
+
+### Activation Codes (legacy, still active)
+
 1. Admin: `POST /api/admin/codes` with Bearer CRON_SECRET → generates codes
 2. User: enters code on `/me/premium`
 3. System: validates → sets `users.tier='premium'`, `tierExpiresAt=now+30d`
 
-**Premium price**: $4.99/month
+### Premium Tiers
+
+| Feature | Free | Premium |
+|---------|------|---------|
+| Quiz + Archetype | ✅ | ✅ |
+| AI Chat | 5 msgs/day | Unlimited |
+| Deep Report | $3.99 one-time | Included |
+| Custom Partners | 2 slots | 5 slots |
+| Advanced Analytics | ❌ | ✅ |
+
+**Premium price**: $4.99/month or $29.99/year (50% savings)
 
 ---
 
@@ -241,3 +292,4 @@ const NAV_ITEMS = [
 | `/pk`, `/pk/[id]` | — | Public, no nav (PK challenge) |
 | `/archetype`, `/archetype/[id]` | — | Public, no nav (archetype pages) |
 | `/archetype/compatibility` | — | Public, no nav (compatibility tool) |
+| `/me/report` | Me | Post-purchase report download (auth required) |

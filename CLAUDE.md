@@ -134,7 +134,7 @@ const isZh = locale === "zh";
 | **Archetype** | `lib/archetype.ts` (610行, pure) | 16 archetypes, 改动必查 4 页面 + 2 OG cards |
 | **AI Partners** | `lib/partner-prompts.ts`, `components/chat/*` | 五层 prompt, Vercel AI SDK v6, tier-based limits |
 | **Voice** | `voice-service/*`, `api/voice/*` | Whisper STT + Edge TTS (Microsoft neural voices), port 8100 |
-| **Billing** | `api/billing/*`, `api/admin/codes/*` | 激活码模式, $4.99/month, Stripe 未接入 |
+| **Billing** | `api/billing/*`, `api/webhooks/lemonsqueezy/*`, `me/report/*` | LemonSqueezy: Deep Report $3.99 (已发布) + Premium $4.99/mo (TODO). 激活码仍可用 |
 | **Social** | `api/profile/*`, `api/messages/*` | 公开档案 + Redis 阅后即焚消息 + 排行榜 |
 | **Referral** | `api/referral/*`, `api/cron/backfill-referral-codes/*` | 8-char codes, referrals tracking table, Me page card |
 | **Crawlers** | `lib/crawlers/*`, `api/cron/crawl-games/*` | Firecrawl-based Steam/TapTap game crawlers |
@@ -433,7 +433,7 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
 - ~~A1: 云部署迁移~~ ✅ 已完成
 - ~~Auth overhaul~~ ✅ 已完成
 - ~~A3: 功能精简~~ ✅ 已完成 (community/marketplace/PK hidden)
-- **A2: LemonSqueezy 支付** — 峰值变现: 测试结果页直接购买深度报告 (¥29.9). LemonSqueezy store created, identity verification may be complete.
+- **A2: LemonSqueezy 支付** — Deep Archetype Report ($3.99) 已在 LemonSqueezy 发布. 待开发: webhook 接收 (`/api/webhooks/lemonsqueezy`), 报告下载页 (`/me/report`), 结果页购买按钮, PDF 生成器.
 - **游戏数据引擎重构** — 当前游戏数量少,推荐引擎无法有效工作。考虑改为纯静态类型推荐(无需DB)。
 - **推荐奖励** — referral 有追踪无奖励,需加 invite→3天Premium 机制
 - **产品深度** — 核心循环完整但每个环节深度不足,需加强原型内容+测试体验+AI聊天质量
