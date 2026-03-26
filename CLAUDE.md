@@ -466,39 +466,52 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
   - **Social distribution**: `docs/social-posts.md` — ready-to-post for Reddit, 知乎, Discord, Twitter/X, 小红书.
   - Build clean, deployed to Vercel
 
-### 🔲 Pending — 最高优先级
+### 🔲 Pending — 🔴 立即执行：应用新设计系统
 
-- **🔴 核心体验问题：游戏不好玩** — 创始人自己测试后认为13款小游戏更像"测试工具"而非"游戏"。这是产品最大的问题。需在新会话中深入讨论游戏设计方向：
-  - 路径 A: 精简到最好玩的 3 个 + 加音效/粒子/连击/排名对比
-  - 路径 B: 放弃小游戏，改为纯问卷模式（像 16personalities）
-  - 路径 C: 做 1 个深度综合游戏（像 Aim Lab 的 60 秒综合测试）
-  - **决策未做，需要新会话讨论**
+- **🔴 应用 DESIGN.md 到代码** — 新设计系统已定稿（根目录 `DESIGN.md`），基于 5 个美国游戏产品研究。需要修改：
+  - `globals.css` — 替换所有 OkLCH 颜色变量：紫色→青绿 #00D4AA，新增金色 #FFB800，暗色背景 #0F1117
+  - `layout.tsx` — 替换 Geist Sans → DM Sans（next/font/google），保留 Outfit + Geist Mono
+  - 所有组件 — 紫色 primary → 青绿，CTA 按钮 → 金色，暗色为默认主题
+  - `page.tsx` (landing) — 移除粉色渐变背景，改用暗色主题
+  - 预览页在 `.gstack/design-preview.html`，可作为视觉参考
+  - **预计影响 15-20 个文件，建议新会话集中执行**
+
+### 🔲 Pending — 核心体验
+
+- **🔴 游戏不好玩** — 创始人测试后认为13款小游戏更像"测试工具"。三条路径待决策：
+  - A: 精简到最好玩的 3 个 + 加音效/粒子/连击
+  - B: 纯问卷模式（像 16personalities）
+  - C: 1 个深度综合游戏（像 Aim Lab）
 
 ### 🔲 Pending — 其他
 
 - **社交分发** — `docs/social-posts.md` 已写好 6 平台内容，需手动发布
 - **等 SEO 索引** — 363 页已被 Google 发现，等 1-2 周索引
 - **观察 Analytics** — 自建事件追踪已上线，admin dashboard 有 Event Analytics 面板
-- **A2: LemonSqueezy 支付** — 身份验证被拒，暂搁置
 - **Google AdSense** — 广告位已就绪（invisible），设置 `NEXT_PUBLIC_ADSENSE_ID` 即激活
-- **嵌入式推广** — `/embed/quiz` + `embed.js` 已就绪
 
-### 📊 当前数据 (2026-03-26)
+### ✅ 本会话完成 (2026-03-27)
+
+- **i18n 修复 (已部署)**: `<html lang>` 从 `zh-CN` 改为动态检测（默认 `en`）、`DEFAULT_LOCALE` 从 `zh` 改为 `en`、keywords 改纯英文。363 个 SEO 页面现在被 Google 正确识别为英文。
+- **共享视图检测 (已部署)**: Quiz result 页面通过 `&own=1` URL 参数区分自己的结果 vs 朋友分享的结果。共享视图显示 "A friend's result" + quiz CTA；自己的结果显示 "Your Gamer Archetype" + 注册 CTA。Confetti 和 analytics 只在自己完成测试时触发。
+- **DESIGN.md 定稿**: 基于 OP.GG/Tracker.gg/Aimlabs/Blitz.gg/Prydwen.gg 五个竞品研究。暗色主题 + 青绿 #00D4AA + 金色 #FFB800 + DM Sans + Outfit。
+- **Code review + QA**: 380 unit tests passing, adversarial review clean, QA health score 95/100。
+
+### 📊 当前数据 (2026-03-27)
 
 | 指标 | 值 |
 |------|-----|
-| 日活 | 30 (+329%) |
-| 页面浏览 | 519 (+7300%) |
-| 跳出率 | 77% (↓9%) |
-| SEO 页面 | 363 (Google 已发现) |
-| 注册用户 | 7 (0 新增) |
-| 变现 | $0 |
-| 核心问题 | 游戏不够好玩 → 无留存 → 无注册 |
+| 日活 | 30 |
+| 页面浏览 | 519 |
+| 跳出率 | 77% |
+| SEO 页面 | 363 (Google 已发现，lang 已修复为 en) |
+| 注册用户 | 7 |
+| 核心问题 | 1) 设计不符合美国游戏用户预期 2) 游戏不够好玩 |
 
 ### 🗓️ 路线
 
-1. **现在**: 解决核心体验问题（游戏设计方向）
-2. **同时**: 发社交帖子获取首批用户反馈
-3. **1-2周后**: 根据 SEO 流量 + 用户反馈调整
-4. **Month 2-4**: 优化转化漏斗 + 变现探索
-5. **Month 4+**: 英文市场 + KOL + 合作
+1. **现在**: 应用新设计系统（DESIGN.md → 代码，~15-20 文件）
+2. **然后**: 解决核心体验问题（游戏设计方向）
+3. **同时**: 发社交帖子获取首批用户反馈
+4. **1-2周后**: 根据 SEO 流量 + 用户反馈调整
+5. **Month 2-4**: 优化转化漏斗 + 变现探索
