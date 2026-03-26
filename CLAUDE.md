@@ -466,15 +466,39 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
   - **Social distribution**: `docs/social-posts.md` — ready-to-post for Reddit, 知乎, Discord, Twitter/X, 小红书.
   - Build clean, deployed to Vercel
 
-### 🔲 Pending
-- **A2: LemonSqueezy 支付** — 身份验证被拒，暂搁置。Deep Report $3.99 已发布但 UI 隐藏。webhook 代码已有。
-- **A4: 监控** — Sentry error tracking (当流量增长后优先)
-- **Google AdSense 激活** — 需流量达 100+/天后申请，设置 `NEXT_PUBLIC_ADSENSE_ID` env var 即激活
-- **社交分发执行** — `docs/social-posts.md` 已写好，需手动发布到各平台
-- **嵌入式推广** — 在游戏博客/Discord 推广 `<script src="gametan.ai/embed.js">` 嵌入
+### 🔲 Pending — 最高优先级
 
-### 🗓️ 中长期路线
-- **当前阶段**: 等待 SEO 索引 (1-2周) + 社交分发获取首批用户 + 观察 Analytics 数据
-- **阶段 B (Month 2-4)**: 基于数据优化转化漏斗 + 深度报告 PDF 生成 + B2B 游戏厂商合作
-- **阶段 C (Month 4-8)**: AdSense 变现 + 英文市场扩展 + 邮件营销 + KOL 合作
-- **阶段 D (Month 8-12)**: 白标引擎 + UGC 测试 + API 开放 + 数据变现
+- **🔴 核心体验问题：游戏不好玩** — 创始人自己测试后认为13款小游戏更像"测试工具"而非"游戏"。这是产品最大的问题。需在新会话中深入讨论游戏设计方向：
+  - 路径 A: 精简到最好玩的 3 个 + 加音效/粒子/连击/排名对比
+  - 路径 B: 放弃小游戏，改为纯问卷模式（像 16personalities）
+  - 路径 C: 做 1 个深度综合游戏（像 Aim Lab 的 60 秒综合测试）
+  - **决策未做，需要新会话讨论**
+
+### 🔲 Pending — 其他
+
+- **社交分发** — `docs/social-posts.md` 已写好 6 平台内容，需手动发布
+- **等 SEO 索引** — 363 页已被 Google 发现，等 1-2 周索引
+- **观察 Analytics** — 自建事件追踪已上线，admin dashboard 有 Event Analytics 面板
+- **A2: LemonSqueezy 支付** — 身份验证被拒，暂搁置
+- **Google AdSense** — 广告位已就绪（invisible），设置 `NEXT_PUBLIC_ADSENSE_ID` 即激活
+- **嵌入式推广** — `/embed/quiz` + `embed.js` 已就绪
+
+### 📊 当前数据 (2026-03-26)
+
+| 指标 | 值 |
+|------|-----|
+| 日活 | 30 (+329%) |
+| 页面浏览 | 519 (+7300%) |
+| 跳出率 | 77% (↓9%) |
+| SEO 页面 | 363 (Google 已发现) |
+| 注册用户 | 7 (0 新增) |
+| 变现 | $0 |
+| 核心问题 | 游戏不够好玩 → 无留存 → 无注册 |
+
+### 🗓️ 路线
+
+1. **现在**: 解决核心体验问题（游戏设计方向）
+2. **同时**: 发社交帖子获取首批用户反馈
+3. **1-2周后**: 根据 SEO 流量 + 用户反馈调整
+4. **Month 2-4**: 优化转化漏斗 + 变现探索
+5. **Month 4+**: 英文市场 + KOL + 合作
