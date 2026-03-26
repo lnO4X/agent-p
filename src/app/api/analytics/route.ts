@@ -66,7 +66,7 @@ export async function GET() {
       return NextResponse.json({ success: false, error: "Forbidden" }, { status: 403 });
     }
 
-    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000);
+    const sevenDaysAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString();
 
     const counts = await db
       .select({
@@ -75,7 +75,7 @@ export async function GET() {
         uniqueUsers: sql<number>`count(distinct ${analyticsEvents.sessionId})`,
       })
       .from(analyticsEvents)
-      .where(sql`${analyticsEvents.createdAt} >= ${sevenDaysAgo}`)
+      .where(sql`${analyticsEvents.createdAt} >= ${sevenDaysAgo}::timestamp`)
       .groupBy(analyticsEvents.event)
       .orderBy(sql`count(*) desc`);
 

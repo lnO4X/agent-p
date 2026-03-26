@@ -15,11 +15,8 @@ export async function GET(request: NextRequest) {
   }
 
   try {
-    const thirtyDaysAgo = new Date();
-    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-
-    const fourteenDaysAgo = new Date();
-    fourteenDaysAgo.setDate(fourteenDaysAgo.getDate() - 14);
+    const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString();
+    const fourteenDaysAgo = new Date(Date.now() - 14 * 24 * 60 * 60 * 1000).toISOString();
 
     // Safe extraction: db.execute may return array or { rows: [] }
     function rows(result: unknown): Array<Record<string, unknown>> {
@@ -34,7 +31,7 @@ export async function GET(request: NextRequest) {
       db.execute(sql`
         SELECT DATE(created_at) as date, COUNT(*) as count
         FROM users
-        WHERE created_at >= ${thirtyDaysAgo}
+        WHERE created_at >= ${thirtyDaysAgo}::timestamp
         GROUP BY DATE(created_at)
         ORDER BY date ASC
       `),
@@ -53,7 +50,7 @@ export async function GET(request: NextRequest) {
           DATE(completed_at) as date,
           COUNT(*) as tests
         FROM test_sessions
-        WHERE status = 'completed' AND completed_at >= ${fourteenDaysAgo}
+        WHERE status = 'completed' AND completed_at >= ${fourteenDaysAgo}::timestamp
         GROUP BY DATE(completed_at)
         ORDER BY date ASC
       `),
@@ -63,7 +60,7 @@ export async function GET(request: NextRequest) {
     const challengeActivity = await db.execute(sql`
       SELECT DATE(completed_at) as date, COUNT(*) as challenges
       FROM micro_challenges
-      WHERE completed_at >= ${fourteenDaysAgo}
+      WHERE completed_at >= ${fourteenDaysAgo}::timestamp
       GROUP BY DATE(completed_at)
       ORDER BY date ASC
     `);
