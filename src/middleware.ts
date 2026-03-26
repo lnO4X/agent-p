@@ -38,6 +38,7 @@ const PUBLIC_PREFIXES = [
   "/api/challenge/card",
   "/api/archetype/card",
   "/api/pk/card",
+  "/embed",
 ];
 
 /** Cache the encoded secret to avoid re-encoding on every request */

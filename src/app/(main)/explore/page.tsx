@@ -5,6 +5,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { GameCard } from "@/components/games/game-card";
 import { useI18n } from "@/i18n/context";
+import { AdSlot } from "@/components/ad-slot";
 
 const PLATFORMS = [
   { key: "", labelKey: "common.all" },
@@ -194,6 +195,9 @@ export default function ExplorePage() {
           ))}
         </div>
       )}
+
+      {/* Ad slot — between game grid and pagination */}
+      <AdSlot slot="explore-mid" className="py-2" />
 
       {/* Pagination */}
       {totalPages > 1 && (

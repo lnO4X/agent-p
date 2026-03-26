@@ -32,6 +32,7 @@ import {
 import { parseScores, parseTalentScores } from "@/lib/quiz-utils";
 import { NpsPrompt } from "@/components/nps-prompt";
 import { GameRecommendations } from "@/components/game-recommendations";
+import { AdSlot } from "@/components/ad-slot";
 
 const TALENT_LABELS_ZH: Record<string, string> = {
   reaction_speed: "反应速度",
@@ -273,6 +274,9 @@ function QuizResultContent() {
           </Button>
         </motion.div>
       </div>
+
+      {/* Ad slot — after archetype reveal */}
+      <AdSlot slot="result-top" className="px-6 pt-4 max-w-lg mx-auto w-full" />
 
       {/* Content */}
       <div className="px-6 py-6 max-w-lg mx-auto w-full space-y-5">

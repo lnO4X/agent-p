@@ -14,6 +14,7 @@ import {
   Share2, Check,
 } from "lucide-react";
 import { ARCHETYPE_NARRATIVES } from "@/lib/archetype-narratives";
+import { AdSlot } from "@/components/ad-slot";
 import { getPlayersForArchetype } from "@/lib/hall-of-fame";
 import { Trophy } from "lucide-react";
 
@@ -134,6 +135,9 @@ export default function ArchetypeDetailPage({
           </p>
         </CardContent>
       </Card>
+
+      {/* Ad slot — between description and narrative */}
+      <AdSlot slot="archetype-mid" />
 
       {/* Deep narrative — "this is me" content */}
       {narrative && (
