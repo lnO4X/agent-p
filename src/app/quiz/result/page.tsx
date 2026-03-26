@@ -99,6 +99,10 @@ function QuizResultContent() {
 
   const [copied, setCopied] = useState(false);
 
+  // Detect shared view: if URL has &own=1, user just completed the quiz themselves.
+  // No &own param = arrived via shared link (persists across refresh, no sessionStorage needed).
+  const isSharedView = !searchParams.get("own");
+
   const shareUrl = useMemo(() => {
     if (typeof window === "undefined" || !archetype) return "";
     return isQuestionnaire
@@ -107,7 +111,7 @@ function QuizResultContent() {
             ? `&scores=${Object.entries(talentScores).map(([k, v]) => `${k}:${v}`).join(",")}`
             : ""
         }`
-      : `${window.location.origin}/quiz/result?s=${scores!.join("-")}`;
+      : `${window.location.origin}/quiz/result?s=${(scores ?? []).join("-")}`;
   }, [archetype, isQuestionnaire, talentScores, scores]);
 
   const shareText = useMemo(() => {
@@ -150,9 +154,9 @@ function QuizResultContent() {
     }
   }, [isZh, archetype, shareText, shareUrl]);
 
-  // Celebration confetti + analytics on mount
+  // Celebration confetti + analytics on mount (skip for shared views)
   useEffect(() => {
-    if (archetype) {
+    if (archetype && !isSharedView) {
       confetti({
         particleCount: 80,
         spread: 60,
@@ -164,7 +168,7 @@ function QuizResultContent() {
         mode: isQuestionnaire ? "questionnaire" : "quick",
       });
     }
-  }, [archetype, isQuestionnaire]);
+  }, [archetype, isQuestionnaire, isSharedView]);
 
   // No data → redirect to quiz
   if ((!scores && !isQuestionnaire) || !archetype) {
@@ -215,7 +219,9 @@ function QuizResultContent() {
           transition={{ duration: 0.5, delay: 0.5 }}
         >
           <div className="text-xs text-muted-foreground tracking-widest uppercase">
-            {isZh ? "你的玩家原型" : "Your Gamer Archetype"}
+            {isSharedView
+              ? (isZh ? "一位朋友的测试结果" : "A friend's result")
+              : (isZh ? "你的玩家原型" : "Your Gamer Archetype")}
           </div>
           <h1
             className="text-3xl md:text-4xl font-bold"
@@ -244,13 +250,28 @@ function QuizResultContent() {
           &ldquo;{isZh ? archetype.tagline : archetype.taglineEn}&rdquo;
         </motion.p>
 
-        {/* Primary share CTA — right after archetype reveal */}
+        {/* Primary CTA — share (own result) or take quiz (shared view) */}
         <motion.div
           className="pt-4"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 1.0 }}
         >
+          {isSharedView ? (
+            <Link href="/quiz">
+              <Button
+                size="lg"
+                className="h-12 px-8 text-base gap-2"
+                style={{
+                  background: `linear-gradient(135deg, ${archetype.gradient[0]}, ${archetype.gradient[1]})`,
+                  color: "white",
+                }}
+              >
+                <Target size={20} />
+                {isZh ? "测测你是什么原型" : "Find your archetype"}
+              </Button>
+            </Link>
+          ) : (
           <Button
             size="lg"
             className="h-12 px-8 text-base gap-2"
@@ -272,6 +293,7 @@ function QuizResultContent() {
               </>
             )}
           </Button>
+          )}
         </motion.div>
       </div>
 
@@ -352,12 +374,36 @@ function QuizResultContent() {
           ) : null}
         </motion.div>
 
-        {/* ── Registration CTA — primary conversion hook ── */}
+        {/* ── CTA card — quiz CTA for shared view, registration for own result ── */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 1.5 }}
         >
+        {isSharedView ? (
+        <Card className="border-primary/30 bg-primary/5 overflow-hidden">
+          <CardContent className="pt-5 pb-5">
+            <div className="text-center mb-4">
+              <div className="text-sm font-semibold mb-1">
+                {isZh
+                  ? "想知道你是什么类型的玩家？"
+                  : "Curious about your gamer archetype?"}
+              </div>
+              <p className="text-xs text-muted-foreground">
+                {isZh
+                  ? "3 分钟测出你的玩家原型 — 完全免费"
+                  : "Find your gamer archetype in 3 minutes — totally free"}
+              </p>
+            </div>
+            <Link href="/quiz" className="block">
+              <Button size="lg" className="w-full h-12 text-base">
+                {isZh ? "我也要测" : "Take the Quiz"}
+                <ArrowRight size={18} className="ml-2" />
+              </Button>
+            </Link>
+          </CardContent>
+        </Card>
+        ) : (
         <Card className="border-primary/30 bg-primary/5 overflow-hidden">
           <CardContent className="pt-5 pb-5">
             <div className="text-center mb-4">
@@ -400,6 +446,7 @@ function QuizResultContent() {
             </Link>
           </CardContent>
         </Card>
+        )}
         </motion.div>
 
         {/* Description */}

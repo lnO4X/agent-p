@@ -54,3 +54,5 @@ voice-service/__pycache__/
 voice-service/*.wav
 .env.production
 test-results/
+
+.env*.local

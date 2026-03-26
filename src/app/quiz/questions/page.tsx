@@ -57,7 +57,7 @@ function QuestionnaireContent() {
       .map(([k, v]) => `${k}:${v}`)
       .join(",");
     const resultBase = gameId ? `/quiz/${gameId}/result` : "/quiz/result";
-    router.push(`${resultBase}?mode=q&archetype=${archetype.id}&scores=${scoreStr}`);
+    router.push(`${resultBase}?mode=q&archetype=${archetype.id}&scores=${scoreStr}&own=1`);
   };
 
   const canSubmit = answered >= total;

@@ -55,7 +55,7 @@ export default function QuizPage() {
       } else {
         // All 3 games done → navigate to result
         const encoded = newScores.map((s) => Math.round(s)).join("-");
-        router.push(`/quiz/result?s=${encoded}`);
+        router.push(`/quiz/result?s=${encoded}&own=1`);
       }
     },
     [currentPlugin, scores, gameIndex, router]
