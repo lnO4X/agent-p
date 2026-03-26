@@ -68,24 +68,37 @@ const FUNNEL_STEPS = [
   { key: "premiumUsers", label: "付费 Premium", color: "bg-amber-500" },
 ] as const;
 
+interface EventCount {
+  event: string;
+  count: number;
+  uniqueUsers: number;
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [modelStats, setModelStats] = useState<ModelStat[]>([]);
+  const [eventCounts, setEventCounts] = useState<EventCount[]>([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    const safeFetch = (url: string) =>
+      fetch(url, { credentials: "include" })
+        .then((r) => r.json())
+        .catch(() => ({ success: false }));
+
     Promise.all([
-      fetch("/api/admin/stats", { credentials: "include" }).then((r) => r.json()),
-      fetch("/api/admin/analytics", { credentials: "include" }).then((r) => r.json()),
-      fetch("/api/admin/chat-model-stats", { credentials: "include" }).then((r) => r.json()),
+      safeFetch("/api/admin/stats"),
+      safeFetch("/api/admin/analytics"),
+      safeFetch("/api/admin/chat-model-stats"),
+      safeFetch("/api/analytics"),
     ])
-      .then(([statsData, analyticsData, modelData]) => {
+      .then(([statsData, analyticsData, modelData, eventsData]) => {
         if (statsData.success) setStats(statsData.data);
         if (analyticsData.success) setAnalytics(analyticsData.data);
-        if (modelData.success) setModelStats(modelData.data.models || []);
+        if (modelData.success) setModelStats(modelData.data?.models || []);
+        if (eventsData.success) setEventCounts(eventsData.data?.eventCounts || []);
       })
-      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -215,6 +228,27 @@ export default function AdminDashboard() {
               </div>
             </div>
             <StackedBarChart data={analytics.dailyActivity} height={100} />
+          </div>
+        </div>
+      )}
+
+      {/* Custom Event Analytics */}
+      {eventCounts.length > 0 && (
+        <div className="rounded-2xl border border-foreground/5 bg-muted/10 p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <TrendingUp className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-semibold">事件追踪 Event Analytics (7d)</h2>
+          </div>
+          <div className="space-y-2">
+            {eventCounts.map((e) => (
+              <div key={e.event} className="flex items-center justify-between text-xs">
+                <span className="font-mono text-muted-foreground">{e.event}</span>
+                <div className="flex items-center gap-3">
+                  <span className="text-foreground font-medium">{e.count}x</span>
+                  <span className="text-muted-foreground">{e.uniqueUsers} users</span>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       )}
