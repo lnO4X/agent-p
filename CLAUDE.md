@@ -120,6 +120,18 @@ const isZh = locale === "zh";
 | `(main)/layout.tsx` | 导航 tab 结构 + activePrefixes |
 | 任何 game plugin | games/index.ts registry + QUICK_TEST_GAMES if quiz game |
 
+### 3.7 Gotchas (踩坑记录)
+
+| 问题 | 根因 | 解法 |
+|------|------|------|
+| **Neon DB 日期参数 500** | `db.execute(sql\`... >= ${new Date()}\`)` — Neon 不接受 JS Date 对象作为参数，会报 `Failed query ... params: Tue Feb 24...` | 必须用 `.toISOString()` 转字符串 + SQL 里加 `::timestamp` cast |
+| **drizzle db.execute() 返回格式不确定** | 可能返回数组 `[{...}]` 或 `{rows:[{...}]}`，取决于 drizzle/postgres.js 版本 | 用安全解包: `Array.isArray(r) ? r : r.rows ?? []` |
+| **next/og ImageResponse Docker 崩溃** | satori 严格 JSX 验证 — `<div>` 里混合文字+表达式子节点（如 `"{value}"` 会创建多个子节点）在没有 `display:flex` 时报错 | 全部改用模板字符串 `` {`"${value}"`} `` |
+| **cookies().set() + redirect() 不兼容** | Next.js 里 `cookies().set()` 和 `NextResponse.redirect()` 不能同时用 | 必须用 `response.cookies.set()` 在 redirect response 上直接设置 |
+| **Vercel Analytics 自定义事件需要 Pro** | 免费版只有 page views，custom events 需要 $20/月 Pro plan | 自建: `POST /api/analytics` + `analytics_events` 表 + `lib/analytics.ts` (sendBeacon) |
+| **Promise.all 一个失败全部失败** | admin dashboard 3 个 API fetch 用 Promise.all，一个 500 导致全部数据丢失 | 每个 fetch 包 `.catch(() => ({success:false}))` 独立处理 |
+| **默认语言硬编码中文** | `DEFAULT_LOCALE = "zh"` 且没检测浏览器语言 | `getInitialLocale()` 用 `navigator.language` 自动检测 |
+
 ---
 
 ## 4. Domain Summary
