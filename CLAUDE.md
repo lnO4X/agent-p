@@ -429,17 +429,40 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
   - **Roadmap updated**: `docs/roadmap.md` Phase B rewritten with B0-B3 strategy (personality matrix → deep content → Hall of Fame → region).
   - Build clean, deployed to Vercel
 
+- Phase 40: Product surgery + free model + landing page redesign
+  - **Product surgery**: Hidden community/marketplace/PK from all navigation (code preserved). Freemium: AI chat 5 msgs/day free.
+  - **NPS feedback**: `product_feedback` table + `POST /api/feedback` + NpsPrompt component (quiz result, once/day).
+  - **Chat perf**: Greeting AI deferred 800ms + 2s timeout. Dashboard fetches parallelized.
+  - **Landing page**: 6-section redesign (hero → what you get → archetypes → how it works → stats → CTA). Dual CTA with "完全免费" badges.
+  - **Free model**: Removed premium CTA from results/chat/me pages. LemonSqueezy product created ($3.99) but UI hidden.
+  - **Locale auto-detect**: Browser language detection (was hardcoded zh). English users see English by default.
+
+- Phase 41: SEO + viral sharing + retention + performance
+  - **256 personality×archetype SEO pages**: `/archetype/[id]/personality/[typeId]` with generateStaticParams (256 combos) + 16 personality index pages. Sitemap 91 → 363 URLs. Google Search Console submitted, 363 pages discovered.
+  - **Viral sharing**: Large gradient share button on result page + Web Share API + "Challenge a Friend" invite card. Share button on archetype detail. Bilingual share text.
+  - **AI coach×archetype**: System prompt includes user's archetype strengths/weakness/nemesis/ally. Coaching instructions for targeting weak talents.
+  - **Daily challenge weakness bias**: 40% chance daily challenge targets user's weakest talent.
+  - **Referral rewards**: 1+ successful referrals → 15 msgs/day chat (was 5).
+  - **Performance**: games/catalog in-memory cache (0.3s cached vs 4.8s). CDN caching on OG cards (24hr), daily ranking (5min), profile cards (1hr).
+  - 380 unit tests passing, build clean, deployed to Vercel
+
+- Phase 42: Analytics + evolution tracker + embed + AdSense
+  - **Vercel Analytics events**: 7 funnel points (quiz_start, quiz_complete, share_click, register, chat_start, archetype_view, personality_combo_view).
+  - **Evolution tracker**: `GET /api/talent-history`, `EvolutionTracker` component (SVG line chart, per-talent deltas, "You've evolved!" banner), integrated into dashboard + me page.
+  - **Embeddable quiz widget**: `/embed/quiz` (dark theme, 4 phases), `/embed` (docs + preview), `public/embed.js` (573 bytes), `?ref=embed` tracking.
+  - **AdSense prep**: `ads.txt`, `AdSlot` component (invisible when no pub ID), slots in result/archetype/explore. Conditional script in layout.
+  - **Social distribution**: `docs/social-posts.md` — ready-to-post for Reddit, 知乎, Discord, Twitter/X, 小红书.
+  - Build clean, deployed to Vercel
+
 ### 🔲 Pending
-- ~~A1: 云部署迁移~~ ✅ 已完成
-- ~~Auth overhaul~~ ✅ 已完成
-- ~~A3: 功能精简~~ ✅ 已完成 (community/marketplace/PK hidden)
-- **A2: LemonSqueezy 支付** — Deep Archetype Report ($3.99) 已在 LemonSqueezy 发布. 待开发: webhook 接收 (`/api/webhooks/lemonsqueezy`), 报告下载页 (`/me/report`), 结果页购买按钮, PDF 生成器.
-- **游戏数据引擎重构** — 当前游戏数量少,推荐引擎无法有效工作。考虑改为纯静态类型推荐(无需DB)。
-- **推荐奖励** — referral 有追踪无奖励,需加 invite→3天Premium 机制
-- **产品深度** — 核心循环完整但每个环节深度不足,需加强原型内容+测试体验+AI聊天质量
-- **A4: 监控 + CI/CD** — Sentry + GitHub Actions + Vercel auto-deploy
+- **A2: LemonSqueezy 支付** — 身份验证被拒，暂搁置。Deep Report $3.99 已发布但 UI 隐藏。webhook 代码已有。
+- **A4: 监控** — Sentry error tracking (当流量增长后优先)
+- **Google AdSense 激活** — 需流量达 100+/天后申请，设置 `NEXT_PUBLIC_ADSENSE_ID` env var 即激活
+- **社交分发执行** — `docs/social-posts.md` 已写好，需手动发布到各平台
+- **嵌入式推广** — 在游戏博客/Discord 推广 `<script src="gametan.ai/embed.js">` 嵌入
 
 ### 🗓️ 中长期路线
-- **阶段 B (Month 2-4)**: 游戏专属测试 (病毒传播) + 深度报告 (PDF) + landing page SEO
-- **阶段 C (Month 4-8)**: 英文市场 + SEO矩阵 + 邮件营销 + 游戏厂商合作
-- **阶段 D (Month 8-12)**: 白标引擎 + UGC测试 + API开放 + 数据变现
+- **当前阶段**: 等待 SEO 索引 (1-2周) + 社交分发获取首批用户 + 观察 Analytics 数据
+- **阶段 B (Month 2-4)**: 基于数据优化转化漏斗 + 深度报告 PDF 生成 + B2B 游戏厂商合作
+- **阶段 C (Month 4-8)**: AdSense 变现 + 英文市场扩展 + 邮件营销 + KOL 合作
+- **阶段 D (Month 8-12)**: 白标引擎 + UGC 测试 + API 开放 + 数据变现
