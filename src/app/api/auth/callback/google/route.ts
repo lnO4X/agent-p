@@ -191,8 +191,11 @@ export async function GET(request: NextRequest) {
     // Issue JWT and set cookie on the redirect response
     // NOTE: Cannot use setAuthCookie() here because cookies() API writes to a
     // separate response object that gets discarded when we return NextResponse.redirect().
+    const isNewUser = !byGoogleId && !byEmail;
     const jwt = await createToken({ sub: user.id, username: user.username });
-    const response = NextResponse.redirect(`${BASE_URL}/dashboard`);
+    const response = NextResponse.redirect(
+      isNewUser ? `${BASE_URL}/dashboard?welcome=1&method=google` : `${BASE_URL}/dashboard`
+    );
     response.cookies.set(AUTH_COOKIE_NAME, jwt, {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",

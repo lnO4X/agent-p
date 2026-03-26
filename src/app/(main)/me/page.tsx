@@ -20,6 +20,7 @@ import {
   Check,
   Copy,
 } from "lucide-react";
+import { EvolutionTracker } from "@/components/evolution-tracker";
 import { scoreToArchetype } from "@/lib/archetype";
 import type { Archetype } from "@/lib/archetype";
 import type { TalentCategory, Rank } from "@/types/talent";
@@ -84,17 +85,27 @@ export default function MePage() {
   const [codeCopied, setCodeCopied] = useState(false);
   const [linkCopied, setLinkCopied] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [evolutionHistory, setEvolutionHistory] = useState<
+    { date: string; archetypeId: string | null; overallScore: number | null; talents: Partial<Record<TalentCategory, number>> }[]
+  >([]);
+  const [evolutionData, setEvolutionData] = useState<{
+    firstArchetype: string | null;
+    currentArchetype: string | null;
+    evolved: boolean;
+    overallChange: number;
+  } | null>(null);
 
   useEffect(() => {
     async function load() {
       try {
         // Fetch latest talent profile + username
-        const [profileRes, challengeRes, sessionsRes, meRes, referralRes] = await Promise.all([
+        const [profileRes, challengeRes, sessionsRes, meRes, referralRes, talentHistoryRes] = await Promise.all([
           fetch("/api/leaderboard").then((r) => r.json()),
           fetch("/api/challenge/history?limit=5").then((r) => r.json()).catch(() => ({ success: false })),
           fetch("/api/sessions").then((r) => r.json()),
           fetch("/api/auth/me").then((r) => r.json()).catch(() => ({ success: false })),
           fetch("/api/referral").then((r) => r.json()).catch(() => ({ success: false })),
+          fetch("/api/talent-history").then((r) => r.json()).catch(() => ({ success: false })),
         ]);
 
         // Get username
@@ -132,6 +143,12 @@ export default function MePage() {
               .filter((s: Session) => s.status === "completed")
               .slice(0, 5)
           );
+        }
+
+        // Talent history (evolution tracker)
+        if (talentHistoryRes?.success && talentHistoryRes.data?.history?.length >= 2) {
+          setEvolutionHistory(talentHistoryRes.data.history);
+          setEvolutionData(talentHistoryRes.data.evolution);
         }
       } catch {
         // silent
@@ -275,6 +292,11 @@ export default function MePage() {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* ─── Evolution Tracker ─── */}
+      {evolutionHistory.length >= 2 && (
+        <EvolutionTracker history={evolutionHistory} evolution={evolutionData} />
       )}
 
       {/* Quick menu grid */}

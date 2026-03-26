@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { track } from "@vercel/analytics";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -54,6 +55,7 @@ export function RegisterForm() {
       });
       const json = await res.json();
       if (json.success) {
+        track("register", { method: "password" });
         // Set cookie client-side for WeChat WKWebView compatibility
         if (json.data?.token) {
           setClientAuthCookie(json.data.token);

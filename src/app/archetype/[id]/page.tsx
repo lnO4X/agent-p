@@ -1,8 +1,9 @@
 "use client";
 
-import { use, useState, useCallback } from "react";
+import { use, useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { track } from "@vercel/analytics";
 import { getArchetype, getAllArchetypes } from "@/lib/archetype";
 import { useI18n } from "@/i18n/context";
 import { Button } from "@/components/ui/button";
@@ -43,7 +44,13 @@ export default function ArchetypeDetailPage({
 
   const [copied, setCopied] = useState(false);
 
+  // Track archetype page view
+  useEffect(() => {
+    track("archetype_view", { archetype: id });
+  }, [id]);
+
   const handleShare = useCallback(async () => {
+    track("share_click", { page: "archetype_detail", archetype: id });
     const shareUrl = typeof window !== "undefined"
       ? `${window.location.origin}/archetype/${id}`
       : `https://gametan.ai/archetype/${id}`;

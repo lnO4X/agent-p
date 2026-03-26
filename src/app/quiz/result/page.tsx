@@ -3,6 +3,7 @@
 import { Suspense, useMemo, useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
+import { track } from "@vercel/analytics";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -124,6 +125,7 @@ function QuizResultContent() {
 
   const handleShare = useCallback(async () => {
     if (!archetype) return;
+    track("share_click", { page: "quiz_result", archetype: archetype.id });
     if (navigator.share) {
       try {
         await navigator.share({
@@ -147,7 +149,7 @@ function QuizResultContent() {
     }
   }, [isZh, archetype, shareText, shareUrl]);
 
-  // Celebration confetti on mount
+  // Celebration confetti + analytics on mount
   useEffect(() => {
     if (archetype) {
       confetti({
@@ -156,8 +158,12 @@ function QuizResultContent() {
         origin: { y: 0.3 },
         colors: [archetype.gradient[0], archetype.gradient[1], '#FFD700'],
       });
+      track("quiz_complete", {
+        archetype: archetype.id,
+        mode: isQuestionnaire ? "questionnaire" : "quick",
+      });
     }
-  }, [archetype]);
+  }, [archetype, isQuestionnaire]);
 
   // No data → redirect to quiz
   if ((!scores && !isQuestionnaire) || !archetype) {

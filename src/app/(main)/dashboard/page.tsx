@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo, Suspense } from "react";
+import { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
+import { track } from "@vercel/analytics";
 import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/i18n/context";
 import { scoreToArchetype } from "@/lib/archetype";
@@ -25,6 +26,7 @@ import {
   Compass,
   Share2,
 } from "lucide-react";
+import { EvolutionTracker } from "@/components/evolution-tracker";
 
 interface PartnerPreview {
   id: string;
@@ -45,6 +47,16 @@ function DashboardContent() {
   const isZh = locale === "zh";
   const searchParams = useSearchParams();
   const isWelcome = searchParams.get("welcome") === "1";
+  const registerMethod = searchParams.get("method");
+
+  // Track Google OAuth registration (password registration is tracked in register-form.tsx)
+  const googleTrackRef = useRef(false);
+  useEffect(() => {
+    if (isWelcome && registerMethod === "google" && !googleTrackRef.current) {
+      googleTrackRef.current = true;
+      track("register", { method: "google" });
+    }
+  }, [isWelcome, registerMethod]);
 
   const [talents, setTalents] = useState<Partial<Record<TalentCategory, number>>>({});
   const [partners, setPartners] = useState<PartnerPreview[]>([]);
@@ -52,6 +64,15 @@ function DashboardContent() {
   const [challengeCompleted, setChallengeCompleted] = useState(false);
   const [challengeTalent, setChallengeTalent] = useState<string | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [evolutionHistory, setEvolutionHistory] = useState<
+    { date: string; archetypeId: string | null; overallScore: number | null; talents: Partial<Record<TalentCategory, number>> }[]
+  >([]);
+  const [evolutionData, setEvolutionData] = useState<{
+    firstArchetype: string | null;
+    currentArchetype: string | null;
+    evolved: boolean;
+    overallChange: number;
+  } | null>(null);
 
   const archetype = useMemo<Archetype | null>(() => {
     const vals = Object.values(talents).filter((v): v is number => v != null);
@@ -66,7 +87,8 @@ function DashboardContent() {
       fetch("/api/auth/me").then((r) => r.json()).catch(() => null),
       fetch("/api/partners").then((r) => r.json()).catch(() => null),
       fetch("/api/challenge").then((r) => r.json()).catch(() => null),
-    ]).then(([leaderboard, me, partnersRes, challenge]) => {
+      fetch("/api/talent-history").then((r) => r.json()).catch(() => null),
+    ]).then(([leaderboard, me, partnersRes, challenge, talentHistory]) => {
       // Profile: match own username in leaderboard
       if (leaderboard?.success && me?.data?.username) {
         const myEntry = leaderboard.data.find(
@@ -90,6 +112,12 @@ function DashboardContent() {
         setChallengeStreak(challenge.data.streak);
         setChallengeCompleted(challenge.data.completedToday);
         setChallengeTalent(challenge.data.talentCategory);
+      }
+
+      // Talent history (evolution tracker)
+      if (talentHistory?.success && talentHistory.data?.history?.length >= 2) {
+        setEvolutionHistory(talentHistory.data.history);
+        setEvolutionData(talentHistory.data.evolution);
       }
     });
   }, []);
@@ -287,6 +315,11 @@ function DashboardContent() {
             </Card>
           </Link>
         </div>
+      )}
+
+      {/* ─── Evolution Tracker ─── */}
+      {evolutionHistory.length >= 2 && (
+        <EvolutionTracker history={evolutionHistory} evolution={evolutionData} />
       )}
 
       {/* ─── Daily Challenge ─── */}

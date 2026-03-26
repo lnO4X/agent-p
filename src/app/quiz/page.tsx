@@ -2,6 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
+import { track } from "@vercel/analytics";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n/context";
 import { gameRegistry } from "@/games";
@@ -124,13 +125,16 @@ export default function QuizPage() {
             <Button
               size="lg"
               className="w-full h-14 text-lg"
-              onClick={() => setPhase("playing")}
+              onClick={() => {
+                track("quiz_start", { mode: "quick" });
+                setPhase("playing");
+              }}
             >
               {locale === "zh" ? "开始快速测试" : "Quick Test"}
               <ArrowRight size={20} className="ml-2" />
             </Button>
 
-            <Link href="/quiz/questions" className="block">
+            <Link href="/quiz/questions" className="block" onClick={() => track("quiz_start", { mode: "questionnaire" })}>
               <Button
                 size="lg"
                 variant="outline"

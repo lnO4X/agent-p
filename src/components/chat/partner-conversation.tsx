@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import { track } from "@vercel/analytics";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport } from "ai";
 import { useI18n } from "@/i18n/context";
@@ -56,6 +57,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
   const [hoverRating, setHoverRating] = useState(0);
   const [submittingRating, setSubmittingRating] = useState(false);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  const chatStartTrackedRef = useRef(false);
 
   // Voice state
   const [lastInputWasVoice, setLastInputWasVoice] = useState(false);
@@ -73,11 +75,16 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
     onTranscript: useCallback((text: string) => {
       // Voice auto-send: transcript → direct send message
       if (text.trim()) {
+        if (!chatStartTrackedRef.current) {
+          chatStartTrackedRef.current = true;
+          track("chat_start", { partnerId });
+        }
         setLastInputWasVoice(true);
         // We'll send via sendMessage in an effect
         setPendingVoiceText(text.trim());
       }
-    }, []),
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [partnerId]),
     onError: (err) => {
       console.warn("[voice]", err);
     },
@@ -214,6 +221,10 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
   const handleSend = useCallback(() => {
     const text = input.trim();
     if (!text || isStreaming) return;
+    if (!chatStartTrackedRef.current) {
+      chatStartTrackedRef.current = true;
+      track("chat_start", { partnerId });
+    }
     setLastInputWasVoice(false); // Text input — don't auto-play TTS
     sendMessage({ text });
     setInput("");
@@ -231,6 +242,10 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
   };
 
   const handleSuggestion = (key: string) => {
+    if (!chatStartTrackedRef.current) {
+      chatStartTrackedRef.current = true;
+      track("chat_start", { partnerId });
+    }
     sendMessage({ text: t(key) });
   };
 

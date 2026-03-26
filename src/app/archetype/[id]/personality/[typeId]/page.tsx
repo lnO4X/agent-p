@@ -1,8 +1,9 @@
 "use client";
 
-import { use } from "react";
+import { use, useEffect } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { track } from "@vercel/analytics";
 import { getArchetype } from "@/lib/archetype";
 import { getPersonalityType } from "@/lib/personality-types";
 import { getCombination } from "@/lib/personality-archetype-matrix";
@@ -35,6 +36,11 @@ export default function PersonalityArchetypeComboPage({
 
   const combo = getCombination(personality.code, archetype.id);
   if (!combo) notFound();
+
+  // Track personality combo view
+  useEffect(() => {
+    track("personality_combo_view", { archetype: id, personality: typeId });
+  }, [id, typeId]);
 
   const archetypeName = isZh ? archetype.name : archetype.nameEn;
   const personalityName = isZh ? personality.name : personality.nameEn;
