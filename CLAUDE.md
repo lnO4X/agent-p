@@ -130,7 +130,7 @@ const isZh = locale === "zh";
 | **cookies().set() + redirect() 不兼容** | Next.js 里 `cookies().set()` 和 `NextResponse.redirect()` 不能同时用 | 必须用 `response.cookies.set()` 在 redirect response 上直接设置 |
 | **Vercel Analytics 自定义事件需要 Pro** | 免费版只有 page views，custom events 需要 $20/月 Pro plan | 自建: `POST /api/analytics` + `analytics_events` 表 + `lib/analytics.ts` (sendBeacon) |
 | **Promise.all 一个失败全部失败** | admin dashboard 3 个 API fetch 用 Promise.all，一个 500 导致全部数据丢失 | 每个 fetch 包 `.catch(() => ({success:false}))` 独立处理 |
-| **默认语言硬编码中文** | `DEFAULT_LOCALE = "zh"` 且没检测浏览器语言 | `getInitialLocale()` 用 `navigator.language` 自动检测 |
+| **默认语言硬编码中文** | `DEFAULT_LOCALE = "zh"` 且没检测浏览器语言 | ✅ 已修复: DEFAULT_LOCALE="en", `<html lang>` 动态化, keywords 纯英文 |
 
 ---
 

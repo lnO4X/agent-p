@@ -15,7 +15,7 @@ type Messages = Record<string, string>;
 
 const MESSAGES: Record<Locale, Messages> = { zh, en };
 
-export const DEFAULT_LOCALE: Locale = "zh";
+export const DEFAULT_LOCALE: Locale = "en";
 
 export const LOCALE_LABELS: Record<Locale, string> = {
   zh: "中文",

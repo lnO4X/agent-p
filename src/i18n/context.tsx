@@ -87,6 +87,8 @@ export function I18nProvider({ children }: { children: ReactNode }) {
     setLocaleState(newLocale);
     try {
       localStorage.setItem(STORAGE_KEY, newLocale);
+      // Sync <html lang> attribute for SEO and screen readers
+      document.documentElement.lang = newLocale === "zh" ? "zh-CN" : "en";
     } catch {
       // ignore
     }

@@ -42,12 +42,12 @@ export const metadata: Metadata = {
     "Play 13 mini-games to uncover your unique gaming talents. Get AI-powered recommendations from 100+ games across all platforms.",
   keywords: [
     "gaming talent test",
+    "gamer personality quiz",
     "game recommendation",
-    "gaming personality",
-    "游戏天赋测试",
-    "游戏推荐",
-    "游戏百宝箱",
+    "gaming personality type",
+    "what type of gamer am I",
     "AI game advisor",
+    "gamer archetype",
   ],
   manifest: "/manifest.json",
   appleWebApp: {
@@ -110,8 +110,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="zh-CN" suppressHydrationWarning>
+    <html lang="en" suppressHydrationWarning>
       <head>
+        {/* Sync <html lang> with stored locale before paint */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var l=localStorage.getItem("app-locale");if(l==="zh")document.documentElement.lang="zh-CN";else if(!l){var n=navigator.language||"";if(n.startsWith("zh"))document.documentElement.lang="zh-CN"}}catch(e){}`,
+          }}
+        />
         <meta name="mobile-web-app-capable" content="yes" />
         <link rel="icon" href="/favicon.ico" sizes="any" />
         <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
