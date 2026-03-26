@@ -84,9 +84,10 @@ export async function GET() {
       data: { eventCounts: counts },
     });
   } catch (error) {
-    console.error("[api/analytics] GET error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("[api/analytics] GET error:", msg);
     return NextResponse.json(
-      { success: false, error: "Internal error" },
+      { success: false, error: msg },
       { status: 500 }
     );
   }

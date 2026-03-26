@@ -106,9 +106,10 @@ export async function GET(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("[admin/analytics] Error:", error);
+    const msg = error instanceof Error ? error.message : String(error);
+    console.error("[admin/analytics] Error:", msg);
     return Response.json(
-      { success: false, error: "Internal error" },
+      { success: false, error: msg },
       { status: 500 }
     );
   }
