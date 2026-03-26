@@ -19,6 +19,7 @@ const PUBLIC_PATHS = [
   "/api/auth/verify-email",
   "/api/voice/health",
   "/api/feedback",
+  "/api/analytics",
 ];
 
 /** API paths that handle their own auth (Bearer token, cron secret, etc.) */

@@ -3,7 +3,7 @@
 import { use, useState, useCallback, useEffect } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { track } from "@vercel/analytics";
+import { trackEvent as track } from "@/lib/analytics";
 import { getArchetype, getAllArchetypes } from "@/lib/archetype";
 import { useI18n } from "@/i18n/context";
 import { Button } from "@/components/ui/button";

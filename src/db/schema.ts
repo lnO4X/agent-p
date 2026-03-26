@@ -537,6 +537,26 @@ export const productFeedback = pgTable(
   ]
 );
 
+// ==================== ANALYTICS EVENTS ====================
+export const analyticsEvents = pgTable(
+  "analytics_events",
+  {
+    id: text("id").primaryKey(),
+    event: text("event").notNull(), // quiz_start, quiz_complete, share_click, register, chat_start, archetype_view, personality_combo_view
+    props: jsonb("props"), // { mode: "quick", archetype: "berserker", ... }
+    userId: text("user_id"), // nullable — anonymous users tracked too
+    sessionId: text("session_id"), // browser session fingerprint
+    page: text("page"), // URL path
+    referrer: text("referrer"), // document.referrer
+    userAgent: text("user_agent"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("analytics_events_event_idx").on(table.event),
+    index("analytics_events_created_idx").on(table.createdAt),
+  ]
+);
+
 // ==================== ACTIVATION CODES ====================
 export const activationCodes = pgTable(
   "activation_codes",

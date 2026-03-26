@@ -3,7 +3,7 @@
 import { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { track } from "@vercel/analytics";
+import { trackEvent as track } from "@/lib/analytics";
 import { Card, CardContent } from "@/components/ui/card";
 import { useI18n } from "@/i18n/context";
 import { scoreToArchetype } from "@/lib/archetype";

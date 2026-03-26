@@ -3,7 +3,7 @@
 import { Suspense, useMemo, useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
-import { track } from "@vercel/analytics";
+import { trackEvent as track } from "@/lib/analytics";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";

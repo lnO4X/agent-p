@@ -3,7 +3,7 @@
 import { use, useEffect } from "react";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { track } from "@vercel/analytics";
+import { trackEvent as track } from "@/lib/analytics";
 import { getArchetype } from "@/lib/archetype";
 import { getPersonalityType } from "@/lib/personality-types";
 import { getCombination } from "@/lib/personality-archetype-matrix";

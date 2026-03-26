@@ -2,7 +2,7 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { track } from "@vercel/analytics";
+import { trackEvent as track } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n/context";
 import { gameRegistry } from "@/games";
