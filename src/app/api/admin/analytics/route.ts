@@ -47,11 +47,11 @@ export async function GET(request: NextRequest) {
           (SELECT COUNT(*) FROM users WHERE tier = 'premium') as premium_users
       `),
 
-      // Simplified: no generate_series (avoids Neon compatibility issues)
+      // Tests per day (last 14 days)
       db.execute(sql`
         SELECT
           DATE(completed_at) as date,
-          COUNT(*) FILTER (WHERE true) as tests
+          COUNT(*) as tests
         FROM test_sessions
         WHERE status = 'completed' AND completed_at >= ${fourteenDaysAgo}
         GROUP BY DATE(completed_at)
