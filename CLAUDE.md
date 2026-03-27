@@ -264,13 +264,13 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
 - i18n: Browser language detection, DEFAULT_LOCALE=en, `<html lang>` dynamic, keywords English-only
 - Sharing: `&own=1` URL param distinguishes own vs shared results, confetti gated
 - Design: DESIGN.md finalized (teal+gold, dark-first, DM Sans+Outfit), competitive research done
-### 🔄 正在执行：DESIGN.md → 代码 (Phase 43)
+### ✅ Phase 43: DESIGN.md → 代码 (完成)
 
-- ✅ `globals.css` — OkLCH 颜色替换完成（紫→青绿+金色，暗色背景 #0F1117）
-- ✅ `layout.tsx` — Geist Sans → DM Sans，theme-color 更新
+- ✅ `globals.css` — OkLCH 颜色替换（紫→青绿+金色，暗色/亮色双主题）
+- ✅ `layout.tsx` — Geist Sans → DM Sans, `class="dark"` SSR 默认, 暗色优先逻辑
 - ✅ `page.tsx` — CTA 按钮改金色 `bg-accent`
-- 🔄 ~18 个组件 — 紫色 class → `text-primary`/`bg-primary` (进行中)
-- 🔲 build + deploy 验证
+- ✅ 18 个组件 — 紫色 class → `text-primary`/`bg-primary` (全部替换)
+- ✅ build 通过 + Vercel 部署
 
 ### 🔲 Pending
 
