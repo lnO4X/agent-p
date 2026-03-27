@@ -168,7 +168,7 @@ export default function MemoryGame({
           </p>
           <button
             onClick={startGame}
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-500 text-white rounded-lg font-bold text-lg transition-colors"
+            className="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-lg transition-colors"
           >
             开始测试
           </button>
@@ -229,7 +229,7 @@ export default function MemoryGame({
       {phase === "done" && (
         <div className="w-full max-w-sm bg-slate-800 rounded-xl p-8 text-center">
           <p className="text-2xl font-bold mb-2">测试完成!</p>
-          <p className="text-4xl font-bold text-purple-400">{maxAchieved}</p>
+          <p className="text-4xl font-bold text-primary">{maxAchieved}</p>
           <p className="text-sm text-muted-foreground mt-2">最长序列长度</p>
         </div>
       )}

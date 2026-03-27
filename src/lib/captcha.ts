@@ -60,7 +60,7 @@ function renderSvg(text: string): string {
   }
 
   return `<svg xmlns="http://www.w3.org/2000/svg" width="${width}" height="${height}" viewBox="0 0 ${width} ${height}">
-    <rect width="100%" height="100%" fill="#1a1a2e"/>
+    <rect width="100%" height="100%" fill="#0F1117"/>
     ${lines}
     ${charsSvg}
   </svg>`;

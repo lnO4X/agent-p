@@ -98,7 +98,7 @@ export default function EmbedInfoPage() {
         {/* Method 2: iframe */}
         <section className="space-y-3">
           <div className="flex items-center gap-2">
-            <Code size={18} className="text-purple-400" />
+            <Code size={18} className="text-primary" />
             <h2 className="text-lg font-semibold">
               {isZh ? "方式二：直接 iframe" : "Method 2: Direct iframe"}
             </h2>
@@ -109,7 +109,7 @@ export default function EmbedInfoPage() {
               : "For more control, use a direct iframe."}
           </p>
           <div className="relative">
-            <pre className="bg-white/5 border border-white/10 rounded-xl p-4 text-sm overflow-x-auto font-mono text-purple-400 whitespace-pre">
+            <pre className="bg-white/5 border border-white/10 rounded-xl p-4 text-sm overflow-x-auto font-mono text-primary whitespace-pre">
               {IFRAME_SNIPPET}
             </pre>
             <button

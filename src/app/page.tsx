@@ -39,10 +39,10 @@ export default function Home() {
               : "Play 3 mini-games that measure your real gaming talents and reveal which of 16 gamer archetypes you are."}
           </p>
 
-          {/* Primary CTA */}
+          {/* Primary CTA — Gold per DESIGN.md (1 per screen max) */}
           <div className="pt-2">
             <Link href="/quiz" className="inline-block">
-              <Button size="lg" className="text-lg h-14 px-12 shadow-glow-lg gap-2">
+              <Button size="lg" className="text-lg h-14 px-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 shadow-[0_8px_30px_oklch(0.80_0.17_85/0.25)]">
                 <Gamepad2 size={20} />
                 {isZh ? "免费开始测试" : "Start Free Quiz"}
               </Button>
@@ -259,7 +259,7 @@ export default function Home() {
             {isZh ? "准备好了吗？" : "Ready to find out?"}
           </p>
           <Link href="/quiz" className="inline-block">
-            <Button size="lg" className="text-lg h-14 px-12 shadow-glow-lg gap-2">
+            <Button size="lg" className="text-lg h-14 px-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 shadow-[0_8px_30px_oklch(0.80_0.17_85/0.25)]">
               <Gamepad2 size={20} />
               {isZh ? "免费开始测试" : "Start Free Quiz"}
             </Button>

@@ -461,7 +461,7 @@ export default function AdminUserDetailPage({
                         : k.category === "skill"
                           ? "bg-green-500/10 text-green-600"
                           : k.category === "behavior"
-                            ? "bg-purple-500/10 text-purple-600"
+                            ? "bg-primary/10 text-primary"
                             : "bg-muted text-muted-foreground"
                     )}
                   >

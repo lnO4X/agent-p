@@ -180,11 +180,11 @@ export default function PlayPage() {
         </Link>
 
         <Link href="/test">
-          <Card className="pressable h-full border-violet-500/30 bg-violet-500/5">
+          <Card className="pressable h-full border-primary/30 bg-primary/5">
             <CardContent className="pt-3 pb-3">
               <div className="flex items-center gap-2.5">
-                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-violet-500/10">
-                  <FlaskConical size={18} className="text-violet-500" />
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10">
+                  <FlaskConical size={18} className="text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm truncate">

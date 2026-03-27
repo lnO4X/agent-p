@@ -24,7 +24,7 @@ function getMatchingArchetypes(gameGenres: string[]) {
 /** Genre-based gradient fallback when image fails to load */
 const GENRE_GRADIENTS: Record<string, string> = {
   fps: "from-red-600 to-red-900",
-  moba: "from-violet-600 to-violet-900",
+  moba: "from-teal-600 to-teal-900",
   rpg: "from-blue-600 to-blue-900",
   rhythm: "from-pink-500 to-pink-800",
   puzzle: "from-emerald-500 to-emerald-800",
@@ -32,7 +32,7 @@ const GENRE_GRADIENTS: Record<string, string> = {
   battle_royale: "from-red-500 to-orange-800",
   racing: "from-cyan-500 to-cyan-800",
   simulation: "from-green-500 to-green-800",
-  card: "from-purple-500 to-purple-900",
+  card: "from-cyan-500 to-cyan-900",
 };
 
 interface GameCardProps {

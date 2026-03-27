@@ -276,8 +276,8 @@ function DashboardContent() {
             <Card className="pressable card-hover hover:border-primary/30 transition-colors">
               <CardContent className="pt-4 pb-4">
                 <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center shrink-0">
-                    <ClipboardList size={20} className="text-purple-500" />
+                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
+                    <ClipboardList size={20} className="text-primary" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-sm">
@@ -421,8 +421,8 @@ function DashboardContent() {
         <Link href="/chat">
           <Card className="pressable card-hover h-full">
             <CardContent className="pt-4 pb-4 flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center">
-                <Bot size={20} className="text-purple-500" />
+              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
+                <Bot size={20} className="text-primary" />
               </div>
               <span className="text-xs font-medium">
                 {isZh ? "AI 角色" : "AI Characters"}

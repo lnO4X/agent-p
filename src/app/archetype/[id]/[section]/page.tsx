@@ -198,9 +198,9 @@ function RelationshipsSection({ archetypeId, isZh }: { archetypeId: string; isZh
         )}
         {evolution && (
           <Link href={`/archetype/${evolution.id}`}>
-            <Card className="hover:border-purple-500/50 transition-colors h-full">
+            <Card className="hover:border-primary/50 transition-colors h-full">
               <CardContent className="p-4 text-center">
-                <Zap className="w-5 h-5 mx-auto mb-1 text-purple-500" />
+                <Zap className="w-5 h-5 mx-auto mb-1 text-primary" />
                 <p className="text-xs text-muted-foreground mb-1">{isZh ? "进化目标" : "Evolution"}</p>
                 <p className="text-2xl mb-1">{evolution.icon}</p>
                 <p className="font-semibold text-sm">{isZh ? evolution.name : evolution.nameEn}</p>
@@ -333,7 +333,7 @@ function GrowthSection({ archetypeId, isZh }: { archetypeId: string; isZh: boole
         <Card>
           <CardContent className="p-4">
             <h3 className="font-semibold mb-2 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-purple-500" />
+              <TrendingUp className="w-4 h-4 text-primary" />
               {isZh ? "进化路径" : "Evolution Path"}
             </h3>
             <div className="flex items-center gap-3 mb-3">
@@ -341,7 +341,7 @@ function GrowthSection({ archetypeId, isZh }: { archetypeId: string; isZh: boole
                 <p className="text-2xl">{archetype.icon}</p>
                 <p className="text-xs font-medium">{isZh ? archetype.name : archetype.nameEn}</p>
               </div>
-              <ArrowRight className="w-5 h-5 text-purple-500" />
+              <ArrowRight className="w-5 h-5 text-primary" />
               <Link href={`/archetype/${evolution.id}`} className="text-center hover:opacity-80">
                 <p className="text-2xl">{evolution.icon}</p>
                 <p className="text-xs font-medium">{isZh ? evolution.name : evolution.nameEn}</p>
@@ -365,7 +365,7 @@ function GrowthSection({ archetypeId, isZh }: { archetypeId: string; isZh: boole
       </p>
 
       {/* Link to full test */}
-      <Card className="border-purple-500/30">
+      <Card className="border-primary/30">
         <CardContent className="p-4 text-center">
           <p className="text-sm text-muted-foreground mb-2">
             {isZh
@@ -374,7 +374,7 @@ function GrowthSection({ archetypeId, isZh }: { archetypeId: string; isZh: boole
           </p>
           <Link
             href="/test"
-            className="inline-flex items-center gap-1 text-sm font-medium text-purple-500 hover:underline"
+            className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
             {isZh ? "开始完整测试 (25分钟)" : "Start Full Test (25 min)"}
             <ArrowRight className="w-4 h-4" />

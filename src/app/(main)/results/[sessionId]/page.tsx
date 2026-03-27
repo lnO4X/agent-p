@@ -203,21 +203,21 @@ export default function ResultDetailPage({
           </Card>
 
           {/* Growth Edge (reframed from weakness — positive framing) */}
-          <Card className="border-purple-500/20 bg-purple-500/5">
+          <Card className="border-primary/20 bg-primary/5">
             <CardContent className="pt-4 pb-4">
               <div className="flex items-start gap-3">
                 <TrendingUp
                   size={18}
-                  className="text-purple-400 mt-0.5 shrink-0"
+                  className="text-primary mt-0.5 shrink-0"
                 />
                 <div>
-                  <div className="text-xs font-medium text-purple-400 mb-1">
+                  <div className="text-xs font-medium text-primary mb-1">
                     {isZh ? "成长突破口" : "Growth Edge"}
                   </div>
                   <p className="text-sm text-foreground/80">
                     {isZh ? archetype.weakness : archetype.weaknessEn}
                   </p>
-                  <p className="text-xs text-purple-400/70 mt-1.5 italic">
+                  <p className="text-xs text-primary/70 mt-1.5 italic">
                     {isZh
                       ? "突破这一点，你将进化为更强的原型"
                       : "Break through this, and you'll evolve into a stronger archetype"}

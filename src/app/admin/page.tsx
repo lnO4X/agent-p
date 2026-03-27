@@ -55,7 +55,7 @@ const STAT_CARDS: Array<{
   { key: "totalUsers", label: "总用户 Users", icon: Users, color: "text-blue-500", href: "/admin/users" },
   { key: "premiumUsers", label: "付费 Premium", icon: Crown, color: "text-amber-500", href: "/admin/users" },
   { key: "registeredToday", label: "今日 Today", icon: UserPlus, color: "text-green-500" },
-  { key: "totalSessions", label: "测试 Tests", icon: FlaskConical, color: "text-purple-500" },
+  { key: "totalSessions", label: "测试 Tests", icon: FlaskConical, color: "text-primary" },
   { key: "totalChallenges", label: "挑战 Challenges", icon: Swords, color: "text-red-500" },
   { key: "totalPartners", label: "伙伴 Partners", icon: Bot, color: "text-cyan-500" },
   { key: "unusedCodes", label: "激活码 Codes", icon: KeyRound, color: "text-orange-500", href: "/admin/codes" },
@@ -63,7 +63,7 @@ const STAT_CARDS: Array<{
 
 const FUNNEL_STEPS = [
   { key: "totalUsers", label: "注册 Registered", color: "bg-blue-500" },
-  { key: "usersWithTests", label: "测试 Tested", color: "bg-purple-500" },
+  { key: "usersWithTests", label: "测试 Tested", color: "bg-primary" },
   { key: "usersWithProfiles", label: "档案 Profiled", color: "bg-green-500" },
   { key: "premiumUsers", label: "付费 Premium", color: "bg-amber-500" },
 ] as const;
@@ -219,7 +219,7 @@ export default function AdminDashboard() {
             </h2>
             <div className="flex gap-4 mb-2">
               <div className="flex items-center gap-1.5">
-                <div className="w-2.5 h-2.5 rounded-sm bg-purple-500" />
+                <div className="w-2.5 h-2.5 rounded-sm bg-primary" />
                 <span className="text-xs text-muted-foreground">Tests</span>
               </div>
               <div className="flex items-center gap-1.5">
@@ -417,7 +417,7 @@ function StackedBarChart({
                 <div className="w-full bg-red-500" style={{ height: `${100 - testPct}%`, minHeight: 2 }} />
               )}
               {d.tests > 0 && (
-                <div className="w-full bg-purple-500" style={{ height: `${testPct}%`, minHeight: 2 }} />
+                <div className="w-full bg-primary" style={{ height: `${testPct}%`, minHeight: 2 }} />
               )}
             </div>
             {i % 2 === 0 && (

@@ -16,7 +16,7 @@ type Phase = "intro" | "playing" | "transition";
 
 const GAME_META = [
   { id: "reaction-speed", icon: Zap, labelZh: "反应速度", labelEn: "Reaction Speed", color: "text-blue-400" },
-  { id: "pattern", icon: Brain, labelZh: "模式识别", labelEn: "Pattern Recognition", color: "text-purple-400" },
+  { id: "pattern", icon: Brain, labelZh: "模式识别", labelEn: "Pattern Recognition", color: "text-primary" },
   { id: "risk", icon: Dice5, labelZh: "风险决策", labelEn: "Risk & Decision", color: "text-amber-400" },
 ] as const;
 

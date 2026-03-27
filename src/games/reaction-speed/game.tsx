@@ -12,7 +12,7 @@ const DISTRACTOR_START_ROUND = 4;
 // Distractor colors that flash briefly to trick the player
 const DISTRACTOR_COLORS = [
   "bg-orange-500",
-  "bg-purple-600",
+  "bg-teal-600",
   "bg-yellow-500",
   "bg-teal-500",
 ];

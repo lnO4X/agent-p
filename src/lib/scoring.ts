@@ -72,7 +72,7 @@ export function recommendGenres(
 
 export const RANK_COLORS: Record<Rank, string> = {
   S: "text-yellow-400 bg-yellow-400/10 border-yellow-400/30",
-  A: "text-purple-400 bg-purple-400/10 border-purple-400/30",
+  A: "text-teal-400 bg-teal-400/10 border-teal-400/30",
   B: "text-blue-400 bg-blue-400/10 border-blue-400/30",
   C: "text-green-400 bg-green-400/10 border-green-400/30",
   D: "text-gray-400 bg-gray-400/10 border-gray-400/30",

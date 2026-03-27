@@ -15,7 +15,7 @@ const CATEGORY_CONFIG = {
   rival: { icon: Swords, color: "text-red-400", bg: "bg-red-500/10" },
   mentor: { icon: Flame, color: "text-amber-400", bg: "bg-amber-500/10" },
   companion: { icon: Heart, color: "text-green-400", bg: "bg-green-500/10" },
-  wild: { icon: Star, color: "text-purple-400", bg: "bg-purple-500/10" },
+  wild: { icon: Star, color: "text-primary", bg: "bg-primary/10" },
 } as const;
 
 export function PartnerHub() {

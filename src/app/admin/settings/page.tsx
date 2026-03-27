@@ -13,7 +13,7 @@ const TIER_COLORS: Record<string, string> = {
   smart: "bg-blue-500/15 text-blue-600",
   fast: "bg-green-500/15 text-green-600",
   free: "bg-gray-500/15 text-gray-600",
-  custom: "bg-purple-500/15 text-purple-600",
+  custom: "bg-primary/15 text-primary",
 };
 
 interface Settings {

@@ -328,7 +328,7 @@ export default function MePage() {
           <CardContent className="pt-4 pb-3">
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-sm font-semibold flex items-center gap-1.5">
-                <FlaskConical size={14} className="text-violet-500" />
+                <FlaskConical size={14} className="text-primary" />
                 {t("me.testHistory")}
               </h2>
               <Link
