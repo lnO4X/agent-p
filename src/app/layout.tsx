@@ -93,8 +93,6 @@ const APP_INIT_SCRIPT = `
     var stored = localStorage.getItem('app-theme');
     var cls = 'dark';
     if (stored === 'light') cls = '';
-    else if (stored === 'dark') cls = 'dark';
-    else if (window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches) cls = '';
     if (cls) document.documentElement.classList.add(cls);
     else document.documentElement.classList.remove('dark');
   })();
@@ -111,7 +109,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang="en" className="dark" suppressHydrationWarning>
       <head>
         {/* Sync <html lang> with stored locale before paint */}
         <script
