@@ -33,6 +33,7 @@ import { parseScores, parseTalentScores } from "@/lib/quiz-utils";
 import { NpsPrompt } from "@/components/nps-prompt";
 import { GameRecommendations } from "@/components/game-recommendations";
 import { AdSlot } from "@/components/ad-slot";
+import { ResultCardDownload } from "@/components/result-card-download";
 
 const TALENT_LABELS_ZH: Record<string, string> = {
   reaction_speed: "反应速度",
@@ -68,13 +69,13 @@ function QuizResultContent() {
   const searchParams = useSearchParams();
   const { locale } = useI18n();
 
-  const mode = searchParams.get("mode"); // "q" = questionnaire
+  const mode = searchParams.get("mode"); // "q" = questionnaire, "scenario" = scenario quiz
   const scores = parseScores(searchParams.get("s"));
   const talentScores = parseTalentScores(searchParams.get("scores"));
 
   const archetype = useMemo<Archetype | null>(() => {
-    if (mode === "q") {
-      // Questionnaire mode: use archetype from URL or compute from scores
+    if (mode === "q" || mode === "scenario") {
+      // Questionnaire or scenario mode: use archetype from URL or compute from scores
       const aId = searchParams.get("archetype");
       if (aId) return getArchetype(aId) ?? null;
       if (talentScores) return scoreToArchetype(talentScores);
@@ -95,7 +96,7 @@ function QuizResultContent() {
   );
 
   const isZh = locale === "zh";
-  const isQuestionnaire = mode === "q";
+  const isQuestionnaire = mode === "q" || mode === "scenario";
 
   const [copied, setCopied] = useState(false);
 
@@ -106,7 +107,7 @@ function QuizResultContent() {
   const shareUrl = useMemo(() => {
     if (typeof window === "undefined" || !archetype) return "";
     return isQuestionnaire
-      ? `${window.location.origin}/quiz/result?mode=q&archetype=${archetype.id}${
+      ? `${window.location.origin}/quiz/result?mode=${mode ?? "q"}&archetype=${archetype.id}${
           talentScores
             ? `&scores=${Object.entries(talentScores).map(([k, v]) => `${k}:${v}`).join(",")}`
             : ""
@@ -165,7 +166,7 @@ function QuizResultContent() {
       });
       track("quiz_complete", {
         archetype: archetype.id,
-        mode: isQuestionnaire ? "questionnaire" : "quick",
+        mode: mode === "scenario" ? "scenario" : isQuestionnaire ? "questionnaire" : "quick",
       });
     }
   }, [archetype, isQuestionnaire, isSharedView]);
@@ -295,6 +296,23 @@ function QuizResultContent() {
           </Button>
           )}
         </motion.div>
+
+        {/* Result card download — own results only */}
+        {!isSharedView && (
+          <motion.div
+            className="pt-3 flex justify-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.4, delay: 1.1 }}
+          >
+            <ResultCardDownload
+              archetype={archetype}
+              talentScores={talentScores}
+              scores={scores}
+              isZh={isZh}
+            />
+          </motion.div>
+        )}
       </div>
 
       {/* Ad slot — after archetype reveal */}
