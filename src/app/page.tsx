@@ -30,13 +30,13 @@ export default function Home() {
           </h1>
 
           <p className="text-2xl md:text-4xl font-bold font-[family-name:var(--font-outfit)] leading-tight">
-            {isZh ? "发现你的玩家原型" : "Discover Your Gamer Archetype"}
+            {isZh ? "你有职业选手的天赋吗？" : "Do You Have What It Takes to Go Pro?"}
           </p>
 
           <p className="text-base md:text-lg text-muted-foreground max-w-md mx-auto">
             {isZh
-              ? "通过 3 个小游戏测量你的真实游戏天赋，揭示你属于 16 种玩家原型中的哪一种。"
-              : "Play 3 mini-games that measure your real gaming talents and reveal which of 16 gamer archetypes you are."}
+              ? "3 个小游戏测量你的反应速度、模式识别和决策能力，与职业选手数据对比。"
+              : "3 mini-games measure your reaction speed, pattern recognition, and decision-making against pro player benchmarks."}
           </p>
 
           {/* Primary CTA — Gold per DESIGN.md (1 per screen max) */}
@@ -44,7 +44,7 @@ export default function Home() {
             <Link href="/quiz" className="inline-block">
               <Button size="lg" className="text-lg h-14 px-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 shadow-[0_8px_30px_oklch(0.80_0.17_85/0.25)]">
                 <Gamepad2 size={20} />
-                {isZh ? "免费开始测试" : "Start Free Quiz"}
+                {isZh ? "测测你的天赋" : "Test Your Talent"}
               </Button>
             </Link>
           </div>
@@ -53,7 +53,7 @@ export default function Home() {
           <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1"><Zap size={12} /> {isZh ? "3分钟" : "3 min"}</span>
             <span>·</span>
-            <span>{isZh ? "无需注册" : "No signup"}</span>
+            <span>{isZh ? "对比职业选手" : "vs Pro Players"}</span>
             <span>·</span>
             <span>{isZh ? "完全免费" : "100% free"}</span>
           </div>
@@ -74,12 +74,12 @@ export default function Home() {
                   <Sparkles size={20} className="text-primary" />
                 </div>
                 <div className="font-semibold text-sm">
-                  {isZh ? "你的专属原型" : "Your Archetype"}
+                  {isZh ? "天赋分数" : "Talent Scores"}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {isZh
-                    ? "16 种独特原型之一，描述你的游戏本能和行为模式"
-                    : "One of 16 unique types describing your gaming instincts"}
+                    ? "反应速度、模式识别、风险决策三维评分"
+                    : "Reaction speed, pattern recognition, and decision-making scores"}
                 </p>
               </CardContent>
             </Card>
@@ -90,12 +90,12 @@ export default function Home() {
                   <Brain size={20} className="text-primary" />
                 </div>
                 <div className="font-semibold text-sm">
-                  {isZh ? "天赋雷达图" : "Talent Radar"}
+                  {isZh ? "职业对比" : "Pro Comparison"}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {isZh
-                    ? "反应速度、手眼协调、策略思维等 13 维天赋评分"
-                    : "13-dimension scores: reaction, coordination, strategy & more"}
+                    ? "看你的天赋和职业选手差多少"
+                    : "See how you measure against pro esports players"}
                 </p>
               </CardContent>
             </Card>
@@ -106,12 +106,12 @@ export default function Home() {
                   <Target size={20} className="text-primary" />
                 </div>
                 <div className="font-semibold text-sm">
-                  {isZh ? "进化路径" : "Growth Path"}
+                  {isZh ? "天赋差距" : "Talent Gap"}
                 </div>
                 <p className="text-xs text-muted-foreground">
                   {isZh
-                    ? "了解你的弱点、盟友、天敌，以及如何进化"
-                    : "Your weakness, allies, nemesis, and how to evolve"}
+                    ? "知道哪里需要提升才能接近职业水平"
+                    : "Know exactly where to improve to approach pro level"}
                 </p>
               </CardContent>
             </Card>
@@ -127,8 +127,8 @@ export default function Home() {
           </h2>
           <p className="text-sm text-muted-foreground text-center max-w-md mx-auto">
             {isZh
-              ? "基于真实游戏技能测量，不是问卷自评。你的原型由你的实际表现决定。"
-              : "Based on real skill measurement, not self-report questionnaires. Your archetype is determined by how you actually play."}
+              ? "基于真实游戏技能测量，不是问卷自评。你的天赋等级由实际表现决定。"
+              : "Based on real skill measurement, not self-report questionnaires. Your talent tier is determined by how you actually play."}
           </p>
 
           {/* Featured 4 archetypes */}
@@ -195,8 +195,8 @@ export default function Home() {
               },
               {
                 step: "2",
-                title: isZh ? "AI 分析你的表现" : "AI Analyzes Your Performance",
-                desc: isZh ? "13 维天赋评分，与数千玩家对比排名" : "13-dimension talent scores, ranked against thousands of players",
+                title: isZh ? "对比职业选手数据" : "Compare Against Pro Players",
+                desc: isZh ? "你的天赋分数与职业选手基准数据对比" : "Your talent scores compared against pro player benchmark data",
                 icon: Brain,
               },
               {
@@ -246,8 +246,8 @@ export default function Home() {
           <div className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1.5">
             <Users size={12} />
             {isZh
-              ? "基于真实游戏技能测量 · 不是性格自评问卷"
-              : "Based on real skill measurement · Not a personality questionnaire"}
+              ? "基于真实游戏技能测量 · 对比职业选手基准数据"
+              : "Based on real skill measurement · Compared against pro player benchmarks"}
           </div>
         </div>
       </section>
@@ -256,16 +256,16 @@ export default function Home() {
       <section className="px-5 py-12 md:py-20">
         <div className="max-w-md mx-auto text-center space-y-4">
           <p className="text-lg md:text-xl font-bold font-[family-name:var(--font-outfit)]">
-            {isZh ? "准备好了吗？" : "Ready to find out?"}
+            {isZh ? "想知道你的天赋水平吗？" : "Ready to see where you stand?"}
           </p>
           <Link href="/quiz" className="inline-block">
             <Button size="lg" className="text-lg h-14 px-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 shadow-[0_8px_30px_oklch(0.80_0.17_85/0.25)]">
               <Gamepad2 size={20} />
-              {isZh ? "免费开始测试" : "Start Free Quiz"}
+              {isZh ? "测测你的天赋" : "Test Your Talent"}
             </Button>
           </Link>
           <p className="text-xs text-muted-foreground">
-            {isZh ? "完全免费 · 无需注册 · 即时出结果" : "100% free · No signup · Instant results"}
+            {isZh ? "完全免费 · 对比职业选手 · 即时出结果" : "100% free · vs Pro Players · Instant results"}
           </p>
         </div>
       </section>

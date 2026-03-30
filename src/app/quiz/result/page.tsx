@@ -28,12 +28,15 @@ import {
   Copy,
   Check,
   Users,
+  Trophy,
 } from "lucide-react";
 import { parseScores, parseTalentScores } from "@/lib/quiz-utils";
 import { NpsPrompt } from "@/components/nps-prompt";
 import { GameRecommendations } from "@/components/game-recommendations";
 import { AdSlot } from "@/components/ad-slot";
 import { ResultCardDownload } from "@/components/result-card-download";
+import { getTalentTier, getProGapAnalysis, PRO_BENCHMARKS } from "@/lib/pro-benchmarks";
+import { HALL_OF_FAME } from "@/lib/hall-of-fame";
 
 const TALENT_LABELS_ZH: Record<string, string> = {
   reaction_speed: "反应速度",
@@ -104,6 +107,26 @@ function QuizResultContent() {
   // No &own param = arrived via shared link (persists across refresh, no sessionStorage needed).
   const isSharedView = !searchParams.get("own");
 
+  // Pro benchmark comparison (for quick-test game mode)
+  const tierInfo = useMemo(
+    () => (scores ? getTalentTier(scores) : null),
+    [scores]
+  );
+  const proGap = useMemo(
+    () => (scores ? getProGapAnalysis(scores, isZh) : null),
+    [scores, isZh]
+  );
+  const avgScore = useMemo(
+    () => (scores ? Math.round(scores.reduce((a, b) => a + b, 0) / scores.length) : null),
+    [scores]
+  );
+
+  // Pro player from same archetype (for display)
+  const proPlayer = useMemo(() => {
+    if (!archetype) return null;
+    return HALL_OF_FAME.find((p) => p.archetypeId === archetype.id && p.role === "pro") ?? null;
+  }, [archetype]);
+
   const shareUrl = useMemo(() => {
     if (typeof window === "undefined" || !archetype) return "";
     return isQuestionnaire
@@ -117,17 +140,24 @@ function QuizResultContent() {
 
   const shareText = useMemo(() => {
     if (!archetype) return "";
+    if (tierInfo && proGap) {
+      // Talent-focused share text with pro comparison
+      const topDim = proGap.reduce((a, b) => (a.percentOfPro > b.percentOfPro ? a : b));
+      return isZh
+        ? `我的电竞天赋: ${tierInfo.labelZh} — ${topDim.label}达到职业水平${topDim.percentOfPro}%。测测你的天赋：gametan.ai/quiz`
+        : `My esports talent: ${tierInfo.labelEn} — ${topDim.label} at ${topDim.percentOfPro}% of pro level. Test yours: gametan.ai/quiz`;
+    }
     return isZh
-      ? `我是「${archetype.name}」${archetype.icon} — ${archetype.tagline} 你是什么类型的玩家？3分钟测出你的玩家原型：gametan.ai/quiz`
-      : `I'm a ${archetype.nameEn} ${archetype.icon} — ${archetype.taglineEn} What gamer archetype are you? Take the 3-min quiz: gametan.ai/quiz`;
-  }, [archetype, isZh]);
+      ? `我是「${archetype.name}」${archetype.icon} — ${archetype.tagline} 测测你的电竞天赋：gametan.ai/quiz`
+      : `I'm a ${archetype.nameEn} ${archetype.icon} — ${archetype.taglineEn} Test your esports talent: gametan.ai/quiz`;
+  }, [archetype, isZh, tierInfo, proGap]);
 
   const challengeText = useMemo(() => {
     if (!archetype) return "";
     return isZh
-      ? `我是${archetype.name}${archetype.icon}，你敢来测测吗？`
-      : `I'm a ${archetype.nameEn} ${archetype.icon} — dare to find out yours?`;
-  }, [archetype, isZh]);
+      ? `我测了电竞天赋${tierInfo ? `(${tierInfo.labelZh})` : ""}，你敢来测测吗？`
+      : `I tested my esports talent${tierInfo ? ` (${tierInfo.labelEn})` : ""} — dare to test yours?`;
+  }, [archetype, isZh, tierInfo]);
 
   const handleShare = useCallback(async () => {
     if (!archetype) return;
@@ -136,8 +166,8 @@ function QuizResultContent() {
       try {
         await navigator.share({
           title: isZh
-            ? `我的玩家原型：${archetype.name}`
-            : `My Gamer Archetype: ${archetype.nameEn}`,
+            ? `我的电竞天赋${tierInfo ? `: ${tierInfo.labelZh}` : ""}`
+            : `My Esports Talent${tierInfo ? `: ${tierInfo.labelEn}` : ""}`,
           text: shareText,
           url: shareUrl,
         });
@@ -158,18 +188,23 @@ function QuizResultContent() {
   // Celebration confetti + analytics on mount (skip for shared views)
   useEffect(() => {
     if (archetype && !isSharedView) {
-      confetti({
-        particleCount: 80,
-        spread: 60,
-        origin: { y: 0.3 },
-        colors: [archetype.gradient[0], archetype.gradient[1], '#FFD700'],
-      });
+      // Only confetti for pro-potential or above (or always for questionnaire mode)
+      const shouldConfetti = isQuestionnaire || (tierInfo && ["pro-elite", "pro-level", "pro-potential"].includes(tierInfo.tier));
+      if (shouldConfetti) {
+        confetti({
+          particleCount: 80,
+          spread: 60,
+          origin: { y: 0.3 },
+          colors: [archetype.gradient[0], archetype.gradient[1], '#FFD700'],
+        });
+      }
       track("quiz_complete", {
         archetype: archetype.id,
+        tier: tierInfo?.tier ?? "unknown",
         mode: mode === "scenario" ? "scenario" : isQuestionnaire ? "questionnaire" : "quick",
       });
     }
-  }, [archetype, isQuestionnaire, isSharedView]);
+  }, [archetype, isQuestionnaire, isSharedView, tierInfo]);
 
   // No data → redirect to quiz
   if ((!scores && !isQuestionnaire) || !archetype) {
@@ -195,61 +230,111 @@ function QuizResultContent() {
 
   return (
     <div className="flex-1 flex flex-col">
-      {/* Hero section with gradient */}
+      {/* Hero section — talent tier primary, archetype secondary */}
       <div
         className="relative px-6 pt-12 pb-8 text-center"
         style={{
-          background: `linear-gradient(135deg, ${archetype.gradient[0]}22, ${archetype.gradient[1]}22)`,
+          background: tierInfo
+            ? `linear-gradient(135deg, oklch(0.78 0.17 170 / 0.08), oklch(0.80 0.17 85 / 0.08))`
+            : `linear-gradient(135deg, ${archetype.gradient[0]}22, ${archetype.gradient[1]}22)`,
         }}
       >
-        {/* Archetype icon */}
-        <motion.div
-          className="text-6xl md:text-7xl mb-4"
-          initial={{ scale: 0, rotate: -180 }}
-          animate={{ scale: 1, rotate: 0 }}
-          transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
-        >
-          {archetype.icon}
-        </motion.div>
+        {/* Talent Tier Badge — the main reveal */}
+        {tierInfo ? (
+          <>
+            <motion.div
+              className="mb-3"
+              initial={{ scale: 0 }}
+              animate={{ scale: 1 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+            >
+              <Trophy size={48} className="mx-auto text-primary" />
+            </motion.div>
 
-        {/* Archetype name */}
-        <motion.div
-          className="space-y-1 mb-4"
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-        >
-          <div className="text-xs text-muted-foreground tracking-widest uppercase">
-            {isSharedView
-              ? (isZh ? "一位朋友的测试结果" : "A friend's result")
-              : (isZh ? "你的玩家原型" : "Your Gamer Archetype")}
-          </div>
-          <h1
-            className="text-3xl md:text-4xl font-bold"
-            style={{
-              background: `linear-gradient(135deg, ${archetype.gradient[0]}, ${archetype.gradient[1]})`,
-              WebkitBackgroundClip: "text",
-              WebkitTextFillColor: "transparent",
-            }}
-          >
-            {isZh ? archetype.name : archetype.nameEn}
-          </h1>
-          {isZh && (
-            <div className="text-sm text-muted-foreground">
-              {archetype.nameEn}
-            </div>
-          )}
-        </motion.div>
+            <motion.div
+              className="space-y-2 mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              <div className="text-xs text-muted-foreground tracking-widest uppercase">
+                {isSharedView
+                  ? (isZh ? "一位朋友的天赋测试" : "A friend's talent test")
+                  : (isZh ? "你的电竞天赋等级" : "Your Esports Talent Tier")}
+              </div>
+              <h1 className="text-3xl md:text-4xl font-bold gradient-text">
+                {isZh ? tierInfo.labelZh : tierInfo.labelEn}
+              </h1>
+              {avgScore !== null && (
+                <div className="text-lg text-muted-foreground font-mono">
+                  {avgScore}/100
+                </div>
+              )}
+            </motion.div>
 
-        {/* Tagline */}
-        <motion.p
-          className="text-base md:text-lg text-foreground/80 italic max-w-md mx-auto"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.6, delay: 0.8 }}
-        >
-          &ldquo;{isZh ? archetype.tagline : archetype.taglineEn}&rdquo;
-        </motion.p>
+            {/* Archetype as secondary label */}
+            <motion.div
+              className="flex items-center justify-center gap-2 mb-2"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.5, delay: 0.8 }}
+            >
+              <span className="text-2xl">{archetype.icon}</span>
+              <span className="text-sm text-muted-foreground">
+                {isZh ? `玩家原型: ${archetype.name}` : `Archetype: ${archetype.nameEn}`}
+              </span>
+            </motion.div>
+          </>
+        ) : (
+          <>
+            {/* Questionnaire/scenario mode: archetype-focused (no pro benchmarks) */}
+            <motion.div
+              className="text-6xl md:text-7xl mb-4"
+              initial={{ scale: 0, rotate: -180 }}
+              animate={{ scale: 1, rotate: 0 }}
+              transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+            >
+              {archetype.icon}
+            </motion.div>
+
+            <motion.div
+              className="space-y-1 mb-4"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+            >
+              <div className="text-xs text-muted-foreground tracking-widest uppercase">
+                {isSharedView
+                  ? (isZh ? "一位朋友的测试结果" : "A friend's result")
+                  : (isZh ? "你的玩家原型" : "Your Gamer Archetype")}
+              </div>
+              <h1
+                className="text-3xl md:text-4xl font-bold"
+                style={{
+                  background: `linear-gradient(135deg, ${archetype.gradient[0]}, ${archetype.gradient[1]})`,
+                  WebkitBackgroundClip: "text",
+                  WebkitTextFillColor: "transparent",
+                }}
+              >
+                {isZh ? archetype.name : archetype.nameEn}
+              </h1>
+              {isZh && (
+                <div className="text-sm text-muted-foreground">
+                  {archetype.nameEn}
+                </div>
+              )}
+            </motion.div>
+
+            <motion.p
+              className="text-base md:text-lg text-foreground/80 italic max-w-md mx-auto"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ duration: 0.6, delay: 0.8 }}
+            >
+              &ldquo;{isZh ? archetype.tagline : archetype.taglineEn}&rdquo;
+            </motion.p>
+          </>
+        )}
 
         {/* Primary CTA — share (own result) or take quiz (shared view) */}
         <motion.div
@@ -262,14 +347,10 @@ function QuizResultContent() {
             <Link href="/quiz">
               <Button
                 size="lg"
-                className="h-12 px-8 text-base gap-2"
-                style={{
-                  background: `linear-gradient(135deg, ${archetype.gradient[0]}, ${archetype.gradient[1]})`,
-                  color: "white",
-                }}
+                className="h-12 px-8 text-base gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
               >
                 <Target size={20} />
-                {isZh ? "测测你是什么原型" : "Find your archetype"}
+                {isZh ? "测测你的天赋" : "Test your talent"}
               </Button>
             </Link>
           ) : (
@@ -290,7 +371,7 @@ function QuizResultContent() {
             ) : (
               <>
                 <Share2 size={20} />
-                {isZh ? "分享我的原型" : "Share My Archetype"}
+                {isZh ? "分享天赋报告" : "Share Talent Report"}
               </>
             )}
           </Button>
@@ -362,35 +443,113 @@ function QuizResultContent() {
                 </motion.div>
               ))
           ) : scores ? (
-            // Game mode: show 3 game scores
-            scores.map((score, i) => (
+            // Game mode: show 3 game scores with pro benchmark markers
+            scores.map((score, i) => {
+              const benchmark = PRO_BENCHMARKS[i];
+              const isAbovePro = score >= (benchmark?.proAvg ?? 100);
+              return (
               <motion.div
                 key={i}
-                className="flex items-center gap-3"
+                className="space-y-1"
                 variants={{
                   hidden: { opacity: 0, x: -20 },
                   visible: { opacity: 1, x: 0 }
                 }}
               >
-                <span className="text-xs text-muted-foreground w-16 text-right">
-                  {isZh ? SCORE_LABELS[i].zh : SCORE_LABELS[i].en}
-                </span>
-                <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
-                  <div
-                    className="h-full rounded-full transition-all duration-1000"
-                    style={{
-                      width: `${Math.round(score)}%`,
-                      background: `linear-gradient(90deg, ${archetype.gradient[0]}, ${archetype.gradient[1]})`,
-                    }}
-                  />
+                <div className="flex items-center gap-3">
+                  <span className="text-xs text-muted-foreground w-16 text-right">
+                    {isZh ? SCORE_LABELS[i].zh : SCORE_LABELS[i].en}
+                  </span>
+                  <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden relative">
+                    <div
+                      className="h-full rounded-full transition-all duration-1000"
+                      style={{
+                        width: `${Math.round(score)}%`,
+                        background: isAbovePro
+                          ? `linear-gradient(90deg, oklch(0.80 0.17 85), oklch(0.85 0.15 60))`
+                          : `linear-gradient(90deg, ${archetype.gradient[0]}, ${archetype.gradient[1]})`,
+                      }}
+                    />
+                    {/* Pro average marker */}
+                    {benchmark && (
+                      <div
+                        className="absolute top-0 h-full w-0.5 bg-white/40"
+                        style={{ left: `${benchmark.proAvg}%` }}
+                        title={isZh ? `职业平均: ${benchmark.proAvg}` : `Pro Avg: ${benchmark.proAvg}`}
+                      />
+                    )}
+                  </div>
+                  <span className={`text-xs font-bold w-8 ${isAbovePro ? "text-amber-400" : ""}`}>
+                    {Math.round(score)}
+                  </span>
                 </div>
-                <span className="text-xs font-bold w-8">
-                  {Math.round(score)}
-                </span>
+                {/* Pro label under the bar */}
+                {benchmark && (
+                  <div className="flex items-center gap-3">
+                    <span className="w-16" />
+                    <div className="flex-1 flex justify-between text-[10px] text-muted-foreground/60 px-0.5">
+                      <span />
+                      <span style={{ marginRight: `${100 - benchmark.proAvg}%` }}>
+                        Pro {benchmark.proAvg}
+                      </span>
+                    </div>
+                    <span className="w-8" />
+                  </div>
+                )}
               </motion.div>
-            ))
+              );
+            })
           ) : null}
         </motion.div>
+
+        {/* ── Pro Comparison Card (game mode only) ── */}
+        {proGap && tierInfo && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 1.3 }}
+          >
+            <Card className="border-primary/20">
+              <CardContent className="pt-5 pb-5 space-y-4">
+                <div className="text-sm font-semibold text-center">
+                  {isZh ? "你的天赋 vs 职业选手" : "Your Talent vs Pro Players"}
+                </div>
+
+                {/* Per-dimension comparison */}
+                <div className="space-y-2">
+                  {proGap.map((item) => (
+                    <div key={item.dimension} className="flex items-center gap-2 text-xs">
+                      <span className="text-muted-foreground w-16 text-right truncate">
+                        {item.label}
+                      </span>
+                      <span className="font-mono w-7 text-right">{item.userScore}</span>
+                      <span className="text-muted-foreground/50">vs</span>
+                      <span className="font-mono w-7 text-muted-foreground">{item.proAvg}</span>
+                      <span className={`font-mono w-10 text-right ${item.delta >= 0 ? "text-amber-400" : "text-muted-foreground"}`}>
+                        {item.delta >= 0 ? "+" : ""}{item.delta}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+
+                {/* Pro player reference */}
+                {proPlayer && (
+                  <div className="flex items-center gap-2 pt-2 border-t border-border/50">
+                    <span className="text-lg">{archetype.icon}</span>
+                    <div className="text-xs">
+                      <div className="text-muted-foreground">
+                        {isZh ? "同类型职业选手" : "Pro with same archetype"}
+                      </div>
+                      <div className="font-medium">
+                        {isZh ? proPlayer.name : proPlayer.nameEn} · {proPlayer.game}
+                      </div>
+                    </div>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
 
         {/* ── CTA card — quiz CTA for shared view, registration for own result ── */}
         <motion.div
@@ -404,18 +563,18 @@ function QuizResultContent() {
             <div className="text-center mb-4">
               <div className="text-sm font-semibold mb-1">
                 {isZh
-                  ? "想知道你是什么类型的玩家？"
-                  : "Curious about your gamer archetype?"}
+                  ? "想知道你的天赋水平吗？"
+                  : "Curious about your talent level?"}
               </div>
               <p className="text-xs text-muted-foreground">
                 {isZh
-                  ? "3 分钟测出你的玩家原型 — 完全免费"
-                  : "Find your gamer archetype in 3 minutes — totally free"}
+                  ? "3 分钟测出你的电竞天赋 — 完全免费"
+                  : "Test your esports talent in 3 minutes — totally free"}
               </p>
             </div>
             <Link href="/quiz" className="block">
-              <Button size="lg" className="w-full h-12 text-base">
-                {isZh ? "我也要测" : "Take the Quiz"}
+              <Button size="lg" className="w-full h-12 text-base bg-accent text-accent-foreground hover:bg-accent/90">
+                {isZh ? "测测我的天赋" : "Test My Talent"}
                 <ArrowRight size={18} className="ml-2" />
               </Button>
             </Link>
@@ -605,8 +764,8 @@ function QuizResultContent() {
               </div>
               <p className="text-xs text-muted-foreground mb-3">
                 {isZh
-                  ? "把测试链接发给朋友，看看他们是什么原型"
-                  : "Send this to a friend who games — find out their archetype"}
+                  ? "把测试链接发给朋友，看看他们的天赋水平"
+                  : "Send this to a friend — find out their talent level"}
               </p>
               <Button
                 variant="outline"
@@ -616,7 +775,7 @@ function QuizResultContent() {
                   const url = typeof window !== "undefined" ? `${window.location.origin}/quiz` : "https://gametan.ai/quiz";
                   if (navigator.share) {
                     try {
-                      await navigator.share({ title: isZh ? "测测你的玩家原型" : "Find Your Gamer Archetype", text: challengeText, url });
+                      await navigator.share({ title: isZh ? "测测你的电竞天赋" : "Test Your Esports Talent", text: challengeText, url });
                       return;
                     } catch { /* cancelled */ }
                   }
@@ -656,8 +815,9 @@ function QuizResultContent() {
         </div>
 
         {/* Footer */}
-        <div className="text-center text-xs text-muted-foreground pt-4 pb-8">
-          gametan.ai
+        <div className="text-center text-xs text-muted-foreground pt-4 pb-8 space-y-1">
+          <p>{isZh ? "分享此报告获得客观天赋评估" : "Share for an objective talent assessment"}</p>
+          <p>gametan.ai</p>
         </div>
       </div>
 

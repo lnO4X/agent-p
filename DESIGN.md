@@ -1,9 +1,9 @@
 # Design System — GameTan
 
 ## Product Context
-- **What this is:** "16personalities for gamers" — a gamer identity system with quiz, archetype reveal, AI coaching
-- **Who it's for:** US gamers (18-30), primarily English-speaking, familiar with Discord/Steam/tracker.gg aesthetic
-- **Space/industry:** Gaming personality quiz (peers: 16personalities, IDR Labs, Aim Lab)
+- **What this is:** Esports talent detection — 3 mini-games measure real gaming talent, compare against pro player benchmarks
+- **Who it's for:** Aspiring pro gamers + their parents (18-30 gamers, parents of 12-18 gamers), familiar with Discord/Steam/tracker.gg aesthetic
+- **Space/industry:** Esports talent assessment (peers: Aim Lab, Human Benchmark, ProGuides)
 - **Project type:** Web app — quiz funnel + identity content + dashboard
 
 ## Aesthetic Direction

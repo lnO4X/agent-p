@@ -118,7 +118,7 @@ export default function QuizPage() {
   };
 
   // ═══════════════════════════════════════════════════
-  // INTRO SCREEN — Scenario quiz is the default CTA
+  // INTRO SCREEN — Mini-games (talent test) is the default CTA
   // ═══════════════════════════════════════════════════
   if (phase === "intro") {
     return (
@@ -126,41 +126,41 @@ export default function QuizPage() {
         <div className="max-w-md w-full text-center space-y-8">
           <div className="space-y-3">
             <h1 className="text-3xl md:text-4xl font-bold">
-              {isZh ? "你是什么类型的玩家？" : "What Kind of Gamer Are You?"}
+              {isZh ? "你有职业选手的天赋吗？" : "Do You Have Pro-Level Talent?"}
             </h1>
             <p className="text-muted-foreground text-base md:text-lg">
               {isZh
-                ? "7道题，2分钟，16种玩家原型"
-                : "7 questions, 2 minutes, 16 possible archetypes"}
+                ? "3个小游戏，3分钟，对比职业选手"
+                : "3 mini-games, 3 min, compare to pro players"}
             </p>
           </div>
 
-          {/* Primary CTA — Scenario Quiz */}
+          {/* Primary CTA — Mini-Games (Talent Test) */}
           <Button
             size="lg"
             className="w-full h-14 text-lg bg-accent hover:bg-accent/90 text-accent-foreground pressable"
             onClick={() => {
-              track("quiz_start", { mode: "scenario" });
-              setPhase("scenario");
+              track("quiz_start", { mode: "quick" });
+              setPhase("playing");
             }}
           >
-            <Sparkles size={20} className="mr-2" />
-            {isZh ? "开始测试" : "Start Quiz"}
+            <Gamepad2 size={20} className="mr-2" />
+            {isZh ? "测测你的天赋" : "Test Your Talent"}
             <ArrowRight size={20} className="ml-2" />
           </Button>
 
-          {/* Secondary — Skill Test */}
+          {/* Secondary — Scenario Quiz */}
           <div className="text-sm text-muted-foreground">
             <button
               className="underline underline-offset-4 hover:text-foreground transition-colors"
               onClick={() => {
-                track("quiz_start", { mode: "quick" });
-                setPhase("playing");
+                track("quiz_start", { mode: "scenario" });
+                setPhase("scenario");
               }}
             >
               {isZh
-                ? "或试试技能测试（3个小游戏）"
-                : "Or try the Skill Test (3 mini-games)"}
+                ? "或试试场景测试（7道题）"
+                : "Or try the Scenario Quiz (7 questions)"}
             </button>
           </div>
 

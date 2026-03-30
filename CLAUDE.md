@@ -1,11 +1,11 @@
-# GameTan — 玩家身份发现器
+# GameTan — 电竞天赋测试
 
 **Brand**: GameTan (gametan.ai)
-**定位**: "16personalities for gamers" — 玩家身份系统（不是游戏平台）
-**核心循环**: Quiz → Archetype reveal → Content depth → Share → Register → Premium report
+**定位**: 电竞天赋测试 — esports talent detection（不是性格问卷）
+**核心循环**: 3 Mini-Games → 天赋分数 + 职业对比 → Share → Register → Premium report
 **变现**: 峰值变现（测完买深度报告 ¥29.9）> 订阅
 
-16 gamer archetypes from 13 talent dimensions. Identity content (96+ SEO pages). Game-specific quizzes (viral). See `docs/roadmap.md` for full plan.
+3 mini-games测量真实游戏天赋，与职业选手基准对比。16 archetypes (弱化为次要标签)。96+ SEO pages。See `docs/roadmap.md` for full plan.
 
 ---
 
