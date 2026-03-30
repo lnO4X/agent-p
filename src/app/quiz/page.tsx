@@ -9,14 +9,12 @@ import { Card } from "@/components/ui/card";
 import { useI18n } from "@/i18n/context";
 import { gameRegistry } from "@/games";
 import { QUICK_TEST_GAMES } from "@/lib/archetype";
-import { getAllGameQuizIds, getGameQuiz } from "@/lib/game-quizzes";
 import { SCENARIO_QUESTIONS, scenarioToArchetype } from "@/lib/scenario-quiz";
 import {
   Zap,
   Brain,
   Dice5,
   ArrowRight,
-  ClipboardList,
   Gamepad2,
   Sparkles,
 } from "lucide-react";
@@ -162,52 +160,6 @@ export default function QuizPage() {
                 ? "或试试场景测试（7道题）"
                 : "Or try the Scenario Quiz (7 questions)"}
             </button>
-          </div>
-
-          {/* Tertiary — Questionnaire + Game-specific */}
-          <div className="space-y-3 pt-4 border-t border-border">
-            <Link
-              href="/quiz/questions"
-              className="block"
-              onClick={() => track("quiz_start", { mode: "questionnaire" })}
-            >
-              <Button
-                size="lg"
-                variant="outline"
-                className="w-full h-12 text-base pressable"
-              >
-                <ClipboardList size={18} className="mr-2" />
-                {isZh
-                  ? "精确问卷 (39题 · 5分钟)"
-                  : "Full Questionnaire (39Q · 5min)"}
-              </Button>
-            </Link>
-
-            {/* Game-specific quizzes */}
-            <div className="space-y-2 pt-2">
-              <div className="flex items-center gap-2 justify-center text-sm text-muted-foreground">
-                <Gamepad2 size={16} />
-                {isZh ? "游戏专属测试" : "Game-Specific Quizzes"}
-              </div>
-              <div className="flex flex-wrap justify-center gap-2">
-                {getAllGameQuizIds().map((gameId) => {
-                  const quiz = getGameQuiz(gameId);
-                  if (!quiz) return null;
-                  return (
-                    <Link
-                      key={gameId}
-                      href={`/quiz/${gameId}`}
-                      className="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-card border border-border text-sm hover:bg-muted transition-colors pressable"
-                    >
-                      <span>{quiz.icon}</span>
-                      <span>
-                        {isZh ? quiz.gameName : quiz.gameNameEn}
-                      </span>
-                    </Link>
-                  );
-                })}
-              </div>
-            </div>
           </div>
 
           <p className="text-xs text-muted-foreground">

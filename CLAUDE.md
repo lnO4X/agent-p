@@ -272,6 +272,22 @@ Next.js 15 (App Router, Turbopack) · TypeScript · PostgreSQL + Drizzle ORM · 
 - ✅ 18 个组件 — 紫色 class → `text-primary`/`bg-primary` (全部替换)
 - ✅ build 通过 + Vercel 部署
 
+### ✅ Phase 44: 产品重定位 — 电竞天赋检测 (完成)
+
+- ✅ Landing/Quiz/Result 页面 → 天赋检测定位 + 职业选手对比
+- ✅ Pro benchmarks 数据层 + 天赋等级系统 (pro-elite/pro-level/pro-potential/above-average/developing)
+- ✅ Hall of Fame: 80+ 职业选手映射到原型
+
+### ✅ Phase 45: 产品聚焦 — 砍掉噪音 (完成)
+
+- ✅ 导航 Partners → Coach (天赋教练)
+- ✅ 删除: marketplace、community、character-presets、MBTI选择器、39题问卷入口
+- ✅ Dashboard: 删除AI Characters区块/问卷卡片，文案对齐天赋检测
+- ✅ Weda → GameTan 品牌 (教练重命名、email domain)
+- ✅ SEO metadata: "Discover Your Gaming DNA" → "Test Your Esports Talent"
+- ✅ 全站文案统一为天赋检测语言
+- ✅ build + 374 tests 通过
+
 ### 🔲 Pending
 
 - **游戏不好玩** — 13 款小游戏像测试工具。待决策：A) 精简 3 个+音效 B) 纯问卷 C) 单个深度游戏

@@ -431,7 +431,7 @@ export default function MePage() {
               </span>
             </div>
             <p className="text-xs text-muted-foreground mb-3">
-              {isZh ? "邀请好友发现他们的游戏天赋，共同探索玩家原型" : "Invite friends to discover their gamer talents"}
+              {isZh ? "邀请好友测测电竞天赋，对比职业选手" : "Invite friends to test their esports talent"}
             </p>
             {/* Code display */}
             <div className="flex items-center gap-2 mb-2">
@@ -472,8 +472,8 @@ export default function MePage() {
                   onClick={async () => {
                     const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai"}/register?ref=${referralCode}`;
                     await navigator.share({
-                      title: isZh ? "GameTan — 发现你的玩家原型" : "GameTan — Discover Your Gamer Archetype",
-                      text: isZh ? `用我的邀请码 ${referralCode} 注册 GameTan，测测你的游戏天赋！` : `Join me on GameTan! Use my code ${referralCode} to discover your gamer archetype.`,
+                      title: isZh ? "GameTan — 测测你的电竞天赋" : "GameTan — Test Your Esports Talent",
+                      text: isZh ? `用我的邀请码 ${referralCode} 注册 GameTan，测测你的电竞天赋！` : `Join me on GameTan! Use my code ${referralCode} to test your esports talent.`,
                       url: inviteLink,
                     });
                   }}

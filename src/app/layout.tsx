@@ -36,18 +36,18 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   title: {
-    default: "GameTan — Discover Your Gaming DNA",
+    default: "GameTan — Test Your Esports Talent",
     template: "%s | GameTan",
   },
   description:
-    "Play 13 mini-games to uncover your unique gaming talents. Get AI-powered recommendations from 100+ games across all platforms.",
+    "3 mini-games measure your reaction speed, pattern recognition, and decision-making against pro player benchmarks. Discover your esports talent tier.",
   keywords: [
+    "esports talent test",
+    "pro player benchmark",
+    "gaming talent detection",
+    "reaction speed test",
     "gaming talent test",
-    "gamer personality quiz",
     "game recommendation",
-    "gaming personality type",
-    "what type of gamer am I",
-    "AI game advisor",
     "gamer archetype",
   ],
   manifest: "/manifest.json",
@@ -69,17 +69,17 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     siteName: "GameTan",
-    title: "GameTan — Discover Your Gaming DNA",
+    title: "GameTan — Test Your Esports Talent",
     description:
-      "Play 13 mini-games to uncover your unique gaming talents. AI-powered recommendations from 100+ games.",
+      "3 mini-games measure your gaming talent against pro player benchmarks. Discover your esports talent tier.",
     locale: "zh_CN",
     alternateLocale: "en_US",
   },
   twitter: {
     card: "summary_large_image",
-    title: "GameTan — Discover Your Gaming DNA",
+    title: "GameTan — Test Your Esports Talent",
     description:
-      "Play 13 mini-games to uncover your unique gaming talents.",
+      "3 mini-games measure your gaming talent against pro player benchmarks.",
   },
   robots: {
     index: true,

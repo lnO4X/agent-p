@@ -12,27 +12,19 @@ import type { TalentCategory } from "@/types/talent";
 import {
   Flame,
   Zap,
-  Bot,
   TrendingUp,
   ChevronRight,
-  Swords,
   Target,
   Sun,
   Moon,
   Sunrise,
   Sunset,
   Sparkles,
-  ClipboardList,
   Compass,
   Share2,
 } from "lucide-react";
 import { EvolutionTracker } from "@/components/evolution-tracker";
 
-interface PartnerPreview {
-  id: string;
-  name: string;
-  avatar: string;
-}
 
 export default function DashboardPage() {
   return (
@@ -59,7 +51,6 @@ function DashboardContent() {
   }, [isWelcome, registerMethod]);
 
   const [talents, setTalents] = useState<Partial<Record<TalentCategory, number>>>({});
-  const [partners, setPartners] = useState<PartnerPreview[]>([]);
   const [challengeStreak, setChallengeStreak] = useState(0);
   const [challengeCompleted, setChallengeCompleted] = useState(false);
   const [challengeTalent, setChallengeTalent] = useState<string | null>(null);
@@ -85,10 +76,9 @@ function DashboardContent() {
     Promise.all([
       fetch("/api/leaderboard").then((r) => r.json()).catch(() => null),
       fetch("/api/auth/me").then((r) => r.json()).catch(() => null),
-      fetch("/api/partners").then((r) => r.json()).catch(() => null),
       fetch("/api/challenge").then((r) => r.json()).catch(() => null),
       fetch("/api/talent-history").then((r) => r.json()).catch(() => null),
-    ]).then(([leaderboard, me, partnersRes, challenge, talentHistory]) => {
+    ]).then(([leaderboard, me, challenge, talentHistory]) => {
       // Profile: match own username in leaderboard
       if (leaderboard?.success && me?.data?.username) {
         const myEntry = leaderboard.data.find(
@@ -97,15 +87,6 @@ function DashboardContent() {
         if (myEntry?.talents) setTalents(myEntry.talents);
       }
       setLoadingProfile(false);
-
-      // Partners
-      if (partnersRes?.data) {
-        setPartners(
-          partnersRes.data.slice(0, 3).map((p: { id: string; name: string; avatar: string }) => ({
-            id: p.id, name: p.name, avatar: p.avatar,
-          }))
-        );
-      }
 
       // Challenge
       if (challenge?.success) {
@@ -133,7 +114,7 @@ function DashboardContent() {
           ? (isZh
             ? `今天挑战一下${t(`talent.${archetype.weakTalent}`)}？`
             : `Challenge your ${t(`talent.${archetype.weakTalent}`)} today?`)
-          : (isZh ? "新的一天，新的挑战" : "New day, new challenge"),
+          : (isZh ? "测测你的电竞天赋" : "Test your esports talent"),
       };
     }
     if (hour >= 12 && hour < 18) {
@@ -141,7 +122,7 @@ function DashboardContent() {
         text: isZh ? "下午好" : "Good Afternoon",
         Icon: Sun,
         suggestion: challengeCompleted
-          ? (isZh ? "今日挑战已完成，和伙伴聊聊？" : "Challenge done! Chat with a partner?")
+          ? (isZh ? "今日挑战已完成！" : "Challenge done!")
           : (isZh ? "别忘了今天的训练" : "Don't forget today's training"),
       };
     }
@@ -190,7 +171,7 @@ function DashboardContent() {
               <div className="text-4xl">{archetype.icon}</div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-muted-foreground">
-                  {isZh ? "你的玩家原型" : "Your Archetype"}
+                  {isZh ? "你的天赋档案" : "Your Talent Profile"}
                 </div>
                 <h1
                   className="text-xl font-bold"
@@ -233,8 +214,8 @@ function DashboardContent() {
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
                   {isZh
-                    ? "选择一种方式发现你的玩家原型"
-                    : "Choose a way to discover your gamer archetype"}
+                    ? "测测你的电竞天赋，对比职业选手"
+                    : "Test your esports talent against pro players"}
                 </p>
               </CardContent>
             </Card>
@@ -244,7 +225,7 @@ function DashboardContent() {
             <div className="text-center space-y-1 py-2">
               <Target size={28} className="text-primary mx-auto" />
               <h2 className="text-base font-bold">
-                {isZh ? "发现你的玩家原型" : "Discover Your Archetype"}
+                {isZh ? "测测你的天赋" : "Test Your Talent"}
               </h2>
             </div>
           )}
@@ -259,32 +240,10 @@ function DashboardContent() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-sm">
-                      {isZh ? "快速测试" : "Quick Quiz"}
+                      {isZh ? "天赋测试" : "Talent Test"}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {isZh ? "3 个小游戏 · 3 分钟" : "3 mini games · 3 min"}
-                    </div>
-                  </div>
-                  <ChevronRight size={16} className="text-muted-foreground shrink-0" />
-                </div>
-              </CardContent>
-            </Card>
-          </Link>
-
-          {/* Questionnaire — 39 questions, 5 min */}
-          <Link href="/quiz/questions" className="block">
-            <Card className="pressable card-hover hover:border-primary/30 transition-colors">
-              <CardContent className="pt-4 pb-4">
-                <div className="flex items-center gap-3">
-                  <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center shrink-0">
-                    <ClipboardList size={20} className="text-primary" />
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-sm">
-                      {isZh ? "问卷测试" : "Questionnaire"}
-                    </div>
-                    <div className="text-xs text-muted-foreground">
-                      {isZh ? "39 道题 · 5 分钟" : "39 questions · 5 min"}
+                      {isZh ? "3 个小游戏 · 对比职业选手" : "3 mini-games · vs Pro Players"}
                     </div>
                   </div>
                   <ChevronRight size={16} className="text-muted-foreground shrink-0" />
@@ -306,7 +265,7 @@ function DashboardContent() {
                       {isZh ? "先逛逛" : "Explore First"}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {isZh ? "300+ 游戏 · 16 种原型" : "300+ games · 16 archetypes"}
+                      {isZh ? "300+ 游戏等你探索" : "300+ games to explore"}
                     </div>
                   </div>
                   <ChevronRight size={16} className="text-muted-foreground shrink-0" />
@@ -376,63 +335,7 @@ function DashboardContent() {
         </Card>
       </Link>
 
-      {/* ─── AI Characters ─── */}
-      {partners.length > 0 && (
-        <Card>
-          <CardContent className="pt-4 pb-3">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold flex items-center gap-1.5">
-                <Bot size={14} className="text-primary" />
-                {isZh ? "你的角色" : "Your Characters"}
-              </h2>
-              <Link
-                href="/chat"
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
-                {t("dashboard.viewAll")} →
-              </Link>
-            </div>
-            <div className="space-y-2">
-              {partners.map((p) => (
-                <Link key={p.id} href={`/chat/${p.id}`}>
-                  <div className="flex items-center gap-3 py-2 px-2 rounded-lg hover:bg-muted/50 transition-colors pressable">
-                    <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-primary text-xs font-bold">
-                      {p.name.charAt(0)}
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="text-sm font-medium truncate">
-                        {p.name}
-                      </div>
-                    </div>
-                    <ChevronRight
-                      size={16}
-                      className="text-muted-foreground"
-                    />
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* ─── Quick actions ─── */}
-      <div className="grid grid-cols-2 gap-3 animate-fade-up" style={{ animationDelay: "0.1s" }}>
-        <Link href="/chat">
-          <Card className="pressable card-hover h-full">
-            <CardContent className="pt-4 pb-4 flex flex-col items-center gap-2">
-              <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center">
-                <Bot size={20} className="text-primary" />
-              </div>
-              <span className="text-xs font-medium">
-                {isZh ? "AI 角色" : "AI Characters"}
-              </span>
-            </CardContent>
-          </Card>
-        </Link>
-      </div>
-
-      {/* ─── Share archetype (only if has one) ─── */}
+      {/* ─── Share talent report (only if has archetype) ─── */}
       {archetype && (
         <Link href={`/archetype/${archetype.id}`}>
           <Card className="pressable">
@@ -440,7 +343,7 @@ function DashboardContent() {
               <div className="flex items-center gap-3">
                 <Share2 size={16} className="text-primary shrink-0" />
                 <span className="text-sm font-medium flex-1">
-                  {isZh ? "分享你的原型给朋友" : "Share your archetype with friends"}
+                  {isZh ? "分享你的天赋报告" : "Share your talent report"}
                 </span>
                 <ChevronRight size={16} className="text-muted-foreground" />
               </div>

@@ -1,5 +1,5 @@
 const RESEND_API_KEY = process.env.RESEND_API_KEY;
-const FROM_EMAIL = process.env.EMAIL_FROM || "GameTan <noreply@weda.ai>";
+const FROM_EMAIL = process.env.EMAIL_FROM || "GameTan <noreply@gametan.ai>";
 
 interface SendEmailOptions {
   to: string;

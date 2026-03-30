@@ -123,12 +123,12 @@ export default function Home() {
       <section className="px-5 py-10 md:py-16 bg-muted/30">
         <div className="max-w-lg md:max-w-3xl mx-auto space-y-6">
           <h2 className="text-xl md:text-2xl font-bold text-center font-[family-name:var(--font-outfit)]">
-            {isZh ? "16 种玩家原型" : "16 Gamer Archetypes"}
+            {isZh ? "16 种天赋档案" : "16 Talent Profiles"}
           </h2>
           <p className="text-sm text-muted-foreground text-center max-w-md mx-auto">
             {isZh
-              ? "基于真实游戏技能测量，不是问卷自评。你的天赋等级由实际表现决定。"
-              : "Based on real skill measurement, not self-report questionnaires. Your talent tier is determined by how you actually play."}
+              ? "每种档案代表电竞中一种独特的天赋组合，基于真实技能测量。"
+              : "Each profile represents a distinct talent combination found in esports, based on real skill measurement."}
           </p>
 
           {/* Featured 4 archetypes */}

@@ -32,7 +32,6 @@ const PUBLIC_PREFIXES = [
   "/explore", "/api/games/catalog",
   "/archetype",
   "/pk", "/api/pk",
-  "/community", "/api/community",
   "/play", "/api/play",
   "/challenge", "/api/challenge",
   "/api/challenge/daily-ranking",

@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/i18n/context";
 import { Button } from "@/components/ui/button";
-import { Home, Gamepad2, Bot, User, Bell } from "lucide-react";
+import { Home, Gamepad2, Brain, User, Bell } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import type { Region } from "@/i18n/context";
 
@@ -28,8 +28,8 @@ const NAV_ITEMS: NavItem[] = [
   },
   {
     href: "/chat",
-    labelKey: "nav.partners",
-    icon: Bot,
+    labelKey: "nav.coach",
+    icon: Brain,
     activePrefixes: ["/chat"],
   },
   {

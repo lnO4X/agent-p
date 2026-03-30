@@ -3,8 +3,7 @@
 import { useState, useEffect, useCallback } from "react";
 import { useI18n } from "@/i18n/context";
 import { ChangePasswordForm } from "@/components/auth/change-password-form";
-import { PersonalitySelector } from "@/components/personality-selector";
-import { Mail, Check, Sun, Moon, Monitor, Gamepad2, Unlink, ExternalLink, Library, Brain } from "lucide-react";
+import { Mail, Check, Sun, Moon, Monitor, Gamepad2, Unlink, ExternalLink, Library } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ThemeMode = "system" | "light" | "dark";
@@ -40,7 +39,6 @@ export default function SettingsPage() {
   const [emailSaving, setEmailSaving] = useState(false);
   const [emailSuccess, setEmailSuccess] = useState(false);
   const [theme, setThemeState] = useState<ThemeMode>("dark");
-  const [personalityType, setPersonalityType] = useState<string | null>(null);
   const [steam, setSteam] = useState<SteamStatus | null>(null);
   const [steamInput, setSteamInput] = useState("");
   const [steamLinking, setSteamLinking] = useState(false);
@@ -65,7 +63,6 @@ export default function SettingsPage() {
         if (settingsRes.ok) {
           const data = await settingsRes.json();
           setEmail(data.data.email || null);
-          setPersonalityType(data.data.personalityType || null);
         }
         if (steamRes.ok) {
           const data = await steamRes.json();
@@ -181,29 +178,6 @@ export default function SettingsPage() {
               </button>
             ))}
           </div>
-        </div>
-      </div>
-
-      {/* Personality type */}
-      <div className="rounded-2xl ring-1 ring-foreground/10 bg-card overflow-hidden">
-        <div className="px-4 py-3.5 space-y-3">
-          <div className="flex items-center gap-2">
-            <Brain className="w-4 h-4 text-muted-foreground" />
-            <div className="space-y-0.5">
-              <p className="text-sm font-medium">
-                {isZh ? "性格类型" : "Personality Type"}
-              </p>
-              <p className="text-xs text-muted-foreground">
-                {isZh
-                  ? "选择你的性格类型，获得更精准的原型分析"
-                  : "Select your personality type for deeper archetype insights"}
-              </p>
-            </div>
-          </div>
-          <PersonalitySelector
-            value={personalityType}
-            onSelect={setPersonalityType}
-          />
         </div>
       </div>
 

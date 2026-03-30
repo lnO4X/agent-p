@@ -5,7 +5,7 @@ import { partners, users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { nanoid } from "nanoid";
 import { createPartnerSchema } from "@/lib/validations";
-import { WEDA_DEFINITION } from "@/lib/partner-prompts";
+import { COACH_DEFINITION } from "@/lib/partner-prompts";
 
 /** Tier-based slot limits: free=2 custom, premium=5 custom */
 const SLOT_LIMITS = { free: 2, premium: 5 } as const;
@@ -31,19 +31,19 @@ async function getUserTier(userId: string): Promise<TierInfo> {
 }
 
 /**
- * Ensure Weda (slot=0) exists for user. Lazily created on first access.
+ * Ensure talent coach (slot=0) exists for user. Lazily created on first access.
  * Uses INSERT ... ON CONFLICT DO NOTHING — safe for concurrent calls.
  */
-async function ensureWeda(userId: string) {
+async function ensureCoach(userId: string) {
   await db
     .insert(partners)
     .values({
       id: nanoid(),
       userId,
       slot: 0,
-      name: "Weda",
-      avatar: "Bot",
-      definition: WEDA_DEFINITION,
+      name: "Talent Coach",
+      avatar: "Brain",
+      definition: COACH_DEFINITION,
       memory: "",
     })
     .onConflictDoNothing();
@@ -56,8 +56,8 @@ export async function GET() {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Ensure Weda exists
-  await ensureWeda(auth.sub);
+  // Ensure talent coach exists
+  await ensureCoach(auth.sub);
 
   const [result, tierInfo] = await Promise.all([
     db
@@ -79,7 +79,7 @@ export async function GET() {
   ]);
 
   const { tier, tierExpiresAt } = tierInfo;
-  const maxSlots = 1 + SLOT_LIMITS[tier]; // 1 (Weda) + custom slots
+  const maxSlots = 1 + SLOT_LIMITS[tier]; // 1 (coach) + custom slots
 
   return NextResponse.json({
     success: true,
