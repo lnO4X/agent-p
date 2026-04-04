@@ -35,8 +35,9 @@ import { NpsPrompt } from "@/components/nps-prompt";
 import { GameRecommendations } from "@/components/game-recommendations";
 import { AdSlot } from "@/components/ad-slot";
 import { ResultCardDownload } from "@/components/result-card-download";
-import { getTalentTier, getProGapAnalysis, PRO_BENCHMARKS } from "@/lib/pro-benchmarks";
+import { getTalentTier, getProGapAnalysis, getSimulatedRank, getTalentInsight, PRO_BENCHMARKS } from "@/lib/pro-benchmarks";
 import { HALL_OF_FAME } from "@/lib/hall-of-fame";
+import { DistributionBar } from "@/components/distribution-bar";
 
 const TALENT_LABELS_ZH: Record<string, string> = {
   reaction_speed: "反应速度",
@@ -127,6 +128,16 @@ function QuizResultContent() {
     return HALL_OF_FAME.find((p) => p.archetypeId === archetype.id && p.role === "pro") ?? null;
   }, [archetype]);
 
+  // Simulated rank & talent insight (game mode only)
+  const simulatedRank = useMemo(
+    () => (scores ? getSimulatedRank(scores) : null),
+    [scores]
+  );
+  const talentInsight = useMemo(
+    () => (scores ? getTalentInsight(scores) : null),
+    [scores]
+  );
+
   const shareUrl = useMemo(() => {
     if (typeof window === "undefined" || !archetype) return "";
     return isQuestionnaire
@@ -140,24 +151,50 @@ function QuizResultContent() {
 
   const shareText = useMemo(() => {
     if (!archetype) return "";
-    if (tierInfo && proGap) {
-      // Talent-focused share text with pro comparison
-      const topDim = proGap.reduce((a, b) => (a.percentOfPro > b.percentOfPro ? a : b));
-      return isZh
-        ? `我的电竞天赋: ${tierInfo.labelZh} — ${topDim.label}达到职业水平${topDim.percentOfPro}%。测测你的天赋：gametan.ai/quiz`
-        : `My esports talent: ${tierInfo.labelEn} — ${topDim.label} at ${topDim.percentOfPro}% of pro level. Test yours: gametan.ai/quiz`;
+    if (tierInfo && simulatedRank) {
+      // Provocative tier-based share text
+      const r = simulatedRank;
+      const shareMap: Record<string, { zh: string; en: string }> = {
+        "pro-elite": {
+          zh: `我测到了职业精英级天赋 🏆 ${r.totalPopulation.toLocaleString()} 人中排前 ${r.rank}。你排第几？`,
+          en: `I scored Pro Elite 🏆 Top ${r.rank} out of ${r.totalPopulation.toLocaleString()}. Where do you rank?`,
+        },
+        "pro-level": {
+          zh: `我的天赋达到职业水平 💪 ${r.totalPopulation.toLocaleString()} 人中排前 ${r.rank}。你呢？`,
+          en: `I'm at Pro Level 💪 Top ${r.rank} of ${r.totalPopulation.toLocaleString()}. What about you?`,
+        },
+        "pro-potential": {
+          zh: `测了电竞天赋，有职业潜力但还差一截 😤 你能超过我吗？`,
+          en: `I have pro potential but not quite there 😤 Can you beat me?`,
+        },
+        "above-average": {
+          zh: `测了电竞天赋，比大多数人强但离职业还很远... 你试试？`,
+          en: `Better than most, but far from pro... Can you do better?`,
+        },
+        developing: {
+          zh: `测了电竞天赋，被现实打击了 😂 测测你是不是比我强`,
+          en: `Reality check: I'm far from pro 😂 Are you any better?`,
+        },
+      };
+      const t = shareMap[tierInfo.tier] ?? shareMap["developing"]!;
+      return isZh ? t.zh : t.en;
     }
     return isZh
       ? `我是「${archetype.name}」${archetype.icon} — ${archetype.tagline} 测测你的电竞天赋：gametan.ai/quiz`
       : `I'm a ${archetype.nameEn} ${archetype.icon} — ${archetype.taglineEn} Test your esports talent: gametan.ai/quiz`;
-  }, [archetype, isZh, tierInfo, proGap]);
+  }, [archetype, isZh, tierInfo, simulatedRank]);
 
   const challengeText = useMemo(() => {
     if (!archetype) return "";
+    if (tierInfo && simulatedRank) {
+      return isZh
+        ? `我测了电竞天赋 (${tierInfo.labelZh})，${simulatedRank.totalPopulation.toLocaleString()} 人中排第 ${simulatedRank.rank}，你敢来测测吗？`
+        : `I tested my esports talent (${tierInfo.labelEn}), ranked #${simulatedRank.rank} of ${simulatedRank.totalPopulation.toLocaleString()} — dare to test yours?`;
+    }
     return isZh
-      ? `我测了电竞天赋${tierInfo ? `(${tierInfo.labelZh})` : ""}，你敢来测测吗？`
-      : `I tested my esports talent${tierInfo ? ` (${tierInfo.labelEn})` : ""} — dare to test yours?`;
-  }, [archetype, isZh, tierInfo]);
+      ? `我测了电竞天赋，你敢来测测吗？`
+      : `I tested my esports talent — dare to test yours?`;
+  }, [archetype, isZh, tierInfo, simulatedRank]);
 
   const handleShare = useCallback(async () => {
     if (!archetype) return;
@@ -515,9 +552,11 @@ function QuizResultContent() {
                   {isZh ? "你的天赋 vs 职业选手" : "Your Talent vs Pro Players"}
                 </div>
 
-                {/* Per-dimension comparison */}
+                {/* Per-dimension comparison with percentile */}
                 <div className="space-y-2">
-                  {proGap.map((item) => (
+                  {proGap.map((item) => {
+                    const pct = item.percentOfPro;
+                    return (
                     <div key={item.dimension} className="flex items-center gap-2 text-xs">
                       <span className="text-muted-foreground w-16 text-right truncate">
                         {item.label}
@@ -528,9 +567,26 @@ function QuizResultContent() {
                       <span className={`font-mono w-10 text-right ${item.delta >= 0 ? "text-amber-400" : "text-muted-foreground"}`}>
                         {item.delta >= 0 ? "+" : ""}{item.delta}
                       </span>
+                      <span className="text-muted-foreground/50 w-10 text-right">
+                        {pct}%
+                      </span>
                     </div>
-                  ))}
+                    );
+                  })}
                 </div>
+
+                {/* Talent insight */}
+                {talentInsight && (
+                  <div className={`text-xs text-center px-2 py-2 rounded-lg ${
+                    talentInsight.tone === "positive"
+                      ? "bg-amber-500/10 text-amber-400"
+                      : talentInsight.tone === "harsh"
+                        ? "bg-muted text-muted-foreground"
+                        : "bg-primary/10 text-primary"
+                  }`}>
+                    {isZh ? talentInsight.messageZh : talentInsight.messageEn}
+                  </div>
+                )}
 
                 {/* Pro player reference */}
                 {proPlayer && (
@@ -546,6 +602,76 @@ function QuizResultContent() {
                     </div>
                   </div>
                 )}
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* ── Reality Check Card (game mode only) ── */}
+        {simulatedRank && avgScore !== null && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 1.45 }}
+          >
+            <Card className="border-border">
+              <CardContent className="pt-5 pb-5 space-y-4">
+                <div className="text-sm font-semibold text-center">
+                  {isZh ? "如果 1 万人参加职业选拔..." : "If 10,000 players tried out for pro..."}
+                </div>
+
+                {/* Rank visualization */}
+                <div className="text-center space-y-1">
+                  <div className="text-2xl font-bold font-mono">
+                    #{simulatedRank.rank.toLocaleString()}
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {isZh
+                      ? `${simulatedRank.totalPopulation.toLocaleString()} 人中排第 ${simulatedRank.rank.toLocaleString()} 名`
+                      : `Rank ${simulatedRank.rank.toLocaleString()} of ${simulatedRank.totalPopulation.toLocaleString()}`}
+                  </div>
+                  {/* Progress bar */}
+                  <div className="h-2 bg-muted rounded-full overflow-hidden mx-8 mt-2">
+                    <div
+                      className="h-full rounded-full bg-primary transition-all duration-1000"
+                      style={{ width: `${simulatedRank.percentile}%` }}
+                    />
+                  </div>
+                </div>
+
+                {/* Pro cutoff */}
+                <div className="flex items-center justify-between text-xs px-2">
+                  <span className="text-muted-foreground">
+                    {isZh ? "入选名额: 前 50 名 (0.5%)" : "Pro spots: Top 50 (0.5%)"}
+                  </span>
+                  <span className="text-muted-foreground">
+                    {isZh
+                      ? `还需超越 ${Math.max(0, simulatedRank.rank - 50).toLocaleString()} 人`
+                      : `${Math.max(0, simulatedRank.rank - 50).toLocaleString()} more to pass`}
+                  </span>
+                </div>
+
+                {/* Distribution visualization */}
+                <DistributionBar
+                  userScore={avgScore}
+                  proAvg={Math.round(PRO_BENCHMARKS.reduce((a, b) => a + b.proAvg, 0) / PRO_BENCHMARKS.length)}
+                  isZh={isZh}
+                />
+
+                {/* Pro reality facts */}
+                <div className="border-t border-border/50 pt-3 space-y-1.5">
+                  <div className="text-[10px] text-muted-foreground/70 text-center uppercase tracking-wider">
+                    {isZh ? "职业选手的现实" : "The Pro Reality"}
+                  </div>
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
+                    <span>{isZh ? "日均训练" : "Daily training"}</span>
+                    <span className="font-mono text-right">8-12h</span>
+                    <span>{isZh ? "职业生涯" : "Career span"}</span>
+                    <span className="font-mono text-right">3-5y</span>
+                    <span>{isZh ? "天赋+全职训练" : "Talent + full-time"}</span>
+                    <span className="font-mono text-right">1-2y</span>
+                  </div>
+                </div>
               </CardContent>
             </Card>
           </motion.div>

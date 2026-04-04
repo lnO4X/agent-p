@@ -6,7 +6,9 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getAllArchetypes } from "@/lib/archetype";
 import { ArchetypeIcon } from "@/components/archetype-icon";
 import { useI18n } from "@/i18n/context";
-import { Zap, Brain, Target, Gamepad2, ChevronRight, Users, Sparkles } from "lucide-react";
+import { Zap, Brain, Target, Gamepad2, ChevronRight, Users, Sparkles, AlertTriangle } from "lucide-react";
+import { DistributionBar } from "@/components/distribution-bar";
+import { PRO_BENCHMARKS } from "@/lib/pro-benchmarks";
 
 // Featured archetypes to preview (show 4 most distinctive)
 const FEATURED_IDS = ["lightning-assassin", "oracle", "berserker", "architect"];
@@ -49,6 +51,16 @@ export default function Home() {
             </Link>
           </div>
 
+          {/* Stat provocation */}
+          <div className="flex items-center justify-center gap-3 text-xs">
+            <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
+              {isZh ? "98% 认为自己能打职业" : "98% think they can go pro"}
+            </span>
+            <span className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border">
+              {isZh ? "不到 1% 达到职业水平" : "<1% actually reach pro"}
+            </span>
+          </div>
+
           {/* Trust badges */}
           <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
             <span className="flex items-center gap-1"><Zap size={12} /> {isZh ? "3分钟" : "3 min"}</span>
@@ -57,6 +69,35 @@ export default function Home() {
             <span>·</span>
             <span>{isZh ? "完全免费" : "100% free"}</span>
           </div>
+        </div>
+      </section>
+
+      {/* ─── Section 1.5: The Gap Most Don't See ─── */}
+      <section className="px-5 py-8 md:py-12">
+        <div className="max-w-md mx-auto text-center space-y-5">
+          <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
+            <AlertTriangle size={14} />
+            {isZh ? "大部分人不知道自己和职业差多远" : "Most people don't know how far they are from pro"}
+          </div>
+
+          <DistributionBar
+            userScore={45}
+            proAvg={Math.round(PRO_BENCHMARKS.reduce((a, b) => a + b.proAvg, 0) / PRO_BENCHMARKS.length)}
+            isZh={isZh}
+          />
+
+          <p className="text-xs text-muted-foreground">
+            {isZh
+              ? "这是大部分玩家的天赋分布 — 你在哪里？"
+              : "This is where most players fall — where are you?"}
+          </p>
+
+          <Link href="/quiz" className="inline-block">
+            <Button variant="outline" size="sm" className="gap-1.5">
+              <Target size={14} />
+              {isZh ? "3 分钟测出你在哪里" : "Find out in 3 minutes"}
+            </Button>
+          </Link>
         </div>
       </section>
 
