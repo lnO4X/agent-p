@@ -1,26 +1,34 @@
 {
-  "lastUpdated": "2026-04-05T02:45:00Z",
+  "lastUpdated": "2026-04-05T03:40:00Z",
   "data": {
     "totalUsers": 7,
     "premiumUsers": 0,
     "revenue": 0
   },
   "lastActions": [
-    "SEO: JSON-LD + blog 5 articles",
-    "Creem payment integration",
-    "Result page conversion CTA",
-    "Product audit cleanup (dead links, stale refs)"
+    "Creem payment integration + $3.99 buy button",
+    "Product audit: dead links, stale refs, metadata alignment",
+    "SEO: JSON-LD + 7 blog articles",
+    "Result page conversion CTA upgrade",
+    "X @GameTanAI registered + first post",
+    "Harness system: 6 self-adaptive tasks"
   ],
   "pendingWork": [
-    "More SEO content for organic traffic",
-    "AdSense activation (waiting for publisher ID)",
+    "More SEO content (target 15+ articles)",
     "Deep Report PDF generation (not yet built)",
-    "Quiz/questions route decision (keep or delete)"
+    "OG share card add rank info",
+    "Landing page A/B test ideas",
+    "Footer add blog link"
   ],
   "blockers": [
-    "AdSense: owner registering (Singapore)",
-    "Deep Report: PDF generation not implemented",
-    "Social: X/Twitter account not yet created"
+    "AdSense: deferred until traffic >1000/mo",
+    "X: Graduated Access pending (owner养号1-3天)",
+    "Deep Report: PDF generation not implemented"
   ],
-  "phase": "Phase 1: 0→100 users (SEO + content + sharing)"
+  "phase": "Phase 1: 0→100 users (SEO + content + sharing)",
+  "deadCommands": [
+    "NEVER automate x.com via browser",
+    "Payment = Creem, NOT LemonSqueezy",
+    "Email domain = gametan.ai, NOT weda.ai"
+  ]
 }
