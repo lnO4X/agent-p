@@ -38,6 +38,9 @@ const PUBLIC_PREFIXES = [
   "/api/challenge/card",
   "/api/archetype/card",
   "/api/pk/card",
+  "/api/home-card",
+  "/api/billing/checkout",
+  "/blog",
   "/embed",
 ];
 
