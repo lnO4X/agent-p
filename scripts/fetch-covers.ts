@@ -37,7 +37,7 @@ function sleep(ms: number): Promise<void> {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-const UA = "GameTalent-CoverFetcher/2.0 (game catalog; contact: dev@weda.ai)";
+const UA = "GameTan-CoverFetcher/2.0 (game catalog; contact: dev@gametan.ai)";
 
 /**
  * Download an image URL and convert to webp. Returns true on success.
