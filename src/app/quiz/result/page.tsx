@@ -726,23 +726,23 @@ function QuizResultContent() {
           transition={{ duration: 0.4, delay: 1.5 }}
         >
         {isSharedView ? (
-        <Card className="border-primary/30 bg-primary/5 overflow-hidden">
+        <Card className="border-accent/30 bg-accent/5 overflow-hidden">
           <CardContent className="pt-5 pb-5">
             <div className="text-center mb-4">
               <div className="text-sm font-semibold mb-1">
                 {isZh
-                  ? "想知道你的天赋水平吗？"
-                  : "Curious about your talent level?"}
+                  ? `你的朋友是 ${tierInfo?.labelZh ?? archetype.name}。你呢？`
+                  : `Your friend is ${tierInfo?.labelEn ?? archetype.nameEn}. What about you?`}
               </div>
               <p className="text-xs text-muted-foreground">
                 {isZh
-                  ? "3 分钟测出你的电竞天赋 — 完全免费"
-                  : "Test your esports talent in 3 minutes — totally free"}
+                  ? "3 分钟，3 个小游戏，对比职业选手 — 免费"
+                  : "3 minutes, 3 mini-games, compared to pro players — free"}
               </p>
             </div>
             <Link href="/quiz" className="block">
               <Button size="lg" className="w-full h-12 text-base bg-accent text-accent-foreground hover:bg-accent/90">
-                {isZh ? "测测我的天赋" : "Test My Talent"}
+                {isZh ? "我也要测" : "I Want to Test Too"}
                 <ArrowRight size={18} className="ml-2" />
               </Button>
             </Link>
@@ -751,41 +751,35 @@ function QuizResultContent() {
         ) : (
         <Card className="border-primary/30 bg-primary/5 overflow-hidden">
           <CardContent className="pt-5 pb-5">
-            <div className="text-center mb-4">
+            <div className="text-center mb-3">
               <div className="text-sm font-semibold mb-1">
                 {isZh
-                  ? `${archetype.name}，这只是冰山一角`
-                  : `${archetype.nameEn}, this is just the tip`}
+                  ? "你的快速测试只测了 3 个维度"
+                  : "Your quick test measured 3 dimensions"}
               </div>
               <p className="text-xs text-muted-foreground">
                 {isZh
-                  ? "注册后解锁完整版 — 免费"
-                  : "Sign up to unlock the full experience — free"}
+                  ? "注册解锁完整 13 维��赋分析 + AI 天赋教练 — 免费"
+                  : "Sign up for full 13-dimension analysis + AI talent coach — free"}
               </p>
             </div>
-            <div className="grid grid-cols-3 gap-3 mb-4">
-              <div className="text-center">
-                <Target size={20} className="text-primary mx-auto mb-1" />
-                <div className="text-[10px] text-muted-foreground leading-tight">
-                  {isZh ? "13维天赋\n精准测试" : "13-Dimension\nDeep Test"}
-                </div>
+            <div className="grid grid-cols-3 gap-2 mb-4 text-center">
+              <div className="px-2 py-2 rounded-lg bg-muted/50">
+                <div className="text-lg font-bold text-primary">13</div>
+                <div className="text-[10px] text-muted-foreground">{isZh ? "天赋维度" : "Dimensions"}</div>
               </div>
-              <div className="text-center">
-                <Bot size={20} className="text-primary mx-auto mb-1" />
-                <div className="text-[10px] text-muted-foreground leading-tight">
-                  {isZh ? "AI伙伴\n游戏解读" : "AI Partner\nGame Insights"}
-                </div>
+              <div className="px-2 py-2 rounded-lg bg-muted/50">
+                <div className="text-lg font-bold text-primary">AI</div>
+                <div className="text-[10px] text-muted-foreground">{isZh ? "天赋教练" : "Coach"}</div>
               </div>
-              <div className="text-center">
-                <Crown size={20} className="text-primary mx-auto mb-1" />
-                <div className="text-[10px] text-muted-foreground leading-tight">
-                  {isZh ? "每日挑战\n连续签到" : "Daily Challenge\nStreak System"}
-                </div>
+              <div className="px-2 py-2 rounded-lg bg-muted/50">
+                <div className="text-lg font-bold text-primary">Pro</div>
+                <div className="text-[10px] text-muted-foreground">{isZh ? "深度对比" : "Deep Compare"}</div>
               </div>
             </div>
             <Link href="/register" className="block">
               <Button size="lg" className="w-full h-12 text-base">
-                {isZh ? "免费注册，解锁完整体验" : "Sign Up Free — Unlock Full Experience"}
+                {isZh ? "免费注册，解锁 13 维分析" : "Sign Up Free — Unlock 13D Analysis"}
                 <ArrowRight size={18} className="ml-2" />
               </Button>
             </Link>
