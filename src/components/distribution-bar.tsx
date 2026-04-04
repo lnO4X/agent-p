@@ -19,7 +19,13 @@ export function DistributionBar({ userScore, proAvg, isZh, className }: Distribu
   const proBin = Math.min(Math.floor(proAvg / 10), 9);
 
   return (
-    <div className={className}>
+    <div
+      className={className}
+      role="img"
+      aria-label={isZh
+        ? `天赋分布图: 你的分数 ${Math.round(userScore)}，职业平均 ${proAvg}`
+        : `Talent distribution: your score ${Math.round(userScore)}, pro average ${proAvg}`}
+    >
       {/* Bars */}
       <div className="flex items-end gap-[3px] h-16">
         {DISTRIBUTION_BINS.map((pct, i) => {
@@ -33,7 +39,7 @@ export function DistributionBar({ userScore, proAvg, isZh, className }: Distribu
                   isUser
                     ? "bg-primary"
                     : isPro
-                      ? "bg-amber-400/60"
+                      ? "bg-accent/60"
                       : "bg-muted-foreground/20"
                 }`}
                 style={{ height: `${height}%` }}
@@ -56,7 +62,7 @@ export function DistributionBar({ userScore, proAvg, isZh, className }: Distribu
                 </div>
               )}
               {isPro && !isUser && (
-                <div className="text-[9px] text-amber-400 font-bold leading-tight">
+                <div className="text-[9px] text-accent font-bold leading-tight">
                   Pro
                 </div>
               )}
@@ -72,9 +78,13 @@ export function DistributionBar({ userScore, proAvg, isZh, className }: Distribu
           {isZh ? `你 (${Math.round(userScore)})` : `You (${Math.round(userScore)})`}
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-2 h-2 rounded-sm bg-amber-400/60 inline-block" />
+          <span className="w-2 h-2 rounded-sm bg-accent/60 inline-block" />
           {isZh ? `职业平均 (${proAvg})` : `Pro Avg (${proAvg})`}
         </span>
+      </div>
+      {/* D10: Data disclaimer */}
+      <div className="text-[10px] text-muted-foreground/50 text-center mt-1">
+        {isZh ? "基于统计模型估算" : "Based on statistical model"}
       </div>
     </div>
   );

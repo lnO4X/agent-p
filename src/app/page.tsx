@@ -51,14 +51,24 @@ export default function Home() {
             </Link>
           </div>
 
-          {/* Stat provocation */}
-          <div className="flex items-center justify-center gap-3 text-xs">
-            <span className="px-2.5 py-1 rounded-full bg-amber-500/10 text-amber-400 border border-amber-500/20">
-              {isZh ? "98% 认为自己能打职业" : "98% think they can go pro"}
-            </span>
-            <span className="px-2.5 py-1 rounded-full bg-muted text-muted-foreground border border-border">
-              {isZh ? "不到 1% 达到职业水平" : "<1% actually reach pro"}
-            </span>
+          {/* D8: Contrast bar — visual gap instead of pill badges */}
+          <div className="max-w-xs mx-auto space-y-1.5 text-xs">
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-2 rounded-full bg-accent/20 overflow-hidden">
+                <div className="h-full w-[98%] rounded-full bg-accent/60" />
+              </div>
+              <span className="text-accent w-24 text-right shrink-0">
+                {isZh ? "98% 想打职业" : "98% want to go pro"}
+              </span>
+            </div>
+            <div className="flex items-center gap-2">
+              <div className="flex-1 h-2 rounded-full bg-primary/20 overflow-hidden">
+                <div className="h-full w-[1%] rounded-full bg-primary" style={{ minWidth: "3px" }} />
+              </div>
+              <span className="text-primary w-24 text-right shrink-0">
+                {isZh ? "<1% 达到职业" : "<1% make it"}
+              </span>
+            </div>
           </div>
 
           {/* Trust badges */}

@@ -218,7 +218,10 @@ function QuizResultContent() {
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     } catch {
-      // clipboard failed silently
+      // D12: clipboard failure feedback
+      if (typeof window !== "undefined") {
+        alert(isZh ? "复制失败，请手动复制链接" : "Copy failed — please copy the link manually");
+      }
     }
   }, [isZh, archetype, shareText, shareUrl]);
 
@@ -516,7 +519,7 @@ function QuizResultContent() {
                       />
                     )}
                   </div>
-                  <span className={`text-xs font-bold w-8 ${isAbovePro ? "text-amber-400" : ""}`}>
+                  <span className={`text-xs font-bold w-8 ${isAbovePro ? "text-accent" : ""}`}>
                     {Math.round(score)}
                   </span>
                 </div>
@@ -539,80 +542,12 @@ function QuizResultContent() {
           ) : null}
         </motion.div>
 
-        {/* ── Pro Comparison Card (game mode only) ── */}
-        {proGap && tierInfo && (
-          <motion.div
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 1.3 }}
-          >
-            <Card className="border-primary/20">
-              <CardContent className="pt-5 pb-5 space-y-4">
-                <div className="text-sm font-semibold text-center">
-                  {isZh ? "你的天赋 vs 职业选手" : "Your Talent vs Pro Players"}
-                </div>
-
-                {/* Per-dimension comparison with percentile */}
-                <div className="space-y-2">
-                  {proGap.map((item) => {
-                    const pct = item.percentOfPro;
-                    return (
-                    <div key={item.dimension} className="flex items-center gap-2 text-xs">
-                      <span className="text-muted-foreground w-16 text-right truncate">
-                        {item.label}
-                      </span>
-                      <span className="font-mono w-7 text-right">{item.userScore}</span>
-                      <span className="text-muted-foreground/50">vs</span>
-                      <span className="font-mono w-7 text-muted-foreground">{item.proAvg}</span>
-                      <span className={`font-mono w-10 text-right ${item.delta >= 0 ? "text-amber-400" : "text-muted-foreground"}`}>
-                        {item.delta >= 0 ? "+" : ""}{item.delta}
-                      </span>
-                      <span className="text-muted-foreground/50 w-10 text-right">
-                        {pct}%
-                      </span>
-                    </div>
-                    );
-                  })}
-                </div>
-
-                {/* Talent insight */}
-                {talentInsight && (
-                  <div className={`text-xs text-center px-2 py-2 rounded-lg ${
-                    talentInsight.tone === "positive"
-                      ? "bg-amber-500/10 text-amber-400"
-                      : talentInsight.tone === "harsh"
-                        ? "bg-muted text-muted-foreground"
-                        : "bg-primary/10 text-primary"
-                  }`}>
-                    {isZh ? talentInsight.messageZh : talentInsight.messageEn}
-                  </div>
-                )}
-
-                {/* Pro player reference */}
-                {proPlayer && (
-                  <div className="flex items-center gap-2 pt-2 border-t border-border/50">
-                    <span className="text-lg">{archetype.icon}</span>
-                    <div className="text-xs">
-                      <div className="text-muted-foreground">
-                        {isZh ? "同类型职业选手" : "Pro with same archetype"}
-                      </div>
-                      <div className="font-medium">
-                        {isZh ? proPlayer.name : proPlayer.nameEn} · {proPlayer.game}
-                      </div>
-                    </div>
-                  </div>
-                )}
-              </CardContent>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* ── Reality Check Card (game mode only) ── */}
+        {/* ── Reality Check Card (game mode only) — D6: macro impact first ── */}
         {simulatedRank && avgScore !== null && (
           <motion.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 1.45 }}
+            transition={{ duration: 0.4, delay: 1.3 }}
           >
             <Card className="border-border">
               <CardContent className="pt-5 pb-5 space-y-4">
@@ -651,27 +586,134 @@ function QuizResultContent() {
                   </span>
                 </div>
 
-                {/* Distribution visualization */}
+                {/* Distribution visualization — D9: ARIA, D10: disclaimer */}
                 <DistributionBar
                   userScore={avgScore}
                   proAvg={Math.round(PRO_BENCHMARKS.reduce((a, b) => a + b.proAvg, 0) / PRO_BENCHMARKS.length)}
                   isZh={isZh}
                 />
 
-                {/* Pro reality facts */}
-                <div className="border-t border-border/50 pt-3 space-y-1.5">
-                  <div className="text-[10px] text-muted-foreground/70 text-center uppercase tracking-wider">
+                {/* D8: Pro reality — narrative style instead of grid */}
+                <div className="border-t border-border/50 pt-3">
+                  <div className="text-[10px] text-muted-foreground/70 text-center uppercase tracking-wider mb-2">
                     {isZh ? "职业选手的现实" : "The Pro Reality"}
                   </div>
-                  <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs text-muted-foreground">
-                    <span>{isZh ? "日均训练" : "Daily training"}</span>
-                    <span className="font-mono text-right">8-12h</span>
-                    <span>{isZh ? "职业生涯" : "Career span"}</span>
-                    <span className="font-mono text-right">3-5y</span>
-                    <span>{isZh ? "天赋+全职训练" : "Talent + full-time"}</span>
-                    <span className="font-mono text-right">1-2y</span>
-                  </div>
+                  <p className="text-xs text-muted-foreground leading-relaxed">
+                    {isZh
+                      ? "职业选手每天训练 8-12 小时，平均职业生涯只有 3-5 年。即使天赋达到职业水平，也需要 1-2 年全职训练才能上场。"
+                      : "Pro players train 8-12 hours daily. The average career lasts just 3-5 years. Even with pro-level talent, it takes 1-2 years of full-time training to compete."}
+                  </p>
                 </div>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
+        {/* ── D7: Highlight Card — emotional turnaround ── */}
+        {scores && proGap && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 1.38 }}
+          >
+            {(() => {
+              const best = proGap.reduce((a, b) => (a.userScore > b.userScore ? a : b));
+              const bestPct = Math.round(best.userScore);
+              return (
+                <Card className="border-primary/20 bg-primary/5">
+                  <CardContent className="pt-4 pb-4 text-center space-y-1">
+                    <div className="text-xs text-muted-foreground">
+                      {isZh ? "但你最强的一项" : "But your strongest skill"}
+                    </div>
+                    <div className="text-base font-semibold text-primary">
+                      {best.label} — {isZh ? `超过了 ${bestPct}% 的玩家` : `beats ${bestPct}% of players`}
+                    </div>
+                    <div className="text-[10px] text-muted-foreground">
+                      {isZh ? "每个人的天赋组合都是独特的" : "Everyone has a unique talent mix"}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })()}
+          </motion.div>
+        )}
+
+        {/* ── Pro Comparison Card (game mode only) ── */}
+        {proGap && tierInfo && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 1.45 }}
+          >
+            <Card className="border-primary/20">
+              <CardContent className="pt-5 pb-5 space-y-4">
+                <div className="text-sm font-semibold text-center">
+                  {isZh ? "你的天赋 vs 职业选手" : "Your Talent vs Pro Players"}
+                </div>
+
+                {/* D9: Per-dimension comparison — responsive stack on mobile */}
+                <div className="space-y-2">
+                  {proGap.map((item) => {
+                    const pct = item.percentOfPro;
+                    return (
+                    <div key={item.dimension}>
+                      {/* Desktop: single row */}
+                      <div className="hidden sm:flex items-center gap-2 text-xs">
+                        <span className="text-muted-foreground w-16 text-right truncate">
+                          {item.label}
+                        </span>
+                        <span className="font-mono w-7 text-right">{item.userScore}</span>
+                        <span className="text-muted-foreground/50">vs</span>
+                        <span className="font-mono w-7 text-muted-foreground">{item.proAvg}</span>
+                        <span className={`font-mono w-10 text-right ${item.delta >= 0 ? "text-accent" : "text-muted-foreground"}`}>
+                          {item.delta >= 0 ? "+" : ""}{item.delta}
+                        </span>
+                        <span className="text-muted-foreground/50 w-10 text-right">
+                          {pct}%
+                        </span>
+                      </div>
+                      {/* Mobile: stacked */}
+                      <div className="flex sm:hidden items-center justify-between text-xs">
+                        <span className="text-muted-foreground">{item.label}</span>
+                        <span className="font-mono">
+                          {item.userScore} <span className="text-muted-foreground/50">vs</span> {item.proAvg}
+                          <span className={`ml-1 ${item.delta >= 0 ? "text-accent" : "text-muted-foreground"}`}>
+                            ({item.delta >= 0 ? "+" : ""}{item.delta})
+                          </span>
+                        </span>
+                      </div>
+                    </div>
+                    );
+                  })}
+                </div>
+
+                {/* D11: Talent insight — use accent token instead of amber-500 */}
+                {talentInsight && (
+                  <div className={`text-xs text-center px-2 py-2 rounded-lg ${
+                    talentInsight.tone === "positive"
+                      ? "bg-accent/10 text-accent"
+                      : talentInsight.tone === "harsh"
+                        ? "bg-muted text-muted-foreground"
+                        : "bg-primary/10 text-primary"
+                  }`}>
+                    {isZh ? talentInsight.messageZh : talentInsight.messageEn}
+                  </div>
+                )}
+
+                {/* Pro player reference */}
+                {proPlayer && (
+                  <div className="flex items-center gap-2 pt-2 border-t border-border/50">
+                    <span className="text-lg">{archetype.icon}</span>
+                    <div className="text-xs">
+                      <div className="text-muted-foreground">
+                        {isZh ? "同类型职业选手" : "Pro with same archetype"}
+                      </div>
+                      <div className="font-medium">
+                        {isZh ? proPlayer.name : proPlayer.nameEn} · {proPlayer.game}
+                      </div>
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </motion.div>
