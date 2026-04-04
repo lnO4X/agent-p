@@ -3,6 +3,7 @@ import { getAllArchetypes } from "@/lib/archetype";
 import { ARCHETYPE_SECTIONS } from "@/lib/archetype-content";
 import { getAllGameQuizIds } from "@/lib/game-quizzes";
 import { PERSONALITY_CODES } from "@/lib/personality-types";
+import { BLOG_POSTS } from "@/lib/blog-posts";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
@@ -63,8 +64,20 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }))
   );
 
+  // Blog posts
+  const blogPages: MetadataRoute.Sitemap = [
+    { url: `${baseUrl}/blog`, lastModified: new Date(), changeFrequency: "weekly" as const, priority: 0.8 },
+    ...BLOG_POSTS.map((post) => ({
+      url: `${baseUrl}/blog/${post.slug}`,
+      lastModified: new Date(post.date),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
+    })),
+  ];
+
   return [
     ...staticPages,
+    ...blogPages,
     ...gameQuizPages,
     ...archetypePages,
     ...archetypeSectionPages,

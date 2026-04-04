@@ -74,6 +74,14 @@ export const metadata: Metadata = {
       "3 mini-games measure your gaming talent against pro player benchmarks. Discover your esports talent tier.",
     locale: "zh_CN",
     alternateLocale: "en_US",
+    images: [
+      {
+        url: "/api/home-card",
+        width: 1200,
+        height: 630,
+        alt: "GameTan — Esports Talent Detection",
+      },
+    ],
   },
   twitter: {
     card: "summary_large_image",
@@ -115,6 +123,45 @@ export default function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `try{var l=localStorage.getItem("app-locale");if(l==="zh")document.documentElement.lang="zh-CN";else if(!l){var n=navigator.language||"";if(n.startsWith("zh"))document.documentElement.lang="zh-CN"}}catch(e){}`,
+          }}
+        />
+        {/* JSON-LD Structured Data — Organization + WebSite + Quiz */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify([
+              {
+                "@context": "https://schema.org",
+                "@type": "Organization",
+                name: "GameTan",
+                url: "https://gametan.ai",
+                logo: "https://gametan.ai/icons/icon-512.png",
+                description: "Esports talent detection — 3 mini-games measure your reaction speed, pattern recognition, and decision-making against pro player benchmarks.",
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "WebSite",
+                name: "GameTan",
+                url: "https://gametan.ai",
+                description: "Test your esports talent against pro player benchmarks",
+                potentialAction: {
+                  "@type": "SearchAction",
+                  target: "https://gametan.ai/archetype?q={search_term_string}",
+                  "query-input": "required name=search_term_string",
+                },
+              },
+              {
+                "@context": "https://schema.org",
+                "@type": "Quiz",
+                name: "Esports Talent Test",
+                url: "https://gametan.ai/quiz",
+                description: "3 mini-games measuring reaction speed, pattern recognition, and risk decision-making. Compare your scores against pro player benchmarks.",
+                about: { "@type": "Thing", name: "Esports Talent" },
+                educationalLevel: "beginner",
+                timeRequired: "PT3M",
+                inLanguage: ["en", "zh"],
+              },
+            ]),
           }}
         />
         <meta name="mobile-web-app-capable" content="yes" />
