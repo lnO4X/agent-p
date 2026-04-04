@@ -5,10 +5,10 @@ import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 
 /**
- * POST /api/billing/checkout — Create a LemonSqueezy checkout URL
+ * POST /api/billing/checkout — Create a Creem checkout session
  *
  * Body: { productType: "deep_report" }
- * Returns: { success: true, data: { url: "https://xxx.lemonsqueezy.com/checkout/..." } }
+ * Returns: { success: true, data: { url: "https://checkout.creem.io/..." } }
  */
 export async function POST(request: Request) {
   const auth = await getAuthFromCookie();
@@ -19,11 +19,10 @@ export async function POST(request: Request) {
     );
   }
 
-  const apiKey = process.env.LEMONSQUEEZY_API_KEY;
-  const storeId = process.env.LEMONSQUEEZY_STORE_ID;
-  const variantId = process.env.LEMONSQUEEZY_VARIANT_ID;
+  const apiKey = process.env.CREEM_API_KEY;
+  const productId = process.env.CREEM_PRODUCT_ID;
 
-  if (!apiKey || !storeId || !variantId) {
+  if (!apiKey || !productId) {
     return NextResponse.json(
       { success: false, error: "Payment not configured" },
       { status: 503 }
@@ -31,7 +30,6 @@ export async function POST(request: Request) {
   }
 
   try {
-    // Get user info for pre-filling checkout
     const user = await db
       .select({ id: users.id, username: users.username, email: users.email })
       .from(users)
@@ -47,49 +45,28 @@ export async function POST(request: Request) {
 
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
 
-    // Create checkout via LemonSqueezy API
-    const response = await fetch("https://api.lemonsqueezy.com/v1/checkouts", {
+    // Create checkout via Creem API
+    const response = await fetch("https://api.creem.io/v1/checkouts", {
       method: "POST",
       headers: {
-        Accept: "application/vnd.api+json",
-        "Content-Type": "application/vnd.api+json",
-        Authorization: `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+        "x-api-key": apiKey,
       },
       body: JSON.stringify({
-        data: {
-          type: "checkouts",
-          attributes: {
-            checkout_data: {
-              email: user[0].email || undefined,
-              custom: {
-                user_id: auth.sub,
-              },
-            },
-            checkout_options: {
-              dark: true,
-              embed: false,
-            },
-            product_options: {
-              redirect_url: `${baseUrl}/me/premium?purchased=1`,
-              receipt_thank_you_note:
-                "Your GameTan Deep Profile Report is being generated! Check your dashboard.",
-            },
-          },
-          relationships: {
-            store: {
-              data: { type: "stores", id: storeId },
-            },
-            variant: {
-              data: { type: "variants", id: variantId },
-            },
-          },
+        product_id: productId,
+        success_url: `${baseUrl}/me/premium?purchased=1`,
+        request_id: `gametan_${auth.sub}_${Date.now()}`,
+        metadata: {
+          user_id: auth.sub,
+          username: user[0].username,
         },
+        ...(user[0].email ? { customer_email: user[0].email } : {}),
       }),
     });
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("[billing/checkout] LemonSqueezy error:", errorText);
+      console.error("[billing/checkout] Creem error:", errorText);
       return NextResponse.json(
         { success: false, error: "Failed to create checkout" },
         { status: 502 }
@@ -97,7 +74,7 @@ export async function POST(request: Request) {
     }
 
     const data = await response.json();
-    const checkoutUrl = data.data?.attributes?.url;
+    const checkoutUrl = data.checkout_url;
 
     if (!checkoutUrl) {
       return NextResponse.json(

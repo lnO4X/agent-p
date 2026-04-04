@@ -719,6 +719,58 @@ function QuizResultContent() {
           </motion.div>
         )}
 
+        {/* ── Deep Report Upsell (own result, not shared) ── */}
+        {!isSharedView && !isQuestionnaire && scores && (
+          <motion.div
+            initial={{ opacity: 0, y: 15 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4, delay: 1.48 }}
+          >
+            <Card className="border-accent/30 bg-accent/5 overflow-hidden">
+              <CardContent className="pt-5 pb-5">
+                <div className="text-center mb-3">
+                  <div className="text-sm font-semibold mb-1">
+                    {isZh ? "想看完整 13 维天赋分析？" : "Want your full 13-dimension analysis?"}
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {isZh
+                      ? "深度报告包含：13 维天赋分数、职业匹配度、个性化训练建议"
+                      : "Deep Report: 13 talent dimensions, pro match score, personalized training plan"}
+                  </p>
+                </div>
+                <Button
+                  size="lg"
+                  className="w-full h-12 text-base bg-accent text-accent-foreground hover:bg-accent/90"
+                  onClick={async () => {
+                    track("deep_report_click", { page: "quiz_result", tier: tierInfo?.tier ?? "unknown" });
+                    try {
+                      const res = await fetch("/api/billing/checkout", {
+                        method: "POST",
+                        headers: { "Content-Type": "application/json" },
+                        body: JSON.stringify({ productType: "deep_report" }),
+                      });
+                      const data = await res.json();
+                      if (data.success && data.data?.url) {
+                        window.location.href = data.data.url;
+                      } else {
+                        // Not logged in or payment not configured — redirect to register
+                        window.location.href = "/register?next=premium";
+                      }
+                    } catch {
+                      window.location.href = "/register?next=premium";
+                    }
+                  }}
+                >
+                  {isZh ? "获取深度报告 — $3.99" : "Get Deep Report — $3.99"}
+                </Button>
+                <p className="text-[10px] text-muted-foreground text-center mt-2">
+                  {isZh ? "一次性购买 · 无需订阅 · 即时生成" : "One-time purchase · No subscription · Instant"}
+                </p>
+              </CardContent>
+            </Card>
+          </motion.div>
+        )}
+
         {/* ── CTA card — quiz CTA for shared view, registration for own result ── */}
         <motion.div
           initial={{ opacity: 0, y: 15 }}
