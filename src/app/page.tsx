@@ -337,6 +337,10 @@ export default function Home() {
           <Link href="/login" className="hover:text-foreground transition-colors">
             {isZh ? "登录" : "Sign in"}
           </Link>
+          <span>·</span>
+          <Link href="/blog" className="hover:text-foreground transition-colors">
+            {isZh ? "博客" : "Blog"}
+          </Link>
         </div>
       </footer>
     </div>
