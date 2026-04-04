@@ -12,11 +12,11 @@ export default function sitemap(): MetadataRoute.Sitemap {
   const staticPages: MetadataRoute.Sitemap = [
     { url: baseUrl, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
     { url: `${baseUrl}/quiz`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.9 },
-    { url: `${baseUrl}/quiz/questions`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
+    // /quiz/questions removed — old 39-question questionnaire, conflicts with talent detection positioning
     { url: `${baseUrl}/explore`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.8 },
     { url: `${baseUrl}/archetype`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.8 },
     { url: `${baseUrl}/archetype/compatibility`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${baseUrl}/community`, lastModified: new Date(), changeFrequency: "daily", priority: 0.6 },
+    // /community removed — feature paused
     { url: `${baseUrl}/pk`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.5 },
   ];
 

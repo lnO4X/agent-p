@@ -49,7 +49,7 @@ async function ensureCoach(userId: string) {
     .onConflictDoNothing();
 }
 
-// GET /api/partners — List user's partners (auto-creates Weda)
+// GET /api/partners — List user's partners (auto-creates Talent Coach)
 export async function GET() {
   const auth = await getAuthFromCookie();
   if (!auth) {

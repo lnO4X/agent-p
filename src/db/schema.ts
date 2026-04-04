@@ -201,7 +201,7 @@ export const partners = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id),
-    slot: integer("slot").notNull(), // 0=Weda built-in, 1-3=custom
+    slot: integer("slot").notNull(), // 0=Talent Coach built-in, 1-3=custom
     name: text("name").notNull(),
     avatar: text("avatar").notNull(), // Lucide icon name
     modelId: text("model_id"), // null = use global default model
@@ -470,7 +470,7 @@ export const chatFeedback = pgTable(
   ]
 );
 
-// ==================== SHARED PARTNER DEFINITIONS (marketplace) ====================
+// ==================== SHARED PARTNER DEFINITIONS ====================
 export const sharedPartners = pgTable(
   "shared_partners",
   {

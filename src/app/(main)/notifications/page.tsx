@@ -77,7 +77,7 @@ export default function NotificationsPage() {
           return (
             <Link
               key={n.id}
-              href="/community"
+              href="/explore"
               className={`flex items-start gap-3 p-3 rounded-2xl border transition-colors pressable ${
                 n.read ? "bg-card/50 border-border/50" : "bg-primary/5 border-primary/20"
               }`}
