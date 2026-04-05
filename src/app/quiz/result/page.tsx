@@ -39,21 +39,6 @@ import { getTalentTier, getProGapAnalysis, getSimulatedRank, getTalentInsight, P
 import { HALL_OF_FAME } from "@/lib/hall-of-fame";
 import { DistributionBar } from "@/components/distribution-bar";
 
-const TALENT_LABELS_ZH: Record<string, string> = {
-  reaction_speed: "反应速度",
-  hand_eye_coord: "手眼协调",
-  spatial_awareness: "空间感知",
-  memory: "记忆力",
-  strategy_logic: "策略逻辑",
-  rhythm_sense: "节奏感",
-  pattern_recog: "图案识别",
-  multitasking: "多任务",
-  decision_speed: "决策速度",
-  emotional_control: "情绪控制",
-  teamwork_tendency: "团队协作",
-  risk_assessment: "风险评估",
-  resource_mgmt: "资源管理",
-};
 
 export default function QuizResultPage() {
   return (
@@ -71,7 +56,7 @@ export default function QuizResultPage() {
 
 function QuizResultContent() {
   const searchParams = useSearchParams();
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
 
   const mode = searchParams.get("mode"); // "q" = questionnaire, "scenario" = scenario quiz
   const scores = parseScores(searchParams.get("s"));
@@ -202,9 +187,9 @@ function QuizResultContent() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: isZh
-            ? `我的电竞天赋${tierInfo ? `: ${tierInfo.labelZh}` : ""}`
-            : `My Esports Talent${tierInfo ? `: ${tierInfo.labelEn}` : ""}`,
+          title: tierInfo
+            ? t("result.share.titleWithTier", { tier: isZh ? tierInfo.labelZh : tierInfo.labelEn })
+            : t("result.share.title"),
           text: shareText,
           url: shareUrl,
         });
@@ -220,10 +205,10 @@ function QuizResultContent() {
     } catch {
       // D12: clipboard failure feedback
       if (typeof window !== "undefined") {
-        alert(isZh ? "复制失败，请手动复制链接" : "Copy failed — please copy the link manually");
+        alert(t("result.share.copyFailed"));
       }
     }
-  }, [isZh, archetype, shareText, shareUrl]);
+  }, [isZh, archetype, shareText, shareUrl, t, tierInfo]);
 
   // Celebration confetti + analytics on mount (skip for shared views)
   useEffect(() => {
@@ -252,10 +237,10 @@ function QuizResultContent() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="text-center space-y-4">
           <p className="text-muted-foreground">
-            {isZh ? "没有测试数据" : "No quiz data found"}
+            {t("result.noData")}
           </p>
           <Link href="/quiz">
-            <Button>{isZh ? "开始测试" : "Take the Quiz"}</Button>
+            <Button>{t("result.startQuiz")}</Button>
           </Link>
         </div>
       </div>
@@ -263,10 +248,10 @@ function QuizResultContent() {
   }
 
   const SCORE_LABELS = [
-    { zh: "反应速度", en: "Reaction" },
-    { zh: "模式识别", en: "Pattern" },
-    { zh: "风险决策", en: "Risk" },
-  ];
+    "result.score.reaction",
+    "result.score.pattern",
+    "result.score.risk",
+  ] as const;
 
   return (
     <div className="flex-1 flex flex-col">
@@ -299,8 +284,8 @@ function QuizResultContent() {
             >
               <div className="text-xs text-muted-foreground tracking-widest uppercase">
                 {isSharedView
-                  ? (isZh ? "一位朋友的天赋测试" : "A friend's talent test")
-                  : (isZh ? "你的电竞天赋等级" : "Your Esports Talent Tier")}
+                  ? t("result.hero.sharedTier")
+                  : t("result.hero.yourTier")}
               </div>
               <h1 className="text-3xl md:text-4xl font-bold gradient-text">
                 {isZh ? tierInfo.labelZh : tierInfo.labelEn}
@@ -345,8 +330,8 @@ function QuizResultContent() {
             >
               <div className="text-xs text-muted-foreground tracking-widest uppercase">
                 {isSharedView
-                  ? (isZh ? "一位朋友的测试结果" : "A friend's result")
-                  : (isZh ? "你的玩家原型" : "Your Gamer Archetype")}
+                  ? t("result.hero.sharedArchetype")
+                  : t("result.hero.yourArchetype")}
               </div>
               <h1
                 className="text-3xl md:text-4xl font-bold"
@@ -390,7 +375,7 @@ function QuizResultContent() {
                 className="h-12 px-8 text-base gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
               >
                 <Target size={20} />
-                {isZh ? "测测你的天赋" : "Test your talent"}
+                {t("result.hero.testYourTalent")}
               </Button>
             </Link>
           ) : (
@@ -406,12 +391,12 @@ function QuizResultContent() {
             {copied ? (
               <>
                 <Check size={20} />
-                {isZh ? "已复制" : "Copied!"}
+                {t("result.share.copied")}
               </>
             ) : (
               <>
                 <Share2 size={20} />
-                {isZh ? "分享天赋报告" : "Share Talent Report"}
+                {t("result.share.report")}
               </>
             )}
           </Button>
@@ -466,7 +451,7 @@ function QuizResultContent() {
                   }}
                 >
                   <span className="text-xs text-muted-foreground w-20 text-right truncate">
-                    {isZh ? TALENT_LABELS_ZH[talent] || talent : talent.replace(/_/g, " ")}
+                    {t(`talent.${talent}`)}
                   </span>
                   <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden">
                     <div
@@ -498,7 +483,7 @@ function QuizResultContent() {
               >
                 <div className="flex items-center gap-3">
                   <span className="text-xs text-muted-foreground w-16 text-right">
-                    {isZh ? SCORE_LABELS[i].zh : SCORE_LABELS[i].en}
+                    {t(SCORE_LABELS[i])}
                   </span>
                   <div className="flex-1 h-3 bg-muted rounded-full overflow-hidden relative">
                     <div
@@ -515,7 +500,7 @@ function QuizResultContent() {
                       <div
                         className="absolute top-0 h-full w-0.5 bg-white/40"
                         style={{ left: `${benchmark.proAvg}%` }}
-                        title={isZh ? `职业平均: ${benchmark.proAvg}` : `Pro Avg: ${benchmark.proAvg}`}
+                        title={t("result.pro.benchmarkTitle", { value: String(benchmark.proAvg) })}
                       />
                     )}
                   </div>
@@ -552,7 +537,7 @@ function QuizResultContent() {
             <Card className="border-border">
               <CardContent className="pt-5 pb-5 space-y-4">
                 <div className="text-sm font-semibold text-center">
-                  {isZh ? "如果 1 万人参加职业选拔..." : "If 10,000 players tried out for pro..."}
+                  {t("result.reality.title")}
                 </div>
 
                 {/* Rank visualization */}
@@ -561,9 +546,7 @@ function QuizResultContent() {
                     #{simulatedRank.rank.toLocaleString()}
                   </div>
                   <div className="text-xs text-muted-foreground">
-                    {isZh
-                      ? `${simulatedRank.totalPopulation.toLocaleString()} 人中排第 ${simulatedRank.rank.toLocaleString()} 名`
-                      : `Rank ${simulatedRank.rank.toLocaleString()} of ${simulatedRank.totalPopulation.toLocaleString()}`}
+                    {t("result.reality.rankOf", { rank: simulatedRank.rank.toLocaleString(), total: simulatedRank.totalPopulation.toLocaleString() })}
                   </div>
                   {/* Progress bar */}
                   <div className="h-2 bg-muted rounded-full overflow-hidden mx-8 mt-2">
@@ -577,12 +560,10 @@ function QuizResultContent() {
                 {/* Pro cutoff */}
                 <div className="flex items-center justify-between text-xs px-2">
                   <span className="text-muted-foreground">
-                    {isZh ? "入选名额: 前 50 名 (0.5%)" : "Pro spots: Top 50 (0.5%)"}
+                    {t("result.reality.proSpots")}
                   </span>
                   <span className="text-muted-foreground">
-                    {isZh
-                      ? `还需超越 ${Math.max(0, simulatedRank.rank - 50).toLocaleString()} 人`
-                      : `${Math.max(0, simulatedRank.rank - 50).toLocaleString()} more to pass`}
+                    {t("result.reality.moreToPass", { count: Math.max(0, simulatedRank.rank - 50).toLocaleString() })}
                   </span>
                 </div>
 
@@ -596,12 +577,10 @@ function QuizResultContent() {
                 {/* D8: Pro reality — narrative style instead of grid */}
                 <div className="border-t border-border/50 pt-3">
                   <div className="text-[10px] text-muted-foreground/70 text-center uppercase tracking-wider mb-2">
-                    {isZh ? "职业选手的现实" : "The Pro Reality"}
+                    {t("result.reality.proReality")}
                   </div>
                   <p className="text-xs text-muted-foreground leading-relaxed">
-                    {isZh
-                      ? "职业选手每天训练 8-12 小时，平均职业生涯只有 3-5 年。即使天赋达到职业水平，也需要 1-2 年全职训练才能上场。"
-                      : "Pro players train 8-12 hours daily. The average career lasts just 3-5 years. Even with pro-level talent, it takes 1-2 years of full-time training to compete."}
+                    {t("result.reality.proDesc")}
                   </p>
                 </div>
               </CardContent>
@@ -623,13 +602,13 @@ function QuizResultContent() {
                 <Card className="border-primary/20 bg-primary/5">
                   <CardContent className="pt-4 pb-4 text-center space-y-1">
                     <div className="text-xs text-muted-foreground">
-                      {isZh ? "但你最强的一项" : "But your strongest skill"}
+                      {t("result.highlight.strongest")}
                     </div>
                     <div className="text-base font-semibold text-primary">
-                      {best.label} — {isZh ? `超过了 ${bestPct}% 的玩家` : `beats ${bestPct}% of players`}
+                      {best.label} — {t("result.highlight.beats", { pct: String(bestPct) })}
                     </div>
                     <div className="text-[10px] text-muted-foreground">
-                      {isZh ? "每个人的天赋组合都是独特的" : "Everyone has a unique talent mix"}
+                      {t("result.highlight.unique")}
                     </div>
                   </CardContent>
                 </Card>
@@ -648,7 +627,7 @@ function QuizResultContent() {
             <Card className="border-primary/20">
               <CardContent className="pt-5 pb-5 space-y-4">
                 <div className="text-sm font-semibold text-center">
-                  {isZh ? "你的天赋 vs 职业选手" : "Your Talent vs Pro Players"}
+                  {t("result.pro.title")}
                 </div>
 
                 {/* D9: Per-dimension comparison — responsive stack on mobile */}
@@ -706,7 +685,7 @@ function QuizResultContent() {
                     <span className="text-lg">{archetype.icon}</span>
                     <div className="text-xs">
                       <div className="text-muted-foreground">
-                        {isZh ? "同类型职业选手" : "Pro with same archetype"}
+                        {t("result.pro.sameArchetype")}
                       </div>
                       <div className="font-medium">
                         {isZh ? proPlayer.name : proPlayer.nameEn} · {proPlayer.game}
@@ -730,12 +709,10 @@ function QuizResultContent() {
               <CardContent className="pt-5 pb-5">
                 <div className="text-center mb-3">
                   <div className="text-sm font-semibold mb-1">
-                    {isZh ? "想看完整 13 维天赋分析？" : "Want your full 13-dimension analysis?"}
+                    {t("result.report.title")}
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {isZh
-                      ? "深度报告包含：13 维天赋分数、职业匹配度、个性化训练建议"
-                      : "Deep Report: 13 talent dimensions, pro match score, personalized training plan"}
+                    {t("result.report.desc")}
                   </p>
                 </div>
                 <Button
@@ -761,10 +738,10 @@ function QuizResultContent() {
                     }
                   }}
                 >
-                  {isZh ? "获取深度报告 — $3.99" : "Get Deep Report — $3.99"}
+                  {t("result.report.cta")}
                 </Button>
                 <p className="text-[10px] text-muted-foreground text-center mt-2">
-                  {isZh ? "一次性购买 · 无需订阅 · 即时生成" : "One-time purchase · No subscription · Instant"}
+                  {t("result.report.note")}
                 </p>
               </CardContent>
             </Card>
@@ -782,19 +759,15 @@ function QuizResultContent() {
           <CardContent className="pt-5 pb-5">
             <div className="text-center mb-4">
               <div className="text-sm font-semibold mb-1">
-                {isZh
-                  ? `你的朋友是 ${tierInfo?.labelZh ?? archetype.name}。你呢？`
-                  : `Your friend is ${tierInfo?.labelEn ?? archetype.nameEn}. What about you?`}
+                {t("result.cta.friendIs", { tier: isZh ? (tierInfo?.labelZh ?? archetype.name) : (tierInfo?.labelEn ?? archetype.nameEn) })}
               </div>
               <p className="text-xs text-muted-foreground">
-                {isZh
-                  ? "3 分钟，3 个小游戏，对比职业选手 — 免费"
-                  : "3 minutes, 3 mini-games, compared to pro players — free"}
+                {t("result.cta.sharedDesc")}
               </p>
             </div>
             <Link href="/quiz" className="block">
               <Button size="lg" className="w-full h-12 text-base bg-accent text-accent-foreground hover:bg-accent/90">
-                {isZh ? "我也要测" : "I Want to Test Too"}
+                {t("result.cta.sharedButton")}
                 <ArrowRight size={18} className="ml-2" />
               </Button>
             </Link>
@@ -805,33 +778,29 @@ function QuizResultContent() {
           <CardContent className="pt-5 pb-5">
             <div className="text-center mb-3">
               <div className="text-sm font-semibold mb-1">
-                {isZh
-                  ? "你的快速测试只测了 3 个维度"
-                  : "Your quick test measured 3 dimensions"}
+                {t("result.cta.quickOnly")}
               </div>
               <p className="text-xs text-muted-foreground">
-                {isZh
-                  ? "注册解锁完整 13 维��赋分析 + AI 天赋教练 — 免费"
-                  : "Sign up for full 13-dimension analysis + AI Talent Coach — free"}
+                {t("result.cta.registerDesc")}
               </p>
             </div>
             <div className="grid grid-cols-3 gap-2 mb-4 text-center">
               <div className="px-2 py-2 rounded-lg bg-muted/50">
                 <div className="text-lg font-bold text-primary">13</div>
-                <div className="text-[10px] text-muted-foreground">{isZh ? "天赋维度" : "Dimensions"}</div>
+                <div className="text-[10px] text-muted-foreground">{t("result.cta.dimensions")}</div>
               </div>
               <div className="px-2 py-2 rounded-lg bg-muted/50">
                 <div className="text-lg font-bold text-primary">AI</div>
-                <div className="text-[10px] text-muted-foreground">{isZh ? "天赋教练" : "Coach"}</div>
+                <div className="text-[10px] text-muted-foreground">{t("result.cta.coach")}</div>
               </div>
               <div className="px-2 py-2 rounded-lg bg-muted/50">
                 <div className="text-lg font-bold text-primary">Pro</div>
-                <div className="text-[10px] text-muted-foreground">{isZh ? "深度对比" : "Deep Compare"}</div>
+                <div className="text-[10px] text-muted-foreground">{t("result.cta.deepCompare")}</div>
               </div>
             </div>
             <Link href="/register" className="block">
               <Button size="lg" className="w-full h-12 text-base">
-                {isZh ? "免费注册，解锁 13 维分析" : "Sign Up Free — Unlock 13D Analysis"}
+                {t("result.cta.registerButton")}
                 <ArrowRight size={18} className="ml-2" />
               </Button>
             </Link>
@@ -870,7 +839,7 @@ function QuizResultContent() {
               />
               <div>
                 <div className="text-xs font-medium text-primary mb-1">
-                  {isZh ? "成长突破口" : "Growth Edge"}
+                  {t("result.growth.title")}
                 </div>
                 <p className="text-sm text-foreground/80">
                   {isZh ? archetype.weakness : archetype.weaknessEn}
@@ -893,7 +862,7 @@ function QuizResultContent() {
               <CardContent className="pt-4 pb-4 text-center">
                 <Swords size={16} className="text-red-400 mx-auto mb-1" />
                 <div className="text-[10px] text-red-400 mb-1">
-                  {isZh ? "天敌" : "Nemesis"}
+                  {t("result.nemesis.label")}
                 </div>
                 <div className="text-lg mb-0.5">{nemesis.icon}</div>
                 <div className="text-xs font-medium">
@@ -907,7 +876,7 @@ function QuizResultContent() {
               <CardContent className="pt-4 pb-4 text-center">
                 <Heart size={16} className="text-green-400 mx-auto mb-1" />
                 <div className="text-[10px] text-green-400 mb-1">
-                  {isZh ? "最佳搭档" : "Best Ally"}
+                  {t("result.ally.label")}
                 </div>
                 <div className="text-lg mb-0.5">{ally.icon}</div>
                 <div className="text-xs font-medium">
@@ -938,7 +907,7 @@ function QuizResultContent() {
               />
               <div>
                 <div className="text-xs font-medium text-primary mb-1">
-                  {isZh ? "进化路径" : "Evolution Path"}
+                  {t("result.evolution.title")}
                 </div>
                 <p className="text-sm text-foreground/80">
                   {isZh
@@ -973,13 +942,11 @@ function QuizResultContent() {
               <div className="flex items-center justify-center gap-2 mb-2">
                 <Users size={16} className="text-primary" />
                 <span className="text-sm font-medium">
-                  {isZh ? "邀请好友来测" : "Challenge a Friend"}
+                  {t("result.challenge.title")}
                 </span>
               </div>
               <p className="text-xs text-muted-foreground mb-3">
-                {isZh
-                  ? "把测试链接发给朋友，看看他们的天赋水平"
-                  : "Send this to a friend — find out their talent level"}
+                {t("result.challenge.desc")}
               </p>
               <Button
                 variant="outline"
@@ -989,7 +956,7 @@ function QuizResultContent() {
                   const url = typeof window !== "undefined" ? `${window.location.origin}/quiz` : "https://gametan.ai/quiz";
                   if (navigator.share) {
                     try {
-                      await navigator.share({ title: isZh ? "测测你的电竞天赋" : "Test Your Esports Talent", text: challengeText, url });
+                      await navigator.share({ title: t("result.challenge.shareTitle"), text: challengeText, url });
                       return;
                     } catch { /* cancelled */ }
                   }
@@ -1001,7 +968,7 @@ function QuizResultContent() {
                 }}
               >
                 {copied ? <Check size={14} /> : <Copy size={14} />}
-                {isZh ? "复制邀请链接" : "Copy Invite Link"}
+                {t("result.challenge.copyLink")}
               </Button>
             </CardContent>
           </Card>
@@ -1015,7 +982,7 @@ function QuizResultContent() {
             onClick={handleShare}
           >
             <Share2 size={16} className="mr-1.5" />
-            {isZh ? "分享" : "Share"}
+            {t("result.share.button")}
           </Button>
           <Link href="/quiz" className="flex-1">
             <Button
@@ -1023,14 +990,14 @@ function QuizResultContent() {
               className="w-full h-10 text-muted-foreground"
             >
               <RotateCcw size={14} className="mr-1.5" />
-              {isZh ? "重测" : "Retake"}
+              {t("result.retake")}
             </Button>
           </Link>
         </div>
 
         {/* Footer */}
         <div className="text-center text-xs text-muted-foreground pt-4 pb-8 space-y-1">
-          <p>{isZh ? "分享此报告获得客观天赋评估" : "Share for an objective talent assessment"}</p>
+          <p>{t("result.footer.sharePrompt")}</p>
           <p>gametan.ai</p>
         </div>
       </div>
