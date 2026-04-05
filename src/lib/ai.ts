@@ -161,7 +161,6 @@ export function getModelSync(modelId: string) {
     const minimax = createOpenAI({
       apiKey: minimaxKey,
       baseURL: "https://api.minimax.io/v1",
-      compatibility: "compatible",
     });
     return minimax.chat(modelId);
   }
