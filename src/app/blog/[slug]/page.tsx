@@ -4,7 +4,7 @@ import { useParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n/context";
-import { getBlogPost } from "@/lib/blog-posts";
+import { getBlogPost, BLOG_POSTS } from "@/lib/blog-posts";
 import { ArrowLeft, Clock, Gamepad2, Share2 } from "lucide-react";
 import { useCallback, useState } from "react";
 
@@ -109,6 +109,30 @@ export default function BlogPostPage() {
               </section>
             ))}
           </div>
+
+          {/* Related articles — internal linking for SEO */}
+          {(() => {
+            const related = BLOG_POSTS.filter((p) => p.slug !== slug).slice(0, 3);
+            if (related.length === 0) return null;
+            return (
+              <div className="border-t border-border pt-6 space-y-3">
+                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                  {isZh ? "相关文章" : "Related Articles"}
+                </h3>
+                <div className="space-y-2">
+                  {related.map((r) => (
+                    <Link
+                      key={r.slug}
+                      href={`/blog/${r.slug}`}
+                      className="block text-sm text-primary hover:underline"
+                    >
+                      {isZh ? r.titleZh : r.titleEn}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            );
+          })()}
 
           {/* CTA */}
           <div className="border-t border-border pt-8 text-center space-y-4">
