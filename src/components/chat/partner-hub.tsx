@@ -32,7 +32,7 @@ export function PartnerHub() {
     load();
   }, []);
 
-  // Find the talent coach (slot=0) — auto-navigate to it
+  // Find Weda coach (slot=0) — auto-navigate to it
   const coach = partners.find((p) => p.slot === 0);
 
   useEffect(() => {
@@ -55,7 +55,7 @@ export function PartnerHub() {
       <div className="max-w-lg mx-auto px-4 py-12 text-center space-y-4">
         <Brain size={48} className="text-primary mx-auto" />
         <h1 className="text-xl font-semibold">
-          {isZh ? "天赋教练" : "Talent Coach"}
+          {isZh ? "Weda 教练" : "Weda Coach"}
         </h1>
         <p className="text-sm text-muted-foreground">
           {isZh

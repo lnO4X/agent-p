@@ -812,7 +812,7 @@ function QuizResultContent() {
               <p className="text-xs text-muted-foreground">
                 {isZh
                   ? "注册解锁完整 13 维��赋分析 + AI 天赋教练 — 免费"
-                  : "Sign up for full 13-dimension analysis + AI talent coach — free"}
+                  : "Sign up for full 13-dimension analysis + AI coach Weda — free"}
               </p>
             </div>
             <div className="grid grid-cols-3 gap-2 mb-4 text-center">

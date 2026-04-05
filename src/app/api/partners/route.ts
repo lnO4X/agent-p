@@ -31,7 +31,7 @@ async function getUserTier(userId: string): Promise<TierInfo> {
 }
 
 /**
- * Ensure talent coach (slot=0) exists for user. Lazily created on first access.
+ * Ensure Weda coach (slot=0) exists for user. Lazily created on first access.
  * Uses INSERT ... ON CONFLICT DO NOTHING — safe for concurrent calls.
  */
 async function ensureCoach(userId: string) {
@@ -41,7 +41,7 @@ async function ensureCoach(userId: string) {
       id: nanoid(),
       userId,
       slot: 0,
-      name: "Talent Coach",
+      name: "Weda",
       avatar: "Brain",
       definition: COACH_DEFINITION,
       memory: "",
@@ -49,14 +49,14 @@ async function ensureCoach(userId: string) {
     .onConflictDoNothing();
 }
 
-// GET /api/partners — List user's partners (auto-creates Talent Coach)
+// GET /api/partners — List user's partners (auto-creates Weda)
 export async function GET() {
   const auth = await getAuthFromCookie();
   if (!auth) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
 
-  // Ensure talent coach exists
+  // Ensure Weda coach exists
   await ensureCoach(auth.sub);
 
   const [result, tierInfo] = await Promise.all([

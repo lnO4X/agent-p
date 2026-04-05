@@ -97,7 +97,7 @@ export async function DELETE(
 
   const { id } = await params;
 
-  // Verify ownership and check it's not the built-in Talent Coach (slot=0)
+  // Verify ownership and check it's not the built-in Weda coach (slot=0)
   const existing = await db
     .select({ id: partners.id, slot: partners.slot })
     .from(partners)
