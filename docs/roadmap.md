@@ -343,7 +343,7 @@ Day 30 → "新测试上线" (再激活)
 | Upstash Free | $0 | 10K cmd/day |
 | OpenRouter | ~$5-20 | AI 聊天按用量 |
 | Resend | $0 | 3K emails/month free |
-| Domain | $0 | 已有 weda.ai |
+| Domain | $0 | gametan.ai |
 | **Total** | **$5-20/mo** | |
 
 ### 阶段 C (Month 4-8) — 有用户后

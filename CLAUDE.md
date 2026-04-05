@@ -151,7 +151,7 @@ const isZh = locale === "zh";
 | **Social** | `api/profile/*`, `api/messages/*` | 公开档案 + Redis 阅后即焚消息 + 排行榜 |
 | **Referral** | `api/referral/*`, `api/cron/backfill-referral-codes/*` | 8-char codes, referrals tracking table, Me page card |
 | **Crawlers** | `lib/crawlers/*`, `api/cron/crawl-games/*` | Firecrawl-based Steam/TapTap game crawlers |
-| **Email** | `lib/email/*`, `api/cron/email-digest/*` | Resend API (weda.ai, Tokyo), weekly digest, streak milestones |
+| **Email** | `lib/email/*`, `api/cron/email-digest/*` | Resend API (gametan.ai, Tokyo), weekly digest, streak milestones |
 | **Admin Settings** | `api/admin/settings/*`, `admin/settings/page.tsx` | Site settings (ai_model etc.), DB-backed key-value store with 60s cache |
 | **Feedback** | `api/feedback/*`, `api/talent-trends/*` | Game rec feedback (like/dislike/played), chat ratings (1-5), talent percentiles |
 | **Marketplace** | `api/marketplace/*`, `(main)/marketplace/page.tsx` | Shared partner definitions, likes, usage tracking |
@@ -213,7 +213,7 @@ voice-service/       Python 3.11 venv, runs on host machine (not Docker)
 ### Cloudflare Tunnel (`~/.cloudflared/config.yml`)
 ```
 gametan.ai → http://localhost:3100  (production)
-dev.weda.ai  → http://localhost:3001  (dev, optional)
+dev.gametan.ai → http://localhost:3001  (dev, optional)
 Tunnel: dev-local (ID: e7a5faf4-dad8-4a54-bb7e-3c57be346ed1)
 ```
 

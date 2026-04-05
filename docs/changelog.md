@@ -17,7 +17,7 @@
   - **Deploy pending**: Docker Desktop was unresponsive; manual deploy needed
 - Phase 22: Infrastructure — Email service + Feishu notifications + OpenRouter key refresh
   - **OpenRouter API key**: Refreshed via admin settings API (hot-swap, no restart)
-  - **Resend email service**: RESEND_API_KEY configured, domain `weda.ai` verified (Tokyo region), FROM: `noreply@weda.ai`
+  - **Resend email service**: RESEND_API_KEY configured, domain `gametan.ai` verified (Tokyo region), FROM: `noreply@gametan.ai`
   - **Feishu notifications**: `scripts/feishu-notify.py` script, integrated into `gametan-dev-cycle` scheduled task (STEP 8)
   - **Dev cycle enhanced**: Now sends Feishu notification after every cycle (success/warning/error/info)
   - **Steam API key**: STEAM_API_KEY configured, game library import feature unlocked
