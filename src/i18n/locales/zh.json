@@ -316,5 +316,52 @@
   "compat.neutral": "有待磨合",
   "compat.challenging": "充满挑战",
   "compat.rival": "宿命对手",
-  "compat.mirror": "镜像映射"
+  "compat.mirror": "镜像映射",
+
+  "home.hero.subtitle": "你有职业选手的天赋吗？",
+  "home.hero.desc": "3 个小游戏测量你的反应速度、模式识别和决策能力，与职业选手数据对比。",
+  "home.hero.cta": "测测你的天赋",
+  "home.hero.wantPro": "98% 想打职业",
+  "home.hero.makePro": "<1% 达到职业",
+  "home.hero.duration": "3分钟",
+  "home.hero.vsPro": "对比职业选手",
+  "home.hero.free": "完全免费",
+
+  "home.gap.intro": "大部分人不知道自己和职业差多远",
+  "home.gap.desc": "这是大部分玩家的天赋分布 — 你在哪里？",
+  "home.gap.cta": "3 分钟测出你在哪里",
+
+  "home.results.title": "测完你会得到",
+  "home.results.scoresTitle": "天赋分数",
+  "home.results.scoresDesc": "反应速度、模式识别、风险决策三维评分",
+  "home.results.compTitle": "职业对比",
+  "home.results.compDesc": "看你的天赋和职业选手差多少",
+  "home.results.gapTitle": "天赋差距",
+  "home.results.gapDesc": "知道哪里需要提升才能接近职业水平",
+
+  "home.archetypes.title": "16 种天赋档案",
+  "home.archetypes.desc": "每种档案代表电竞中一种独特的天赋组合，基于真实技能测量。",
+  "home.archetypes.viewAll": "查看全部 16 种原型",
+
+  "home.how.title": "怎么测？",
+  "home.how.step1Title": "玩 3 个小游戏",
+  "home.how.step1Desc": "反应速度、模式识别、手眼协调 — 每个不到 1 分钟",
+  "home.how.step2Title": "对比职业选手数据",
+  "home.how.step2Desc": "你的天赋分数与职业选手基准数据对比",
+  "home.how.step3Title": "揭示你的原型",
+  "home.how.step3Desc": "专属原型卡片、深度分析、进化建议 — 可分享给朋友",
+
+  "home.social.archetypes": "玩家原型",
+  "home.social.talentDims": "天赋维度",
+  "home.social.minComplete": "分钟完成",
+  "home.social.proof": "基于真实游戏技能测量 · 对比职业选手基准数据",
+
+  "home.cta.title": "想知道你的天赋水平吗？",
+  "home.cta.button": "测测你的天赋",
+  "home.cta.sub": "完全免费 · 对比职业选手 · 即时出结果",
+
+  "home.footer.archetypes": "原型",
+  "home.footer.games": "游戏",
+  "home.footer.signIn": "登录",
+  "home.footer.blog": "博客"
 }

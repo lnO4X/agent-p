@@ -15,8 +15,8 @@ const FEATURED_IDS = ["lightning-assassin", "oracle", "berserker", "architect"];
 
 export default function Home() {
   const archetypes = getAllArchetypes();
-  const { locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t, locale } = useI18n();
+  const isZh = locale === "zh"; // kept for archetype dynamic data + DistributionBar prop
   const featured = FEATURED_IDS.map((id) => archetypes.find((a) => a.id === id)!).filter(Boolean);
 
   return (
@@ -32,13 +32,11 @@ export default function Home() {
           </h1>
 
           <p className="text-2xl md:text-4xl font-bold font-[family-name:var(--font-outfit)] leading-tight">
-            {isZh ? "你有职业选手的天赋吗？" : "Do You Have What It Takes to Go Pro?"}
+            {t("home.hero.subtitle")}
           </p>
 
           <p className="text-base md:text-lg text-muted-foreground max-w-md mx-auto">
-            {isZh
-              ? "3 个小游戏测量你的反应速度、模式识别和决策能力，与职业选手数据对比。"
-              : "3 mini-games measure your reaction speed, pattern recognition, and decision-making against pro player benchmarks."}
+            {t("home.hero.desc")}
           </p>
 
           {/* Primary CTA — Gold per DESIGN.md (1 per screen max) */}
@@ -46,7 +44,7 @@ export default function Home() {
             <Link href="/quiz" className="inline-block">
               <Button size="lg" className="text-lg h-14 px-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 shadow-[0_8px_30px_oklch(0.80_0.17_85/0.25)]">
                 <Gamepad2 size={20} />
-                {isZh ? "测测你的天赋" : "Test Your Talent"}
+                {t("home.hero.cta")}
               </Button>
             </Link>
           </div>
@@ -58,7 +56,7 @@ export default function Home() {
                 <div className="h-full w-[98%] rounded-full bg-accent/60" />
               </div>
               <span className="text-accent w-24 text-right shrink-0">
-                {isZh ? "98% 想打职业" : "98% want to go pro"}
+                {t("home.hero.wantPro")}
               </span>
             </div>
             <div className="flex items-center gap-2">
@@ -66,18 +64,18 @@ export default function Home() {
                 <div className="h-full w-[1%] rounded-full bg-primary" style={{ minWidth: "3px" }} />
               </div>
               <span className="text-primary w-24 text-right shrink-0">
-                {isZh ? "<1% 达到职业" : "<1% make it"}
+                {t("home.hero.makePro")}
               </span>
             </div>
           </div>
 
           {/* Trust badges */}
           <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
-            <span className="flex items-center gap-1"><Zap size={12} /> {isZh ? "3分钟" : "3 min"}</span>
+            <span className="flex items-center gap-1"><Zap size={12} /> {t("home.hero.duration")}</span>
             <span>·</span>
-            <span>{isZh ? "对比职业选手" : "vs Pro Players"}</span>
+            <span>{t("home.hero.vsPro")}</span>
             <span>·</span>
-            <span>{isZh ? "完全免费" : "100% free"}</span>
+            <span>{t("home.hero.free")}</span>
           </div>
         </div>
       </section>
@@ -87,7 +85,7 @@ export default function Home() {
         <div className="max-w-md mx-auto text-center space-y-5">
           <div className="flex items-center justify-center gap-2 text-sm text-muted-foreground">
             <AlertTriangle size={14} />
-            {isZh ? "大部分人不知道自己和职业差多远" : "Most people don't know how far they are from pro"}
+            {t("home.gap.intro")}
           </div>
 
           <DistributionBar
@@ -97,15 +95,13 @@ export default function Home() {
           />
 
           <p className="text-xs text-muted-foreground">
-            {isZh
-              ? "这是大部分玩家的天赋分布 — 你在哪里？"
-              : "This is where most players fall — where are you?"}
+            {t("home.gap.desc")}
           </p>
 
           <Link href="/quiz" className="inline-block">
             <Button variant="outline" size="sm" className="gap-1.5">
               <Target size={14} />
-              {isZh ? "3 分钟测出你在哪里" : "Find out in 3 minutes"}
+              {t("home.gap.cta")}
             </Button>
           </Link>
         </div>
@@ -115,7 +111,7 @@ export default function Home() {
       <section className="px-5 py-10 md:py-16">
         <div className="max-w-lg md:max-w-3xl mx-auto space-y-6">
           <h2 className="text-xl md:text-2xl font-bold text-center font-[family-name:var(--font-outfit)]">
-            {isZh ? "测完你会得到" : "What You'll Get"}
+            {t("home.results.title")}
           </h2>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -125,12 +121,10 @@ export default function Home() {
                   <Sparkles size={20} className="text-primary" />
                 </div>
                 <div className="font-semibold text-sm">
-                  {isZh ? "天赋分数" : "Talent Scores"}
+                  {t("home.results.scoresTitle")}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {isZh
-                    ? "反应速度、模式识别、风险决策三维评分"
-                    : "Reaction speed, pattern recognition, and decision-making scores"}
+                  {t("home.results.scoresDesc")}
                 </p>
               </CardContent>
             </Card>
@@ -141,12 +135,10 @@ export default function Home() {
                   <Brain size={20} className="text-primary" />
                 </div>
                 <div className="font-semibold text-sm">
-                  {isZh ? "职业对比" : "Pro Comparison"}
+                  {t("home.results.compTitle")}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {isZh
-                    ? "看你的天赋和职业选手差多少"
-                    : "See how you measure against pro esports players"}
+                  {t("home.results.compDesc")}
                 </p>
               </CardContent>
             </Card>
@@ -157,12 +149,10 @@ export default function Home() {
                   <Target size={20} className="text-primary" />
                 </div>
                 <div className="font-semibold text-sm">
-                  {isZh ? "天赋差距" : "Talent Gap"}
+                  {t("home.results.gapTitle")}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {isZh
-                    ? "知道哪里需要提升才能接近职业水平"
-                    : "Know exactly where to improve to approach pro level"}
+                  {t("home.results.gapDesc")}
                 </p>
               </CardContent>
             </Card>
@@ -174,12 +164,10 @@ export default function Home() {
       <section className="px-5 py-10 md:py-16 bg-muted/30">
         <div className="max-w-lg md:max-w-3xl mx-auto space-y-6">
           <h2 className="text-xl md:text-2xl font-bold text-center font-[family-name:var(--font-outfit)]">
-            {isZh ? "16 种天赋档案" : "16 Talent Profiles"}
+            {t("home.archetypes.title")}
           </h2>
           <p className="text-sm text-muted-foreground text-center max-w-md mx-auto">
-            {isZh
-              ? "每种档案代表电竞中一种独特的天赋组合，基于真实技能测量。"
-              : "Each profile represents a distinct talent combination found in esports, based on real skill measurement."}
+            {t("home.archetypes.desc")}
           </p>
 
           {/* Featured 4 archetypes */}
@@ -222,7 +210,7 @@ export default function Home() {
               href="/archetype"
               className="inline-flex items-center gap-1 text-sm text-primary hover:underline"
             >
-              {isZh ? "查看全部 16 种原型" : "View all 16 archetypes"}
+              {t("home.archetypes.viewAll")}
               <ChevronRight size={14} />
             </Link>
           </div>
@@ -233,27 +221,27 @@ export default function Home() {
       <section className="px-5 py-10 md:py-16">
         <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
           <h2 className="text-xl md:text-2xl font-bold text-center font-[family-name:var(--font-outfit)]">
-            {isZh ? "怎么测？" : "How It Works"}
+            {t("home.how.title")}
           </h2>
 
           <div className="space-y-4">
             {[
               {
                 step: "1",
-                title: isZh ? "玩 3 个小游戏" : "Play 3 Mini-Games",
-                desc: isZh ? "反应速度、模式识别、手眼协调 — 每个不到 1 分钟" : "Reaction, pattern recognition, coordination — each under 1 minute",
+                title: t("home.how.step1Title"),
+                desc: t("home.how.step1Desc"),
                 icon: Gamepad2,
               },
               {
                 step: "2",
-                title: isZh ? "对比职业选手数据" : "Compare Against Pro Players",
-                desc: isZh ? "你的天赋分数与职业选手基准数据对比" : "Your talent scores compared against pro player benchmark data",
+                title: t("home.how.step2Title"),
+                desc: t("home.how.step2Desc"),
                 icon: Brain,
               },
               {
                 step: "3",
-                title: isZh ? "揭示你的原型" : "Reveal Your Archetype",
-                desc: isZh ? "专属原型卡片、深度分析、进化建议 — 可分享给朋友" : "Personal archetype card, deep analysis, growth path — shareable",
+                title: t("home.how.step3Title"),
+                desc: t("home.how.step3Desc"),
                 icon: Sparkles,
               },
             ].map((item) => (
@@ -280,25 +268,23 @@ export default function Home() {
           <div className="flex items-center justify-center gap-6 text-center">
             <div>
               <div className="text-2xl md:text-3xl font-bold text-primary">16</div>
-              <div className="text-xs text-muted-foreground">{isZh ? "玩家原型" : "Archetypes"}</div>
+              <div className="text-xs text-muted-foreground">{t("home.social.archetypes")}</div>
             </div>
             <div className="w-px h-10 bg-border" />
             <div>
               <div className="text-2xl md:text-3xl font-bold text-primary">13</div>
-              <div className="text-xs text-muted-foreground">{isZh ? "天赋维度" : "Talent Dims"}</div>
+              <div className="text-xs text-muted-foreground">{t("home.social.talentDims")}</div>
             </div>
             <div className="w-px h-10 bg-border" />
             <div>
               <div className="text-2xl md:text-3xl font-bold text-primary">3</div>
-              <div className="text-xs text-muted-foreground">{isZh ? "分钟完成" : "Min to Complete"}</div>
+              <div className="text-xs text-muted-foreground">{t("home.social.minComplete")}</div>
             </div>
           </div>
 
           <div className="text-center text-xs text-muted-foreground flex items-center justify-center gap-1.5">
             <Users size={12} />
-            {isZh
-              ? "基于真实游戏技能测量 · 对比职业选手基准数据"
-              : "Based on real skill measurement · Compared against pro player benchmarks"}
+            {t("home.social.proof")}
           </div>
         </div>
       </section>
@@ -307,16 +293,16 @@ export default function Home() {
       <section className="px-5 py-12 md:py-20">
         <div className="max-w-md mx-auto text-center space-y-4">
           <p className="text-lg md:text-xl font-bold font-[family-name:var(--font-outfit)]">
-            {isZh ? "想知道你的天赋水平吗？" : "Ready to see where you stand?"}
+            {t("home.cta.title")}
           </p>
           <Link href="/quiz" className="inline-block">
             <Button size="lg" className="text-lg h-14 px-12 gap-2 bg-accent text-accent-foreground hover:bg-accent/90 shadow-[0_8px_30px_oklch(0.80_0.17_85/0.25)]">
               <Gamepad2 size={20} />
-              {isZh ? "测测你的天赋" : "Test Your Talent"}
+              {t("home.cta.button")}
             </Button>
           </Link>
           <p className="text-xs text-muted-foreground">
-            {isZh ? "完全免费 · 对比职业选手 · 即时出结果" : "100% free · vs Pro Players · Instant results"}
+            {t("home.cta.sub")}
           </p>
         </div>
       </section>
@@ -327,19 +313,19 @@ export default function Home() {
           <span>gametan.ai</span>
           <span>·</span>
           <Link href="/archetype" className="hover:text-foreground transition-colors">
-            {isZh ? "原型" : "Archetypes"}
+            {t("home.footer.archetypes")}
           </Link>
           <span>·</span>
           <Link href="/explore" className="hover:text-foreground transition-colors">
-            {isZh ? "游戏" : "Games"}
+            {t("home.footer.games")}
           </Link>
           <span>·</span>
           <Link href="/login" className="hover:text-foreground transition-colors">
-            {isZh ? "登录" : "Sign in"}
+            {t("home.footer.signIn")}
           </Link>
           <span>·</span>
           <Link href="/blog" className="hover:text-foreground transition-colors">
-            {isZh ? "博客" : "Blog"}
+            {t("home.footer.blog")}
           </Link>
         </div>
       </footer>

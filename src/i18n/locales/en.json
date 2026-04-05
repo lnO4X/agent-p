@@ -316,5 +316,52 @@
   "compat.neutral": "Needs Work",
   "compat.challenging": "Challenging",
   "compat.rival": "Rivals",
-  "compat.mirror": "Mirror Match"
+  "compat.mirror": "Mirror Match",
+
+  "home.hero.subtitle": "Do You Have What It Takes to Go Pro?",
+  "home.hero.desc": "3 mini-games measure your reaction speed, pattern recognition, and decision-making against pro player benchmarks.",
+  "home.hero.cta": "Test Your Talent",
+  "home.hero.wantPro": "98% want to go pro",
+  "home.hero.makePro": "<1% make it",
+  "home.hero.duration": "3 min",
+  "home.hero.vsPro": "vs Pro Players",
+  "home.hero.free": "100% free",
+
+  "home.gap.intro": "Most people don't know how far they are from pro",
+  "home.gap.desc": "This is where most players fall — where are you?",
+  "home.gap.cta": "Find out in 3 minutes",
+
+  "home.results.title": "What You'll Get",
+  "home.results.scoresTitle": "Talent Scores",
+  "home.results.scoresDesc": "Reaction speed, pattern recognition, and decision-making scores",
+  "home.results.compTitle": "Pro Comparison",
+  "home.results.compDesc": "See how you measure against pro esports players",
+  "home.results.gapTitle": "Talent Gap",
+  "home.results.gapDesc": "Know exactly where to improve to approach pro level",
+
+  "home.archetypes.title": "16 Talent Profiles",
+  "home.archetypes.desc": "Each profile represents a distinct talent combination found in esports, based on real skill measurement.",
+  "home.archetypes.viewAll": "View all 16 archetypes",
+
+  "home.how.title": "How It Works",
+  "home.how.step1Title": "Play 3 Mini-Games",
+  "home.how.step1Desc": "Reaction, pattern recognition, coordination — each under 1 minute",
+  "home.how.step2Title": "Compare Against Pro Players",
+  "home.how.step2Desc": "Your talent scores compared against pro player benchmark data",
+  "home.how.step3Title": "Reveal Your Archetype",
+  "home.how.step3Desc": "Personal archetype card, deep analysis, growth path — shareable",
+
+  "home.social.archetypes": "Archetypes",
+  "home.social.talentDims": "Talent Dims",
+  "home.social.minComplete": "Min to Complete",
+  "home.social.proof": "Based on real skill measurement · Compared against pro player benchmarks",
+
+  "home.cta.title": "Ready to see where you stand?",
+  "home.cta.button": "Test Your Talent",
+  "home.cta.sub": "100% free · vs Pro Players · Instant results",
+
+  "home.footer.archetypes": "Archetypes",
+  "home.footer.games": "Games",
+  "home.footer.signIn": "Sign in",
+  "home.footer.blog": "Blog"
 }
