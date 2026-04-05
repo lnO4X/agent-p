@@ -316,5 +316,52 @@
   "compat.neutral": "노력 필요",
   "compat.challenging": "어려운 궁합",
   "compat.rival": "라이벌",
-  "compat.mirror": "미러 매치"
+  "compat.mirror": "미러 매치",
+
+  "home.hero.subtitle": "프로 선수의 재능이 있을까?",
+  "home.hero.desc": "3개의 미니게임으로 반응 속도, 패턴 인식, 판단력을 측정하고 프로 선수 데이터와 비교합니다.",
+  "home.hero.cta": "재능 테스트하기",
+  "home.hero.wantPro": "98%가 프로를 꿈꾼다",
+  "home.hero.makePro": "<1%만 프로가 된다",
+  "home.hero.duration": "3분",
+  "home.hero.vsPro": "프로 선수와 비교",
+  "home.hero.free": "100% 무료",
+
+  "home.gap.intro": "대부분의 사람들은 프로와의 차이를 모른다",
+  "home.gap.desc": "이것이 대부분 플레이어의 재능 분포입니다 — 당신은 어디에?",
+  "home.gap.cta": "3분 만에 확인하기",
+
+  "home.results.title": "테스트 결과로 알 수 있는 것",
+  "home.results.scoresTitle": "재능 점수",
+  "home.results.scoresDesc": "반응 속도, 패턴 인식, 판단력 점수",
+  "home.results.compTitle": "프로와 비교",
+  "home.results.compDesc": "프로 e스포츠 선수와 비교했을 때 나의 위치 확인",
+  "home.results.gapTitle": "재능 격차",
+  "home.results.gapDesc": "프로 수준에 가까워지려면 어디를 개선해야 하는지 파악",
+
+  "home.archetypes.title": "16가지 재능 프로필",
+  "home.archetypes.desc": "각 프로필은 실제 기술 측정을 기반으로 e스포츠에서 발견되는 독특한 재능 조합을 나타냅니다.",
+  "home.archetypes.viewAll": "16가지 유형 모두 보기",
+
+  "home.how.title": "테스트 방법",
+  "home.how.step1Title": "미니게임 3개 플레이",
+  "home.how.step1Desc": "반응 속도, 패턴 인식, 손-눈 협응력 — 각 1분 이내",
+  "home.how.step2Title": "프로 선수와 비교",
+  "home.how.step2Desc": "당신의 재능 점수를 프로 선수 벤치마크 데이터와 비교",
+  "home.how.step3Title": "나의 유형 공개",
+  "home.how.step3Desc": "전용 유형 카드, 심층 분석, 성장 경로 — 공유 가능",
+
+  "home.social.archetypes": "유형",
+  "home.social.talentDims": "재능 지표",
+  "home.social.minComplete": "분이면 완료",
+  "home.social.proof": "실제 게임 기술 측정 기반 · 프로 선수 벤치마크와 비교",
+
+  "home.cta.title": "나의 실력이 궁금하지 않으세요?",
+  "home.cta.button": "재능 테스트하기",
+  "home.cta.sub": "100% 무료 · 프로 선수와 비교 · 즉시 결과 확인",
+
+  "home.footer.archetypes": "유형",
+  "home.footer.games": "게임",
+  "home.footer.signIn": "로그인",
+  "home.footer.blog": "블로그"
 }

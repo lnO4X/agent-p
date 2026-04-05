@@ -316,5 +316,52 @@
   "compat.neutral": "Ausbaufähig",
   "compat.challenging": "Herausfordernd",
   "compat.rival": "Rivalen",
-  "compat.mirror": "Spiegelmatch"
+  "compat.mirror": "Spiegelmatch",
+
+  "home.hero.subtitle": "Hast du das Zeug zum Profi?",
+  "home.hero.desc": "3 Minispiele messen deine Reaktionsgeschwindigkeit, Mustererkennung und Entscheidungsfähigkeit im Vergleich zu Profi-Spielern.",
+  "home.hero.cta": "Teste dein Talent",
+  "home.hero.wantPro": "98% wollen Profi werden",
+  "home.hero.makePro": "<1% schaffen es",
+  "home.hero.duration": "3 Min",
+  "home.hero.vsPro": "vs Profi-Spieler",
+  "home.hero.free": "100% kostenlos",
+
+  "home.gap.intro": "Die meisten wissen nicht, wie weit sie von Profi-Niveau entfernt sind",
+  "home.gap.desc": "Hier befinden sich die meisten Spieler — wo stehst du?",
+  "home.gap.cta": "Finde es in 3 Minuten heraus",
+
+  "home.results.title": "Was du erfährst",
+  "home.results.scoresTitle": "Talent-Scores",
+  "home.results.scoresDesc": "Scores für Reaktionsgeschwindigkeit, Mustererkennung und Entscheidungsfähigkeit",
+  "home.results.compTitle": "Profi-Vergleich",
+  "home.results.compDesc": "Sieh, wie du dich gegenüber professionellen E-Sport-Spielern schlägst",
+  "home.results.gapTitle": "Talent-Lücke",
+  "home.results.gapDesc": "Erfahre genau, was du verbessern musst, um dem Profi-Niveau näher zu kommen",
+
+  "home.archetypes.title": "16 Talent-Profile",
+  "home.archetypes.desc": "Jedes Profil steht für eine einzigartige Talentkombination im E-Sport, basierend auf echten Fähigkeitsmessungen.",
+  "home.archetypes.viewAll": "Alle 16 Archetypen ansehen",
+
+  "home.how.title": "So funktioniert's",
+  "home.how.step1Title": "Spiele 3 Minispiele",
+  "home.how.step1Desc": "Reaktion, Mustererkennung, Koordination — jeweils unter 1 Minute",
+  "home.how.step2Title": "Vergleiche dich mit Profi-Spielern",
+  "home.how.step2Desc": "Deine Talent-Scores im Vergleich mit Benchmark-Daten von Profi-Spielern",
+  "home.how.step3Title": "Entdecke deinen Archetyp",
+  "home.how.step3Desc": "Persönliche Archetyp-Karte, tiefgehende Analyse, Wachstumspfad — teilbar",
+
+  "home.social.archetypes": "Archetypen",
+  "home.social.talentDims": "Talent-Dimensionen",
+  "home.social.minComplete": "Min bis fertig",
+  "home.social.proof": "Basierend auf echten Fähigkeitsmessungen · Verglichen mit Profi-Spieler-Benchmarks",
+
+  "home.cta.title": "Bereit zu erfahren, wo du stehst?",
+  "home.cta.button": "Teste dein Talent",
+  "home.cta.sub": "100% kostenlos · vs Profi-Spieler · Sofortergebnisse",
+
+  "home.footer.archetypes": "Archetypen",
+  "home.footer.games": "Spiele",
+  "home.footer.signIn": "Anmelden",
+  "home.footer.blog": "Blog"
 }

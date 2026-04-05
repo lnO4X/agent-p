@@ -316,5 +316,52 @@
   "compat.neutral": "努力次第",
   "compat.challenging": "難しい相性",
   "compat.rival": "ライバル",
-  "compat.mirror": "ミラーマッチ"
+  "compat.mirror": "ミラーマッチ",
+
+  "home.hero.subtitle": "プロになれる才能がある？",
+  "home.hero.desc": "3つのミニゲームで反応速度・パターン認識・判断力を測定し、プロ選手のデータと比較します。",
+  "home.hero.cta": "才能をテストする",
+  "home.hero.wantPro": "98%がプロを目指す",
+  "home.hero.makePro": "<1%がプロになれる",
+  "home.hero.duration": "3分",
+  "home.hero.vsPro": "プロ選手と比較",
+  "home.hero.free": "完全無料",
+
+  "home.gap.intro": "ほとんどの人はプロとの差を知らない",
+  "home.gap.desc": "これが大半のプレイヤーの才能分布 — あなたはどこ？",
+  "home.gap.cta": "3分で確かめよう",
+
+  "home.results.title": "テストで分かること",
+  "home.results.scoresTitle": "才能スコア",
+  "home.results.scoresDesc": "反応速度・パターン認識・判断力のスコア",
+  "home.results.compTitle": "プロとの比較",
+  "home.results.compDesc": "プロeスポーツ選手と比べてどの位置にいるか確認",
+  "home.results.gapTitle": "才能ギャップ",
+  "home.results.gapDesc": "プロレベルに近づくために何を伸ばすべきか分かる",
+
+  "home.archetypes.title": "16の才能プロファイル",
+  "home.archetypes.desc": "各プロファイルはeスポーツにおける独自の才能の組み合わせを表し、実際のスキル測定に基づいています。",
+  "home.archetypes.viewAll": "16タイプをすべて見る",
+
+  "home.how.title": "テストの流れ",
+  "home.how.step1Title": "3つのミニゲームをプレイ",
+  "home.how.step1Desc": "反応速度・パターン認識・手と目の連携 — 各1分以内",
+  "home.how.step2Title": "プロ選手と比較",
+  "home.how.step2Desc": "あなたの才能スコアをプロ選手のベンチマークデータと比較",
+  "home.how.step3Title": "あなたのタイプを解明",
+  "home.how.step3Desc": "専用タイプカード・深層分析・成長の道筋 — シェア可能",
+
+  "home.social.archetypes": "タイプ",
+  "home.social.talentDims": "才能指標",
+  "home.social.minComplete": "分で完了",
+  "home.social.proof": "実際のスキル測定に基づく · プロ選手ベンチマークと比較",
+
+  "home.cta.title": "自分の実力を知る準備はできた？",
+  "home.cta.button": "才能をテストする",
+  "home.cta.sub": "完全無料 · プロ選手と比較 · 即時結果",
+
+  "home.footer.archetypes": "タイプ",
+  "home.footer.games": "ゲーム",
+  "home.footer.signIn": "ログイン",
+  "home.footer.blog": "ブログ"
 }

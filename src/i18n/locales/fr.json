@@ -316,5 +316,52 @@
   "compat.neutral": "À travailler",
   "compat.challenging": "Difficile",
   "compat.rival": "Rivaux",
-  "compat.mirror": "Miroir"
+  "compat.mirror": "Miroir",
+
+  "home.hero.subtitle": "As-tu le talent pour devenir pro ?",
+  "home.hero.desc": "3 mini-jeux mesurent ta vitesse de réaction, ta reconnaissance de motifs et ta prise de décision par rapport aux joueurs professionnels.",
+  "home.hero.cta": "Teste ton talent",
+  "home.hero.wantPro": "98% veulent devenir pro",
+  "home.hero.makePro": "<1% y arrivent",
+  "home.hero.duration": "3 min",
+  "home.hero.vsPro": "vs Joueurs Pro",
+  "home.hero.free": "100% gratuit",
+
+  "home.gap.intro": "La plupart ne savent pas à quel point ils sont loin du niveau pro",
+  "home.gap.desc": "Voici où se situent la plupart des joueurs — et toi, où es-tu ?",
+  "home.gap.cta": "Découvre-le en 3 minutes",
+
+  "home.results.title": "Ce que tu obtiendras",
+  "home.results.scoresTitle": "Scores de talent",
+  "home.results.scoresDesc": "Scores de vitesse de réaction, reconnaissance de motifs et prise de décision",
+  "home.results.compTitle": "Comparaison avec les pros",
+  "home.results.compDesc": "Découvre comment tu te mesures face aux joueurs professionnels d'esports",
+  "home.results.gapTitle": "Écart de talent",
+  "home.results.gapDesc": "Sache exactement quoi améliorer pour te rapprocher du niveau pro",
+
+  "home.archetypes.title": "16 profils de talent",
+  "home.archetypes.desc": "Chaque profil représente une combinaison de talents unique dans l'esport, basée sur des mesures réelles de compétences.",
+  "home.archetypes.viewAll": "Voir les 16 archétypes",
+
+  "home.how.title": "Comment ca marche",
+  "home.how.step1Title": "Joue a 3 mini-jeux",
+  "home.how.step1Desc": "Réaction, reconnaissance de motifs, coordination — chacun en moins d'1 minute",
+  "home.how.step2Title": "Compare-toi aux joueurs pro",
+  "home.how.step2Desc": "Tes scores de talent comparés aux données de référence des joueurs professionnels",
+  "home.how.step3Title": "Révèle ton archétype",
+  "home.how.step3Desc": "Carte d'archétype personnelle, analyse approfondie, parcours de progression — partageable",
+
+  "home.social.archetypes": "Archétypes",
+  "home.social.talentDims": "Dimensions de talent",
+  "home.social.minComplete": "Min pour terminer",
+  "home.social.proof": "Basé sur des mesures réelles de compétences · Comparé aux données de joueurs professionnels",
+
+  "home.cta.title": "Prêt à savoir où tu te situes ?",
+  "home.cta.button": "Teste ton talent",
+  "home.cta.sub": "100% gratuit · vs Joueurs Pro · Résultats instantanés",
+
+  "home.footer.archetypes": "Archétypes",
+  "home.footer.games": "Jeux",
+  "home.footer.signIn": "Se connecter",
+  "home.footer.blog": "Blog"
 }
