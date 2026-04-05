@@ -1,55 +1,31 @@
-"use client";
-
-import { useParams } from "next/navigation";
 import Link from "next/link";
+import { notFound } from "next/navigation";
 import { Button } from "@/components/ui/button";
-import { useI18n } from "@/i18n/context";
 import { getBlogPost, BLOG_POSTS } from "@/lib/blog-posts";
-import { ArrowLeft, Clock, Gamepad2, Share2 } from "lucide-react";
-import { useCallback, useState } from "react";
+import { ShareButton } from "@/components/share-button";
+import { ArrowLeft, Clock, Gamepad2 } from "lucide-react";
 
-export default function BlogPostPage() {
-  const { slug } = useParams<{ slug: string }>();
-  const { locale } = useI18n();
-  const isZh = locale === "zh";
+/**
+ * Blog post page — SERVER COMPONENT for SEO.
+ * All article content renders in server HTML so Google can index it.
+ * Only the ShareButton is a client component (needs navigator API).
+ */
+export default async function BlogPostPage({
+  params,
+}: {
+  params: Promise<{ slug: string }>;
+}) {
+  const { slug } = await params;
   const post = getBlogPost(slug);
-  const [copied, setCopied] = useState(false);
-
-  const handleShare = useCallback(async () => {
-    if (!post) return;
-    const url = `https://gametan.ai/blog/${slug}`;
-    const text = isZh ? post.titleZh : post.titleEn;
-    if (navigator.share) {
-      try {
-        await navigator.share({ title: text, url });
-        return;
-      } catch { /* cancelled */ }
-    }
-    try {
-      await navigator.clipboard.writeText(url);
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    } catch {
-      if (typeof window !== "undefined") {
-        alert(isZh ? "复制失败" : "Copy failed");
-      }
-    }
-  }, [post, slug, isZh]);
 
   if (!post) {
-    return (
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        <p className="text-muted-foreground mb-4">
-          {isZh ? "文章未找到" : "Post not found"}
-        </p>
-        <Link href="/blog">
-          <Button variant="outline">{isZh ? "返回博客" : "Back to Blog"}</Button>
-        </Link>
-      </div>
-    );
+    notFound();
   }
 
-  const sections = isZh ? post.sectionsZh : post.sectionsEn;
+  // Server renders English by default (best for SEO/Google).
+  // Client-side locale switching handled by i18n context on hydration.
+  const sections = post.sectionsEn;
+  const related = BLOG_POSTS.filter((p) => p.slug !== slug).slice(0, 3);
 
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background">
@@ -60,35 +36,32 @@ export default function BlogPostPage() {
           className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6"
         >
           <ArrowLeft size={14} />
-          {isZh ? "博客" : "Blog"}
+          Blog
         </Link>
 
-        {/* Header */}
+        {/* Article — server rendered for SEO */}
         <article className="space-y-6">
           <header className="space-y-3">
             <h1 className="text-2xl md:text-3xl font-bold leading-tight font-[family-name:var(--font-outfit)]">
-              {isZh ? post.titleZh : post.titleEn}
+              {post.titleEn}
             </h1>
             <div className="flex items-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
                 <Clock size={12} />
-                {post.readTimeMin} {isZh ? "分钟阅读" : "min read"}
+                {post.readTimeMin} min read
               </span>
               <span>{post.date}</span>
-              <button
-                onClick={handleShare}
-                className="flex items-center gap-1 hover:text-primary transition-colors"
-              >
-                <Share2 size={12} />
-                {copied ? (isZh ? "已复制" : "Copied") : (isZh ? "分享" : "Share")}
-              </button>
+              <ShareButton
+                url={`https://gametan.ai/blog/${slug}`}
+                title={post.titleEn}
+              />
             </div>
             <p className="text-base text-muted-foreground leading-relaxed">
-              {isZh ? post.descriptionZh : post.descriptionEn}
+              {post.descriptionEn}
             </p>
           </header>
 
-          {/* Content */}
+          {/* Content — ALL in server HTML */}
           <div className="space-y-8">
             {sections.map((section, i) => (
               <section key={i} className="space-y-3">
@@ -111,33 +84,29 @@ export default function BlogPostPage() {
           </div>
 
           {/* Related articles — internal linking for SEO */}
-          {(() => {
-            const related = BLOG_POSTS.filter((p) => p.slug !== slug).slice(0, 3);
-            if (related.length === 0) return null;
-            return (
-              <div className="border-t border-border pt-6 space-y-3">
-                <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
-                  {isZh ? "相关文章" : "Related Articles"}
-                </h3>
-                <div className="space-y-2">
-                  {related.map((r) => (
-                    <Link
-                      key={r.slug}
-                      href={`/blog/${r.slug}`}
-                      className="block text-sm text-primary hover:underline"
-                    >
-                      {isZh ? r.titleZh : r.titleEn}
-                    </Link>
-                  ))}
-                </div>
+          {related.length > 0 && (
+            <div className="border-t border-border pt-6 space-y-3">
+              <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">
+                Related Articles
+              </h3>
+              <div className="space-y-2">
+                {related.map((r) => (
+                  <Link
+                    key={r.slug}
+                    href={`/blog/${r.slug}`}
+                    className="block text-sm text-primary hover:underline"
+                  >
+                    {r.titleEn}
+                  </Link>
+                ))}
               </div>
-            );
-          })()}
+            </div>
+          )}
 
           {/* CTA */}
           <div className="border-t border-border pt-8 text-center space-y-4">
             <p className="text-lg font-semibold font-[family-name:var(--font-outfit)]">
-              {isZh ? "准备好测试了吗？" : "Ready to test your talent?"}
+              Ready to test your talent?
             </p>
             <Link href="/quiz">
               <Button
@@ -145,11 +114,11 @@ export default function BlogPostPage() {
                 className="h-12 px-10 text-base gap-2 bg-accent text-accent-foreground hover:bg-accent/90"
               >
                 <Gamepad2 size={18} />
-                {isZh ? "3 分钟免费测试" : "Free 3-Min Test"}
+                Free 3-Min Test
               </Button>
             </Link>
             <p className="text-xs text-muted-foreground">
-              {isZh ? "完全免费 · 对比职业选手 · 即时出结果" : "100% free · vs Pro Players · Instant results"}
+              100% free · vs Pro Players · Instant results
             </p>
           </div>
         </article>
