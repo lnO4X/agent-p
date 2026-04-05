@@ -6,9 +6,9 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/i18n/context";
 import { Button } from "@/components/ui/button";
-import { Home, Gamepad2, Brain, User, Bell } from "lucide-react";
+import { Home, Gamepad2, Brain, User, Globe } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-import type { Region } from "@/i18n/context";
+// Region type no longer needed — using locale directly
 
 interface NavItem {
   href: string;
@@ -55,21 +55,11 @@ export default function MainLayout({
   const pathname = usePathname();
   const { logout } = useAuth();
   const { t, locale, setLocale, region, setRegion } = useI18n();
-  const [unreadCount, setUnreadCount] = useState(0);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
-  // Check login on mount only (cookie doesn't change between routes)
   useEffect(() => {
-    const hasToken = document.cookie.includes("logged-in=");
-    setIsLoggedIn(hasToken);
-    if (!hasToken) return;
-    fetch("/api/notifications?limit=1")
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.unreadCount) setUnreadCount(json.unreadCount);
-      })
-      .catch(() => {});
-  }, []); // Mount only — was [pathname] which refetched on every navigation
+    setIsLoggedIn(document.cookie.includes("logged-in="));
+  }, []);
 
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col">
@@ -99,41 +89,14 @@ export default function MainLayout({
               );
             })}
 
-            {/* Notification bell (logged-in only) */}
-            {isLoggedIn && (
-              <Link
-                href="/notifications"
-                className={`relative pressable flex items-center justify-center w-8 h-8 rounded-xl transition-colors ${
-                  pathname.startsWith("/notifications")
-                    ? "bg-primary/10 text-primary"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                <Bell size={16} strokeWidth={1.8} />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center leading-none">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
-              </Link>
-            )}
-
-            {/* Region selector */}
-            <div className="ml-2 flex items-center gap-0.5">
-              {(["cn", "global"] as Region[]).map((r) => (
-                <button
-                  key={r}
-                  onClick={() => setRegion(r)}
-                  className={`px-2 py-1 rounded-lg text-xs transition-colors ${
-                    region === r
-                      ? "bg-primary/10 text-primary font-medium"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
-                >
-                  {r === "cn" ? "🇨🇳" : "🌍"}
-                </button>
-              ))}
-            </div>
+            {/* Language selector */}
+            <button
+              onClick={() => setLocale(locale === "zh" ? "en" : "zh")}
+              className="ml-2 flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <Globe size={14} />
+              {locale === "zh" ? "EN" : "中文"}
+            </button>
 
             {isLoggedIn ? (
               <Button
@@ -160,26 +123,12 @@ export default function MainLayout({
         <div className="flex h-11 items-center justify-between px-4">
           <span className="font-semibold text-sm">{t("app.name")}</span>
           <div className="flex items-center gap-2">
-            {/* Notification bell (mobile, logged-in only) */}
-            {isLoggedIn && (
-              <Link
-                href="/notifications"
-                className="relative flex items-center justify-center w-7 h-7 rounded-xl text-muted-foreground"
-              >
-                <Bell size={18} strokeWidth={1.8} />
-                {unreadCount > 0 && (
-                  <span className="absolute -top-0.5 -right-0.5 w-4 h-4 rounded-full bg-primary text-primary-foreground text-[10px] font-bold flex items-center justify-center leading-none">
-                    {unreadCount > 9 ? "9+" : unreadCount}
-                  </span>
-                )}
-              </Link>
-            )}
-            {/* Region toggle */}
+            {/* Language toggle (mobile) */}
             <button
-              onClick={() => setRegion(region === "cn" ? "global" : "cn")}
+              onClick={() => setLocale(locale === "zh" ? "en" : "zh")}
               className="text-muted-foreground text-xs px-1.5 py-0.5 rounded-md bg-muted"
             >
-              {region === "cn" ? "🌍" : "🇨🇳"}
+              {locale === "zh" ? "EN" : "中"}
             </button>
             {isLoggedIn ? (
               <Button
