@@ -1,35 +1,66 @@
 #!/bin/bash
-# GameTan Autonomous Dev Cycle — Windows Task Scheduler entry point
-# Self-bootstrapping: reads current state before deciding what to do
+# GameTan Harness — Continuous Loop
+# Pipeline 完成后根据结果决定等多久再跑下一次
+# 不是固定间隔，是自适应的
 
 cd C:/Users/eashe/x/agent-p
+LOG="$HOME/.gametan/notifications/loop.log"
+mkdir -p "$(dirname "$LOG")"
 
-PROMPT='你是 GameTan 的自主开发 agent。遵循自举协议：
+while true; do
+  START=$(date +%s)
+  echo "[$(date)] Pipeline starting" >> "$LOG"
 
-## 自举（先做）
-1. cat CLAUDE.md 的 §7 Current Status 了解当前阶段
-2. curl -s https://gametan.ai/api/admin/stats -H "Authorization: Bearer prod-cron-x7k9m2w5q8j1v4n6p3r0" 获取实时数据
-3. git log --oneline -5 看最近做了什么
-4. curl -s -o /dev/null -w "%{http_code}" https://gametan.ai 确认网站正常
+  # Run the pipeline via claude -p
+  claude -p "$(cat <<'PROMPT'
+你是 GameTan 的 Harness Agent。执行一次完整 pipeline。
 
-## 决策（根据数据）
-- 网站挂了 → 修复
-- 用户 < 50 → SEO/内容/分享（获客）
-- 用户 50-500 且付费=0 → 转化优化（变现）
-- 有付费用户 → 留存/扩展
-- 都不是 → 读 CLAUDE.md pending 做最顶部的
+## OBSERVE
+```bash
+cd C:/Users/eashe/x/agent-p
+curl -s 'https://gametan.ai/api/admin/traffic' -H "Authorization: Bearer prod-cron-x7k9m2w5q8j1v4n6p3r0" > /tmp/gt-traffic.json
+curl -s 'https://gametan.ai/api/admin/stats' -H "Authorization: Bearer prod-cron-x7k9m2w5q8j1v4n6p3r0" > /tmp/gt-stats.json
+curl -s -o /dev/null -w "%{http_code}" https://gametan.ai > /tmp/gt-health.txt
+cat .harness/history/pipeline.jsonl | tail -5
+cat .harness/sprint-spec.json
+```
+写 .harness/observations.json。
 
-## 执行（只做1个改动）
-- 读相关文件理解代码
-- 做改动
-- npx next build && npx vitest run 必须通过
-- git add && git commit && git push
-- bash scripts/notify.sh "自主循环 | 用户:N 付费:M | 改动:XXX"
+## DECIDE
+读 observations + pipeline.jsonl 历史。应用产品原则(简单≠简陋、深度、新人友好)。
+连续3+次同类改动但指标没变 → 换策略。
+决定 ACT 或 SKIP。写 .harness/sprint-spec.json。
 
-## 自检
-- 部署后确认网站 200
-- 如果挂了: git revert HEAD && git push
+## BUILD + EVALUATE (只在 ACT 时)
+只做 spec 里写的 → build → test → commit → push → curl 验证。
 
-所有决策自己做，不问用户。'
+## RECORD (每次都做)
+追加 pipeline.jsonl。更新 state.json。git add .harness/ → commit → push。
 
-claude -p "$PROMPT" --max-turns 30 2>&1 | tail -5
+## 输出下次等待时间
+最后一行必须输出一个数字（分钟），表示下次 pipeline 应该等多久：
+- 如果 ACT 且还有后续工作 → 输出 5（立即继续）
+- 如果 ACT 且暂时做完了 → 输出 60
+- 如果 SKIP（等数据）→ 输出 240
+- 如果修了紧急 bug → 输出 15（快速验证）
+只输出数字，不要加其他文字。
+
+通知: bash scripts/notify.sh "Pipeline完成 | 动作:XXX | 下次:N分钟后"
+
+死命令: 不自动化x.com, Creem not LemonSqueezy, gametan.ai not weda.ai
+PROMPT
+)" --max-turns 30 2>&1 | tee -a "$LOG"
+
+  # Extract wait time from last line of output
+  WAIT=$(tail -1 "$LOG" | grep -oE '^[0-9]+$' || echo "240")
+
+  # Sanity bounds: min 5 min, max 480 min (8h)
+  if [ "$WAIT" -lt 5 ] 2>/dev/null; then WAIT=5; fi
+  if [ "$WAIT" -gt 480 ] 2>/dev/null; then WAIT=480; fi
+
+  END=$(date +%s)
+  DURATION=$(( (END - START) / 60 ))
+  echo "[$(date)] Pipeline done in ${DURATION}min. Sleeping ${WAIT}min." >> "$LOG"
+
+  sleep "${WAIT}m"
+done

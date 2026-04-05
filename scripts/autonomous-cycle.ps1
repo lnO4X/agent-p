@@ -1,30 +1,41 @@
-# GameTan Autonomous Dev Cycle — Windows Task Scheduler entry point
-# Runs every 4 hours via Task Scheduler
+# GameTan Harness — Continuous Loop Launcher
+# Windows Task Scheduler calls this on boot/login
+# This script starts the loop and ensures only one instance runs
 
 $ErrorActionPreference = "Continue"
+$lockFile = "$env:USERPROFILE\.gametan\harness.lock"
 $logFile = "$env:USERPROFILE\.gametan\notifications\scheduler.log"
-$timestamp = Get-Date -Format "yyyy-MM-dd HH:mm:ss"
 
-# Ensure log dir exists
 New-Item -ItemType Directory -Force -Path "$env:USERPROFILE\.gametan\notifications" | Out-Null
 
-Add-Content -Path $logFile -Value "[$timestamp] Starting autonomous cycle"
+# Single instance check — don't start if already running
+if (Test-Path $lockFile) {
+    $lockPid = Get-Content $lockFile -ErrorAction SilentlyContinue
+    $running = Get-Process -Id $lockPid -ErrorAction SilentlyContinue
+    if ($running) {
+        Add-Content -Path $logFile -Value "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] Harness already running (PID $lockPid). Exiting."
+        exit 0
+    }
+}
+
+# Write lock
+$PID | Set-Content $lockFile
+Add-Content -Path $logFile -Value "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] Starting harness loop"
 
 try {
-    # Use Git Bash to run the cycle script
     $gitBash = "C:\Program Files\Git\bin\bash.exe"
     $script = "C:/Users/eashe/x/agent-p/scripts/autonomous-cycle.sh"
-    
-    $process = Start-Process -FilePath $gitBash -ArgumentList "-l", $script -NoNewWindow -PassThru -Wait -RedirectStandardOutput "$env:TEMP\gametan-cycle-out.txt" -RedirectStandardError "$env:TEMP\gametan-cycle-err.txt"
-    
-    $output = Get-Content "$env:TEMP\gametan-cycle-out.txt" -Raw -ErrorAction SilentlyContinue
-    $errors = Get-Content "$env:TEMP\gametan-cycle-err.txt" -Raw -ErrorAction SilentlyContinue
-    
-    $exitCode = $process.ExitCode
-    Add-Content -Path $logFile -Value "[$timestamp] Completed with exit code: $exitCode"
-    if ($output) { Add-Content -Path $logFile -Value "OUTPUT: $output" }
-    if ($errors) { Add-Content -Path $logFile -Value "ERRORS: $errors" }
+
+    # Start the continuous loop — it handles its own sleep intervals
+    $process = Start-Process -FilePath $gitBash -ArgumentList "-l", $script -NoNewWindow -PassThru -Wait `
+        -RedirectStandardOutput "$env:TEMP\gametan-loop-out.txt" `
+        -RedirectStandardError "$env:TEMP\gametan-loop-err.txt"
+
+    Add-Content -Path $logFile -Value "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] Loop exited with code: $($process.ExitCode)"
 }
 catch {
-    Add-Content -Path $logFile -Value "[$timestamp] ERROR: $_"
+    Add-Content -Path $logFile -Value "[$(Get-Date -Format 'yyyy-MM-dd HH:mm:ss')] ERROR: $_"
+}
+finally {
+    Remove-Item $lockFile -ErrorAction SilentlyContinue
 }
