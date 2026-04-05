@@ -146,14 +146,18 @@ export function getUserTestTier(userTier: "free" | "premium"): TestTier {
   return userTier === "premium" ? "pro" : "standard";
 }
 
-/** Get daily chat limit for a user tier */
+/** Get daily chat limit for a user tier.
+ * Registered users = Standard (15/day). Premium = Pro (100/day).
+ * Quick (0) is only for anonymous/unregistered — but they can't call /api/chat anyway (requires auth).
+ */
 export function getChatLimit(
   userTier: "free" | "premium",
   hasReferrals: boolean
 ): number {
   if (userTier === "premium") return TIER_CONFIGS.pro.dailyChatLimit;
-  if (hasReferrals) return TIER_CONFIGS.standard.dailyChatLimit;
-  return TIER_CONFIGS.quick.dailyChatLimit;
+  // All registered users get Standard-level chat (15/day minimum)
+  // Referrals don't change chat limit anymore — Standard is the base for all registered users
+  return TIER_CONFIGS.standard.dailyChatLimit;
 }
 
 /** Get daily test limit for a user tier */

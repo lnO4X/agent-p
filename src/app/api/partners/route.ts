@@ -81,9 +81,14 @@ export async function GET() {
   const { tier, tierExpiresAt } = tierInfo;
   const maxSlots = 1 + SLOT_LIMITS[tier]; // 1 (coach) + custom slots
 
+  // Fix legacy "Weda" name in DB — always return "Talent Coach" for built-in coach (slot 0)
+  const fixedResult = result.map((p) =>
+    p.slot === 0 && p.name !== "Talent Coach" ? { ...p, name: "Talent Coach" } : p
+  );
+
   return NextResponse.json({
     success: true,
-    data: result,
+    data: fixedResult,
     tier,
     tierExpiresAt: tierExpiresAt?.toISOString() ?? null,
     maxSlots,
