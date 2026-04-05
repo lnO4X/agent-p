@@ -1,0 +1,14 @@
+{
+  "timestamp": "2026-04-05T11:30:00Z",
+  "action": "SKIP",
+  "rationale": "数据不足以做任何决策。PageViewTracker 刚部署 6 小时，只有 1 个 page_view（可能是我自己）。13 篇 blog 文章已加但完全没有 Google 索引的流量数据。继续加 blog 是在做无用功。正确做法：等 3-5 天积累数据，然后再决策。",
+  "principleCheck": {
+    "simpler": "N/A — 不做改动",
+    "newUserFriendly": "N/A",
+    "proDirection": "N/A",
+    "shouldCutSomething": "待数据积累后再判断哪些功能/页面没有吸引力需要砍掉"
+  },
+  "antiSlop": "连续 5 个 commit 是加 blog 文章。流量数据为 0。不能继续同样的策略。",
+  "nextCheckpoint": "2026-04-08 — 3 天后再看流量数据是否有变化",
+  "doNotDo": "不加新内容，不做新功能，不改 UI。等数据。"
+}

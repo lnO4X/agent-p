@@ -1,0 +1,26 @@
+{
+  "timestamp": "2026-04-05T11:30:00Z",
+  "traffic": {
+    "24h": { "pageViews": 1, "uniqueSessions": 1 },
+    "7d": { "pageViews": 1, "uniqueSessions": 1 },
+    "topPages": [{ "page": "/", "views": 1 }],
+    "topReferrers": [],
+    "funnel": {
+      "page_view": 1,
+      "quiz_start": 1,
+      "quiz_complete": 3,
+      "share_click": 1,
+      "deep_report_click": 0
+    }
+  },
+  "users": { "total": 7, "premium": 0, "today": 0 },
+  "siteHealth": 200,
+  "recentCommits": [
+    "refactor: simplify harness",
+    "refactor: harness architecture",
+    "feat: self-hosted traffic analytics",
+    "feat: add 3 SEO blog articles"
+  ],
+  "pipelineHistory": [],
+  "assessment": "RAW DATA ONLY - no opinions"
+}
