@@ -1,72 +1,45 @@
-# GameTan KAIROS Harness
+# GameTan Harness — 3-Agent Pipeline
 
-Inspired by Claude Code's leaked KAIROS + autoDream architecture.
-Ref: https://www.anthropic.com/engineering/harness-design-long-running-apps
+Strict implementation of https://www.anthropic.com/engineering/harness-design-long-running-apps
 
-## Architecture: Persistent Daemon with Dream Phase
+## Architecture
 
 ```
-┌─ KAIROS Daemon (continuous loop) ─────────────────┐
-│                                                    │
-│  ┌─ Health Check (15s budget) ──┐                  │
-│  │ curl gametan.ai → 200?       │                  │
-│  │ != 200 → emergency pipeline  │                  │
-│  └──────────────────────────────┘                  │
-│           │                                        │
-│  ┌─ DREAM Phase (autoDream) ────┐                  │
-│  │ Triggers:                    │                  │
-│  │  • 4h since last dream       │                  │
-│  │  • 3+ pipeline entries       │                  │
-│  │ Actions:                     │                  │
-│  │  • Merge duplicate obs       │                  │
-│  │  • Resolve contradictions    │                  │
-│  │  • Confirm/deny guesses      │                  │
-│  │  • Strategy reflection       │                  │
-│  │  • Generate insights         │                  │
-│  │ Output: dream-output.json    │                  │
-│  └──────────────────────────────┘                  │
-│           │                                        │
-│  ┌─ ACTIVE Pipeline ───────────┐                   │
-│  │ OBSERVE → DECIDE → ACT/SKIP │                   │
-│  │ → EVALUATE → RECORD          │                  │
-│  │                              │                  │
-│  │ DECIDE reads dream-output    │                  │
-│  │ Self-pacing: 5-240 min       │                  │
-│  └──────────────────────────────┘                  │
-│           │                                        │
-│  sleep(self-decided interval)                      │
-│  └─→ loop back to Health Check                     │
-│                                                    │
-└────────────────────────────────────────────────────┘
+Agent 1: OBSERVER    Agent 2: PLANNER    Agent 3: EXECUTOR    Agent 4: EVALUATOR
+   │                    │                    │                    │
+   │ collect data       │ read obs           │ read spec          │ test live site
+   │ no opinions        │ product decisions  │ implement only     │ skeptical scoring
+   │                    │                    │                    │
+   ▼                    ▼                    ▼                    ▼
+observations.json → sprint-spec.json → build-result.json → last-eval.json
+                                                                  │
+                                                    ┌─────────────┘
+                                                    ▼
+                                              next PLANNER reads
+                                              eval feedback
 ```
+
+## Key Design Principles
+
+1. **Agent separation is REAL** — each is a separate `claude -p` call
+2. **File-based handoff ONLY** — no agent sees another's conversation
+3. **Evaluator is skeptical** — default score 2/5, must confirm before higher
+4. **3+ consecutive SKIP = must ACT** — cannot indefinitely defer
+5. **Evaluator finds residual problems** — not just spec compliance
 
 ## Files
 
-- observations.json    ← OBSERVE raw data
-- dream-input.json     ← Data collected for dream phase
-- dream-output.json    ← Dream's insights + strategy suggestions
-- sprint-spec.json     ← DECIDE's ACT/SKIP + rationale
-- last-eval.json       ← EVALUATE scores + direction audit
+- observations.json    ← OBSERVER writes (raw data)
+- sprint-spec.json     ← PLANNER writes (ACT/SKIP + spec)
+- build-result.json    ← EXECUTOR writes (commit, files changed)
+- last-eval.json       ← EVALUATOR writes (scores, issues, residualProblems)
 - state.json           ← System snapshot
 - history/
-  - pipeline.jsonl     ← Every pipeline run (self-evolution data)
-  - dream.jsonl        ← Every dream run (consolidation log)
+  - pipeline.jsonl     ← Every cycle appended (evolution data)
 
-## Self-Pacing (not fixed intervals)
+## System-Level
 
-Pipeline output decides next interval:
-- ACT + more work → 5 min
-- ACT + done → 30 min
-- SKIP (waiting for data) → 120 min
-- Emergency fix → 10 min
-
-## System-Level (Windows Task Scheduler)
-
-- GameTan-Autonomous: starts continuous loop, 4h safety restart, lock file prevents duplicates
-- GameTan-Watchdog: pure PowerShell curl every 30min, no Claude CLI
-
-## Dead Commands
-
-- NEVER automate x.com via browser
-- Payment = Creem (Live), NOT LemonSqueezy
-- Email = gametan.ai, NOT weda.ai
+- Windows Task Scheduler: `GameTan-Autonomous` (continuous loop)
+- Windows Task Scheduler: `GameTan-Watchdog` (pure PowerShell curl, 30min)
+- Claude Code: `gametan-autonomous` (every 4h safety net)
+- Claude Code: `gametan-human-tasks` (daily 9am, only when needed)

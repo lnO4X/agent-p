@@ -1,225 +1,194 @@
 #!/bin/bash
-# GameTan Harness — KAIROS-inspired Continuous Daemon
+# GameTan Harness — 3-Agent Pipeline with File Handoff
 #
-# Architecture (based on Claude Code KAIROS + autoDream):
-# 1. DAEMON MODE: persistent loop, never exits
-# 2. ACTIVE PHASE: Observe→Decide→Act/Skip→Record (pipeline)
-# 3. DREAM PHASE: memory consolidation, strategy reflection, data analysis
-# 4. Self-pacing: pipeline decides its own next interval
-# 5. Lock file: single instance guarantee
+# Architecture (strict Anthropic harness design):
+#   Agent 1: OBSERVER   — collect data, write observations.json (no opinions)
+#   Agent 2: PLANNER    — read observations, write sprint-spec.json (product decisions)
+#   Agent 3: EXECUTOR   — read spec, implement+test+deploy, write build-result.json
+#   Agent 4: EVALUATOR  — test live site independently, write last-eval.json
+#
+# Each agent is a SEPARATE claude -p call.
+# Communication is ONLY through .harness/ files.
+# No agent sees another agent's conversation.
 
 cd C:/Users/eashe/x/agent-p
-HARNESS_DIR=".harness"
-HISTORY="$HARNESS_DIR/history/pipeline.jsonl"
-DREAM_LOG="$HARNESS_DIR/history/dream.jsonl"
-LOOP_LOG="$HOME/.gametan/notifications/loop.log"
+HARNESS=".harness"
+HISTORY="$HARNESS/history/pipeline.jsonl"
+LOG="$HOME/.gametan/notifications/loop.log"
 LOCK="$HOME/.gametan/harness.lock"
-mkdir -p "$HARNESS_DIR/history" "$HOME/.gametan/notifications"
+mkdir -p "$HARNESS/history" "$HOME/.gametan/notifications"
 
-# Single instance lock
+# Single instance
 if [ -f "$LOCK" ]; then
   OLD_PID=$(cat "$LOCK" 2>/dev/null)
   if kill -0 "$OLD_PID" 2>/dev/null; then
-    echo "[$(date)] Already running (PID $OLD_PID). Exiting." >> "$LOOP_LOG"
+    echo "[$(date)] Already running (PID $OLD_PID)" >> "$LOG"
     exit 0
   fi
 fi
 echo $$ > "$LOCK"
 trap "rm -f $LOCK" EXIT
 
-echo "[$(date)] Harness daemon starting (PID $$)" >> "$LOOP_LOG"
+echo "[$(date)] === Harness starting ===" >> "$LOG"
 
-#############################################
-# DREAM PHASE — runs between pipeline cycles
-# Lightweight: no claude CLI, just data analysis + file writes
-#############################################
-dream_phase() {
-  local NOW=$(date -u +%Y-%m-%dT%H:%M:%SZ)
-  local LAST_DREAM=$(tail -1 "$DREAM_LOG" 2>/dev/null | grep -o '"ts":"[^"]*"' | cut -d'"' -f4)
-  local HISTORY_COUNT=$(wc -l < "$HISTORY" 2>/dev/null || echo 0)
-  local SINCE_DREAM=""
+while true; do
+  CYCLE_START=$(date +%s)
 
-  # autoDream trigger conditions (adapted from CC leak):
-  # 1. At least 4 hours since last dream
-  # 2. At least 3 new pipeline entries since last dream
-  # 3. No other dream running (lock file handles this)
-  # 4. At least 10 minutes since last pipeline
-
-  if [ -n "$LAST_DREAM" ]; then
-    LAST_DREAM_TS=$(date -d "$LAST_DREAM" +%s 2>/dev/null || echo 0)
-    NOW_TS=$(date +%s)
-    SINCE_DREAM=$(( (NOW_TS - LAST_DREAM_TS) / 3600 ))
-    if [ "$SINCE_DREAM" -lt 4 ]; then
-      return 0  # Too soon for dream
-    fi
+  # ─── Health Check (15s budget) ───
+  HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 https://gametan.ai 2>/dev/null || echo "000")
+  if [ "$HTTP" != "200" ]; then
+    echo "[$(date)] ALERT: site $HTTP" >> "$LOG"
+    bash scripts/notify.sh "🚨 gametan.ai 返回 $HTTP"
   fi
 
-  if [ "$HISTORY_COUNT" -lt 3 ]; then
-    return 0  # Not enough data to dream about
-  fi
+  # ─── Agent 1: OBSERVER (data only, no opinions) ───
+  echo "[$(date)] Agent 1: OBSERVER" >> "$LOG"
+  claude -p 'You are a neutral data collector. Collect data and write it to a file. No opinions, no recommendations.
 
-  echo "[$(date)] Dream phase starting" >> "$LOOP_LOG"
-
-  # Collect observations without claude CLI (pure data)
-  local TRAFFIC=$(curl -s 'https://gametan.ai/api/admin/traffic' -H "Authorization: Bearer prod-cron-x7k9m2w5q8j1v4n6p3r0" 2>/dev/null)
-  local STATS=$(curl -s 'https://gametan.ai/api/admin/stats' -H "Authorization: Bearer prod-cron-x7k9m2w5q8j1v4n6p3r0" 2>/dev/null)
-  local RECENT_ACTIONS=$(tail -5 "$HISTORY" 2>/dev/null)
-
-  # Write dream input for next pipeline to consume
-  cat > "$HARNESS_DIR/dream-input.json" << DREAMINPUT
-{
-  "timestamp": "$NOW",
-  "traffic": $TRAFFIC,
-  "stats": $STATS,
-  "recentPipeline": [$(echo "$RECENT_ACTIONS" | paste -sd',' -)],
-  "questions": [
-    "Are recent actions producing measurable results?",
-    "Should we change strategy based on traffic trends?",
-    "What contradictions exist in our observations?",
-    "What should the next pipeline focus on?"
-  ]
-}
-DREAMINPUT
-
-  # Run dream consolidation via claude (lightweight, focused prompt)
-  claude -p "$(cat <<'DREAMPROMPT'
-你是 GameTan 的 Dream Agent。你在后台做记忆整合和策略反思。
-
-读这些文件：
 ```bash
 cd C:/Users/eashe/x/agent-p
-cat .harness/dream-input.json
-cat .harness/history/pipeline.jsonl
-cat .harness/state.json
-cat .harness/last-eval.json 2>/dev/null
+TRAFFIC=$(curl -s "https://gametan.ai/api/admin/traffic" -H "Authorization: Bearer prod-cron-x7k9m2w5q8j1v4n6p3r0")
+STATS=$(curl -s "https://gametan.ai/api/admin/stats" -H "Authorization: Bearer prod-cron-x7k9m2w5q8j1v4n6p3r0")
+HEALTH=$(curl -s -o /dev/null -w "%{http_code}" https://gametan.ai)
+COMMITS=$(git log --oneline -5)
+HISTORY=$(cat .harness/history/pipeline.jsonl | tail -5)
+PREV_EVAL=$(cat .harness/last-eval.json 2>/dev/null || echo "{}")
 ```
 
-## 你的工作（autoDream 逻辑）
+Write ALL raw data to .harness/observations.json as valid JSON. Include: traffic, stats, health code, recent commits, pipeline history, previous eval. No analysis. Just data.' --max-turns 10 2>&1 | tail -3 >> "$LOG"
 
-1. **合并重复观察**: pipeline.jsonl 里有没有重复的发现？合并。
-2. **消除矛盾**: 有没有互相矛盾的结论？解决。
-3. **确认事实**: 之前是猜测的东西，现在数据能证实/证伪了吗？
-4. **策略反思**: 最近的策略有没有在产出结果？如果没有，建议什么？
-5. **生成洞察**: 有没有数据揭示的、之前没注意到的模式？
+  # ─── Agent 2: PLANNER (product decisions) ───
+  echo "[$(date)] Agent 2: PLANNER" >> "$LOG"
+  claude -p 'You are a product designer for GameTan (gametan.ai), an esports talent testing website.
 
-## 输出
-
-写 .harness/dream-output.json：
-```json
-{
-  "timestamp": "ISO",
-  "mergedObservations": ["合并后的关键观察"],
-  "contradictionsResolved": ["解决了什么矛盾"],
-  "factsConfirmed": ["确认了什么事实"],
-  "strategyReflection": "当前策略是否有效，建议什么",
-  "nextFocus": "下次 pipeline 应该关注什么"
-}
-```
-
-然后更新 .harness/state.json 中的数据快照。
-git add .harness/dream-output.json .harness/state.json && git commit -m "dream: memory consolidation" && git push
-
-## 原则
-- 不写代码，不改产品
-- 只做思考、整合、反思
-- 输出给下次 Pipeline 的 DECIDE 阶段消费
-DREAMPROMPT
-)" --max-turns 15 2>&1 | tail -3 >> "$LOOP_LOG"
-
-  # Log dream entry
-  echo "{\"ts\":\"$NOW\",\"type\":\"dream\",\"historyCount\":$HISTORY_COUNT}" >> "$DREAM_LOG"
-  echo "[$(date)] Dream phase complete" >> "$LOOP_LOG"
-}
-
-#############################################
-# ACTIVE PHASE — full pipeline via claude -p
-#############################################
-active_phase() {
-  echo "[$(date)] Active phase (pipeline) starting" >> "$LOOP_LOG"
-
-  local RESULT=$(claude -p "$(cat <<'PIPELINE'
-你是 GameTan 的 Harness Agent。执行一次完整 pipeline。
-
-## 自举
+Read these files:
 ```bash
 cd C:/Users/eashe/x/agent-p
-cat .harness/dream-output.json 2>/dev/null
-cat .harness/observations.json 2>/dev/null
+cat .harness/observations.json
 cat .harness/history/pipeline.jsonl | tail -5
+cat .harness/last-eval.json 2>/dev/null
+cat CLAUDE.md | head -30
+```
+
+Product principles:
+- 简单≠简陋: grab core, cut everything without data-proven attraction
+- 深度: pro esports clubs can use it for player assessment
+- 新人友好: 3 min zero barrier to value
+
+Decision rules:
+1. If evaluator found issues → spec: fix them (priority 1)
+2. If site is down → spec: fix
+3. If 3+ consecutive SKIPs with same rationale → MUST change strategy, not SKIP again
+4. If product has residual problems (stale UI, broken flows, inconsistent copy) → spec: fix
+5. If 0 organic traffic → spec: SEO/distribution improvement (create content, fix meta, internal linking)
+6. If traffic but no conversion → spec: funnel optimization
+7. Only SKIP if genuinely nothing can be improved
+
+CRITICAL: "SKIP because waiting for data" is NOT acceptable after 3 consecutive SKIPs.
+If you have SKIPped 3+ times, you MUST find something to improve — review the product yourself.
+
+Write .harness/sprint-spec.json:
+{
+  "action": "ACT" | "SKIP",
+  "rationale": "why (based on what data/eval feedback)",
+  "spec": "exactly what to do (1 change)",
+  "files": ["files to modify"],
+  "testCriteria": ["how to verify after deployment"],
+  "doNotDo": "what NOT to do"
+}' --max-turns 10 2>&1 | tail -3 >> "$LOG"
+
+  # ─── Check if SKIP ───
+  ACTION=$(cat "$HARNESS/sprint-spec.json" 2>/dev/null | python -c "import sys,json; print(json.load(sys.stdin).get('action','SKIP'))" 2>/dev/null || echo "SKIP")
+
+  if [ "$ACTION" = "ACT" ]; then
+    # ─── Agent 3: EXECUTOR (implement spec ONLY) ───
+    echo "[$(date)] Agent 3: EXECUTOR" >> "$LOG"
+    claude -p 'You are an engineer. Read the spec and implement EXACTLY what it says. Nothing more.
+
+```bash
+cd C:/Users/eashe/x/agent-p
 cat .harness/sprint-spec.json
 ```
 
-如果 dream-output.json 存在且有 nextFocus → 优先考虑 dream 的建议。
+Rules:
+- Only modify files listed in the spec
+- Do not add features not in the spec
+- npx next build MUST pass
+- npx vitest run MUST pass
+- git add + commit + push when done
+- If build fails, fix the build error only, do not add unrelated changes
 
-## OBSERVE
+After deployment, write .harness/build-result.json:
+{"built": true, "commit": "<short hash>", "filesChanged": [...]}' --max-turns 25 2>&1 | tail -3 >> "$LOG"
+
+    # Wait for Vercel deployment
+    sleep 45
+
+    # ─── Agent 4: EVALUATOR (independent skeptical testing) ───
+    echo "[$(date)] Agent 4: EVALUATOR" >> "$LOG"
+    claude -p 'You are an independent QA tester. You are SKEPTICAL by default. Score 2/5 unless you confirm something works.
+
+Read what was supposed to be built:
 ```bash
-curl -s 'https://gametan.ai/api/admin/traffic' -H "Authorization: Bearer prod-cron-x7k9m2w5q8j1v4n6p3r0"
-curl -s 'https://gametan.ai/api/admin/stats' -H "Authorization: Bearer prod-cron-x7k9m2w5q8j1v4n6p3r0"
-curl -s -o /dev/null -w "%{http_code}" https://gametan.ai
-git log --oneline -5
+cd C:/Users/eashe/x/agent-p
+cat .harness/sprint-spec.json
+cat .harness/build-result.json 2>/dev/null
 ```
-写 .harness/observations.json。
 
-## DECIDE
-读 observations + pipeline history + dream output。
-产品原则: 简单≠简陋、深度（俱乐部级评估）、新人友好。
-自进化: 连续3+次同类改动但指标没变 → 换策略。
-写 .harness/sprint-spec.json (ACT 或 SKIP)。
+Now TEST the live site against the spec testCriteria:
+```bash
+# Basic health
+curl -s -o /dev/null -w "%{http_code}" https://gametan.ai
 
-## BUILD + EVALUATE (ACT only)
-只做 spec 里写的 → build → test → commit → push → curl 验证。
-写 .harness/last-eval.json。
+# Test specific criteria from sprint-spec
+# (read testCriteria and run appropriate curl commands)
 
-## RECORD
-追加 pipeline.jsonl。更新 state.json。git add .harness/ → commit → push。
-通知: bash scripts/notify.sh "Pipeline | 访客:X 用户:N | 动作:XXX"
+# Check for residual problems while you are at it:
+# - Any page returning non-200?
+# - i18n keys: diff zh.json vs en.json key count
+# - Any Weda/weda references remaining?
+# - Blog pages accessible?
+```
 
-## 输出下次等待时间（最后一行，只输出数字）
-- ACT 且有后续 → 5
-- ACT 完成 → 30
-- SKIP 等数据 → 120
-- 修紧急 bug → 10
+Score 1-5 (default 2, only give higher if confirmed):
+1. Did the spec change actually work?
+2. Did it introduce any regressions?
+3. Are there residual problems you noticed?
+4. Product quality: does the site feel polished or has rough edges?
 
-死命令: 不自动化x.com, Creem not LemonSqueezy, gametan.ai not weda.ai
-PIPELINE
-)" --max-turns 30 2>&1)
-
-  echo "$RESULT" | tail -5 >> "$LOOP_LOG"
-
-  # Extract wait time from last line
-  local WAIT=$(echo "$RESULT" | tail -1 | grep -oE '^[0-9]+$' || echo "60")
-  echo "$WAIT"
+Write .harness/last-eval.json:
+{
+  "timestamp": "ISO",
+  "specAction": "what was built",
+  "scores": {"specImplemented": N, "noRegressions": N, "productQuality": N},
+  "issues": ["specific problems found"],
+  "residualProblems": ["things not related to this spec but need fixing"],
+  "recommendation": "what should the next cycle focus on"
 }
 
-#############################################
-# MAIN DAEMON LOOP
-#############################################
-CYCLE=0
-while true; do
-  CYCLE=$((CYCLE + 1))
-  echo "[$(date)] === Cycle $CYCLE ===" >> "$LOOP_LOG"
-
-  # Health check first (15-second budget, like KAIROS)
-  HTTP=$(curl -s -o /dev/null -w "%{http_code}" --max-time 15 https://gametan.ai 2>/dev/null || echo "000")
-  if [ "$HTTP" != "200" ]; then
-    echo "[$(date)] ALERT: site returned $HTTP" >> "$LOOP_LOG"
-    bash scripts/notify.sh "🚨 gametan.ai 返回 $HTTP"
-    # Don't sleep, run pipeline immediately to fix
-    active_phase > /dev/null
-    sleep 300  # Wait 5 min after emergency fix
-    continue
+git add .harness/last-eval.json && git commit -m "eval: cycle results" && git push' --max-turns 15 2>&1 | tail -3 >> "$LOG"
   fi
 
-  # Try dream phase first (lightweight, no claude if conditions not met)
-  dream_phase
+  # ─── Record + Notify ───
+  CYCLE_END=$(date +%s)
+  DURATION=$(( (CYCLE_END - CYCLE_START) / 60 ))
+  TRAFFIC=$(cat "$HARNESS/observations.json" 2>/dev/null | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('traffic',{}).get('24h',{}).get('pageViews',0))" 2>/dev/null || echo "?")
+  USERS=$(cat "$HARNESS/observations.json" 2>/dev/null | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('stats',{}).get('totalUsers',0))" 2>/dev/null || echo "?")
+  SPEC=$(cat "$HARNESS/sprint-spec.json" 2>/dev/null | python -c "import sys,json; d=json.load(sys.stdin); print(d.get('spec','?')[:60])" 2>/dev/null || echo "?")
 
-  # Run active pipeline
-  WAIT=$(active_phase)
+  echo "{\"ts\":\"$(date -u +%Y-%m-%dT%H:%M:%SZ)\",\"action\":\"$ACTION\",\"spec\":\"$SPEC\",\"traffic_24h\":$TRAFFIC,\"users\":$USERS,\"duration_min\":$DURATION}" >> "$HISTORY"
 
-  # Bounds: min 5, max 240
-  if [ "$WAIT" -lt 5 ] 2>/dev/null; then WAIT=5; fi
-  if [ "$WAIT" -gt 240 ] 2>/dev/null; then WAIT=240; fi
+  if [ "$ACTION" = "ACT" ]; then
+    bash scripts/notify.sh "🔧 Harness | $ACTION | 访客:$TRAFFIC 用户:$USERS | $SPEC"
+  fi
 
-  echo "[$(date)] Sleeping ${WAIT}min before next cycle" >> "$LOOP_LOG"
+  # ─── Decide next interval ───
+  if [ "$ACTION" = "ACT" ]; then
+    WAIT=30  # Did work, check again in 30 min
+  else
+    WAIT=120 # Skipped, wait 2 hours
+  fi
+
+  echo "[$(date)] Cycle done (${DURATION}min). Next in ${WAIT}min." >> "$LOG"
   sleep "${WAIT}m"
 done
