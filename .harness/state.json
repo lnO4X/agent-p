@@ -1,21 +1,22 @@
 {
-  "lastUpdated": "2026-04-05T04:32:00Z",
+  "lastUpdated": "2026-04-05T08:23:00Z",
   "data": {
     "totalUsers": 7,
     "premiumUsers": 0,
     "revenue": 0
   },
   "lastActions": [
-    "Added 3 SEO blog articles (total: 10 articles)",
-    "Articles: cognitive-edge, reaction-benchmarks, talent-vs-practice",
-    "Fixed Chinese quotation mark escaping (ASCII quotes -> 「」)"
+    "Added 3 SEO blog articles (total: 13 articles)",
+    "Articles: aim-training-science, esports-age-peak, mobile-gaming-talent",
+    "Keywords: aim training, pro gamer age, mobile esports talent"
   ],
   "pendingWork": [
-    "More SEO content (target 15+ articles, currently 10)",
+    "More SEO content (target 15+ articles, currently 13)",
     "Deep Report PDF generation (not yet built)",
     "OG share card add rank info",
     "Landing page A/B test ideas",
-    "Footer add blog link (done)"
+    "Structured data (JSON-LD) for blog articles",
+    "Internal linking between blog articles"
   ],
   "blockers": [
     "AdSense: deferred until traffic >1000/mo",
