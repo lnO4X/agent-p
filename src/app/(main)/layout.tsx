@@ -8,7 +8,7 @@ import { useI18n } from "@/i18n/context";
 import { Button } from "@/components/ui/button";
 import { Home, Gamepad2, Brain, User, Globe } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
-// Region type no longer needed — using locale directly
+import { LOCALE_LABELS, getLocales, type Locale } from "@/i18n/index";
 
 interface NavItem {
   href: string;
@@ -54,7 +54,8 @@ export default function MainLayout({
 }) {
   const pathname = usePathname();
   const { logout } = useAuth();
-  const { t, locale, setLocale, region, setRegion } = useI18n();
+  const { t, locale, setLocale } = useI18n();
+  const [showLangMenu, setShowLangMenu] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
   useEffect(() => {
@@ -89,14 +90,31 @@ export default function MainLayout({
               );
             })}
 
-            {/* Language selector */}
-            <button
-              onClick={() => setLocale(locale === "zh" ? "en" : "zh")}
-              className="ml-2 flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-muted-foreground hover:text-foreground transition-colors"
-            >
-              <Globe size={14} />
-              {locale === "zh" ? "EN" : "中文"}
-            </button>
+            {/* Language selector (desktop) */}
+            <div className="relative ml-2">
+              <button
+                onClick={() => setShowLangMenu(!showLangMenu)}
+                className="flex items-center gap-1 px-2 py-1 rounded-lg text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <Globe size={14} />
+                {LOCALE_LABELS[locale]?.slice(0, 3) ?? locale}
+              </button>
+              {showLangMenu && (
+                <div className="absolute right-0 top-full mt-1 py-1 bg-surface border border-border rounded-lg shadow-lg z-50 min-w-[120px]">
+                  {getLocales().map((l) => (
+                    <button
+                      key={l}
+                      onClick={() => { setLocale(l as Locale); setShowLangMenu(false); }}
+                      className={`w-full text-left px-3 py-1.5 text-xs transition-colors ${
+                        l === locale ? "text-primary bg-primary/5" : "text-foreground hover:bg-muted"
+                      }`}
+                    >
+                      {LOCALE_LABELS[l as Locale]}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
 
             {isLoggedIn ? (
               <Button
@@ -123,12 +141,16 @@ export default function MainLayout({
         <div className="flex h-11 items-center justify-between px-4">
           <span className="font-semibold text-sm">{t("app.name")}</span>
           <div className="flex items-center gap-2">
-            {/* Language toggle (mobile) */}
+            {/* Language toggle (mobile — cycles through locales) */}
             <button
-              onClick={() => setLocale(locale === "zh" ? "en" : "zh")}
+              onClick={() => {
+                const locales = getLocales();
+                const idx = locales.indexOf(locale);
+                setLocale(locales[(idx + 1) % locales.length] as Locale);
+              }}
               className="text-muted-foreground text-xs px-1.5 py-0.5 rounded-md bg-muted"
             >
-              {locale === "zh" ? "EN" : "中"}
+              {LOCALE_LABELS[locale]?.slice(0, 2) ?? locale}
             </button>
             {isLoggedIn ? (
               <Button

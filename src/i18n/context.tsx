@@ -2,14 +2,12 @@
 
 /**
  * I18n React Context + Provider + hook.
+ * Supports 8 languages with browser auto-detection.
  *
  * Usage:
- *   const { t, locale, setLocale, region, setRegion } = useI18n();
+ *   const { t, locale, setLocale } = useI18n();
  *   <p>{t("dashboard.title")}</p>
  *   <p>{t("explore.subtitle", { count: 127 })}</p>
- *
- * Region: "cn" (中国) or "global" (🌍).
- * Changing region also sets the locale: cn→zh, global→en.
  */
 
 import {
@@ -20,38 +18,47 @@ import {
   useMemo,
   type ReactNode,
 } from "react";
-import { translate, DEFAULT_LOCALE, type Locale } from "./index";
+import { translate, DEFAULT_LOCALE, LOCALE_LABELS, type Locale } from "./index";
 
+// Re-export for backwards compatibility
 export type Region = "cn" | "global";
 
 interface I18nContextValue {
   locale: Locale;
   setLocale: (locale: Locale) => void;
   t: (key: string, params?: Record<string, string | number>) => string;
+  /** @deprecated use setLocale directly */
   region: Region;
+  /** @deprecated use setLocale directly */
   setRegion: (region: Region) => void;
 }
 
 const I18nContext = createContext<I18nContextValue | null>(null);
 
 const STORAGE_KEY = "app-locale";
-const REGION_STORAGE_KEY = "app-region";
+
+/** Map browser language code to our Locale */
+const LANG_MAP: Record<string, Locale> = {
+  zh: "zh",
+  ja: "ja",
+  ko: "ko",
+  es: "es",
+  pt: "pt",
+  fr: "fr",
+  de: "de",
+  en: "en",
+};
 
 function detectLocaleFromBrowser(): Locale {
   try {
-    const lang = navigator.language || navigator.languages?.[0] || "";
-    return lang.startsWith("zh") ? "zh" : "en";
+    const langs = navigator.languages || [navigator.language || ""];
+    for (const lang of langs) {
+      const code = lang.split("-")[0].toLowerCase();
+      if (LANG_MAP[code]) return LANG_MAP[code];
+    }
+    return DEFAULT_LOCALE;
   } catch {
     return DEFAULT_LOCALE;
-  }
-}
-
-function detectRegionFromBrowser(): Region {
-  try {
-    const lang = navigator.language || navigator.languages?.[0] || "";
-    return lang.startsWith("zh") ? "cn" : "global";
-  } catch {
-    return "cn";
   }
 }
 
@@ -59,52 +66,42 @@ function getInitialLocale(): Locale {
   if (typeof window === "undefined") return DEFAULT_LOCALE;
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
-    if (stored === "zh" || stored === "en") return stored;
+    if (stored && stored in LOCALE_LABELS) return stored as Locale;
   } catch {
     // localStorage unavailable
   }
-  // Auto-detect from browser language
   return detectLocaleFromBrowser();
 }
 
-function getInitialRegion(): Region {
-  if (typeof window === "undefined") return "cn";
-  try {
-    const stored = localStorage.getItem(REGION_STORAGE_KEY);
-    if (stored === "cn" || stored === "global") return stored;
-  } catch {
-    // localStorage unavailable
-  }
-  // Auto-detect from browser language
-  return detectRegionFromBrowser();
-}
+const HTML_LANG_MAP: Record<Locale, string> = {
+  en: "en",
+  zh: "zh-CN",
+  ja: "ja",
+  ko: "ko",
+  es: "es",
+  pt: "pt-BR",
+  fr: "fr",
+  de: "de",
+};
 
 export function I18nProvider({ children }: { children: ReactNode }) {
   const [locale, setLocaleState] = useState<Locale>(getInitialLocale);
-  const [region, setRegionState] = useState<Region>(getInitialRegion);
 
   const setLocale = useCallback((newLocale: Locale) => {
     setLocaleState(newLocale);
     try {
       localStorage.setItem(STORAGE_KEY, newLocale);
-      // Sync <html lang> attribute for SEO and screen readers
-      document.documentElement.lang = newLocale === "zh" ? "zh-CN" : "en";
+      document.documentElement.lang = HTML_LANG_MAP[newLocale] || newLocale;
     } catch {
       // ignore
     }
   }, []);
 
+  // Backwards compatibility: region → locale mapping
+  const region: Region = locale === "zh" ? "cn" : "global";
   const setRegion = useCallback(
     (newRegion: Region) => {
-      setRegionState(newRegion);
-      try {
-        localStorage.setItem(REGION_STORAGE_KEY, newRegion);
-      } catch {
-        // ignore
-      }
-      // Region also drives locale: cn→zh, global→en
-      const newLocale: Locale = newRegion === "cn" ? "zh" : "en";
-      setLocale(newLocale);
+      setLocale(newRegion === "cn" ? "zh" : "en");
     },
     [setLocale]
   );
