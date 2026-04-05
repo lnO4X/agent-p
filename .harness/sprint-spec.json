@@ -1,21 +1,33 @@
 {
-  "timestamp": "2026-04-06T18:15:00Z",
+  "ts": "2026-04-06T22:00:00Z",
   "action": "ACT",
-  "rationale": "4 consecutive SKIPs — must ACT. Evaluator flagged dead routes as residual problems. Removing dead code improves product quality score and SEO (eliminates duplicate/orphan content).",
+  "rationale": "/challenge has 0 usage in traffic data (confirmed by observer). Not in nav. 1762 lines across 7 files. Referenced in dashboard, me, play, email templates, middleware — all must be cleaned. isZh ternary is sanctioned pattern per CLAUDE.md §3.3, not a real problem.",
   "spec": {
-    "title": "Remove dead routes: /recommend and /notifications",
-    "files": [
-      "src/app/(main)/recommend/page.tsx — DELETE entire directory",
-      "src/app/(main)/notifications/page.tsx — DELETE entire directory",
-      "src/app/robots.ts — remove /notifications from disallow list (page gone)"
+    "title": "Remove dead /challenge feature (0 usage, 1762 LOC)",
+    "files_to_delete": [
+      "src/app/(main)/challenge/leaderboard/page.tsx",
+      "src/app/(main)/challenge/page.tsx",
+      "src/app/api/challenge/card/route.tsx",
+      "src/app/api/challenge/daily-ranking/route.ts",
+      "src/app/api/challenge/history/route.ts",
+      "src/app/api/challenge/leaderboard/route.ts",
+      "src/app/api/challenge/route.ts"
     ],
+    "files_to_edit": [
+      "src/app/(main)/dashboard/page.tsx — remove /api/challenge fetch + challenge section/link",
+      "src/app/(main)/me/page.tsx — remove challenge link",
+      "src/app/(main)/play/page.tsx — remove /api/challenge fetch + challenge link",
+      "src/lib/email/templates.ts — change CTA URLs from /challenge to /test or /quiz",
+      "src/middleware.ts — remove /challenge from PUBLIC_PREFIXES",
+      "src/__tests__/email-templates.test.ts — update assertions"
+    ],
+    "db_note": "Keep micro_challenges and pk_challenges tables — historical data, no schema change needed",
     "testCriteria": [
-      "GET /recommend returns 404 (not 200 or redirect to self)",
-      "GET /notifications returns 404",
-      "GET /robots.txt does not mention /notifications",
       "npx next build passes",
-      "No remaining imports of removed files"
-    ],
-    "reasoning": "Both pages have 0 traffic, 0 nav links, and 0 incoming references. /recommend duplicated /explore. /notifications had nav entry removed previously. Cleaning dead code reduces maintenance surface and prevents search engines from indexing orphan pages."
+      "GET /challenge returns 404",
+      "GET /dashboard returns 200",
+      "GET /play returns 200",
+      "GET / returns 200"
+    ]
   }
 }

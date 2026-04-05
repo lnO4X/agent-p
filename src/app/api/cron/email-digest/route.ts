@@ -91,7 +91,7 @@ async function handleDigest(request: NextRequest) {
 
       const html = weeklyDigestHtml({
         username: user.username,
-        challengeCount: weekChallenges.length,
+        testCount: weekChallenges.length,
         streakDays: streak,
         topTalent: best.talentCategory,
         topScore: best.score,
@@ -101,8 +101,8 @@ async function handleDigest(request: NextRequest) {
       const ok = await sendEmail({
         to: user.email,
         subject: isZh
-          ? `GameTan 周报 — ${weekChallenges.length} 次挑战`
-          : `GameTan Weekly — ${weekChallenges.length} challenges`,
+          ? `GameTan 周报 — ${weekChallenges.length} 次测试`
+          : `GameTan Weekly — ${weekChallenges.length} tests`,
         html,
       });
 

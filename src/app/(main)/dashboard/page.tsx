@@ -10,8 +10,6 @@ import { scoreToArchetype } from "@/lib/archetype";
 import type { Archetype } from "@/lib/archetype";
 import type { TalentCategory } from "@/types/talent";
 import {
-  Flame,
-  Zap,
   TrendingUp,
   ChevronRight,
   Target,
@@ -51,9 +49,6 @@ function DashboardContent() {
   }, [isWelcome, registerMethod]);
 
   const [talents, setTalents] = useState<Partial<Record<TalentCategory, number>>>({});
-  const [challengeStreak, setChallengeStreak] = useState(0);
-  const [challengeCompleted, setChallengeCompleted] = useState(false);
-  const [challengeTalent, setChallengeTalent] = useState<string | null>(null);
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [evolutionHistory, setEvolutionHistory] = useState<
     { date: string; archetypeId: string | null; overallScore: number | null; talents: Partial<Record<TalentCategory, number>> }[]
@@ -76,9 +71,8 @@ function DashboardContent() {
     Promise.all([
       fetch("/api/leaderboard").then((r) => r.json()).catch(() => null),
       fetch("/api/auth/me").then((r) => r.json()).catch(() => null),
-      fetch("/api/challenge").then((r) => r.json()).catch(() => null),
       fetch("/api/talent-history").then((r) => r.json()).catch(() => null),
-    ]).then(([leaderboard, me, challenge, talentHistory]) => {
+    ]).then(([leaderboard, me, talentHistory]) => {
       // Profile: match own username in leaderboard
       if (leaderboard?.success && me?.data?.username) {
         const myEntry = leaderboard.data.find(
@@ -87,13 +81,6 @@ function DashboardContent() {
         if (myEntry?.talents) setTalents(myEntry.talents);
       }
       setLoadingProfile(false);
-
-      // Challenge
-      if (challenge?.success) {
-        setChallengeStreak(challenge.data.streak);
-        setChallengeCompleted(challenge.data.completedToday);
-        setChallengeTalent(challenge.data.talentCategory);
-      }
 
       // Talent history (evolution tracker)
       if (talentHistory?.success && talentHistory.data?.history?.length >= 2) {
@@ -112,8 +99,8 @@ function DashboardContent() {
         Icon: Sunrise,
         suggestion: archetype
           ? (isZh
-            ? `今天挑战一下${t(`talent.${archetype.weakTalent}`)}？`
-            : `Challenge your ${t(`talent.${archetype.weakTalent}`)} today?`)
+            ? `训练一下${t(`talent.${archetype.weakTalent}`)}？`
+            : `Train your ${t(`talent.${archetype.weakTalent}`)} today?`)
           : (isZh ? "测测你的电竞天赋" : "Test your esports talent"),
       };
     }
@@ -121,9 +108,7 @@ function DashboardContent() {
       return {
         text: isZh ? "下午好" : "Good Afternoon",
         Icon: Sun,
-        suggestion: challengeCompleted
-          ? (isZh ? "今日挑战已完成！" : "Challenge done!")
-          : (isZh ? "别忘了今天的训练" : "Don't forget today's training"),
+        suggestion: isZh ? "继续探索你的天赋" : "Keep exploring your talents",
       };
     }
     if (hour >= 18 && hour < 22) {
@@ -280,60 +265,6 @@ function DashboardContent() {
       {evolutionHistory.length >= 2 && (
         <EvolutionTracker history={evolutionHistory} evolution={evolutionData} />
       )}
-
-      {/* ─── Daily Challenge ─── */}
-      <Link href="/challenge">
-        <Card
-          className={`pressable card-hover ${
-            challengeCompleted
-              ? "border-green-500/30 bg-green-500/5"
-              : "border-primary/30 bg-primary/5 shadow-glow"
-          }`}
-        >
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center gap-3">
-              <div
-                className={`flex items-center justify-center w-10 h-10 rounded-xl ${
-                  challengeCompleted ? "bg-green-500/10" : "bg-primary/10"
-                }`}
-              >
-                <Zap
-                  size={20}
-                  className={
-                    challengeCompleted ? "text-green-500" : "text-primary"
-                  }
-                />
-              </div>
-              <div className="flex-1">
-                <div className="font-semibold text-sm">
-                  {challengeCompleted
-                    ? t("dashboard.challengeDone")
-                    : isZh
-                      ? "今日训练"
-                      : "Today's Training"}
-                </div>
-                {challengeTalent && (
-                  <div className="text-xs text-muted-foreground">
-                    {t(`talent.${challengeTalent}`)}
-                    {archetype && !challengeCompleted && (
-                      <span className="ml-1">
-                        ·{" "}
-                        {isZh ? "进化路径相关" : "Evolution path"}
-                      </span>
-                    )}
-                  </div>
-                )}
-              </div>
-              {challengeStreak > 0 && (
-                <div className="flex items-center gap-1 text-orange-500">
-                  <Flame size={16} />
-                  <span className="text-sm font-bold">{challengeStreak}</span>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      </Link>
 
       {/* ─── Share talent report (only if has archetype) ─── */}
       {archetype && (

@@ -80,25 +80,25 @@ export function communityRepliedHtml(opts: {
  */
 export function weeklyDigestHtml(opts: {
   username: string;
-  challengeCount: number;
+  testCount: number;
   streakDays: number;
   topTalent?: string;
   topScore?: number;
   isZh: boolean;
 }): string {
-  const { username, challengeCount, streakDays, topTalent, topScore, isZh } = opts;
+  const { username, testCount, streakDays, topTalent, topScore, isZh } = opts;
 
   const greeting = isZh
     ? `${username}，这是你的 GameTan 周报`
     : `${username}, here's your GameTan weekly digest`;
 
-  const challengeText = isZh
-    ? `本周完成 <strong>${challengeCount}</strong> 次挑战`
-    : `Completed <strong>${challengeCount}</strong> challenges this week`;
+  const testText = isZh
+    ? `本周完成 <strong>${testCount}</strong> 次测试`
+    : `Completed <strong>${testCount}</strong> tests this week`;
 
   const streakText = isZh
-    ? `当前连续挑战 <strong>${streakDays}</strong> 天`
-    : `Current streak: <strong>${streakDays}</strong> days`;
+    ? `活跃 <strong>${streakDays}</strong> 天`
+    : `Active for <strong>${streakDays}</strong> days`;
 
   const topText = topTalent && topScore
     ? isZh
@@ -106,8 +106,8 @@ export function weeklyDigestHtml(opts: {
       : `Best performance: ${topTalent} — ${Math.round(topScore)} pts`
     : "";
 
-  const ctaText = isZh ? "继续挑战" : "Keep Playing";
-  const ctaUrl = `${BASE_URL}/challenge`;
+  const ctaText = isZh ? "继续测试" : "Keep Playing";
+  const ctaUrl = `${BASE_URL}/test`;
 
   return `
 <!DOCTYPE html>
@@ -119,7 +119,7 @@ export function weeklyDigestHtml(opts: {
       ${greeting}
     </h2>
     <div style="background: #f0f4ff; border-radius: 12px; padding: 16px; margin-bottom: 16px;">
-      <p style="margin: 0 0 8px; font-size: 14px; color: #333;">${challengeText}</p>
+      <p style="margin: 0 0 8px; font-size: 14px; color: #333;">${testText}</p>
       <p style="margin: 0 0 8px; font-size: 14px; color: #333;">${streakText}</p>
       ${topText ? `<p style="margin: 0; font-size: 14px; color: #333;">${topText}</p>` : ""}
     </div>
@@ -145,15 +145,15 @@ export function streakMilestoneHtml(opts: {
   const { username, streakDays, isZh } = opts;
 
   const title = isZh
-    ? `${username}，恭喜连续挑战 ${streakDays} 天！`
+    ? `${username}，恭喜连续活跃 ${streakDays} 天！`
     : `${username}, congrats on a ${streakDays}-day streak!`;
 
   const body = isZh
-    ? `你已经连续挑战 ${streakDays} 天了，太厉害了！继续保持，解锁更多成就。`
-    : `You've been challenging yourself for ${streakDays} consecutive days. Keep it up!`;
+    ? `你已经连续活跃 ${streakDays} 天了，太厉害了！继续保持，解锁更多成就。`
+    : `You've been active for ${streakDays} consecutive days. Keep it up!`;
 
-  const ctaText = isZh ? "继续挑战" : "Continue";
-  const ctaUrl = `${BASE_URL}/challenge`;
+  const ctaText = isZh ? "继续训练" : "Continue";
+  const ctaUrl = `${BASE_URL}/test`;
 
   return `
 <!DOCTYPE html>

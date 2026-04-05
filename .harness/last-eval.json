@@ -1,22 +1,20 @@
 {
-  "timestamp": "2026-04-06T16:18:00Z",
-  "specAction": "production audit + nav cleanup + i18n migration",
+  "timestamp": "2026-04-06T18:30:00Z",
+  "specAction": "Remove dead routes /recommend and /notifications",
   "scores": {
-    "specImplemented": 4,
+    "specImplemented": 5,
     "noRegressions": 5,
     "productQuality": 3
   },
   "issues": [],
   "residualProblems": [
-    "47 files still use isZh ternary — biggest: archetype/[id]/[section] (45), pk/[id] (34), quiz/[gameId]/result (27), archetype/[id] (27), dashboard (26)",
-    "/test page duplicates /quiz purpose — should unify into single quiz entry with tier selection",
-    "/recommend duplicates /explore — can be removed or merged",
-    "/challenge has 0 usage and complex code — evaluate if worth keeping",
-    "/notifications page exists but nav entry removed — dead code candidate",
-    "Blog response time 1.1s — consider static generation or caching",
-    "Archetype listing 1.1s — heavy page, consider pagination or lazy loading",
-    "0 organic traffic — all 13 PV from vercel.com referrer — SEO not working yet",
-    "Scenario quiz option on /quiz page needs evaluation against Quick/Standard/Pro tier system"
+    "29 files still use isZh ternary — heaviest: archetype/[id]/[section] (45), archetype/[id] (27), dashboard (26)",
+    "/challenge has 0 usage in traffic data — evaluate if worth keeping",
+    "Blog response time was 1.1s last eval — not re-tested",
+    "Archetype listing was 1.1s — not re-tested",
+    "0 organic traffic — all PV from vercel.com referrer — SEO not working, needs GSC submission + social distribution",
+    "7 total users, 0 premium — no revenue path active",
+    "/test/session/[sessionId] route exists but /test redirects to login (middleware) — quiz funnel requires auth"
   ],
-  "recommendation": "Next priority: 1) Unify /test into /quiz tier system 2) Continue isZh migration (archetype pages next) 3) Investigate why Google hasn't indexed despite 363-page sitemap"
+  "recommendation": "Next priorities: 1) Social distribution (X posts, community engagement) to drive organic traffic — this is the #1 blocker 2) Continue isZh→t() migration on archetype pages (heaviest files) 3) Evaluate /challenge route usefulness"
 }

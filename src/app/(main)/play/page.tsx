@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { GameCard } from "@/components/games/game-card";
 import { useI18n } from "@/i18n/context";
-import { Zap, FlaskConical, Flame } from "lucide-react";
+import { Zap, FlaskConical } from "lucide-react";
 
 const PLATFORMS = [
   { key: "", labelKey: "common.all" },
@@ -41,7 +41,8 @@ interface GameItem {
 }
 
 export default function PlayPage() {
-  const { t } = useI18n();
+  const { t, locale } = useI18n();
+  const isZh = locale === "zh";
   const [platform, setPlatform] = useState("");
   const [genre, setGenre] = useState("");
   const [search, setSearch] = useState("");
@@ -53,30 +54,11 @@ export default function PlayPage() {
   const [totalPages, setTotalPages] = useState(1);
   const fetchRef = useRef(0);
 
-  // Challenge state
-  const [challengeStreak, setChallengeStreak] = useState(0);
-  const [challengeCompleted, setChallengeCompleted] = useState(false);
-  const [challengeTalent, setChallengeTalent] = useState<string | null>(null);
-
   // Debounce search input (300ms)
   useEffect(() => {
     const timer = setTimeout(() => setDebouncedSearch(search), 300);
     return () => clearTimeout(timer);
   }, [search]);
-
-  // Fetch challenge info once
-  useEffect(() => {
-    fetch("/api/challenge")
-      .then((r) => r.json())
-      .then((json) => {
-        if (json.success) {
-          setChallengeStreak(json.data.streak);
-          setChallengeCompleted(json.data.completedToday);
-          setChallengeTalent(json.data.talentCategory);
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   const fetchGames = useCallback(async () => {
     const fetchId = ++fetchRef.current;
@@ -130,50 +112,23 @@ export default function PlayPage() {
         <p className="text-sm text-muted-foreground">{t("play.subtitle")}</p>
       </div>
 
-      {/* Quick actions: Daily Challenge + Full Test */}
+      {/* Quick actions: Quick Quiz + Full Test */}
       <div className="grid grid-cols-2 gap-3">
-        <Link href="/challenge">
-          <Card
-            className={`pressable h-full ${
-              challengeCompleted
-                ? "border-green-500/30 bg-green-500/5"
-                : "border-primary/30 bg-primary/5"
-            }`}
-          >
+        <Link href="/quiz">
+          <Card className="pressable h-full border-primary/30 bg-primary/5">
             <CardContent className="pt-3 pb-3">
               <div className="flex items-center gap-2.5">
-                <div
-                  className={`flex items-center justify-center w-9 h-9 rounded-xl ${
-                    challengeCompleted ? "bg-green-500/10" : "bg-primary/10"
-                  }`}
-                >
-                  <Zap
-                    size={18}
-                    className={
-                      challengeCompleted ? "text-green-500" : "text-primary"
-                    }
-                  />
+                <div className="flex items-center justify-center w-9 h-9 rounded-xl bg-primary/10">
+                  <Zap size={18} className="text-primary" />
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm truncate">
-                    {challengeCompleted
-                      ? t("dashboard.challengeDone")
-                      : t("play.dailyChallenge")}
+                    {isZh ? "快速测试" : "Quick Quiz"}
                   </div>
-                  {challengeTalent && (
-                    <div className="text-[10px] text-muted-foreground truncate">
-                      {t(`talent.${challengeTalent}`)}
-                    </div>
-                  )}
+                  <div className="text-[10px] text-muted-foreground truncate">
+                    {isZh ? "3分钟测天赋" : "3-min talent test"}
+                  </div>
                 </div>
-                {challengeStreak > 0 && (
-                  <div className="flex items-center gap-0.5 text-orange-500 flex-shrink-0">
-                    <Flame size={14} />
-                    <span className="text-xs font-bold">
-                      {challengeStreak}
-                    </span>
-                  </div>
-                )}
               </div>
             </CardContent>
           </Card>

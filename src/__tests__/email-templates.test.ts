@@ -130,7 +130,7 @@ describe("email templates", () => {
   describe("weeklyDigestHtml", () => {
     const baseOpts = {
       username: "alice",
-      challengeCount: 15,
+      testCount: 15,
       streakDays: 7,
       isZh: true,
     };
@@ -152,7 +152,7 @@ describe("email templates", () => {
       expect(html).toContain("weekly digest");
     });
 
-    it("interpolates challenge count", () => {
+    it("interpolates test count", () => {
       const html = weeklyDigestHtml(baseOpts);
       expect(html).toContain("15");
     });
@@ -177,9 +177,9 @@ describe("email templates", () => {
       expect(html).not.toContain("\u6700\u4F73\u8868\u73B0"); // 最佳表现
     });
 
-    it("contains challenge CTA link", () => {
+    it("contains test CTA link", () => {
       const html = weeklyDigestHtml(baseOpts);
-      expect(html).toContain("/challenge");
+      expect(html).toContain("/test");
     });
 
     it("contains GameTan branding", () => {
@@ -198,7 +198,7 @@ describe("email templates", () => {
       });
       expect(html).toContain("bob");
       expect(html).toContain("30");
-      expect(html).toContain("\u8FDE\u7EED\u6311\u6218"); // 连续挑战
+      expect(html).toContain("\u8FDE\u7EED\u6D3B\u8DC3"); // 连续活跃
     });
 
     it("returns HTML with username and streak days (en)", () => {
@@ -211,13 +211,13 @@ describe("email templates", () => {
       expect(html).toContain("30-day streak");
     });
 
-    it("contains CTA link to challenge", () => {
+    it("contains CTA link to test", () => {
       const html = streakMilestoneHtml({
         username: "bob",
         streakDays: 7,
         isZh: false,
       });
-      expect(html).toContain("/challenge");
+      expect(html).toContain("/test");
     });
 
     it("contains GameTan branding", () => {

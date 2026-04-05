@@ -12,7 +12,6 @@ import {
   Settings,
   Crown,
   ChevronRight,
-  Zap,
   FlaskConical,
   Share2,
   TrendingUp,
@@ -31,14 +30,6 @@ interface ProfileData {
   overallRank: string | null;
   sessionId: string | null;
   talents: Partial<Record<TalentCategory, number | null>>;
-}
-
-interface RecentChallenge {
-  id: string;
-  gameId: string;
-  talentCategory: string;
-  score: number;
-  completedAt: string;
 }
 
 interface Session {
@@ -78,7 +69,6 @@ export default function MePage() {
   const { t, locale } = useI18n();
   const [username, setUsername] = useState<string | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
-  const [challenges, setChallenges] = useState<RecentChallenge[]>([]);
   const [sessions, setSessions] = useState<Session[]>([]);
   const [referralCode, setReferralCode] = useState<string | null>(null);
   const [referralCount, setReferralCount] = useState(0);
@@ -99,9 +89,8 @@ export default function MePage() {
     async function load() {
       try {
         // Fetch latest talent profile + username
-        const [profileRes, challengeRes, sessionsRes, meRes, referralRes, talentHistoryRes] = await Promise.all([
+        const [profileRes, sessionsRes, meRes, referralRes, talentHistoryRes] = await Promise.all([
           fetch("/api/leaderboard").then((r) => r.json()),
-          fetch("/api/challenge/history?limit=5").then((r) => r.json()).catch(() => ({ success: false })),
           fetch("/api/sessions").then((r) => r.json()),
           fetch("/api/auth/me").then((r) => r.json()).catch(() => ({ success: false })),
           fetch("/api/referral").then((r) => r.json()).catch(() => ({ success: false })),
@@ -126,10 +115,6 @@ export default function MePage() {
               talents: myEntry.talents,
             });
           }
-        }
-
-        if (challengeRes.success) {
-          setChallenges(challengeRes.data || []);
         }
 
         if (referralRes.success) {
@@ -361,56 +346,6 @@ export default function MePage() {
                     />
                   </div>
                 </Link>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Recent challenges */}
-      {challenges.length > 0 && (
-        <Card>
-          <CardContent className="pt-4 pb-3">
-            <div className="flex items-center justify-between mb-3">
-              <h2 className="text-sm font-semibold flex items-center gap-1.5">
-                <Zap size={14} className="text-primary" />
-                {t("me.recentChallenges")}
-              </h2>
-              <Link
-                href="/challenge"
-                className="text-xs text-muted-foreground hover:text-foreground"
-              >
-                {t("dashboard.viewAll")} →
-              </Link>
-            </div>
-            <div className="space-y-2">
-              {challenges.map((ch) => (
-                <div
-                  key={ch.id}
-                  className="flex items-center justify-between py-1.5"
-                >
-                  <div className="flex items-center gap-2">
-                    <TalentIcon
-                      category={ch.talentCategory as TalentCategory}
-                      size={14}
-                      className="text-primary"
-                    />
-                    <span className="text-sm">
-                      {t(`talent.${ch.talentCategory}`)}
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <span className="text-sm font-bold">
-                      {Math.round(ch.score)}
-                    </span>
-                    <span className="text-[10px] text-muted-foreground">
-                      {new Date(ch.completedAt).toLocaleDateString(
-                        locale === "en" ? "en-US" : "zh-CN",
-                        { month: "short", day: "numeric" }
-                      )}
-                    </span>
-                  </div>
-                </div>
               ))}
             </div>
           </CardContent>
