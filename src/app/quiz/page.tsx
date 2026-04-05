@@ -2,26 +2,21 @@
 
 import { useState, useCallback, useMemo } from "react";
 import { useRouter } from "next/navigation";
-import { motion, AnimatePresence } from "framer-motion";
 import { trackEvent as track } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { useI18n } from "@/i18n/context";
 import { gameRegistry } from "@/games";
 import { QUICK_TEST_GAMES } from "@/lib/archetype";
-import { SCENARIO_QUESTIONS, scenarioToArchetype } from "@/lib/scenario-quiz";
 import {
   Zap,
   Brain,
   Dice5,
   ArrowRight,
   Gamepad2,
-  Sparkles,
 } from "lucide-react";
 import type { GameRawResult } from "@/types/game";
-import Link from "next/link";
 
-type Phase = "intro" | "scenario" | "playing" | "transition";
+type Phase = "intro" | "playing" | "transition";
 
 const GAME_META = [
   { id: "reaction-speed", icon: Zap, labelZh: "反应速度", labelEn: "Reaction Speed", color: "text-blue-400" },
@@ -36,11 +31,6 @@ export default function QuizPage() {
 
   const [phase, setPhase] = useState<Phase>("intro");
 
-  // ─── Scenario quiz state ───
-  const [scenarioIndex, setScenarioIndex] = useState(0);
-  const [scenarioAnswers, setScenarioAnswers] = useState<string[]>([]);
-  const [selectedChoice, setSelectedChoice] = useState<string | null>(null);
-
   // ─── Mini-game state ───
   const [gameIndex, setGameIndex] = useState(0);
   const [scores, setScores] = useState<number[]>([]);
@@ -51,36 +41,6 @@ export default function QuizPage() {
     [currentGameId]
   );
   const GameComponent = currentPlugin?.component ?? null;
-
-  // ─── Scenario quiz handlers ───
-  const handleScenarioChoice = useCallback(
-    (choiceId: string) => {
-      if (selectedChoice) return; // prevent double-tap
-      setSelectedChoice(choiceId);
-
-      // Brief highlight, then advance
-      setTimeout(() => {
-        const newAnswers = [...scenarioAnswers, choiceId];
-
-        if (scenarioIndex < SCENARIO_QUESTIONS.length - 1) {
-          setScenarioAnswers(newAnswers);
-          setScenarioIndex((i) => i + 1);
-          setSelectedChoice(null);
-        } else {
-          // All 7 done — compute result
-          const { archetype, talentScores } = scenarioToArchetype(newAnswers);
-          const scoresParam = Object.entries(talentScores)
-            .map(([k, v]) => `${k}:${v}`)
-            .join(",");
-          track("quiz_complete", { mode: "scenario", archetype: archetype.id });
-          router.push(
-            `/quiz/result?mode=scenario&archetype=${archetype.id}&scores=${scoresParam}&own=1`
-          );
-        }
-      }, 300);
-    },
-    [selectedChoice, scenarioAnswers, scenarioIndex, router]
-  );
 
   // ─── Mini-game handlers ───
   const handleComplete = useCallback(
@@ -147,127 +107,11 @@ export default function QuizPage() {
             <ArrowRight size={20} className="ml-2" />
           </Button>
 
-          {/* Secondary — Scenario Quiz */}
-          <div className="text-sm text-muted-foreground">
-            <button
-              className="underline underline-offset-4 hover:text-foreground transition-colors"
-              onClick={() => {
-                track("quiz_start", { mode: "scenario" });
-                setPhase("scenario");
-              }}
-            >
-              {isZh
-                ? "或试试场景测试（7道题）"
-                : "Or try the Scenario Quiz (7 questions)"}
-            </button>
-          </div>
-
           <p className="text-xs text-muted-foreground">
             {isZh
               ? "无需注册 · 结果即时生成 · 可分享"
               : "No registration · Instant results · Shareable"}
           </p>
-        </div>
-      </div>
-    );
-  }
-
-  // ═══════════════════════════════════════════════════
-  // SCENARIO QUIZ — One question at a time
-  // ═══════════════════════════════════════════════════
-  if (phase === "scenario") {
-    const question = SCENARIO_QUESTIONS[scenarioIndex];
-
-    return (
-      <div className="flex-1 flex flex-col">
-        {/* Progress bar */}
-        <div className="px-4 py-3 border-b border-border">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-sm text-muted-foreground">
-              {scenarioIndex + 1} / {SCENARIO_QUESTIONS.length}
-            </span>
-            <button
-              className="text-xs text-muted-foreground hover:text-foreground transition-colors"
-              onClick={() => {
-                setPhase("intro");
-                setScenarioIndex(0);
-                setScenarioAnswers([]);
-                setSelectedChoice(null);
-              }}
-            >
-              {isZh ? "退出" : "Exit"}
-            </button>
-          </div>
-          <div className="flex gap-1.5">
-            {SCENARIO_QUESTIONS.map((_, i) => (
-              <div
-                key={i}
-                className={`h-1.5 flex-1 rounded-full transition-colors duration-300 ${
-                  i < scenarioIndex
-                    ? "bg-primary"
-                    : i === scenarioIndex
-                      ? "bg-primary/50"
-                      : "bg-muted"
-                }`}
-              />
-            ))}
-          </div>
-        </div>
-
-        {/* Question + Choices */}
-        <div className="flex-1 flex flex-col justify-center px-4 py-6 max-w-lg mx-auto w-full">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={question.id}
-              initial={{ opacity: 0, x: 40 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: -40 }}
-              transition={{ duration: 0.25 }}
-              className="space-y-6"
-            >
-              {/* Scenario text */}
-              <h2 className="text-xl md:text-2xl font-semibold leading-snug">
-                {isZh ? question.zh : question.en}
-              </h2>
-
-              {/* Choice cards */}
-              <div className="space-y-3">
-                {question.choices.map((choice) => {
-                  const isSelected = selectedChoice === choice.id;
-                  return (
-                    <motion.div
-                      key={choice.id}
-                      whileTap={{ scale: 0.97 }}
-                    >
-                      <Card
-                        className={`p-4 cursor-pointer transition-all duration-200 border-2 ${
-                          isSelected
-                            ? "border-primary bg-primary/10"
-                            : "border-transparent hover:border-border hover:bg-muted/50"
-                        }`}
-                        onClick={() => handleScenarioChoice(choice.id)}
-                      >
-                        <div className="flex items-start gap-3">
-                          <span
-                            className={`flex-shrink-0 w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold uppercase ${
-                              isSelected
-                                ? "bg-primary text-primary-foreground"
-                                : "bg-muted text-muted-foreground"
-                            }`}
-                          >
-                            {choice.id}
-                          </span>
-                          <span className="text-sm md:text-base leading-relaxed">
-                            {isZh ? choice.zh : choice.en}
-                          </span>
-                        </div>
-                      </Card>
-                    </motion.div>
-                  );
-                })}
-              </div>
-            </motion.div>
-          </AnimatePresence>
         </div>
       </div>
     );
