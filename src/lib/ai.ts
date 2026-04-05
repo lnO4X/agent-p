@@ -130,8 +130,9 @@ export async function getModel(modelId?: string | null) {
       const minimax = createOpenAI({
         apiKey: fallbackKey,
         baseURL: "https://api.minimax.io/v1",
+        compatibility: "compatible",
       });
-      return minimax(modelId || process.env.MINIMAX_MODEL || "MiniMax-M2.7-highspeed");
+      return minimax.chat(modelId || process.env.MINIMAX_MODEL || "MiniMax-M2.7-highspeed");
     }
   }
 
@@ -141,8 +142,9 @@ export async function getModel(modelId?: string | null) {
     const minimax = createOpenAI({
       apiKey,
       baseURL: "https://api.minimax.io/v1",
+      compatibility: "compatible",  // Force /chat/completions, not /responses
     });
-    return minimax(resolvedModel);
+    return minimax.chat(resolvedModel);
   }
 
   const openrouter = createOpenRouter({ apiKey });
@@ -159,8 +161,9 @@ export function getModelSync(modelId: string) {
     const minimax = createOpenAI({
       apiKey: minimaxKey,
       baseURL: "https://api.minimax.io/v1",
+      compatibility: "compatible",
     });
-    return minimax(modelId);
+    return minimax.chat(modelId);
   }
 
   const openrouterKey = process.env.OPENROUTER_API_KEY;
