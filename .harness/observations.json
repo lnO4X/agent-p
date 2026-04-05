@@ -1,22 +1,33 @@
 {
-  "ts": "2026-04-06T01:45:00Z",
+  "ts": "2026-04-06T06:00:00Z",
   "siteStatus": 200,
   "traffic": {
-    "pv24h": 7,
-    "sessions24h": 2,
-    "topReferrer": "vercel.com",
-    "isOrganic": false
+    "last24h": {"pageViews": 7, "uniqueSessions": 2},
+    "last7d": {"pageViews": 7, "uniqueSessions": 2},
+    "topReferrer": "vercel.com (6/7 = 86% internal)",
+    "organicTraffic": 0
   },
   "funnel": {
     "pageView": 7,
-    "quizStart": 1,
-    "quizComplete": 3,
+    "quizComplete": 2,
     "shareClick": 1
   },
-  "users": {
-    "total": 7,
-    "premium": 0,
+  "stats": {
+    "totalUsers": 7,
+    "premiumUsers": 0,
     "registeredToday": 0
   },
-  "notes": "Traffic 7x vs last run but all from vercel.com — internal testing. No organic acquisition yet. Checkpoint 2026-04-08."
+  "recentCommits": [
+    "ec52455 feat: P4 — tiered assessment system",
+    "0104b33 feat: P3 — all 8 languages",
+    "e634902 feat: P3 — multi-language infrastructure",
+    "010b597 feat: P2 — performance trim",
+    "96702b4 chore: KAIROS cycle #3 — SKIP"
+  ],
+  "seoStatus": {
+    "sitemapLive": true,
+    "jsonLd": ["Organization", "WebSite", "Quiz"],
+    "robotsTxt": "clean",
+    "estimatedPages": "363+"
+  }
 }

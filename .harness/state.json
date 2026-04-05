@@ -1,11 +1,14 @@
 {
-  "lastRun": "2026-04-06T01:45:00Z",
+  "lastRun": "2026-04-06T06:00:00Z",
   "lastAction": "SKIP",
+  "lastDream": "2026-04-06T06:00:00Z",
   "nextCheckpoint": "2026-04-08T12:00:00Z",
-  "consecutiveSkips": 3,
-  "totalRuns": 3,
+  "consecutiveSkips": 4,
+  "totalRuns": 4,
   "siteStatus": 200,
   "traffic24h": 7,
   "totalUsers": 7,
-  "premiumUsers": 0
+  "premiumUsers": 0,
+  "dreamInsight": "distribution_bottleneck",
+  "pendingHumanTasks": ["social_posts", "gsc_verification", "indexing_check"]
 }
