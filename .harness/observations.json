@@ -1,26 +1,34 @@
 {
-  "timestamp": "2026-04-05T11:30:00Z",
+  "ts": "2026-04-05T19:00:00Z",
+  "site_status": 200,
   "traffic": {
-    "24h": { "pageViews": 1, "uniqueSessions": 1 },
-    "7d": { "pageViews": 1, "uniqueSessions": 1 },
-    "topPages": [{ "page": "/", "views": 1 }],
+    "last24h": {"pageViews": 1, "uniqueSessions": 1},
+    "last7d": {"pageViews": 1, "uniqueSessions": 1},
+    "topPages": [{"page": "/", "views": 1}],
     "topReferrers": [],
     "funnel": {
+      "quiz_complete": 3,
       "page_view": 1,
       "quiz_start": 1,
-      "quiz_complete": 3,
-      "share_click": 1,
-      "deep_report_click": 0
+      "share_click": 1
     }
   },
-  "users": { "total": 7, "premium": 0, "today": 0 },
-  "siteHealth": 200,
-  "recentCommits": [
-    "refactor: simplify harness",
-    "refactor: harness architecture",
-    "feat: self-hosted traffic analytics",
-    "feat: add 3 SEO blog articles"
+  "stats": {
+    "totalUsers": 7,
+    "premiumUsers": 0,
+    "registeredToday": 0,
+    "totalSessions": 5,
+    "totalChallenges": 4,
+    "totalPartners": 9
+  },
+  "lastCommits": [
+    "19ebb7f chore: first real pipeline execution — SKIP",
+    "dd7162e refactor: simplify harness",
+    "4788e81 refactor: harness architecture",
+    "f784494 feat: self-hosted traffic analytics",
+    "5f12a7f chore: update harness state"
   ],
-  "pipelineHistory": [],
-  "assessment": "RAW DATA ONLY - no opinions"
+  "pipelineHistory": [
+    {"ts": "2026-04-05T11:30:00Z", "action": "SKIP", "traffic_24h": 1, "users": 7}
+  ]
 }
