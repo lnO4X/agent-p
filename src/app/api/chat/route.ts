@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
     return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  // Per-user daily chat rate limiting (free=5/day, premium=unlimited)
+  // Per-user daily chat rate limiting (tier-based via test-tiers.ts)
   const today = new Date().toISOString().slice(0, 10);
   let userRow;
   try {
@@ -52,21 +52,22 @@ export async function POST(request: NextRequest) {
   const isPremium = userRow.length > 0 && userRow[0].tier === "premium" &&
     (!userRow[0].tierExpiresAt || userRow[0].tierExpiresAt >= new Date());
 
-  // Referral reward: users with 1+ successful referrals get 15 daily messages instead of 5
-  let dailyLimit = isPremium ? 999 : 5;
+  // Chat limits: Quick=0 (no coach), Standard=15/day, Pro=100/day
+  // Referral reward: 1+ referrals unlocks Standard-level chat (15/day)
+  let hasReferrals = false;
   if (!isPremium) {
     try {
       const [refCount] = await db
         .select({ count: sql<number>`count(*)` })
         .from(referrals)
         .where(eq(referrals.referrerId, auth.sub));
-      if (Number(refCount?.count ?? 0) >= 1) {
-        dailyLimit = 15;
-      }
+      hasReferrals = Number(refCount?.count ?? 0) >= 1;
     } catch {
-      // Non-blocking: if referral check fails, use default limit
+      // Non-blocking
     }
   }
+  const { getChatLimit } = await import("@/lib/test-tiers");
+  const dailyLimit = getChatLimit(isPremium ? "premium" : "free", hasReferrals);
   const { allowed } = await checkRateLimit(
     `rl:chat:${auth.sub}:${today}`,
     dailyLimit,

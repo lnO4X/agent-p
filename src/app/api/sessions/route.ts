@@ -5,8 +5,8 @@ import { testSessions, users } from "@/db/schema";
 import { eq, desc, and, sql } from "drizzle-orm";
 import { getAuthFromCookie } from "@/lib/auth";
 
-/** Tier-based test limits: free=3, premium=unlimited */
-const MAX_TESTS = { free: 3, premium: 9999 } as const;
+import { getTestLimit } from "@/lib/test-tiers";
+
 const isDev = process.env.NODE_ENV === "development";
 const noLimit = isDev || process.env.DISABLE_TEST_LIMIT === "true";
 
@@ -35,33 +35,37 @@ export async function POST() {
       );
     }
 
-    // Tier-based test limit
+    // Tier-based daily test limit (from test-tiers.ts)
     const tier = await getUserTier(auth.sub);
-    const maxTests = MAX_TESTS[tier];
+    const maxDaily = getTestLimit(tier);
 
-    const completedCount = await db
+    // Count tests completed TODAY (not all-time)
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+    const todayCount = await db
       .select({ count: sql<number>`count(*)::int` })
       .from(testSessions)
       .where(
         and(
           eq(testSessions.userId, auth.sub),
-          eq(testSessions.status, "completed")
+          eq(testSessions.status, "completed"),
+          sql`${testSessions.startedAt} >= ${todayStart.toISOString()}::timestamp`
         )
       );
 
-    if (!noLimit && completedCount[0]?.count >= maxTests) {
+    if (!noLimit && (todayCount[0]?.count ?? 0) >= maxDaily) {
       return NextResponse.json(
         {
           success: false,
           error: {
-            code: "TEST_LIMIT_REACHED",
+            code: "DAILY_LIMIT_REACHED",
             message: tier === "free"
-              ? `免费用户最多完成 ${maxTests} 次天赋测试，升级Premium无限制`
-              : `已达到测试上限`,
+              ? `今日测试次数已达上限 (${maxDaily}次/天)，升级 Pro 可测 20 次/天`
+              : `Today's test limit reached (${maxDaily}/day)`,
           },
           needsUpgrade: tier === "free",
         },
-        { status: 403 }
+        { status: 429 }
       );
     }
 
@@ -108,7 +112,7 @@ export async function GET() {
     }
 
     const tier = await getUserTier(auth.sub);
-    const maxTests = MAX_TESTS[tier];
+    const maxTests = getTestLimit(tier);
 
     const sessions = await db
       .select()
