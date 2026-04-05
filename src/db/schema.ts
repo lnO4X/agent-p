@@ -201,7 +201,7 @@ export const partners = pgTable(
     userId: text("user_id")
       .notNull()
       .references(() => users.id),
-    slot: integer("slot").notNull(), // 0=Weda coach built-in, 1-3=custom
+    slot: integer("slot").notNull(), // 0=Talent Coach built-in, 1-3=custom
     name: text("name").notNull(),
     avatar: text("avatar").notNull(), // Lucide icon name
     modelId: text("model_id"), // null = use global default model
