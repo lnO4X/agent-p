@@ -3,6 +3,7 @@ import { DM_Sans, Geist_Mono, Outfit } from "next/font/google";
 import { Analytics } from "@vercel/analytics/next";
 import { SpeedInsights } from "@vercel/speed-insights/next";
 import { I18nProvider } from "@/i18n/context";
+import { PageViewTracker } from "@/components/page-view-tracker";
 import "./globals.css";
 
 const dmSans = DM_Sans({
@@ -184,6 +185,7 @@ export default function RootLayout({
       >
         <script dangerouslySetInnerHTML={{ __html: APP_INIT_SCRIPT }} />
         <I18nProvider>{children}</I18nProvider>
+        <PageViewTracker />
         <Analytics />
         <SpeedInsights />
       </body>
