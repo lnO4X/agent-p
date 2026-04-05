@@ -192,16 +192,20 @@ export async function POST(request: NextRequest) {
     messages: modelMessages,
     maxOutputTokens: 1500,
     maxRetries: 3,
+    temperature: 0.7,
     abortSignal: AbortSignal.any([
       request.signal,
       AbortSignal.timeout(50000),
     ]),
     onError: (event) => {
-      // Only log non-abort errors (client disconnects are expected)
       if (event.error instanceof Error && event.error.name === "AbortError") return;
       console.error("[chat] Stream error:", event.error);
     },
   });
 
-  return result.toUIMessageStreamResponse();
+  // MiniMax M2.7 includes <think>...</think> in content.
+  // Strip thinking tags before sending to client.
+  return result.toUIMessageStreamResponse({
+    sendReasoning: false,
+  });
 }
