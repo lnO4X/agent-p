@@ -94,37 +94,53 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
 
   const [pendingVoiceText, setPendingVoiceText] = useState<string | null>(null);
 
-  // Load single partner (fast — 1 DB query vs full list)
-  useEffect(() => {
-    fetch(`/api/partners/${partnerId}`)
-      .then((r) => r.json())
-      .then((data) => {
-        if (data.success) setPartner(data.data as Partner);
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [partnerId]);
-
-  // Deferred greeting — load after chat is interactive, not blocking UI
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      fetch(`/api/partners/${partnerId}/greeting`)
-        .then((r) => r.json())
-        .then((data) => {
-          if (data.greeting) setGreeting(data.greeting);
-        })
-        .catch(() => {});
-    }, 800); // Delay 800ms to let UI settle first
-    return () => clearTimeout(timer);
-  }, [partnerId]);
-
-  const { messages, sendMessage, status, error } = useChat({
+  const { messages, setMessages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({
       api: "/api/chat",
       credentials: "include",
       body: { partnerId },
     }),
   });
+
+  // Load partner + chat history in parallel for fast startup
+  const [historyLoaded, setHistoryLoaded] = useState(false);
+  useEffect(() => {
+    const partnerPromise = fetch(`/api/partners/${partnerId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success) setPartner(data.data as Partner);
+      })
+      .catch(() => {});
+
+    const historyPromise = fetch(`/api/chat/history?partnerId=${partnerId}`, { credentials: "include" })
+      .then((r) => r.json())
+      .then((data) => {
+        if (data.success && data.data?.length) {
+          setMessages(data.data);
+          setHistoryLoaded(true);
+        } else {
+          setHistoryLoaded(true);
+        }
+      })
+      .catch(() => setHistoryLoaded(true));
+
+    Promise.all([partnerPromise, historyPromise]).finally(() => setLoading(false));
+  }, [partnerId, setMessages]);
+
+  // Deferred greeting — only load if there's NO chat history (new conversations)
+  useEffect(() => {
+    if (!historyLoaded || messages.length > 0) return;
+    const timer = setTimeout(() => {
+      fetch(`/api/partners/${partnerId}/greeting`, { credentials: "include" })
+        .then((r) => r.json())
+        .then((data) => {
+          if (data.greeting) setGreeting(data.greeting);
+        })
+        .catch(() => {});
+    }, 300); // Short delay, only for first-time users
+    return () => clearTimeout(timer);
+  }, [partnerId, historyLoaded, messages.length]);
+
 
   const isStreaming = status === "submitted" || status === "streaming";
 

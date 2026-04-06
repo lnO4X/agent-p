@@ -513,6 +513,30 @@ export const sharedPartnerLikes = pgTable(
   ]
 );
 
+// ==================== CHAT MESSAGES (Conversation History) ====================
+export const chatMessages = pgTable(
+  "chat_messages",
+  {
+    id: text("id").primaryKey(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    partnerId: text("partner_id")
+      .notNull()
+      .references(() => partners.id, { onDelete: "cascade" }),
+    role: text("role", { enum: ["user", "assistant"] }).notNull(),
+    content: text("content").notNull(),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    index("chat_messages_user_partner_idx").on(
+      table.userId,
+      table.partnerId,
+      table.createdAt
+    ),
+  ]
+);
+
 // ==================== SITE SETTINGS (key-value config) ====================
 export const siteSettings = pgTable("site_settings", {
   key: text("key").primaryKey(),

@@ -9,7 +9,7 @@ import {
   summarizeConversationContext,
 } from "@/lib/partner-prompts";
 import { db } from "@/db";
-import { partners, users, referrals } from "@/db/schema";
+import { partners, users, referrals, chatMessages } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { chatMessageSchema } from "@/lib/validations";
 import { checkRateLimit } from "@/lib/redis";
@@ -183,6 +183,19 @@ export async function POST(request: NextRequest) {
     conversationSummary || undefined
   );
 
+  // Extract the user's latest message text for persistence
+  const lastUserMsg = [...clientMessages].reverse().find(
+    (m: Record<string, unknown>) => m.role === "user"
+  );
+  const userMsgText = lastUserMsg
+    ? Array.isArray(lastUserMsg.parts)
+      ? (lastUserMsg.parts as Array<{ type?: string; text?: string }>)
+          .filter((p) => p.type === "text")
+          .map((p) => p.text || "")
+          .join("")
+      : String(lastUserMsg.content || "")
+    : "";
+
   // Stream response with retries and abort signal for graceful disconnection.
   const result = streamText({
     model,
@@ -200,6 +213,63 @@ export async function POST(request: NextRequest) {
       console.error("[chat] Stream error:", event.error);
     },
   });
+
+  // Persist messages to DB (non-blocking — don't delay the stream)
+  const persistMessages = async () => {
+    try {
+      // Save user message
+      if (userMsgText.trim()) {
+        await db.insert(chatMessages).values({
+          id: crypto.randomUUID(),
+          userId: auth.sub,
+          partnerId,
+          role: "user",
+          content: userMsgText.trim(),
+        });
+      }
+
+      // Wait for full response, then save assistant message
+      const rawText = await result.text;
+      const cleanText = rawText
+        .replace(/<think>[\s\S]*?<\/think>/g, "")
+        .trim();
+
+      if (cleanText) {
+        await db.insert(chatMessages).values({
+          id: crypto.randomUUID(),
+          userId: auth.sub,
+          partnerId,
+          role: "assistant",
+          content: cleanText,
+        });
+      }
+
+      // Prune old messages: keep only last 100 per user+partner
+      const oldMessages = await db
+        .select({ id: chatMessages.id })
+        .from(chatMessages)
+        .where(
+          and(
+            eq(chatMessages.userId, auth.sub),
+            eq(chatMessages.partnerId, partnerId)
+          )
+        )
+        .orderBy(sql`created_at DESC`)
+        .offset(100);
+
+      if (oldMessages.length > 0) {
+        const oldIds = oldMessages.map((m) => m.id);
+        await db
+          .delete(chatMessages)
+          .where(sql`id = ANY(${oldIds})`);
+      }
+    } catch (err) {
+      console.error("[chat] Failed to persist messages:", err);
+    }
+  };
+
+  // Fire-and-forget persistence
+  persistMessages();
 
   // MiniMax M2.7 embeds <think>...</think> in content that we must strip.
   // Transform the stream to remove think tags before sending to client.
