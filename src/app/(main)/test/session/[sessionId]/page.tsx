@@ -18,7 +18,7 @@ export default function TestSessionPage({
 }) {
   const { sessionId } = use(params);
   const router = useRouter();
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const isMobile = useIsMobile();
   const isZh = locale === "zh";
   const games = useMemo(
@@ -95,7 +95,7 @@ export default function TestSessionPage({
       {/* Mobile skip notice */}
       {isMobile && (
         <div className="text-xs text-center text-muted-foreground">
-          {isZh ? "手机模式：已跳过需要鼠标/键盘的游戏" : "Mobile mode: skipped games requiring mouse/keyboard"}
+          {t("test.session.mobileSkip")}
         </div>
       )}
 
@@ -122,8 +122,8 @@ export default function TestSessionPage({
           onNext={handleNext}
           nextLabel={
             currentIndex + 1 >= games.length
-              ? (isZh ? "查看结果" : "View Results")
-              : (isZh ? "下一个测试" : "Next Test")
+              ? t("test.session.viewResults")
+              : t("test.session.nextTest")
           }
         />
       )}
@@ -131,7 +131,7 @@ export default function TestSessionPage({
       {phase === "completing" && (
         <div className="text-center py-20">
           <div className="text-lg text-muted-foreground">
-            {isZh ? "正在生成测试报告..." : "Generating your report..."}
+            {t("test.session.generating")}
           </div>
         </div>
       )}

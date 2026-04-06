@@ -13,7 +13,7 @@ interface Session {
 }
 
 export default function ResultsListPage() {
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const isZh = locale === "zh";
   const [sessions, setSessions] = useState<Session[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,21 +31,21 @@ export default function ResultsListPage() {
 
   if (loading) {
     return (
-      <div className="text-center py-20 text-muted-foreground">{isZh ? "加载中..." : "Loading..."}</div>
+      <div className="text-center py-20 text-muted-foreground">{t("common.loading")}</div>
     );
   }
 
   return (
     <div className="max-w-2xl mx-auto space-y-4">
-      <h1 className="text-2xl font-bold">{isZh ? "测试记录" : "Test History"}</h1>
+      <h1 className="text-2xl font-bold">{t("sessionResult.testHistory")}</h1>
       {sessions.length === 0 ? (
         <div className="text-center py-20">
-          <p className="text-muted-foreground mb-4">{isZh ? "还没有测试记录" : "No test records yet"}</p>
+          <p className="text-muted-foreground mb-4">{t("sessionResult.noRecords")}</p>
           <Link
             href="/test"
             className="text-primary hover:underline"
           >
-            {isZh ? "开始第一次测试" : "Start your first test"}
+            {t("sessionResult.startFirstTest")}
           </Link>
         </div>
       ) : (
@@ -64,10 +64,10 @@ export default function ResultsListPage() {
                     })}
                   </div>
                   <div className="text-sm text-muted-foreground">
-                    {isZh ? "完整天赋测试" : "Full Talent Test"}
+                    {t("sessionResult.fullTalentTest")}
                   </div>
                 </div>
-                <div className="text-sm text-primary">{isZh ? "查看详情" : "View Details"} &rarr;</div>
+                <div className="text-sm text-primary">{t("sessionResult.viewDetails")} &rarr;</div>
               </CardContent>
             </Card>
           </Link>

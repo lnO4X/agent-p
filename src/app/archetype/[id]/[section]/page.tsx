@@ -32,7 +32,7 @@ export default function ArchetypeSectionPage({
   params: Promise<{ id: string; section: string }>;
 }) {
   const { id, section } = use(params);
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const isZh = locale === "zh";
 
   const archetype = getArchetype(id);
@@ -40,14 +40,20 @@ export default function ArchetypeSectionPage({
     notFound();
   }
 
-  const sectionTitles: Record<string, { zh: string; en: string; icon: React.ReactNode }> = {
-    games: { zh: "推荐游戏", en: "Recommended Games", icon: <Gamepad2 className="w-5 h-5" /> },
-    relationships: { zh: "关系图谱", en: "Relationships", icon: <Heart className="w-5 h-5" /> },
-    growth: { zh: "进化之路", en: "Growth Path", icon: <TrendingUp className="w-5 h-5" /> },
-    characters: { zh: "角色匹配", en: "Character Matches", icon: <Users className="w-5 h-5" /> },
+  const sectionIcons: Record<string, React.ReactNode> = {
+    games: <Gamepad2 className="w-5 h-5" />,
+    relationships: <Heart className="w-5 h-5" />,
+    growth: <TrendingUp className="w-5 h-5" />,
+    characters: <Users className="w-5 h-5" />,
   };
 
-  const sectionInfo = sectionTitles[section];
+  const sectionKeys: Record<string, string> = {
+    games: "archetype.sectionGames",
+    relationships: "archetype.sectionRelationships",
+    growth: "archetype.sectionGrowth",
+    characters: "archetype.sectionCharacters",
+  };
+
   const name = isZh ? archetype.name : archetype.nameEn;
 
   return (
@@ -68,7 +74,7 @@ export default function ArchetypeSectionPage({
               href={`/archetype/${id}/${s}`}
               className="text-xs px-2 py-1 rounded-full bg-muted hover:bg-muted/80 text-muted-foreground"
             >
-              {isZh ? sectionTitles[s].zh : sectionTitles[s].en}
+              {t(sectionKeys[s])}
             </Link>
           ))}
         </div>
@@ -85,7 +91,7 @@ export default function ArchetypeSectionPage({
           <span className="text-3xl">{archetype.icon}</span>
           <div>
             <h1 className="text-xl font-bold">
-              {name} — {isZh ? sectionInfo.zh : sectionInfo.en}
+              {name} — {t(sectionKeys[section])}
             </h1>
             <p className="text-sm text-muted-foreground">
               {isZh ? archetype.tagline : archetype.taglineEn}
@@ -95,22 +101,22 @@ export default function ArchetypeSectionPage({
       </div>
 
       {/* Section Content */}
-      {section === "games" && <GamesSection archetypeId={id} isZh={isZh} />}
-      {section === "relationships" && <RelationshipsSection archetypeId={id} isZh={isZh} />}
-      {section === "growth" && <GrowthSection archetypeId={id} isZh={isZh} />}
-      {section === "characters" && <CharactersSection archetypeId={id} isZh={isZh} />}
+      {section === "games" && <GamesSection archetypeId={id} isZh={isZh} t={t} />}
+      {section === "relationships" && <RelationshipsSection archetypeId={id} isZh={isZh} t={t} />}
+      {section === "growth" && <GrowthSection archetypeId={id} isZh={isZh} t={t} />}
+      {section === "characters" && <CharactersSection archetypeId={id} isZh={isZh} t={t} />}
 
       {/* CTA */}
       <Card className="border-dashed">
         <CardContent className="p-4 text-center">
           <p className="text-sm text-muted-foreground mb-2">
-            {isZh ? "还不知道你的原型？" : "Don't know your archetype yet?"}
+            {t("archetype.dontKnowYours")}
           </p>
           <Link
             href="/quiz"
             className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
-            {isZh ? "3分钟测试，发现你的游戏DNA" : "Take the 3-min quiz to find your gaming DNA"}
+            {t("archetype.threeMinQuiz")}
             <ArrowRight className="w-4 h-4" />
           </Link>
         </CardContent>
@@ -121,15 +127,15 @@ export default function ArchetypeSectionPage({
 
 // ==================== GAMES SECTION ====================
 
-function GamesSection({ archetypeId, isZh }: { archetypeId: string; isZh: boolean }) {
+type TFunc = (key: string, params?: Record<string, string | number>) => string;
+
+function GamesSection({ archetypeId, isZh, t }: { archetypeId: string; isZh: boolean; t: TFunc }) {
   const games = ARCHETYPE_GAMES[archetypeId] || [];
 
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        {isZh
-          ? "基于你的天赋维度匹配的完美游戏。匹配度越高，越适合你的原型。"
-          : "Games perfectly matched to your talent dimensions. Higher match = better fit for your archetype."}
+        {t("archetype.gamesIntro")}
       </p>
       {games.map((game, i) => (
         <Card key={i}>
@@ -162,7 +168,7 @@ function GamesSection({ archetypeId, isZh }: { archetypeId: string; isZh: boolea
 
 // ==================== RELATIONSHIPS SECTION ====================
 
-function RelationshipsSection({ archetypeId, isZh }: { archetypeId: string; isZh: boolean }) {
+function RelationshipsSection({ archetypeId, isZh, t }: { archetypeId: string; isZh: boolean; t: TFunc }) {
   const archetype = getArchetype(archetypeId)!;
   const allArchetypes = getAllArchetypes();
 
@@ -189,7 +195,7 @@ function RelationshipsSection({ archetypeId, isZh }: { archetypeId: string; isZh
             <Card className="hover:border-green-500/50 transition-colors h-full">
               <CardContent className="p-4 text-center">
                 <Shield className="w-5 h-5 mx-auto mb-1 text-green-500" />
-                <p className="text-xs text-muted-foreground mb-1">{isZh ? "天生盟友" : "Natural Ally"}</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("archetype.naturalAlly")}</p>
                 <p className="text-2xl mb-1">{ally.icon}</p>
                 <p className="font-semibold text-sm">{isZh ? ally.name : ally.nameEn}</p>
               </CardContent>
@@ -201,7 +207,7 @@ function RelationshipsSection({ archetypeId, isZh }: { archetypeId: string; isZh
             <Card className="hover:border-primary/50 transition-colors h-full">
               <CardContent className="p-4 text-center">
                 <Zap className="w-5 h-5 mx-auto mb-1 text-primary" />
-                <p className="text-xs text-muted-foreground mb-1">{isZh ? "进化目标" : "Evolution"}</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("archetype.evolutionTarget")}</p>
                 <p className="text-2xl mb-1">{evolution.icon}</p>
                 <p className="font-semibold text-sm">{isZh ? evolution.name : evolution.nameEn}</p>
               </CardContent>
@@ -213,7 +219,7 @@ function RelationshipsSection({ archetypeId, isZh }: { archetypeId: string; isZh
             <Card className="hover:border-red-500/50 transition-colors h-full">
               <CardContent className="p-4 text-center">
                 <Swords className="w-5 h-5 mx-auto mb-1 text-red-500" />
-                <p className="text-xs text-muted-foreground mb-1">{isZh ? "天生克星" : "Nemesis"}</p>
+                <p className="text-xs text-muted-foreground mb-1">{t("archetype.naturalNemesis")}</p>
                 <p className="text-2xl mb-1">{nemesis.icon}</p>
                 <p className="font-semibold text-sm">{isZh ? nemesis.name : nemesis.nameEn}</p>
               </CardContent>
@@ -223,7 +229,7 @@ function RelationshipsSection({ archetypeId, isZh }: { archetypeId: string; isZh
       </div>
 
       {/* All compatibility */}
-      <h2 className="text-lg font-semibold">{isZh ? "全原型兼容性" : "Compatibility with All Archetypes"}</h2>
+      <h2 className="text-lg font-semibold">{t("archetype.allCompatibility")}</h2>
       <div className="space-y-2">
         {relationships.map(({ archetype: other, compat }) => {
           if (!compat) return null;
@@ -265,7 +271,7 @@ function RelationshipsSection({ archetypeId, isZh }: { archetypeId: string; isZh
 
 // ==================== GROWTH SECTION ====================
 
-function GrowthSection({ archetypeId, isZh }: { archetypeId: string; isZh: boolean }) {
+function GrowthSection({ archetypeId, isZh, t }: { archetypeId: string; isZh: boolean; t: TFunc }) {
   const archetype = getArchetype(archetypeId)!;
   const evolution = getArchetype(archetype.evolutionId);
 
@@ -298,7 +304,7 @@ function GrowthSection({ archetypeId, isZh }: { archetypeId: string; isZh: boole
             <div className="flex items-center gap-2 mb-2">
               <Zap className="w-4 h-4 text-green-500" />
               <h3 className="font-semibold text-green-600 dark:text-green-400">
-                {isZh ? "核心优势" : "Core Strength"}
+                {t("archetype.coreStrength")}
               </h3>
             </div>
             <p className="text-lg font-bold mb-1">
@@ -315,7 +321,7 @@ function GrowthSection({ archetypeId, isZh }: { archetypeId: string; isZh: boole
             <div className="flex items-center gap-2 mb-2">
               <Shield className="w-4 h-4 text-red-500" />
               <h3 className="font-semibold text-red-600 dark:text-red-400">
-                {isZh ? "需要提升" : "Needs Improvement"}
+                {t("archetype.needsImprovement")}
               </h3>
             </div>
             <p className="text-lg font-bold mb-1">
@@ -334,7 +340,7 @@ function GrowthSection({ archetypeId, isZh }: { archetypeId: string; isZh: boole
           <CardContent className="p-4">
             <h3 className="font-semibold mb-2 flex items-center gap-2">
               <TrendingUp className="w-4 h-4 text-primary" />
-              {isZh ? "进化路径" : "Evolution Path"}
+              {t("archetype.evolutionPath")}
             </h3>
             <div className="flex items-center gap-3 mb-3">
               <div className="text-center">
@@ -356,27 +362,23 @@ function GrowthSection({ archetypeId, isZh }: { archetypeId: string; isZh: boole
 
       {/* Training Recommendation */}
       <h2 className="text-lg font-semibold">
-        {isZh ? `提升${weakName.zh}的训练游戏` : `Games to Train ${weakName.en}`}
+        {t("archetype.trainingGamesFor", { talent: isZh ? weakName.zh : weakName.en })}
       </h2>
       <p className="text-sm text-muted-foreground">
-        {isZh
-          ? "通过针对性的游戏训练，弥补你的弱点，解锁进化路径。"
-          : "Targeted gaming practice to address your weakness and unlock your evolution path."}
+        {t("archetype.trainingIntro")}
       </p>
 
       {/* Link to full test */}
       <Card className="border-primary/30">
         <CardContent className="p-4 text-center">
           <p className="text-sm text-muted-foreground mb-2">
-            {isZh
-              ? "想知道你的天赋精确分数？完成完整13维测试。"
-              : "Want your exact talent scores? Take the full 13-dimension test."}
+            {t("archetype.wantExactScores")}
           </p>
           <Link
             href="/test"
             className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
-            {isZh ? "开始完整测试 (25分钟)" : "Start Full Test (25 min)"}
+            {t("archetype.startFullTest")}
             <ArrowRight className="w-4 h-4" />
           </Link>
         </CardContent>
@@ -387,15 +389,13 @@ function GrowthSection({ archetypeId, isZh }: { archetypeId: string; isZh: boole
 
 // ==================== CHARACTERS SECTION ====================
 
-function CharactersSection({ archetypeId, isZh }: { archetypeId: string; isZh: boolean }) {
+function CharactersSection({ archetypeId, isZh, t }: { archetypeId: string; isZh: boolean; t: TFunc }) {
   const characters = ARCHETYPE_CHARACTERS[archetypeId] || [];
 
   return (
     <div className="space-y-3">
       <p className="text-sm text-muted-foreground">
-        {isZh
-          ? "这些游戏角色与你的原型共享相同的DNA——相似的优势、风格和个性。"
-          : "These game characters share your archetype's DNA — similar strengths, playstyle, and personality."}
+        {t("archetype.charactersIntro")}
       </p>
       {characters.map((char, i) => (
         <Card key={i}>

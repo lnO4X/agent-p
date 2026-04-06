@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from "react";
 import { X } from "lucide-react";
+import { useI18n } from "@/i18n/context";
 import { cn } from "@/lib/utils";
 
 interface NpsPromptProps {
@@ -13,6 +14,7 @@ interface NpsPromptProps {
 const STORAGE_KEY = "gametan-nps-dismissed";
 
 export function NpsPrompt({ context, isZh, delay = 2000 }: NpsPromptProps) {
+  const { t } = useI18n();
   const [visible, setVisible] = useState(false);
   const [score, setScore] = useState<number | null>(null);
   const [comment, setComment] = useState("");
@@ -57,7 +59,7 @@ export function NpsPrompt({ context, isZh, delay = 2000 }: NpsPromptProps) {
     return (
       <div className="fixed bottom-20 left-1/2 -translate-x-1/2 z-50 bg-card border border-border rounded-2xl shadow-xl px-5 py-4 max-w-xs text-center animate-fade-up">
         <p className="text-sm font-medium">
-          {isZh ? "感谢你的反馈！" : "Thanks for your feedback!"}
+          {t("nps.thanks")}
         </p>
       </div>
     );
@@ -73,9 +75,7 @@ export function NpsPrompt({ context, isZh, delay = 2000 }: NpsPromptProps) {
       </button>
 
       <p className="text-sm font-medium mb-3 pr-4">
-        {isZh
-          ? "你向朋友推荐 GameTan 的可能性？"
-          : "How likely are you to recommend GameTan?"}
+        {t("nps.question")}
       </p>
 
       {/* Score buttons 1-10 */}
@@ -100,8 +100,8 @@ export function NpsPrompt({ context, isZh, delay = 2000 }: NpsPromptProps) {
         ))}
       </div>
       <div className="flex justify-between text-[10px] text-muted-foreground mb-3">
-        <span>{isZh ? "不太可能" : "Not likely"}</span>
-        <span>{isZh ? "非常可能" : "Very likely"}</span>
+        <span>{t("nps.notLikely")}</span>
+        <span>{t("nps.veryLikely")}</span>
       </div>
 
       {/* Comment (shows after score selected) */}
@@ -110,11 +110,7 @@ export function NpsPrompt({ context, isZh, delay = 2000 }: NpsPromptProps) {
           <textarea
             value={comment}
             onChange={(e) => setComment(e.target.value)}
-            placeholder={
-              isZh
-                ? "有什么建议？（可选）"
-                : "Any suggestions? (optional)"
-            }
+            placeholder={t("nps.placeholder")}
             className="w-full h-16 text-xs bg-muted/30 border border-border rounded-xl p-2 resize-none focus:outline-none focus:ring-1 focus:ring-primary"
             maxLength={500}
           />
@@ -122,7 +118,7 @@ export function NpsPrompt({ context, isZh, delay = 2000 }: NpsPromptProps) {
             onClick={submit}
             className="w-full py-2 bg-primary text-primary-foreground text-xs font-medium rounded-xl hover:bg-primary/90 transition-colors"
           >
-            {isZh ? "提交" : "Submit"}
+            {t("nps.submit")}
           </button>
         </div>
       )}

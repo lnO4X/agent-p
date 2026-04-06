@@ -18,8 +18,7 @@ import { useI18n } from "@/i18n/context";
 import { KeyRound, CheckCircle, ArrowLeft } from "lucide-react";
 
 function ResetPasswordForm() {
-  const { locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
   const searchParams = useSearchParams();
   const token = searchParams.get("token") || "";
 
@@ -31,9 +30,9 @@ function ResetPasswordForm() {
 
   useEffect(() => {
     if (!token) {
-      setError(isZh ? "重置链接无效" : "Invalid reset link");
+      setError(t("auth.invalidResetLink"));
     }
-  }, [token, isZh]);
+  }, [token, t]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -43,11 +42,11 @@ function ResetPasswordForm() {
 
     // Client-side validation
     if (password.length < 6) {
-      setError(isZh ? "密码至少6个字符" : "Password must be at least 6 characters");
+      setError(t("auth.passwordMinLength"));
       return;
     }
     if (password !== confirmPassword) {
-      setError(isZh ? "两次输入的密码不一致" : "Passwords do not match");
+      setError(t("auth.passwordsNoMatch"));
       return;
     }
 
@@ -63,10 +62,10 @@ function ResetPasswordForm() {
       if (json.success) {
         setSuccess(true);
       } else {
-        setError(json.error?.message || (isZh ? "重置失败" : "Reset failed"));
+        setError(json.error?.message || t("auth.resetFailed"));
       }
     } catch {
-      setError(isZh ? "网络错误，请重试" : "Network error, please retry");
+      setError(t("auth.networkErrorRetry"));
     }
     setLoading(false);
   }
@@ -80,18 +79,16 @@ function ResetPasswordForm() {
               <CheckCircle className="h-6 w-6 text-green-600" />
             </div>
             <CardTitle className="text-2xl">
-              {isZh ? "密码已重置" : "Password Reset"}
+              {t("auth.passwordResetDone")}
             </CardTitle>
             <CardDescription>
-              {isZh
-                ? "你的密码已成功重置，请使用新密码登录。"
-                : "Your password has been successfully reset. Please sign in with your new password."}
+              {t("auth.passwordResetDoneDesc")}
             </CardDescription>
           </CardHeader>
           <CardFooter className="flex justify-center">
             <Link href="/login">
               <Button>
-                {isZh ? "前往登录" : "Go to Login"}
+                {t("auth.goToLogin")}
               </Button>
             </Link>
           </CardFooter>
@@ -108,10 +105,10 @@ function ResetPasswordForm() {
             <KeyRound className="h-6 w-6 text-blue-600" />
           </div>
           <CardTitle className="text-2xl">
-            {isZh ? "重置密码" : "Reset Password"}
+            {t("auth.resetPasswordTitle")}
           </CardTitle>
           <CardDescription>
-            {isZh ? "输入你的新密码" : "Enter your new password"}
+            {t("auth.resetPasswordDesc")}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleSubmit}>
@@ -123,28 +120,28 @@ function ResetPasswordForm() {
             )}
             <div className="space-y-2">
               <Label htmlFor="password">
-                {isZh ? "新密码" : "New Password"}
+                {t("auth.newPassword")}
               </Label>
               <Input
                 id="password"
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={isZh ? "至少6个字符" : "6+ characters"}
+                placeholder={t("auth.passwordPlaceholder")}
                 autoComplete="new-password"
                 required
               />
             </div>
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">
-                {isZh ? "确认新密码" : "Confirm Password"}
+                {t("auth.confirmPassword")}
               </Label>
               <Input
                 id="confirmPassword"
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                placeholder={isZh ? "再次输入新密码" : "Re-enter new password"}
+                placeholder={t("auth.reenterPassword")}
                 autoComplete="new-password"
                 required
               />
@@ -153,12 +150,12 @@ function ResetPasswordForm() {
           <CardFooter className="flex flex-col gap-3">
             <Button type="submit" className="w-full" disabled={loading || !token}>
               {loading
-                ? (isZh ? "重置中..." : "Resetting...")
-                : (isZh ? "重置密码" : "Reset Password")}
+                ? t("auth.resetting")
+                : t("auth.resetPasswordTitle")}
             </Button>
             <Link href="/login" className="text-sm text-muted-foreground hover:text-primary">
               <ArrowLeft className="inline mr-1 h-3 w-3" />
-              {isZh ? "返回登录" : "Back to Login"}
+              {t("auth.backToLogin")}
             </Link>
           </CardFooter>
         </form>

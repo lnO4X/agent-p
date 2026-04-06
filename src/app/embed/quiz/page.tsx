@@ -1,10 +1,11 @@
 "use client";
 
-import { useState, useCallback, useMemo, useEffect } from "react";
+import { useState, useCallback, useMemo } from "react";
 import { gameRegistry } from "@/games";
 import { QUICK_TEST_GAMES } from "@/lib/archetype";
 import { quickScoresToArchetype } from "@/lib/archetype";
 import type { GameRawResult } from "@/types/game";
+import { useI18n } from "@/i18n/context";
 import { Zap, Brain, Dice5, ArrowRight, ExternalLink } from "lucide-react";
 
 const BASE_URL = "https://gametan.ai";
@@ -17,20 +18,12 @@ const GAME_META = [
 
 type Phase = "cta" | "playing" | "transition" | "result";
 
-function detectZh(): boolean {
-  if (typeof navigator === "undefined") return true;
-  return navigator.language.startsWith("zh");
-}
-
 export default function EmbedQuizPage() {
-  const [isZh, setIsZh] = useState(true);
+  const { locale, t } = useI18n();
+  const isZh = locale === "zh";
   const [phase, setPhase] = useState<Phase>("cta");
   const [gameIndex, setGameIndex] = useState(0);
   const [scores, setScores] = useState<number[]>([]);
-
-  useEffect(() => {
-    setIsZh(detectZh());
-  }, []);
 
   const currentGameId = QUICK_TEST_GAMES[gameIndex];
   const currentPlugin = useMemo(
@@ -82,12 +75,10 @@ export default function EmbedQuizPage() {
       <div className="flex flex-col items-center justify-center min-h-screen px-4 py-6 text-center">
         <div className="space-y-4 max-w-sm w-full">
           <div className="text-2xl font-bold">
-            🎮 {isZh ? "你是什么类型的玩家？" : "What Gamer Are You?"}
+            {t("embed.whatGamerAreYou")}
           </div>
           <p className="text-sm text-gray-400">
-            {isZh
-              ? "3个小游戏 · 3分钟 · 揭示你的游戏原型"
-              : "3 mini-games · 3 min · Discover your archetype"}
+            {t("embed.threeGamesDiscover")}
           </p>
 
           <div className="space-y-2">
@@ -113,7 +104,7 @@ export default function EmbedQuizPage() {
             onClick={() => setPhase("playing")}
             className="w-full py-3 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[0.97] transition-all font-semibold text-white flex items-center justify-center gap-2"
           >
-            {isZh ? "开始测试" : "Start Quiz"}
+            {t("embed.startQuiz")}
             <ArrowRight size={18} />
           </button>
 
@@ -160,7 +151,7 @@ export default function EmbedQuizPage() {
           {nextMeta && NextIcon && (
             <div className="space-y-2">
               <div className="text-xs text-gray-400">
-                {isZh ? "下一关" : "Next Round"}
+                {t("quiz.nextRound")}
               </div>
               <div className="flex items-center justify-center gap-2">
                 <NextIcon size={20} style={{ color: nextMeta.color }} />
@@ -175,7 +166,7 @@ export default function EmbedQuizPage() {
             onClick={startNextGame}
             className="w-full py-3 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[0.97] transition-all font-semibold text-white flex items-center justify-center gap-2"
           >
-            {isZh ? "继续" : "Continue"}
+            {t("quiz.continue")}
             <ArrowRight size={18} />
           </button>
         </div>
@@ -221,7 +212,7 @@ export default function EmbedQuizPage() {
             rel="noopener noreferrer"
             className="w-full py-3 px-6 rounded-xl bg-blue-600 hover:bg-blue-500 active:scale-[0.97] transition-all font-semibold text-white flex items-center justify-center gap-2 no-underline"
           >
-            {isZh ? "查看完整结果" : "View Full Results"}
+            {t("embed.viewFullResults")}
             <ExternalLink size={16} />
           </a>
 
@@ -233,7 +224,7 @@ export default function EmbedQuizPage() {
             }}
             className="text-sm text-gray-500 hover:text-gray-300 transition-colors"
           >
-            {isZh ? "重新测试" : "Retake Quiz"}
+            {t("embed.retakeQuiz")}
           </button>
 
           <div className="text-xs text-gray-500">

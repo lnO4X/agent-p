@@ -205,6 +205,8 @@ export interface ProGapItem {
 /**
  * Per-dimension gap analysis comparing user scores against pro averages.
  * Order: [reaction, pattern, risk]
+ * i18n: Pure lib function — uses isZh param (no useI18n() available).
+ * Keys tracked in .i18n-batch5.json: pro.*
  */
 export function getProGapAnalysis(
   scores: number[],

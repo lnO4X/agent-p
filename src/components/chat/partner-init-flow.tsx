@@ -11,8 +11,7 @@ import { ArrowLeft, Check } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export function PartnerInitFlow() {
-  const { t, locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
   const router = useRouter();
   const [step, setStep] = useState<1 | 2 | 3>(1);
   const [definition, setDefinition] = useState("");
@@ -98,10 +97,10 @@ export function PartnerInitFlow() {
         router.push("/chat");
       } else {
         const data = await res.json().catch(() => ({}));
-        setCreateError(data.error || (isZh ? "创建失败，请重试" : "Failed to create, please retry"));
+        setCreateError(data.error || t("partners.init.createFailed"));
       }
     } catch {
-      setCreateError(isZh ? "网络错误，请重试" : "Network error, please retry");
+      setCreateError(t("partners.init.networkError"));
     } finally {
       setCreating(false);
     }

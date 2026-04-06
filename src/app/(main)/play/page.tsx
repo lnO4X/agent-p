@@ -123,10 +123,10 @@ export default function PlayPage() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="font-semibold text-sm truncate">
-                    {isZh ? "快速测试" : "Quick Quiz"}
+                    {t("play.quickQuiz")}
                   </div>
                   <div className="text-[10px] text-muted-foreground truncate">
-                    {isZh ? "3分钟测天赋" : "3-min talent test"}
+                    {t("play.quickQuizDesc")}
                   </div>
                 </div>
               </div>

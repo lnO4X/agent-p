@@ -8,12 +8,10 @@ import { Brain } from "lucide-react";
 import type { Partner } from "@/types/partner";
 
 export function PartnerHub() {
-  const { t, locale } = useI18n();
+  const { t } = useI18n();
   const router = useRouter();
   const [partners, setPartners] = useState<Partner[]>([]);
   const [loading, setLoading] = useState(true);
-
-  const isZh = locale === "zh";
 
   useEffect(() => {
     async function load() {
@@ -55,12 +53,10 @@ export function PartnerHub() {
       <div className="max-w-lg mx-auto px-4 py-12 text-center space-y-4">
         <Brain size={48} className="text-primary mx-auto" />
         <h1 className="text-xl font-semibold">
-          {isZh ? "天赋教练" : "Talent Coach"}
+          {t("partners.title")}
         </h1>
         <p className="text-sm text-muted-foreground">
-          {isZh
-            ? "AI 教练正在准备中..."
-            : "Your AI coach is being set up..."}
+          {t("chat.coachSetup")}
         </p>
       </div>
     );

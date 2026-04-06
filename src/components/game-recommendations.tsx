@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Gamepad2, Star, ChevronRight } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { useI18n } from "@/i18n/context";
 import { cn } from "@/lib/utils";
 
 const GENRE_LABELS: Record<string, { zh: string; en: string }> = {
@@ -47,6 +48,7 @@ export function GameRecommendations({
   gradient,
   isZh,
 }: GameRecommendationsProps) {
+  const { t } = useI18n();
   const [games, setGames] = useState<Game[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -88,7 +90,7 @@ export function GameRecommendations({
       <div className="space-y-3">
         <div className="text-xs text-muted-foreground flex items-center gap-1.5">
           <Gamepad2 size={12} />
-          {isZh ? "为你推荐游戏..." : "Finding games for you..."}
+          {t("game.rec.loading")}
         </div>
         <div className="flex gap-3 overflow-x-auto pb-2">
           {[1, 2, 3].map((i) => (
@@ -108,7 +110,7 @@ export function GameRecommendations({
       <div>
         <div className="text-xs text-muted-foreground mb-2 flex items-center gap-1.5">
           <Gamepad2 size={12} />
-          {isZh ? "推荐游戏类型" : "Recommended Genres"}
+          {t("game.rec.genres")}
         </div>
         <div className="flex flex-wrap gap-2">
           {genres.map((genre) => (
@@ -117,7 +119,7 @@ export function GameRecommendations({
               href={`/explore?genre=${genre}`}
               className="text-xs px-3 py-1.5 rounded-full bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors"
             >
-              {GENRE_LABELS[genre]?.[isZh ? "zh" : "en"] ?? genre.toUpperCase()}
+              {t(`genre.${genre}`) !== `genre.${genre}` ? t(`genre.${genre}`) : genre.toUpperCase()}
             </Link>
           ))}
         </div>
@@ -130,15 +132,13 @@ export function GameRecommendations({
       <div className="flex items-center justify-between">
         <div className="text-xs text-muted-foreground flex items-center gap-1.5">
           <Gamepad2 size={12} />
-          {isZh
-            ? `${archetypeName}的推荐游戏`
-            : `Games for ${archetypeNameEn}`}
+          {t("game.rec.forArchetype", { name: isZh ? archetypeName : archetypeNameEn })}
         </div>
         <Link
           href={`/explore?genre=${genres[0]}`}
           className="text-[10px] text-primary flex items-center gap-0.5 hover:underline"
         >
-          {isZh ? "查看全部" : "See all"}
+          {t("dashboard.viewAll")}
           <ChevronRight size={10} />
         </Link>
       </div>
@@ -151,7 +151,7 @@ export function GameRecommendations({
             href={`/explore?genre=${genre}`}
             className="text-[10px] px-2 py-1 rounded-full bg-primary/10 text-primary font-medium hover:bg-primary/20 transition-colors"
           >
-            {GENRE_LABELS[genre]?.[isZh ? "zh" : "en"] ?? genre.toUpperCase()}
+            {t(`genre.${genre}`) !== `genre.${genre}` ? t(`genre.${genre}`) : genre.toUpperCase()}
           </Link>
         ))}
       </div>
@@ -174,7 +174,7 @@ export function GameRecommendations({
                 {game.coverUrl ? (
                   <img
                     src={game.coverUrl}
-                    alt={isZh ? game.name : (game.nameEn || game.name)}
+                    alt={isZh ? game.name : game.nameEn || game.name}
                     className="w-full h-16 object-cover"
                     loading="lazy"
                   />
@@ -204,7 +204,7 @@ export function GameRecommendations({
                     "min-h-[2.2em]"
                   )}
                 >
-                  {isZh ? game.name : (game.nameEn || game.name)}
+                  {isZh ? game.name : game.nameEn || game.name}
                 </p>
                 <div className="flex flex-wrap gap-0.5 mt-1">
                   {game.platforms?.slice(0, 2).map((p) => (

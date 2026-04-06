@@ -7,7 +7,7 @@ import { BLOG_POSTS } from "@/lib/blog-posts";
 import { BookOpen, Clock, ArrowRight } from "lucide-react";
 
 export default function BlogPage() {
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const isZh = locale === "zh";
 
   return (
@@ -15,12 +15,10 @@ export default function BlogPage() {
       <div className="max-w-2xl mx-auto px-5 py-12 w-full space-y-8">
         <div className="space-y-2">
           <h1 className="text-3xl font-bold font-[family-name:var(--font-outfit)]">
-            {isZh ? "博客" : "Blog"}
+            {t("blog.title")}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {isZh
-              ? "电竞天赋、游戏技能和职业选手表现的深度分析"
-              : "Deep analysis on esports talent, gaming skills, and pro player performance"}
+            {t("blog.subtitle")}
           </p>
         </div>
 
@@ -38,16 +36,16 @@ export default function BlogPage() {
                   <div className="flex items-center gap-4 text-xs text-muted-foreground/70 pt-1">
                     <span className="flex items-center gap-1">
                       <Clock size={12} />
-                      {post.readTimeMin} {isZh ? "分钟" : "min read"}
+                      {post.readTimeMin} {t("blog.minRead")}
                     </span>
                     <span className="flex items-center gap-1">
                       <BookOpen size={12} />
-                      {post.sectionsEn.length} {isZh ? "章节" : "sections"}
+                      {post.sectionsEn.length} {t("blog.sections")}
                     </span>
                     <span>{post.date}</span>
                   </div>
                   <div className="flex items-center gap-1 text-primary text-xs font-medium pt-1">
-                    {isZh ? "阅读全文" : "Read more"}
+                    {t("blog.readMore")}
                     <ArrowRight size={12} />
                   </div>
                 </CardContent>

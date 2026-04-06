@@ -34,7 +34,6 @@ export default function DashboardPage() {
 
 function DashboardContent() {
   const { t, locale } = useI18n();
-  const isZh = locale === "zh";
   const searchParams = useSearchParams();
   const isWelcome = searchParams.get("welcome") === "1";
   const registerMethod = searchParams.get("method");
@@ -95,33 +94,31 @@ function DashboardContent() {
   const getGreeting = () => {
     if (hour >= 5 && hour < 12) {
       return {
-        text: isZh ? "早上好" : "Good Morning",
+        text: t("dashboard.greetingMorning"),
         Icon: Sunrise,
         suggestion: archetype
-          ? (isZh
-            ? `训练一下${t(`talent.${archetype.weakTalent}`)}？`
-            : `Train your ${t(`talent.${archetype.weakTalent}`)} today?`)
-          : (isZh ? "测测你的电竞天赋" : "Test your esports talent"),
+          ? t("dashboard.suggestTrain", { talent: t(`talent.${archetype.weakTalent}`) })
+          : t("dashboard.suggestTest"),
       };
     }
     if (hour >= 12 && hour < 18) {
       return {
-        text: isZh ? "下午好" : "Good Afternoon",
+        text: t("dashboard.greetingAfternoon"),
         Icon: Sun,
-        suggestion: isZh ? "继续探索你的天赋" : "Keep exploring your talents",
+        suggestion: t("dashboard.suggestExplore"),
       };
     }
     if (hour >= 18 && hour < 22) {
       return {
-        text: isZh ? "晚上好" : "Good Evening",
+        text: t("dashboard.greetingEvening"),
         Icon: Sunset,
-        suggestion: isZh ? "放松时间，来几局游戏" : "Relaxation time — play some games",
+        suggestion: t("dashboard.suggestRelax"),
       };
     }
     return {
-      text: isZh ? "夜深了" : "Late Night",
+      text: t("dashboard.greetingNight"),
       Icon: Moon,
-      suggestion: isZh ? "注意休息，明天继续" : "Rest well, continue tomorrow",
+      suggestion: t("dashboard.suggestRest"),
     };
   };
 
@@ -135,7 +132,7 @@ function DashboardContent() {
         <GreetingIcon size={20} className="text-primary shrink-0" />
         <div>
           <h2 className="text-lg font-bold">
-            {greeting.text}{archetype ? `，${isZh ? archetype.name : archetype.nameEn}` : ""}
+            {greeting.text}{archetype ? `，${locale === "zh" ? archetype.name : archetype.nameEn}` : ""}
           </h2>
           <p className="text-xs text-muted-foreground">{greeting.suggestion}</p>
         </div>
@@ -156,7 +153,7 @@ function DashboardContent() {
               <div className="text-4xl">{archetype.icon}</div>
               <div className="flex-1 min-w-0">
                 <div className="text-xs text-muted-foreground">
-                  {isZh ? "你的天赋档案" : "Your Talent Profile"}
+                  {t("dashboard.yourTalentProfile")}
                 </div>
                 <h1
                   className="text-xl font-bold"
@@ -166,10 +163,10 @@ function DashboardContent() {
                     WebkitTextFillColor: "transparent",
                   }}
                 >
-                  {isZh ? archetype.name : archetype.nameEn}
+                  {locale === "zh" ? archetype.name : archetype.nameEn}
                 </h1>
                 <p className="text-xs text-muted-foreground mt-0.5 line-clamp-1 italic">
-                  {isZh ? archetype.tagline : archetype.taglineEn}
+                  {locale === "zh" ? archetype.tagline : archetype.taglineEn}
                 </p>
               </div>
               <Link href="/me">
@@ -182,7 +179,7 @@ function DashboardContent() {
               <div className="flex items-center gap-2 text-xs">
                 <TrendingUp size={12} className="text-primary shrink-0" />
                 <span className="text-muted-foreground line-clamp-1">
-                  {isZh ? archetype.evolutionHint : archetype.evolutionHintEn}
+                  {locale === "zh" ? archetype.evolutionHint : archetype.evolutionHintEn}
                 </span>
               </div>
             </div>
@@ -195,12 +192,10 @@ function DashboardContent() {
             <Card className="border-primary/30 bg-primary/5">
               <CardContent className="pt-4 pb-4 text-center">
                 <h2 className="text-lg font-bold">
-                  {isZh ? "🎉 欢迎加入 GameTan！" : "🎉 Welcome to GameTan!"}
+                  {t("dashboard.welcomeTitle")}
                 </h2>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {isZh
-                    ? "测测你的电竞天赋，对比职业选手"
-                    : "Test your esports talent against pro players"}
+                  {t("dashboard.welcomeDesc")}
                 </p>
               </CardContent>
             </Card>
@@ -210,7 +205,7 @@ function DashboardContent() {
             <div className="text-center space-y-1 py-2">
               <Target size={28} className="text-primary mx-auto" />
               <h2 className="text-base font-bold">
-                {isZh ? "测测你的天赋" : "Test Your Talent"}
+                {t("dashboard.testYourTalent")}
               </h2>
             </div>
           )}
@@ -225,10 +220,10 @@ function DashboardContent() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-sm">
-                      {isZh ? "天赋测试" : "Talent Test"}
+                      {t("dashboard.talentTest")}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {isZh ? "3 个小游戏 · 对比职业选手" : "3 mini-games · vs Pro Players"}
+                      {t("dashboard.talentTestDesc")}
                     </div>
                   </div>
                   <ChevronRight size={16} className="text-muted-foreground shrink-0" />
@@ -247,10 +242,10 @@ function DashboardContent() {
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="font-semibold text-sm">
-                      {isZh ? "先逛逛" : "Explore First"}
+                      {t("dashboard.exploreFirst")}
                     </div>
                     <div className="text-xs text-muted-foreground">
-                      {isZh ? "300+ 游戏等你探索" : "300+ games to explore"}
+                      {t("dashboard.exploreFirstDesc")}
                     </div>
                   </div>
                   <ChevronRight size={16} className="text-muted-foreground shrink-0" />
@@ -274,7 +269,7 @@ function DashboardContent() {
               <div className="flex items-center gap-3">
                 <Share2 size={16} className="text-primary shrink-0" />
                 <span className="text-sm font-medium flex-1">
-                  {isZh ? "分享你的天赋报告" : "Share your talent report"}
+                  {t("dashboard.shareTalentReport")}
                 </span>
                 <ChevronRight size={16} className="text-muted-foreground" />
               </div>

@@ -91,7 +91,7 @@ function CompatibilityContent() {
             onChange={(id) => { setAId(id); setShowResult(false); }}
             archetypes={archetypes}
             isZh={isZh}
-            label={isZh ? "玩家 A" : "Player A"}
+            label={t("archetype.playerA")}
           />
         </div>
 
@@ -106,7 +106,7 @@ function CompatibilityContent() {
             onChange={(id) => { setBId(id); setShowResult(false); }}
             archetypes={archetypes}
             isZh={isZh}
-            label={isZh ? "玩家 B" : "Player B"}
+            label={t("archetype.playerB")}
           />
         </div>
       </div>
@@ -190,7 +190,7 @@ function CompatibilityContent() {
                 <div className="flex items-center gap-2">
                   <ThumbsUp className="w-4 h-4 text-green-500" />
                   <h3 className="font-semibold text-sm">
-                    {isZh ? "优势" : "Strengths"}
+                    {t("archetype.strengths")}
                   </h3>
                 </div>
                 <ul className="space-y-1.5">
@@ -208,7 +208,7 @@ function CompatibilityContent() {
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-yellow-500" />
                   <h3 className="font-semibold text-sm">
-                    {isZh ? "挑战" : "Challenges"}
+                    {t("archetype.challenges")}
                   </h3>
                 </div>
                 <ul className="space-y-1.5">
@@ -242,7 +242,7 @@ function CompatibilityContent() {
               className="pressable"
               onClick={() => { setAId(""); setBId(""); setShowResult(false); }}
             >
-              {isZh ? "重新选择" : "Try Again"}
+              {t("archetype.tryAgain")}
             </Button>
           </div>
         </div>
@@ -251,7 +251,7 @@ function CompatibilityContent() {
       {/* Quiz CTA */}
       <div className="text-center pt-4">
         <p className="text-xs text-muted-foreground mb-2">
-          {isZh ? "还不知道自己的原型？" : "Don't know your archetype yet?"}
+          {t("archetype.dontKnowYours")}
         </p>
         <Link href="/quiz">
           <Button className="pressable gap-2">

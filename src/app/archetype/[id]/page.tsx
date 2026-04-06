@@ -96,8 +96,8 @@ export default function ArchetypeDetailPage({
           >
             {copied ? <Check size={14} /> : <Share2 size={14} />}
             {copied
-              ? (isZh ? "已复制" : "Copied!")
-              : (isZh ? "分享" : "Share")}
+              ? t("archetype.copied")
+              : t("archetype.share")}
           </Button>
           <Link href="/quiz">
             <Button size="sm" variant="outline" className="pressable gap-1.5">
@@ -145,39 +145,35 @@ export default function ArchetypeDetailPage({
           {[
             {
               icon: <Brain className="w-4 h-4" />,
-              titleZh: "你的游戏本能",
-              titleEn: "Your Gaming Instinct",
+              titleKey: "archetype.gamingInstinct",
               content: isZh ? narrative.instinct : narrative.instinctEn,
               color: archetype.gradient[0],
             },
             {
               icon: <Eye className="w-4 h-4" />,
-              titleZh: "你的典型行为",
-              titleEn: "Your Typical Behaviors",
+              titleKey: "archetype.typicalBehaviors",
               content: isZh ? narrative.behaviors : narrative.behaviorsEn,
               color: archetype.gradient[1],
             },
             {
               icon: <Users className="w-4 h-4" />,
-              titleZh: "队友眼中的你",
-              titleEn: "How Teammates See You",
+              titleKey: "archetype.teammateView",
               content: isZh ? narrative.teamView : narrative.teamViewEn,
               color: archetype.gradient[0],
             },
             {
               icon: <TrendingUp className="w-4 h-4" />,
-              titleZh: "你的进化之路",
-              titleEn: "Your Growth Path",
+              titleKey: "archetype.yourGrowthPath",
               content: isZh ? narrative.growthPath : narrative.growthPathEn,
               color: archetype.gradient[1],
             },
-          ].map(({ icon, titleZh, titleEn, content, color }) => (
-            <Card key={titleEn}>
+          ].map(({ icon, titleKey, content, color }) => (
+            <Card key={titleKey}>
               <CardContent className="pt-4 space-y-2">
                 <div className="flex items-center gap-2">
                   <div style={{ color }}>{icon}</div>
                   <h3 className="font-semibold text-sm">
-                    {isZh ? titleZh : titleEn}
+                    {t(titleKey)}
                   </h3>
                 </div>
                 <p className="text-sm text-muted-foreground leading-relaxed whitespace-pre-line">
@@ -196,7 +192,7 @@ export default function ArchetypeDetailPage({
             <div className="flex items-center gap-2">
               <Trophy className="w-4 h-4 text-primary" />
               <h3 className="font-semibold text-sm">
-                {isZh ? "殿堂选手" : "Hall of Fame"}
+                {t("archetype.hallOfFame")}
               </h3>
               <span className="text-[10px] text-muted-foreground ml-auto">
                 {region === "cn" ? "🇨🇳 中国" : "🌍 Global"}
@@ -231,18 +227,18 @@ export default function ArchetypeDetailPage({
       {/* Deep dive sections */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
         {[
-          { section: "games", icon: "🎮", zh: "推荐游戏", en: "Games" },
-          { section: "relationships", icon: "💞", zh: "关系图谱", en: "Relationships" },
-          { section: "growth", icon: "📈", zh: "进化之路", en: "Growth" },
-          { section: "characters", icon: "🎭", zh: "角色匹配", en: "Characters" },
-        ].map(({ section, icon, zh, en }) => (
+          { section: "games", icon: "🎮", key: "archetype.sectionGames" },
+          { section: "relationships", icon: "💞", key: "archetype.sectionRelationships" },
+          { section: "growth", icon: "📈", key: "archetype.sectionGrowth" },
+          { section: "characters", icon: "🎭", key: "archetype.sectionCharacters" },
+        ].map(({ section, icon, key }) => (
           <Link
             key={section}
             href={`/archetype/${id}/${section}`}
             className="pressable flex flex-col items-center gap-1.5 p-3 rounded-xl border hover:bg-muted/50 transition-colors"
           >
             <span className="text-xl">{icon}</span>
-            <span className="text-xs font-medium">{isZh ? zh : en}</span>
+            <span className="text-xs font-medium">{t(key)}</span>
           </Link>
         ))}
       </div>
@@ -384,9 +380,7 @@ export default function ArchetypeDetailPage({
       >
         <CardContent className="pt-4 space-y-3 text-center">
           <p className="text-sm font-medium">
-            {isZh
-              ? `看看${archetype.name}和其他原型的兼容性`
-              : `Check ${archetype.nameEn}'s compatibility with other archetypes`}
+            {t("archetype.checkCompatWith", { name })}
           </p>
           <Link href={`/archetype/compatibility?a=${archetype.id}`}>
             <Button variant="outline" size="sm" className="pressable">

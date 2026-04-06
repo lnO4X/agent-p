@@ -4,6 +4,7 @@ import { useState, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Download, Share2, Loader2 } from "lucide-react";
 import { trackEvent as track } from "@/lib/analytics";
+import { useI18n } from "@/i18n/context";
 import type { Archetype } from "@/lib/archetype";
 import type { TalentCategory } from "@/types/talent";
 
@@ -42,6 +43,7 @@ export function ResultCardDownload({
   scores,
   isZh,
 }: ResultCardDownloadProps) {
+  const { t } = useI18n();
   const [loading, setLoading] = useState(false);
 
   const fetchCardBlob = useCallback(async (): Promise<Blob | null> => {
@@ -92,12 +94,8 @@ export function ResultCardDownload({
 
       await navigator.share({
         files: [file],
-        title: isZh
-          ? `我的玩家原型：${archetype.name}`
-          : `My Gamer Archetype: ${archetype.nameEn}`,
-        text: isZh
-          ? `我是「${archetype.name}」${archetype.icon} — gametan.ai/quiz`
-          : `I'm a ${archetype.nameEn} ${archetype.icon} — gametan.ai/quiz`,
+        title: t("result.card.shareTitle", { name: isZh ? archetype.name : archetype.nameEn }),
+        text: t("result.card.shareText", { name: isZh ? archetype.name : archetype.nameEn, icon: archetype.icon }),
       });
     } catch {
       // share cancelled or failed
@@ -125,7 +123,7 @@ export function ResultCardDownload({
         ) : (
           <Download size={14} />
         )}
-        {isZh ? "保存卡片" : "Save Card"}
+        {t("result.card.save")}
       </Button>
       {canShareFiles && (
         <Button
@@ -136,7 +134,7 @@ export function ResultCardDownload({
           disabled={loading}
         >
           <Share2 size={14} />
-          {isZh ? "分享卡片" : "Share Card"}
+          {t("result.card.share")}
         </Button>
       )}
     </div>

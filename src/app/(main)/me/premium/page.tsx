@@ -33,7 +33,6 @@ const PRODUCT = {
 
 export default function PremiumPage() {
   const { t, locale } = useI18n();
-  const isZh = locale === "zh";
   const [code, setCode] = useState("");
   const [activating, setActivating] = useState(false);
   const [purchasing, setPurchasing] = useState(false);
@@ -46,7 +45,7 @@ export default function PremiumPage() {
     // Check for successful purchase redirect
     const params = new URLSearchParams(window.location.search);
     if (params.get("purchased") === "1") {
-      setSuccess(isZh ? "🎉 购买成功！Premium 已激活" : "🎉 Purchase successful! Premium activated");
+      setSuccess(t("premium.purchaseActivated"));
       // Clean URL
       window.history.replaceState({}, "", "/me/premium");
     }
@@ -58,7 +57,7 @@ export default function PremiumPage() {
         if (pJson.tierExpiresAt) setExpiresAt(pJson.tierExpiresAt);
       })
       .catch(() => {});
-  }, [isZh]);
+  }, [t]);
 
   const handleActivate = async () => {
     const trimmed = code.trim().toUpperCase();
@@ -84,10 +83,10 @@ export default function PremiumPage() {
         );
         setCode("");
       } else {
-        setError(json.error?.message || (isZh ? "激活失败，请重试" : "Activation failed"));
+        setError(json.error?.message || t("premium.activateFailed"));
       }
     } catch {
-      setError(isZh ? "网络错误，请重试" : "Network error");
+      setError(t("premium.networkError"));
     } finally {
       setActivating(false);
     }
@@ -111,10 +110,10 @@ export default function PremiumPage() {
         window.location.href = json.data.url;
         return; // Don't set purchasing=false — page is navigating away
       } else {
-        setError(json.error || (isZh ? "开通失败，请重试" : "Purchase failed"));
+        setError(json.error || t("premium.purchaseFailed"));
       }
     } catch {
-      setError(isZh ? "网络错误，请重试" : "Network error");
+      setError(t("premium.networkError"));
     } finally {
       setPurchasing(false);
     }
@@ -196,10 +195,10 @@ export default function PremiumPage() {
         <CardContent className="pt-4 pb-4 space-y-4">
           <div className="text-center">
             <div className="text-3xl font-bold">
-              {isZh ? PRODUCT.priceZh : PRODUCT.priceEn}
+              {locale === "zh" ? PRODUCT.priceZh : PRODUCT.priceEn}
             </div>
             <div className="text-sm text-muted-foreground mt-1">
-              {isZh ? "一次购买，365天 Premium" : "One-time purchase, 365 days Premium"}
+              {t("premium.oneTimePurchase")}
             </div>
           </div>
 
@@ -214,14 +213,12 @@ export default function PremiumPage() {
               <Crown size={16} className="mr-2" />
             )}
             {currentTier === "premium"
-              ? (isZh ? "已是 Premium" : "Already Premium")
-              : (isZh ? "立即购买" : "Buy Now")}
+              ? t("premium.alreadyPremium")
+              : t("premium.buyNowBtn")}
           </Button>
 
           <p className="text-[11px] text-center text-muted-foreground">
-            {isZh
-              ? "安全支付由 LemonSqueezy 提供 · 支持信用卡/PayPal"
-              : "Secure checkout by LemonSqueezy · Credit card & PayPal"}
+            {t("premium.secureCheckout")}
           </p>
         </CardContent>
       </Card>

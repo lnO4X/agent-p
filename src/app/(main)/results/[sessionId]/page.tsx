@@ -157,7 +157,7 @@ export default function ResultDetailPage({
           >
             <div className="text-6xl mb-3">{archetype.icon}</div>
             <div className="text-xs text-muted-foreground tracking-widest uppercase mb-1">
-              {isZh ? "你的玩家原型" : "Your Gamer Archetype"}
+              {t("sessionResult.yourArchetype")}
             </div>
             <h1
               className="text-3xl md:text-4xl font-bold mb-1"
@@ -212,15 +212,13 @@ export default function ResultDetailPage({
                 />
                 <div>
                   <div className="text-xs font-medium text-primary mb-1">
-                    {isZh ? "成长突破口" : "Growth Edge"}
+                    {t("result.growth.title")}
                   </div>
                   <p className="text-sm text-foreground/80">
                     {isZh ? archetype.weakness : archetype.weaknessEn}
                   </p>
                   <p className="text-xs text-primary/70 mt-1.5 italic">
-                    {isZh
-                      ? "突破这一点，你将进化为更强的原型"
-                      : "Break through this, and you'll evolve into a stronger archetype"}
+                    {t("sessionResult.growthHint")}
                   </p>
                 </div>
               </div>
@@ -234,7 +232,7 @@ export default function ResultDetailPage({
                 <CardContent className="pt-4 pb-4 text-center">
                   <Swords size={16} className="text-red-400 mx-auto mb-1" />
                   <div className="text-[10px] text-red-400 mb-1">
-                    {isZh ? "天敌" : "Nemesis"}
+                    {t("result.nemesis.label")}
                   </div>
                   <div className="text-lg mb-0.5">{nemesis.icon}</div>
                   <div className="text-xs font-medium">
@@ -248,7 +246,7 @@ export default function ResultDetailPage({
                 <CardContent className="pt-4 pb-4 text-center">
                   <Heart size={16} className="text-green-400 mx-auto mb-1" />
                   <div className="text-[10px] text-green-400 mb-1">
-                    {isZh ? "最佳搭档" : "Best Ally"}
+                    {t("result.ally.label")}
                   </div>
                   <div className="text-lg mb-0.5">{ally.icon}</div>
                   <div className="text-xs font-medium">
@@ -274,7 +272,7 @@ export default function ResultDetailPage({
                 />
                 <div>
                   <div className="text-xs font-medium text-primary mb-1">
-                    {isZh ? "进化路径" : "Evolution Path"}
+                    {t("result.evolution.title")}
                   </div>
                   <p className="text-sm text-foreground/80">
                     {isZh

@@ -32,8 +32,7 @@ export function VoiceButton({
   onStopRecording,
   disabled,
 }: VoiceButtonProps) {
-  const { locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
 
   const handleClick = useCallback(() => {
     if (isRecording) {
@@ -50,12 +49,8 @@ export function VoiceButton({
       disabled={disabled || isTranscribing}
       title={
         isRecording
-          ? isZh
-            ? "停止录音"
-            : "Stop recording"
-          : isZh
-            ? "语音输入"
-            : "Voice input"
+          ? t("chat.voice.stop")
+          : t("chat.voice.start")
       }
       className={cn(
         "flex-shrink-0 w-9 h-9 rounded-full flex items-center justify-center",

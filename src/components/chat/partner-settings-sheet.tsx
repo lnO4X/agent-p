@@ -21,9 +21,8 @@ export function PartnerSettingsSheet({
   onClose,
   onUpdated,
 }: PartnerSettingsSheetProps) {
-  const { locale } = useI18n();
+  const { t } = useI18n();
   const router = useRouter();
-  const isZh = locale === "zh";
 
   const [name, setName] = useState(partner.name);
   const [avatar, setAvatar] = useState(partner.avatar);
@@ -65,10 +64,10 @@ export function PartnerSettingsSheet({
         onClose();
       } else {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || (isZh ? "保存失败" : "Save failed"));
+        setError(data.error || t("partners.saveFailed"));
       }
     } catch {
-      setError(isZh ? "网络错误" : "Network error");
+      setError(t("auth.networkError"));
     } finally {
       setSaving(false);
     }
@@ -89,10 +88,10 @@ export function PartnerSettingsSheet({
         router.push("/chat");
       } else {
         const data = await res.json().catch(() => ({}));
-        setError(data.error || (isZh ? "删除失败" : "Delete failed"));
+        setError(data.error || t("partners.deleteFailed"));
       }
     } catch {
-      setError(isZh ? "网络错误" : "Network error");
+      setError(t("auth.networkError"));
     } finally {
       setDeleting(false);
     }
@@ -113,7 +112,7 @@ export function PartnerSettingsSheet({
         {/* Handle */}
         <div className="sticky top-0 bg-background pt-3 pb-2 px-4 flex items-center justify-between border-b border-foreground/10 z-10">
           <h2 className="text-base font-semibold">
-            {isZh ? "角色设置" : "Character Settings"}
+            {t("partners.characterSettings")}
           </h2>
           <button
             type="button"
@@ -135,7 +134,7 @@ export function PartnerSettingsSheet({
           {/* Name */}
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-              {isZh ? "名称" : "Name"}
+              {t("partners.nameLabel")}
             </label>
             <input
               type="text"
@@ -156,7 +155,7 @@ export function PartnerSettingsSheet({
           {/* Avatar */}
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-              {isZh ? "图标" : "Icon"}
+              {t("partners.iconLabel")}
             </label>
             <div className="grid grid-cols-6 gap-2">
               {PARTNER_ICON_NAMES.map((iconName) => {
@@ -190,7 +189,7 @@ export function PartnerSettingsSheet({
           {/* Definition */}
           <div>
             <label className="text-xs font-medium text-muted-foreground mb-1.5 block">
-              {isZh ? "人格定义" : "Personality Definition"}
+              {t("partners.personalityLabel")}
             </label>
             <textarea
               value={definition}
@@ -219,12 +218,8 @@ export function PartnerSettingsSheet({
           >
             <Save className="w-4 h-4" />
             {saving
-              ? isZh
-                ? "保存中…"
-                : "Saving…"
-              : isZh
-                ? "保存修改"
-                : "Save Changes"}
+              ? t("partners.saving")
+              : t("partners.saveChanges")}
           </button>
 
           {/* Danger zone */}
@@ -241,16 +236,14 @@ export function PartnerSettingsSheet({
                 )}
               >
                 <Trash2 className="w-4 h-4" />
-                {isZh ? "删除角色" : "Delete Character"}
+                {t("partners.deleteCharacter")}
               </button>
             ) : (
               <div className="space-y-2">
                 <div className="flex items-start gap-2 text-xs text-destructive bg-destructive/10 rounded-xl px-3 py-2.5">
                   <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>
-                    {isZh
-                      ? "确定删除此角色？所有对话记忆将丢失，此操作不可撤销。"
-                      : "Delete this character? All conversation memory will be lost. This cannot be undone."}
+                    {t("partners.deleteWarning")}
                   </span>
                 </div>
                 <div className="grid grid-cols-2 gap-2">
@@ -262,7 +255,7 @@ export function PartnerSettingsSheet({
                       "bg-muted text-foreground pressable"
                     )}
                   >
-                    {isZh ? "取消" : "Cancel"}
+                    {t("common.cancel")}
                   </button>
                   <button
                     type="button"
@@ -275,12 +268,8 @@ export function PartnerSettingsSheet({
                     )}
                   >
                     {deleting
-                      ? isZh
-                        ? "删除中…"
-                        : "Deleting…"
-                      : isZh
-                        ? "确认删除"
-                        : "Confirm Delete"}
+                      ? t("partners.deleting")
+                      : t("partners.confirmDelete")}
                   </button>
                 </div>
               </div>

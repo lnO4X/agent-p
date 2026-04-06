@@ -19,7 +19,7 @@ export function PersonalitySelector({
   onSelect,
   autoSave = true,
 }: PersonalitySelectorProps) {
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const isZh = locale === "zh";
   const [selected, setSelected] = useState<string | null>(value ?? null);
   const [saving, setSaving] = useState<string | null>(null);
@@ -41,18 +41,12 @@ export function PersonalitySelector({
           });
           const json = await res.json();
           if (!json.success) {
-            setError(
-              isZh
-                ? "保存失败，请重试"
-                : "Failed to save, please try again"
-            );
+            setError(t("personality.saveFailed"));
             setSaving(null);
             return;
           }
         } catch {
-          setError(
-            isZh ? "网络错误，请重试" : "Network error, please try again"
-          );
+          setError(t("personality.networkError"));
           setSaving(null);
           return;
         }
@@ -70,12 +64,10 @@ export function PersonalitySelector({
       {/* Title */}
       <div className="text-center space-y-1">
         <h3 className="text-lg font-semibold">
-          {isZh ? "选择你的性格类型" : "Choose Your Personality Type"}
+          {t("personality.title")}
         </h3>
         <p className="text-sm text-muted-foreground">
-          {isZh
-            ? "玩家性格分析 · 16种性格类型"
-            : "Player Personality Profile · 16 Types"}
+          {t("personality.subtitle")}
         </p>
       </div>
 

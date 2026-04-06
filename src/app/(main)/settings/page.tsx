@@ -121,10 +121,10 @@ export default function SettingsPage() {
         if (statusData.success) setSteam(statusData.data);
         setSteamInput("");
       } else {
-        setSteamError(typeof data.error === "string" ? data.error : (isZh ? "无效的 Steam ID" : "Invalid Steam ID"));
+        setSteamError(typeof data.error === "string" ? data.error : t("settings.steamInvalidId"));
       }
     } catch {
-      setSteamError(isZh ? "网络错误，请重试" : "Network error");
+      setSteamError(t("settings.steamNetworkError"));
     } finally {
       setSteamLinking(false);
     }

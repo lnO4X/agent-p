@@ -65,7 +65,7 @@ export function MemoryBanner({ memory, partnerName, partnerId, onMemoryCleared }
               {confirmClear ? (
                 <div className="flex items-center gap-2">
                   <span className="text-[10px] text-destructive">
-                    {isZh ? "确认清除所有记忆？" : "Clear all memory?"}
+                    {t("chat.memory.clearConfirm")}
                   </span>
                   <button
                     type="button"
@@ -85,15 +85,15 @@ export function MemoryBanner({ memory, partnerName, partnerId, onMemoryCleared }
                     className="text-[10px] text-destructive font-medium hover:underline pressable"
                   >
                     {clearing
-                      ? (isZh ? "清除中..." : "Clearing...")
-                      : (isZh ? "确认" : "Confirm")}
+                      ? t("chat.memory.clearing")
+                      : t("common.confirm")}
                   </button>
                   <button
                     type="button"
                     onClick={() => setConfirmClear(false)}
                     className="text-[10px] text-muted-foreground hover:underline"
                   >
-                    {isZh ? "取消" : "Cancel"}
+                    {t("common.cancel")}
                   </button>
                 </div>
               ) : (
@@ -103,7 +103,7 @@ export function MemoryBanner({ memory, partnerName, partnerId, onMemoryCleared }
                   className="flex items-center gap-1 text-[10px] text-muted-foreground hover:text-destructive transition-colors pressable"
                 >
                   <Trash2 className="w-3 h-3" />
-                  {isZh ? "清除记忆" : "Clear memory"}
+                  {t("chat.memory.clear")}
                 </button>
               )}
             </div>

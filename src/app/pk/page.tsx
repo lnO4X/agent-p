@@ -23,8 +23,7 @@ const PK_GAMES = [
 ] as const;
 
 export default function PkCreatePage() {
-  const { locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t, locale } = useI18n();
 
   const [phase, setPhase] = useState<Phase>("select");
   const [selectedGameId, setSelectedGameId] = useState<string | null>(null);
@@ -61,7 +60,7 @@ export default function PkCreatePage() {
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
             gameId: selectedGameId,
-            creatorName: creatorName || (isZh ? "匿名玩家" : "Anonymous"),
+            creatorName: creatorName || t("pk.anonymous"),
             rawScore: result.rawScore,
             durationMs: result.durationMs,
             metadata: result.metadata,
@@ -76,15 +75,15 @@ export default function PkCreatePage() {
           });
           setPhase("created");
         } else {
-          setError(json.error?.message || (isZh ? "创建失败" : "Create failed"));
+          setError(json.error?.message || t("pk.createFailed"));
           setPhase("select");
         }
       } catch {
-        setError(isZh ? "网络错误" : "Network error");
+        setError(t("pk.networkError"));
         setPhase("select");
       }
     },
-    [selectedGameId, creatorName, isZh]
+    [selectedGameId, creatorName, t]
   );
 
   const handleAbort = useCallback(() => {
@@ -98,9 +97,7 @@ export default function PkCreatePage() {
       locale === "en" && selectedGame.nameEn
         ? selectedGame.nameEn
         : selectedGame.name;
-    const text = isZh
-      ? `我在「${gameName}」拿了 ${Math.round(pkResult.score)} 分，来 PK 吗？`
-      : `I scored ${Math.round(pkResult.score)} in ${gameName}. Can you beat me?`;
+    const text = t("pk.shareText", { game: gameName, score: Math.round(pkResult.score) });
     if (navigator.share) {
       try {
         await navigator.share({ title: "GameTan PK", text, url });
@@ -132,7 +129,7 @@ export default function PkCreatePage() {
           <div className="flex items-center gap-2 text-sm">
             <Swords size={16} className="text-primary" />
             <span className="font-medium">
-              {isZh ? "创建 PK" : "Create PK"}
+              {t("pk.createPk")}
             </span>
           </div>
           <span className="text-xs text-muted-foreground">{gameName}</span>
@@ -149,7 +146,7 @@ export default function PkCreatePage() {
     return (
       <div className="min-h-[100dvh] flex items-center justify-center">
         <p className="text-sm text-muted-foreground">
-          {isZh ? "创建挑战中..." : "Creating challenge..."}
+          {t("pk.creatingChallenge")}
         </p>
       </div>
     );
@@ -164,11 +161,11 @@ export default function PkCreatePage() {
           <div className="text-center space-y-3">
             <Swords size={36} className="text-primary mx-auto" />
             <h1 className="text-2xl font-bold">
-              {isZh ? "挑战已创建！" : "Challenge Created!"}
+              {t("pk.challengeCreated")}
             </h1>
             <div className="flex items-center justify-center gap-2">
               <span className="text-sm text-muted-foreground">
-                {isZh ? "你的分数" : "Your score"}:
+                {t("pk.yourScore")}:
               </span>
               <span className={`text-xl font-bold ${RANK_COLORS[rank]}`}>
                 {Math.round(pkResult.score)} ({rank})
@@ -180,7 +177,7 @@ export default function PkCreatePage() {
           <Card className="border-primary/20 bg-primary/5">
             <CardContent className="py-4">
               <div className="text-xs text-muted-foreground mb-2">
-                {isZh ? "分享链接给好友" : "Share this link with a friend"}
+                {t("pk.shareLinkHint")}
               </div>
               <div className="flex items-center gap-2">
                 <div className="flex-1 px-3 py-2 rounded-lg bg-background border border-border text-sm truncate font-mono">
@@ -207,7 +204,7 @@ export default function PkCreatePage() {
           <div className="space-y-3">
             <Button className="w-full h-11" onClick={handleShare}>
               <Share2 size={16} className="mr-2" />
-              {isZh ? "分享挑战" : "Share Challenge"}
+              {t("pk.shareChallenge")}
             </Button>
             <Button
               variant="outline"
@@ -219,7 +216,7 @@ export default function PkCreatePage() {
               }}
             >
               <Swords size={16} className="mr-2" />
-              {isZh ? "创建新挑战" : "Create Another"}
+              {t("pk.createAnother")}
             </Button>
           </div>
 
@@ -239,14 +236,14 @@ export default function PkCreatePage() {
           <div className="text-center space-y-2">
             <Swords size={32} className="text-primary mx-auto" />
             <h2 className="text-xl font-bold">
-              {isZh ? "输入你的名字" : "Enter Your Name"}
+              {t("pk.enterName")}
             </h2>
           </div>
           <input
             type="text"
             value={creatorName}
             onChange={(e) => setCreatorName(e.target.value)}
-            placeholder={isZh ? "你的名字" : "Your name"}
+            placeholder={t("pk.yourName")}
             maxLength={30}
             className="w-full px-4 py-3 rounded-xl border border-border bg-background text-base focus:outline-none focus:ring-2 focus:ring-primary/30"
             autoFocus
@@ -259,14 +256,14 @@ export default function PkCreatePage() {
               variant="ghost"
               className="flex-1"
               onClick={() => {
-                setCreatorName(isZh ? "匿名玩家" : "Anonymous");
+                setCreatorName(t("pk.anonymous"));
                 setPhase("playing");
               }}
             >
-              {isZh ? "跳过" : "Skip"}
+              {t("pk.skip")}
             </Button>
             <Button className="flex-1" onClick={() => setPhase("playing")}>
-              {isZh ? "开始游戏" : "Start Game"}
+              {t("pk.startGame")}
               <ArrowRight size={16} className="ml-2" />
             </Button>
           </div>
@@ -282,12 +279,10 @@ export default function PkCreatePage() {
         <div className="text-center space-y-3">
           <Swords size={36} className="text-primary mx-auto" />
           <h1 className="text-2xl font-bold">
-            {isZh ? "邀请好友 PK" : "Challenge a Friend"}
+            {t("pk.challengeFriend")}
           </h1>
           <p className="text-muted-foreground text-sm">
-            {isZh
-              ? "选一个游戏，打出你的分数，然后发给好友！"
-              : "Pick a game, set your score, then share with a friend!"}
+            {t("pk.pickGameHint")}
           </p>
         </div>
 
@@ -316,7 +311,7 @@ export default function PkCreatePage() {
                   <div className="text-sm font-medium">{name}</div>
                   <div className="text-xs text-muted-foreground">
                     ~{game.estimatedDurationSec}
-                    {isZh ? "秒" : "s"}
+                    {t("pk.secondsShort")}
                   </div>
                 </div>
                 <ArrowRight size={16} className="text-muted-foreground" />
@@ -330,7 +325,7 @@ export default function PkCreatePage() {
             href="/quiz"
             className="text-xs text-muted-foreground hover:text-primary"
           >
-            {isZh ? "← 返回测试" : "← Back to Quiz"}
+            {t("pk.backToQuiz")}
           </Link>
         </div>
       </div>

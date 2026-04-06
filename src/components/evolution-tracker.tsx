@@ -171,12 +171,10 @@ export function EvolutionTracker({ history, evolution }: EvolutionTrackerProps) 
         <div className="flex items-center gap-2">
           <TrendingUp size={16} className="text-primary shrink-0" />
           <h2 className="text-sm font-semibold">
-            {isZh ? "成长轨迹" : "Evolution Tracker"}
+            {t("evolution.title")}
           </h2>
           <span className="text-[10px] text-muted-foreground ml-auto">
-            {isZh
-              ? `${history.length} 次测试`
-              : `${history.length} tests`}
+            {t("evolution.testCount", { count: history.length })}
           </span>
         </div>
 
@@ -190,7 +188,7 @@ export function EvolutionTracker({ history, evolution }: EvolutionTrackerProps) 
           >
             <Sparkles size={14} className="text-primary shrink-0" />
             <span className="font-medium">
-              {isZh ? "你进化了！" : "You've evolved!"}
+              {t("evolution.evolved")}
             </span>
             <div className="flex items-center gap-1.5 ml-auto">
               <span>{firstArchetype.icon}</span>
@@ -243,7 +241,7 @@ export function EvolutionTracker({ history, evolution }: EvolutionTrackerProps) 
         {/* Score trend chart */}
         <div>
           <div className="text-[10px] text-muted-foreground mb-1">
-            {isZh ? "综合评分趋势" : "Overall Score Trend"}
+            {t("evolution.scoreTrend")}
           </div>
           <ScoreTrendChart history={history} />
         </div>
@@ -251,7 +249,7 @@ export function EvolutionTracker({ history, evolution }: EvolutionTrackerProps) 
         {/* Per-talent changes */}
         <div>
           <div className="text-[10px] text-muted-foreground mb-2">
-            {isZh ? "天赋变化" : "Talent Changes"}
+            {t("evolution.talentChanges")}
           </div>
           <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
             {talentChanges.map(({ category, current, change }) => (
@@ -292,7 +290,7 @@ export function EvolutionTracker({ history, evolution }: EvolutionTrackerProps) 
             <div className="flex items-center justify-center gap-2 py-2.5 rounded-xl bg-primary/10 hover:bg-primary/15 transition-colors pressable">
               <RotateCcw size={14} className="text-primary" />
               <span className="text-xs font-medium text-primary">
-                {isZh ? "重新测试，追踪进化" : "Retake test, track your evolution"}
+                {t("evolution.retakeCta")}
               </span>
             </div>
           </Link>

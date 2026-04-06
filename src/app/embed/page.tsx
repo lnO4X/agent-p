@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Copy, Check, Code, Eye } from "lucide-react";
+import { useI18n } from "@/i18n/context";
 
 const BASE_URL = "https://gametan.ai";
 
@@ -14,19 +15,10 @@ const IFRAME_SNIPPET = `<iframe
   allow="autoplay"
 ></iframe>`;
 
-function detectZh(): boolean {
-  if (typeof navigator === "undefined") return true;
-  return navigator.language.startsWith("zh");
-}
-
 export default function EmbedInfoPage() {
-  const [isZh, setIsZh] = useState(true);
+  const { t } = useI18n();
   const [copiedScript, setCopiedScript] = useState(false);
   const [copiedIframe, setCopiedIframe] = useState(false);
-
-  useEffect(() => {
-    setIsZh(detectZh());
-  }, []);
 
   const copyToClipboard = (text: string, type: "script" | "iframe") => {
     navigator.clipboard.writeText(text).then(() => {
@@ -46,12 +38,10 @@ export default function EmbedInfoPage() {
         {/* Header */}
         <div className="text-center space-y-3">
           <h1 className="text-3xl font-bold">
-            🎮 {isZh ? "嵌入 GameTan 测试" : "Embed GameTan Quiz"}
+            {t("embed.embedTitle")}
           </h1>
           <p className="text-gray-400">
-            {isZh
-              ? "在你的网站上嵌入玩家原型测试，让访客发现他们的游戏 DNA"
-              : "Embed the gamer archetype quiz on your website and let visitors discover their gaming DNA"}
+            {t("embed.embedDesc")}
           </p>
         </div>
 
@@ -60,13 +50,11 @@ export default function EmbedInfoPage() {
           <div className="flex items-center gap-2">
             <Code size={18} className="text-blue-400" />
             <h2 className="text-lg font-semibold">
-              {isZh ? "方式一：Script 标签（推荐）" : "Method 1: Script Tag (Recommended)"}
+              {t("embed.method1Title")}
             </h2>
           </div>
           <p className="text-sm text-gray-400">
-            {isZh
-              ? "添加一行代码即可。支持自定义宽高。"
-              : "Just one line of code. Supports custom width and height."}
+            {t("embed.method1Desc")}
           </p>
           <div className="relative">
             <pre className="bg-white/5 border border-white/10 rounded-xl p-4 text-sm overflow-x-auto font-mono text-green-400">
@@ -86,11 +74,11 @@ export default function EmbedInfoPage() {
           <div className="text-xs text-gray-500 space-y-1">
             <div>
               <code className="text-gray-400">data-width</code> —{" "}
-              {isZh ? "宽度（默认 400px）" : "Width (default 400px)"}
+              {t("embed.widthDefault")}
             </div>
             <div>
               <code className="text-gray-400">data-height</code> —{" "}
-              {isZh ? "高度（默认 500px）" : "Height (default 500px)"}
+              {t("embed.heightDefault")}
             </div>
           </div>
         </section>
@@ -100,13 +88,11 @@ export default function EmbedInfoPage() {
           <div className="flex items-center gap-2">
             <Code size={18} className="text-primary" />
             <h2 className="text-lg font-semibold">
-              {isZh ? "方式二：直接 iframe" : "Method 2: Direct iframe"}
+              {t("embed.method2Title")}
             </h2>
           </div>
           <p className="text-sm text-gray-400">
-            {isZh
-              ? "如果你需要更多控制，直接使用 iframe。"
-              : "For more control, use a direct iframe."}
+            {t("embed.method2Desc")}
           </p>
           <div className="relative">
             <pre className="bg-white/5 border border-white/10 rounded-xl p-4 text-sm overflow-x-auto font-mono text-primary whitespace-pre">
@@ -130,7 +116,7 @@ export default function EmbedInfoPage() {
           <div className="flex items-center gap-2">
             <Eye size={18} className="text-amber-400" />
             <h2 className="text-lg font-semibold">
-              {isZh ? "预览" : "Preview"}
+              {t("embed.preview")}
             </h2>
           </div>
           <div className="flex justify-center">
@@ -154,7 +140,7 @@ export default function EmbedInfoPage() {
           >
             GameTan
           </a>{" "}
-          — {isZh ? "发现你的游戏 DNA" : "Discover Your Gaming DNA"}
+          — {t("embed.discoverDna")}
         </div>
       </div>
     </div>

@@ -26,7 +26,7 @@ const GAME_META = [
 
 export default function QuizPage() {
   const router = useRouter();
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const isZh = locale === "zh";
 
   const [phase, setPhase] = useState<Phase>("intro");
@@ -84,12 +84,10 @@ export default function QuizPage() {
         <div className="max-w-md w-full text-center space-y-8">
           <div className="space-y-3">
             <h1 className="text-3xl md:text-4xl font-bold">
-              {isZh ? "你有职业选手的天赋吗？" : "Do You Have Pro-Level Talent?"}
+              {t("quiz.proLevelTalent")}
             </h1>
             <p className="text-muted-foreground text-base md:text-lg">
-              {isZh
-                ? "3个小游戏，3分钟，对比职业选手"
-                : "3 mini-games, 3 min, compare to pro players"}
+              {t("quiz.threeGamesDesc")}
             </p>
           </div>
 
@@ -103,14 +101,12 @@ export default function QuizPage() {
             }}
           >
             <Gamepad2 size={20} className="mr-2" />
-            {isZh ? "测测你的天赋" : "Test Your Talent"}
+            {t("quiz.testYourTalent")}
             <ArrowRight size={20} className="ml-2" />
           </Button>
 
           <p className="text-xs text-muted-foreground">
-            {isZh
-              ? "无需注册 · 结果即时生成 · 可分享"
-              : "No registration · Instant results · Shareable"}
+            {t("quiz.noRegistration")}
           </p>
         </div>
       </div>
@@ -152,7 +148,7 @@ export default function QuizPage() {
           {nextMeta && NextIcon && (
             <div className="space-y-3">
               <div className="text-muted-foreground text-sm">
-                {isZh ? "下一关" : "Next Round"}
+                {t("quiz.nextRound")}
               </div>
               <div className="flex items-center justify-center gap-3">
                 <NextIcon size={24} className={nextMeta.color} />
@@ -164,7 +160,7 @@ export default function QuizPage() {
           )}
 
           <Button size="lg" className="w-full h-12" onClick={startNextGame}>
-            {isZh ? "继续" : "Continue"}
+            {t("quiz.continue")}
             <ArrowRight size={18} className="ml-2" />
           </Button>
         </div>

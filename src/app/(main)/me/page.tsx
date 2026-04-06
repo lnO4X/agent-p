@@ -144,8 +144,6 @@ export default function MePage() {
     load();
   }, []);
 
-  const isZh = locale === "zh";
-
   // Compute archetype from talent scores
   const archetype: Archetype | null = profile?.talents
     ? scoreToArchetype(
@@ -201,10 +199,10 @@ export default function MePage() {
                     WebkitTextFillColor: "transparent",
                   }}
                 >
-                  {isZh ? archetype.name : archetype.nameEn}
+                  {locale === "zh" ? archetype.name : archetype.nameEn}
                 </h1>
                 <p className="text-xs text-muted-foreground italic line-clamp-1">
-                  {isZh ? archetype.tagline : archetype.taglineEn}
+                  {locale === "zh" ? archetype.tagline : archetype.taglineEn}
                 </p>
               </div>
             </div>
@@ -214,7 +212,7 @@ export default function MePage() {
               <div className="flex items-center gap-2 text-xs">
                 <TrendingUp size={12} className="text-primary shrink-0" />
                 <span className="text-muted-foreground line-clamp-1">
-                  {isZh ? archetype.evolutionHint : archetype.evolutionHintEn}
+                  {locale === "zh" ? archetype.evolutionHint : archetype.evolutionHintEn}
                 </span>
               </div>
             </div>
@@ -252,7 +250,7 @@ export default function MePage() {
                   className="flex items-center justify-center gap-2 text-xs text-primary hover:underline"
                 >
                   <Share2 size={12} />
-                  {isZh ? "查看公开档案" : "View Public Profile"}
+                  {t("me.viewPublicProfile")}
                 </Link>
               </div>
             )}
@@ -366,7 +364,7 @@ export default function MePage() {
               </span>
             </div>
             <p className="text-xs text-muted-foreground mb-3">
-              {isZh ? "邀请好友测测电竞天赋，对比职业选手" : "Invite friends to test their esports talent"}
+              {t("me.referralDesc")}
             </p>
             {/* Code display */}
             <div className="flex items-center gap-2 mb-2">
@@ -381,7 +379,7 @@ export default function MePage() {
                   setTimeout(() => setCodeCopied(false), 1500);
                 }}
                 className="p-2 rounded-lg bg-muted hover:bg-muted/80 active:scale-95 transition-transform"
-                title={isZh ? "复制邀请码" : "Copy code"}
+                title={t("me.referralCopyCode")}
               >
                 {codeCopied ? <Check size={16} className="text-green-500" /> : <Copy size={16} className="text-muted-foreground" />}
               </button>
@@ -399,7 +397,7 @@ export default function MePage() {
                 className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-medium hover:bg-green-500/20 active:scale-95 transition-transform pressable"
               >
                 {linkCopied ? <Check size={13} /> : <Copy size={13} />}
-                {isZh ? "复制邀请链接" : "Copy invite link"}
+                {t("me.referralCopyLink")}
               </button>
               {typeof navigator !== "undefined" && "share" in navigator && (
                 <button
@@ -407,15 +405,15 @@ export default function MePage() {
                   onClick={async () => {
                     const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai"}/register?ref=${referralCode}`;
                     await navigator.share({
-                      title: isZh ? "GameTan — 测测你的电竞天赋" : "GameTan — Test Your Esports Talent",
-                      text: isZh ? `用我的邀请码 ${referralCode} 注册 GameTan，测测你的电竞天赋！` : `Join me on GameTan! Use my code ${referralCode} to test your esports talent.`,
+                      title: t("me.referralShareTitle"),
+                      text: t("me.referralShareText", { code: referralCode }),
                       url: inviteLink,
                     });
                   }}
                   className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 active:scale-95 transition-transform pressable"
                 >
                   <Share2 size={13} />
-                  {isZh ? "分享" : "Share"}
+                  {t("me.shareBtn")}
                 </button>
               )}
             </div>

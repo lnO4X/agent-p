@@ -15,8 +15,7 @@ import {
 import { useI18n } from "@/i18n/context";
 
 export function ChangePasswordForm() {
-  const { locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
 
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
@@ -31,11 +30,11 @@ export function ChangePasswordForm() {
     setSuccess("");
 
     if (newPassword !== confirmPassword) {
-      setError(isZh ? "两次密码输入不一致" : "Passwords do not match");
+      setError(t("auth.passwordsNoMatch"));
       return;
     }
     if (newPassword.length < 6) {
-      setError(isZh ? "新密码至少6个字符" : "New password must be at least 6 characters");
+      setError(t("auth.newPasswordMinLength"));
       return;
     }
 
@@ -48,15 +47,15 @@ export function ChangePasswordForm() {
       });
       const json = await res.json();
       if (json.success) {
-        setSuccess(isZh ? "密码修改成功" : "Password changed successfully");
+        setSuccess(t("auth.passwordChanged"));
         setCurrentPassword("");
         setNewPassword("");
         setConfirmPassword("");
       } else {
-        setError(json.error?.message || (isZh ? "修改失败" : "Change failed"));
+        setError(json.error?.message || t("auth.changeFailed"));
       }
     } catch {
-      setError(isZh ? "网络错误，请重试" : "Network error, please retry");
+      setError(t("auth.networkErrorRetry"));
     } finally {
       setLoading(false);
     }
@@ -65,9 +64,9 @@ export function ChangePasswordForm() {
   return (
     <Card className="w-full max-w-md">
       <CardHeader>
-        <CardTitle>{isZh ? "修改密码" : "Change Password"}</CardTitle>
+        <CardTitle>{t("auth.changePassword")}</CardTitle>
         <CardDescription>
-          {isZh ? "请输入当前密码和新密码" : "Enter your current password and a new password"}
+          {t("auth.changePasswordDesc")}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
@@ -84,7 +83,7 @@ export function ChangePasswordForm() {
           )}
           <div className="space-y-2">
             <Label htmlFor="currentPassword">
-              {isZh ? "当前密码" : "Current Password"}
+              {t("auth.currentPassword")}
             </Label>
             <Input
               id="currentPassword"
@@ -96,20 +95,20 @@ export function ChangePasswordForm() {
           </div>
           <div className="space-y-2">
             <Label htmlFor="newPassword">
-              {isZh ? "新密码" : "New Password"}
+              {t("auth.newPassword")}
             </Label>
             <Input
               id="newPassword"
               type="password"
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
-              placeholder={isZh ? "至少6个字符" : "6+ characters"}
+              placeholder={t("auth.passwordPlaceholder")}
               autoComplete="new-password"
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="confirmNewPassword">
-              {isZh ? "确认新密码" : "Confirm New Password"}
+              {t("auth.confirmNewPassword")}
             </Label>
             <Input
               id="confirmNewPassword"
@@ -123,8 +122,8 @@ export function ChangePasswordForm() {
         <CardFooter>
           <Button type="submit" className="w-full" disabled={loading}>
             {loading
-              ? (isZh ? "修改中..." : "Updating...")
-              : (isZh ? "修改密码" : "Change Password")}
+              ? t("auth.updating")
+              : t("auth.changePassword")}
           </Button>
         </CardFooter>
       </form>

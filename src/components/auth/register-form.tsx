@@ -18,8 +18,7 @@ import { useI18n } from "@/i18n/context";
 import { setClientAuthCookie } from "@/lib/client-auth";
 
 export function RegisterForm() {
-  const { locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [referredBy, setReferredBy] = useState("");
@@ -38,7 +37,7 @@ export function RegisterForm() {
     setError("");
 
     if (password.length < 6) {
-      setError(isZh ? "密码至少6个字符" : "Password must be at least 6 characters");
+      setError(t("auth.passwordMinLength"));
       return;
     }
     if (loading) return;
@@ -63,10 +62,10 @@ export function RegisterForm() {
         window.location.href = "/dashboard?welcome=1";
         return; // Keep loading=true — button stays disabled during navigation
       } else {
-        setError(json.error?.message || (isZh ? "注册失败" : "Registration failed"));
+        setError(json.error?.message || t("auth.registerFailed"));
       }
     } catch {
-      setError(isZh ? "网络错误" : "Network error");
+      setError(t("auth.networkError"));
     }
     setLoading(false);
   }
@@ -75,10 +74,10 @@ export function RegisterForm() {
     <Card className="w-full max-w-md">
       <CardHeader className="text-center">
         <CardTitle className="text-2xl">
-          {isZh ? "注册" : "Sign Up"}
+          {t("auth.signUp")}
         </CardTitle>
         <CardDescription>
-          {isZh ? "创建你的 GameTan 账号" : "Create your GameTan account"}
+          {t("auth.createAccount")}
         </CardDescription>
       </CardHeader>
       <form onSubmit={handleSubmit}>
@@ -90,38 +89,38 @@ export function RegisterForm() {
           )}
           <div className="space-y-2">
             <Label htmlFor="username">
-              {isZh ? "用户名" : "Username"}
+              {t("auth.username")}
             </Label>
             <Input
               id="username"
               value={username}
               onChange={(e) => setUsername(e.target.value)}
-              placeholder={isZh ? "3-20位字母、数字或下划线" : "3-20 chars: letters, numbers, underscore"}
+              placeholder={t("auth.usernamePlaceholder")}
               autoComplete="username"
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="password">
-              {isZh ? "密码" : "Password"}
+              {t("auth.password")}
             </Label>
             <Input
               id="password"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder={isZh ? "至少6个字符" : "6+ characters"}
+              placeholder={t("auth.passwordPlaceholder")}
               autoComplete="new-password"
             />
           </div>
           <div className="space-y-2">
             <Label htmlFor="referral">
-              {isZh ? "邀请码 (选填)" : "Referral Code (optional)"}
+              {t("auth.referralLabel")}
             </Label>
             <Input
               id="referral"
               value={referredBy}
               onChange={(e) => setReferredBy(e.target.value.toUpperCase())}
-              placeholder={isZh ? "好友的邀请码" : "Friend's referral code"}
+              placeholder={t("auth.referralPlaceholder")}
               maxLength={8}
               className="font-mono tracking-wider uppercase"
             />
@@ -130,8 +129,8 @@ export function RegisterForm() {
         <CardFooter className="flex flex-col gap-3">
           <Button type="submit" className="w-full" disabled={loading}>
             {loading
-              ? (isZh ? "注册中..." : "Signing up...")
-              : (isZh ? "注册" : "Sign Up")}
+              ? t("auth.signingUp")
+              : t("auth.signUp")}
           </Button>
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
@@ -139,7 +138,7 @@ export function RegisterForm() {
             </div>
             <div className="relative flex justify-center text-xs uppercase">
               <span className="bg-card px-2 text-muted-foreground">
-                {isZh ? "或" : "or"}
+                {t("auth.or")}
               </span>
             </div>
           </div>
@@ -155,12 +154,12 @@ export function RegisterForm() {
               <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
               <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
             </svg>
-            {isZh ? "使用 Google 注册" : "Sign up with Google"}
+            {t("auth.googleSignUp")}
           </Button>
           <p className="text-sm text-muted-foreground">
-            {isZh ? "已有账号？" : "Already have an account?"}{" "}
+            {t("auth.hasAccount")}{" "}
             <Link href="/login" className="text-primary hover:underline">
-              {isZh ? "登录" : "Log in"}
+              {t("auth.goLogin")}
             </Link>
           </p>
         </CardFooter>

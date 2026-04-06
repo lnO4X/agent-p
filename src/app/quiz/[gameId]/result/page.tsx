@@ -74,7 +74,7 @@ function GameQuizResultContent() {
   const params = useParams<{ gameId: string }>();
   const searchParams = useSearchParams();
   const router = useRouter();
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const isZh = locale === "zh";
 
   const gameId = params.gameId;
@@ -124,10 +124,10 @@ function GameQuizResultContent() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="text-center space-y-4">
           <p className="text-muted-foreground">
-            {isZh ? "未找到该游戏测试" : "Game quiz not found"}
+            {t("quiz.gameQuizNotFound")}
           </p>
           <Link href="/quiz">
-            <Button>{isZh ? "返回测试" : "Back to Quiz"}</Button>
+            <Button>{t("quiz.backToQuiz")}</Button>
           </Link>
         </div>
       </div>
@@ -140,7 +140,7 @@ function GameQuizResultContent() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="text-center space-y-4">
           <p className="text-sm text-muted-foreground">
-            {isZh ? "正在加载..." : "Loading..."}
+            {t("common.loading")}
           </p>
         </div>
       </div>
@@ -154,17 +154,20 @@ function GameQuizResultContent() {
       : "https://gametan.ai";
   const shareUrl = `${origin}/quiz/${gameId}/result?mode=q&archetype=${archetypeId}`;
 
-  const shareText = isZh
-    ? `我是${quiz.gameName}里的「${character.name}」！${character.title}。你是哪个角色？`
-    : `I am ${character.nameEn} in ${quiz.gameNameEn}! ${character.titleEn}. Which character are you?`;
+  const shareText = t("quizResult.gameShareText", {
+    charName: isZh ? character.name : character.nameEn,
+    gameName: isZh ? quiz.gameName : quiz.gameNameEn,
+    charTitle: isZh ? character.title : character.titleEn,
+  });
 
   async function handleShare() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: isZh
-            ? `我的${quiz!.gameName}角色：${character!.name}`
-            : `My ${quiz!.gameNameEn} Character: ${character!.nameEn}`,
+          title: t("quizResult.gameShareTitle", {
+            gameName: isZh ? quiz!.gameName : quiz!.gameNameEn,
+            charName: isZh ? character!.name : character!.nameEn,
+          }),
           text: shareText,
           url: shareUrl,
         });
@@ -238,7 +241,7 @@ function GameQuizResultContent() {
                   className="text-xs font-medium mb-1"
                   style={{ color: character.color }}
                 >
-                  {isZh ? "为什么是你" : "Why You Matched"}
+                  {t("quizResult.whyYouMatched")}
                 </div>
                 <p className="text-sm text-foreground/90 leading-relaxed">
                   {isZh ? character.matchReason : character.matchReasonEn}
@@ -261,7 +264,7 @@ function GameQuizResultContent() {
                 <div className="text-2xl">{archetype.icon}</div>
                 <div className="flex-1">
                   <div className="text-[10px] text-muted-foreground uppercase tracking-wider">
-                    {isZh ? "你的核心玩家原型" : "Your Core Gamer Type"}
+                    {t("quizResult.coreGamerType")}
                   </div>
                   <div
                     className="text-base font-semibold"
@@ -287,7 +290,7 @@ function GameQuizResultContent() {
         {talentScores && (
           <div className="space-y-2">
             <div className="text-xs text-muted-foreground px-1">
-              {isZh ? "天赋概览" : "Talent Overview"}
+              {t("quizResult.talentOverview")}
             </div>
             {Object.entries(talentScores)
               .sort(([, a], [, b]) => (b ?? 0) - (a ?? 0))
@@ -323,7 +326,7 @@ function GameQuizResultContent() {
           onClick={handleShare}
         >
           <Share2 size={16} className="mr-1.5" />
-          {isZh ? "分享我的结果" : "Share My Result"}
+          {t("quizResult.shareMyResult")}
         </Button>
 
         {/* Registration CTA (if not logged in) */}
@@ -332,41 +335,35 @@ function GameQuizResultContent() {
             <CardContent className="pt-5 pb-5">
               <div className="text-center mb-4">
                 <div className="text-sm font-semibold mb-1">
-                  {isZh
-                    ? `${character.name}，这只是开始`
-                    : `${character.nameEn}, this is just the start`}
+                  {t("quizResult.justTheStart", { name: isZh ? character.name : character.nameEn })}
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  {isZh
-                    ? "注册后解锁完整版 — 免费"
-                    : "Sign up to unlock the full experience — free"}
+                  {t("quizResult.signUpUnlock")}
                 </p>
               </div>
               <div className="grid grid-cols-3 gap-3 mb-4">
                 <div className="text-center">
                   <Target size={20} className="text-primary mx-auto mb-1" />
                   <div className="text-[10px] text-muted-foreground leading-tight">
-                    {isZh ? "13维天赋\n精准测试" : "13-Dimension\nDeep Test"}
+                    {t("quizResult.feature13d")}
                   </div>
                 </div>
                 <div className="text-center">
                   <Bot size={20} className="text-primary mx-auto mb-1" />
                   <div className="text-[10px] text-muted-foreground leading-tight">
-                    {isZh ? "AI伙伴\n游戏解读" : "AI Partner\nGame Insights"}
+                    {t("quizResult.featureAiPartner")}
                   </div>
                 </div>
                 <div className="text-center">
                   <Crown size={20} className="text-primary mx-auto mb-1" />
                   <div className="text-[10px] text-muted-foreground leading-tight">
-                    {isZh ? "每日挑战\n连续签到" : "Daily Challenge\nStreak System"}
+                    {t("quizResult.featureDailyChallenge")}
                   </div>
                 </div>
               </div>
               <Link href="/register" className="block">
                 <Button size="lg" className="w-full h-12 text-base pressable">
-                  {isZh
-                    ? "免费注册，解锁完整体验"
-                    : "Sign Up Free — Unlock Full Experience"}
+                  {t("quizResult.signUpFreeBtn")}
                   <ArrowRight size={18} className="ml-2" />
                 </Button>
               </Link>
@@ -378,7 +375,7 @@ function GameQuizResultContent() {
         {otherQuizzes.length > 0 && (
           <div className="space-y-2">
             <div className="text-xs text-muted-foreground text-center">
-              {isZh ? "试试其他游戏测试" : "Try Other Game Quizzes"}
+              {t("quiz.tryOtherQuizzes")}
             </div>
             <div className="flex justify-center gap-3">
               {otherQuizzes.map((q) => (
@@ -404,7 +401,7 @@ function GameQuizResultContent() {
             className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground pressable"
           >
             <RotateCcw size={14} />
-            {isZh ? "通用玩家原型测试" : "Take the General Quiz"}
+            {t("quiz.generalQuiz")}
           </Link>
         </div>
 

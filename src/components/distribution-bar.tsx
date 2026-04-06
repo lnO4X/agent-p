@@ -1,6 +1,7 @@
 "use client";
 
 import { DISTRIBUTION_BINS } from "@/lib/pro-benchmarks";
+import { useI18n } from "@/i18n/context";
 
 interface DistributionBarProps {
   userScore: number;
@@ -14,6 +15,7 @@ interface DistributionBarProps {
  * Marks the user's position and the pro average line.
  */
 export function DistributionBar({ userScore, proAvg, isZh, className }: DistributionBarProps) {
+  const { t } = useI18n();
   const maxBin = Math.max(...DISTRIBUTION_BINS);
   const userBin = Math.min(Math.floor(userScore / 10), 9);
   const proBin = Math.min(Math.floor(proAvg / 10), 9);
@@ -22,9 +24,7 @@ export function DistributionBar({ userScore, proAvg, isZh, className }: Distribu
     <div
       className={className}
       role="img"
-      aria-label={isZh
-        ? `天赋分布图: 你的分数 ${Math.round(userScore)}，职业平均 ${proAvg}`
-        : `Talent distribution: your score ${Math.round(userScore)}, pro average ${proAvg}`}
+      aria-label={t("distribution.ariaLabel", { score: Math.round(userScore), proAvg })}
     >
       {/* Bars */}
       <div className="flex items-end gap-[3px] h-16">
@@ -58,7 +58,7 @@ export function DistributionBar({ userScore, proAvg, isZh, className }: Distribu
             <div key={i} className="flex-1 text-center">
               {isUser && (
                 <div className="text-[9px] text-primary font-bold leading-tight">
-                  {isZh ? "你" : "You"}
+                  {t("distribution.you")}
                 </div>
               )}
               {isPro && !isUser && (
@@ -75,16 +75,16 @@ export function DistributionBar({ userScore, proAvg, isZh, className }: Distribu
       <div className="flex items-center justify-center gap-4 mt-1.5 text-[10px] text-muted-foreground">
         <span className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-sm bg-primary inline-block" />
-          {isZh ? `你 (${Math.round(userScore)})` : `You (${Math.round(userScore)})`}
+          {t("distribution.youScore", { score: Math.round(userScore) })}
         </span>
         <span className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-sm bg-accent/60 inline-block" />
-          {isZh ? `职业平均 (${proAvg})` : `Pro Avg (${proAvg})`}
+          {t("distribution.proAvg", { score: proAvg })}
         </span>
       </div>
       {/* D10: Data disclaimer */}
       <div className="text-[10px] text-muted-foreground/50 text-center mt-1">
-        {isZh ? "基于统计模型估算" : "Based on statistical model"}
+        {t("distribution.disclaimer")}
       </div>
     </div>
   );

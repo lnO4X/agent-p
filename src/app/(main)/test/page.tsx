@@ -113,7 +113,7 @@ function TestHubContent() {
               <div className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-amber-500/10 border border-amber-500/30 text-amber-400 hover:bg-amber-500/20 transition-colors">
                 <Crown size={16} />
                 <span className="text-sm font-medium">
-                  {isZh ? "升级 Premium — 5次测试额度" : "Upgrade to Premium — 5 test slots"}
+                  {t("test.upgradePremium")}
                 </span>
                 <ArrowRight size={14} />
               </div>

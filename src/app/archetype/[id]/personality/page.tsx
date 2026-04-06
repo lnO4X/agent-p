@@ -17,7 +17,7 @@ export default function PersonalityIndexPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = use(params);
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const isZh = locale === "zh";
 
   const archetype = getArchetype(id);
@@ -40,7 +40,7 @@ export default function PersonalityIndexPage({
         <Link href="/quiz">
           <Button size="sm" variant="outline" className="pressable gap-1.5">
             <Sparkles size={14} />
-            {isZh ? "测一测" : "Take Quiz"}
+            {t("archetype.takeQuizShort")}
           </Button>
         </Link>
       </div>
@@ -55,14 +55,10 @@ export default function PersonalityIndexPage({
         <div className="text-5xl">{archetype.icon}</div>
         <div>
           <h1 className="text-xl font-bold">
-            {isZh
-              ? `${archetypeName} × 16种性格`
-              : `${archetypeName} × 16 Personality Types`}
+            {t("archetype.personalityCross", { name: archetypeName })}
           </h1>
           <p className="text-sm text-muted-foreground mt-1">
-            {isZh
-              ? "同一个原型，不同的性格，截然不同的游戏风格"
-              : "Same archetype, different personalities, entirely different playstyles"}
+            {t("archetype.sameArchetypeDiffPersonality")}
           </p>
         </div>
       </div>
@@ -119,15 +115,13 @@ export default function PersonalityIndexPage({
       <Card className="border-dashed">
         <CardContent className="p-4 text-center">
           <p className="text-sm text-muted-foreground mb-2">
-            {isZh
-              ? "想知道你是哪种类型？"
-              : "Want to find out which type you are?"}
+            {t("archetype.wantToKnowType")}
           </p>
           <Link
             href="/quiz"
             className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
-            {isZh ? "3分钟测试，发现你的游戏DNA" : "Take the 3-min quiz to find your gaming DNA"}
+            {t("archetype.threeMinQuiz")}
             <ArrowRight className="w-4 h-4" />
           </Link>
         </CardContent>

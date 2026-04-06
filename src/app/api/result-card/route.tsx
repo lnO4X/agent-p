@@ -48,6 +48,8 @@ const SCORE_LABELS = [
 
 /**
  * GET /api/result-card — Generate a 1080x1920 vertical result card image
+ * i18n: Server-side OG image route — uses isZh param (no useI18n() available).
+ * Keys tracked in .i18n-batch5.json: result.card.*
  *
  * Query params:
  *  - archetype (required): archetype ID

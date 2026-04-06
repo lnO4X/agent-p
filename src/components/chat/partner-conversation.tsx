@@ -39,8 +39,7 @@ const SUGGESTION_KEYS = [
 ] as const;
 
 export function PartnerConversation({ partnerId }: PartnerConversationProps) {
-  const { t, locale } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
   const router = useRouter();
   const [partner, setPartner] = useState<Partner | null>(null);
   const [loading, setLoading] = useState(true);
@@ -330,7 +329,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
     return (
       <div className="flex flex-col items-center justify-center h-64 gap-3">
         <p className="text-sm text-muted-foreground">
-          {isZh ? "找不到该角色" : "Partner not found"}
+          {t("partners.notFound")}
         </p>
         <button
           type="button"
@@ -370,8 +369,8 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
             }}
             className="pressable p-1"
             title={autoPlayTts
-              ? (isZh ? "关闭语音自动播放" : "Turn off auto-play voice")
-              : (isZh ? "开启语音自动播放" : "Turn on auto-play voice")
+              ? t("chat.autoPlayOff")
+              : t("chat.autoPlayOn")
             }
           >
             {autoPlayTts ? (
@@ -411,7 +410,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
             {/* Partner name */}
             <h2 className="text-lg font-semibold mb-1">{partner.name}</h2>
             <p className="text-xs text-muted-foreground mb-6">
-              {isZh ? "你的 AI 游戏伙伴" : "Your AI gaming partner"}
+              {t("partners.aiGamingPartner")}
             </p>
             {/* Greeting bubble */}
             {greeting && (
@@ -423,7 +422,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
             )}
             {!greeting && (
               <p className="text-sm text-muted-foreground/60 italic">
-                {isZh ? "发条消息开始聊天吧" : "Send a message to start chatting"}
+                {t("chat.startChatting")}
               </p>
             )}
           </div>
@@ -459,7 +458,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
           <div className="flex justify-center py-3">
             <div className="flex items-center gap-2 text-xs text-muted-foreground">
               <Loader2 className="w-3 h-3 animate-spin" />
-              <span>{isZh ? "正在重试..." : "Retrying..."}</span>
+              <span>{t("chat.retrying")}</span>
             </div>
           </div>
         )}
@@ -476,7 +475,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
                 <div className="flex flex-col items-center gap-2 px-5 py-3 rounded-2xl bg-amber-500/10 border border-amber-500/20 max-w-xs">
                   <Crown className="w-5 h-5 text-amber-500" />
                   <p className="text-xs text-center text-muted-foreground">
-                    {isZh ? "今日对话次数已用完，明天再来吧！" : "Daily chat limit reached. Come back tomorrow!"}
+                    {t("chat.dailyLimitReached")}
                   </p>
                 </div>
               );
@@ -488,7 +487,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
                     <span className="text-orange-600 dark:text-orange-400 text-xs font-bold">!</span>
                   </div>
                   <p className="text-xs text-muted-foreground flex-1">
-                    {isZh ? "AI 服务暂时不可用，请稍后再试" : "AI service temporarily unavailable"}
+                    {t("chat.serviceUnavailable")}
                   </p>
                 </div>
               );
@@ -501,8 +500,8 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
                   </div>
                   <p className="text-xs text-muted-foreground flex-1">
                     {error.message === "Failed to fetch"
-                      ? (isZh ? "网络连接中断" : "Connection lost")
-                      : (isZh ? "发送失败，请重试" : "Failed to send")}
+                      ? t("chat.connectionLost")
+                      : t("chat.sendFailed")}
                   </p>
                   <button
                     type="button"
@@ -515,7 +514,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
                     }}
                     className="text-xs text-primary font-medium pressable flex-shrink-0"
                   >
-                    {isZh ? "重试" : "Retry"}
+                    {t("common.retry")}
                   </button>
                 </div>
               );
@@ -527,7 +526,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
           <div className="flex justify-center py-3 animate-in fade-in-0 slide-in-from-bottom-2 duration-300">
             <div className="flex flex-col items-center gap-2 px-4 py-3 rounded-2xl bg-muted/60 border border-foreground/5 max-w-xs">
               <p className="text-xs text-muted-foreground">
-                {isZh ? "对话体验如何？" : "How's the chat?"}
+                {t("chat.ratingPrompt")}
               </p>
               <div className="flex gap-1">
                 {[1, 2, 3, 4, 5].map((star) => (
@@ -557,7 +556,7 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
         {hasRated && (
           <div className="flex justify-center py-2 animate-in fade-in-0 duration-300">
             <p className="text-xs text-muted-foreground">
-              {isZh ? "感谢评价 🎯" : "Thanks for the rating 🎯"}
+              {t("chat.ratingThanks")}
             </p>
           </div>
         )}

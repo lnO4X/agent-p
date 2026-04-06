@@ -26,7 +26,7 @@ export default function PersonalityArchetypeComboPage({
   params: Promise<{ id: string; typeId: string }>;
 }) {
   const { id, typeId } = use(params);
-  const { locale } = useI18n();
+  const { t, locale } = useI18n();
   const isZh = locale === "zh";
 
   const archetype = getArchetype(id);
@@ -55,12 +55,12 @@ export default function PersonalityArchetypeComboPage({
           className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground pressable"
         >
           <ArrowLeft className="w-4 h-4" />
-          {isZh ? "所有性格类型" : "All Personality Types"}
+          {t("archetype.allPersonalityTypes")}
         </Link>
         <Link href="/quiz">
           <Button size="sm" variant="outline" className="pressable gap-1.5">
             <Sparkles size={14} />
-            {isZh ? "测一测" : "Take Quiz"}
+            {t("archetype.takeQuizShort")}
           </Button>
         </Link>
       </div>
@@ -90,7 +90,7 @@ export default function PersonalityArchetypeComboPage({
           <div className="flex items-center gap-2">
             <Brain className="w-4 h-4" style={{ color: archetype.gradient[0] }} />
             <h2 className="font-semibold text-sm">
-              {isZh ? "独特洞察" : "Unique Insight"}
+              {t("archetype.uniqueInsight")}
             </h2>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -105,7 +105,7 @@ export default function PersonalityArchetypeComboPage({
           <div className="flex items-center gap-2">
             <Zap className="w-4 h-4" style={{ color: archetype.gradient[0] }} />
             <h2 className="font-semibold text-sm">
-              {isZh ? "超级能力" : "Superpower"}
+              {t("archetype.superpower")}
             </h2>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -120,7 +120,7 @@ export default function PersonalityArchetypeComboPage({
           <div className="flex items-center gap-2">
             <Shield className="w-4 h-4 text-destructive" />
             <h2 className="font-semibold text-sm">
-              {isZh ? "盲点" : "Blindspot"}
+              {t("archetype.blindspot")}
             </h2>
           </div>
           <p className="text-sm text-muted-foreground leading-relaxed">
@@ -135,7 +135,7 @@ export default function PersonalityArchetypeComboPage({
           <div className="flex items-center gap-2">
             <Users className="w-4 h-4" style={{ color: archetype.gradient[1] }} />
             <h2 className="font-semibold text-sm">
-              {isZh ? "社交兼容度" : "Social Compatibility"}
+              {t("archetype.socialCompatibility")}
             </h2>
           </div>
           <div className="flex items-center gap-3">
@@ -151,9 +151,7 @@ export default function PersonalityArchetypeComboPage({
             <span className="text-sm font-mono font-semibold">{combo.socialScore}%</span>
           </div>
           <p className="text-xs text-muted-foreground">
-            {isZh
-              ? "和随机队友的默契程度。越高代表越容易融入团队。"
-              : "How well you mesh with random teammates. Higher = easier team integration."}
+            {t("archetype.socialScoreDesc")}
           </p>
         </CardContent>
       </Card>
@@ -166,7 +164,7 @@ export default function PersonalityArchetypeComboPage({
               <span className="text-2xl">{archetype.icon}</span>
               <div>
                 <p className="text-xs text-muted-foreground">
-                  {isZh ? "查看原型" : "View Archetype"}
+                  {t("archetype.viewArchetype")}
                 </p>
                 <p className="font-semibold text-sm">{archetypeName}</p>
               </div>
@@ -179,10 +177,10 @@ export default function PersonalityArchetypeComboPage({
               <span className="text-2xl">{personality.emoji}</span>
               <div>
                 <p className="text-xs text-muted-foreground">
-                  {isZh ? "其他性格" : "Other Types"}
+                  {t("archetype.otherTypes")}
                 </p>
                 <p className="font-semibold text-sm">
-                  {isZh ? "16种性格" : "16 Types"}
+                  {t("archetype.sixteenTypes")}
                 </p>
               </div>
             </CardContent>
@@ -199,14 +197,12 @@ export default function PersonalityArchetypeComboPage({
       >
         <CardContent className="pt-5 pb-5 space-y-3 text-center">
           <p className="text-sm font-medium">
-            {isZh
-              ? `你是 ${personality.code} ${archetypeName} 吗？做个测试看看！`
-              : `Are you the ${personality.code} ${archetype.nameEn}? Take the quiz to find out!`}
+            {t("archetype.areYouThis", { code: personality.code, name: archetypeName })}
           </p>
           <Link href="/quiz">
             <Button className="pressable gap-2">
               <Sparkles size={16} />
-              {isZh ? "开始测试" : "Take the Quiz"}
+              {t("archetype.startQuiz")}
               <ArrowRight size={16} />
             </Button>
           </Link>

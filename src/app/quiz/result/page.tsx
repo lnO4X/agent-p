@@ -306,7 +306,7 @@ function QuizResultContent() {
             >
               <span className="text-2xl">{archetype.icon}</span>
               <span className="text-sm text-muted-foreground">
-                {isZh ? `玩家原型: ${archetype.name}` : `Archetype: ${archetype.nameEn}`}
+                {t("quizResult.archetypeLabel", { name: isZh ? archetype.name : archetype.nameEn })}
               </span>
             </motion.div>
           </>

@@ -77,6 +77,8 @@ export function communityRepliedHtml(opts: {
 
 /**
  * Weekly digest email for users who have email bound
+ * i18n: Server-side email template — uses isZh param (no useI18n() available).
+ * Keys tracked in .i18n-batch5.json: email.weekly.*
  */
 export function weeklyDigestHtml(opts: {
   username: string;
@@ -136,6 +138,8 @@ export function weeklyDigestHtml(opts: {
 
 /**
  * Streak milestone notification
+ * i18n: Server-side email template — uses isZh param (no useI18n() available).
+ * Keys tracked in .i18n-batch5.json: email.streak.*
  */
 export function streakMilestoneHtml(opts: {
   username: string;
@@ -174,6 +178,8 @@ export function streakMilestoneHtml(opts: {
 
 /**
  * Password reset email
+ * i18n: Server-side email template — uses isZh param (no useI18n() available).
+ * Keys tracked in .i18n-batch5.json: email.reset.*
  */
 export function passwordResetHtml(opts: {
   username: string;
@@ -211,6 +217,8 @@ export function passwordResetHtml(opts: {
 
 /**
  * Email verification email
+ * i18n: Server-side email template — uses isZh param (no useI18n() available).
+ * Keys tracked in .i18n-batch5.json: email.verify.*
  */
 export function emailVerificationHtml(opts: {
   username: string;

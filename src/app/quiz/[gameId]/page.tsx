@@ -11,7 +11,7 @@ import { ArrowLeft, ArrowRight, Gamepad2 } from "lucide-react";
 export default function GameQuizIntroPage() {
   const params = useParams<{ gameId: string }>();
   const router = useRouter();
-  const { locale } = useI18n();
+  const { locale, t } = useI18n();
   const isZh = locale === "zh";
 
   const gameId = params.gameId;
@@ -23,10 +23,10 @@ export default function GameQuizIntroPage() {
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
         <div className="text-center space-y-4">
           <p className="text-muted-foreground">
-            {isZh ? "未找到该游戏测试" : "Game quiz not found"}
+            {t("quiz.gameQuizNotFound")}
           </p>
           <Link href="/quiz">
-            <Button>{isZh ? "返回测试" : "Back to Quiz"}</Button>
+            <Button>{t("quiz.backToQuiz")}</Button>
           </Link>
         </div>
       </div>
@@ -48,9 +48,7 @@ export default function GameQuizIntroPage() {
         >
           <div className="text-5xl md:text-6xl mb-2">{quiz.icon}</div>
           <h1 className="text-2xl md:text-3xl font-bold">
-            {isZh
-              ? `你是哪个${quiz.gameName}角色？`
-              : `Which ${quiz.gameNameEn} character are you?`}
+            {t("quiz.whichCharacterAreYou", { game: isZh ? quiz.gameName : quiz.gameNameEn })}
           </h1>
           <p className="text-muted-foreground text-sm md:text-base">
             {isZh ? quiz.description : quiz.descriptionEn}
@@ -61,7 +59,7 @@ export default function GameQuizIntroPage() {
         <div className="space-y-2">
           <div className="text-xs text-muted-foreground flex items-center gap-1.5 px-1">
             <Gamepad2 size={12} />
-            {isZh ? "可能的结果" : "Possible Results"}
+            {t("quiz.possibleResults")}
           </div>
           <div className="grid grid-cols-2 gap-2">
             {sampleCharacters.map((char) => (
@@ -97,14 +95,12 @@ export default function GameQuizIntroPage() {
             }}
           >
             <Gamepad2 size={20} className="mr-2" />
-            {isZh ? "测测你的天赋" : "Test Your Talent"}
+            {t("quiz.testYourTalent")}
             <ArrowRight size={20} className="ml-2" />
           </Button>
 
           <p className="text-xs text-muted-foreground text-center">
-            {isZh
-              ? "3个小游戏 · 3分钟 · 无需注册"
-              : "3 mini-games · 3 min · No registration"}
+            {t("quiz.threeGamesSubtitle")}
           </p>
         </div>
 
@@ -115,7 +111,7 @@ export default function GameQuizIntroPage() {
             className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground pressable"
           >
             <ArrowLeft size={14} />
-            {isZh ? "通用玩家测试" : "General Gamer Quiz"}
+            {t("quiz.generalQuiz")}
           </Link>
         </div>
 
@@ -123,7 +119,7 @@ export default function GameQuizIntroPage() {
         {allQuizzes.length > 0 && (
           <div className="space-y-2 pt-2">
             <div className="text-xs text-muted-foreground text-center">
-              {isZh ? "其他游戏测试" : "Other Game Quizzes"}
+              {t("quiz.tryOtherQuizzes")}
             </div>
             <div className="flex justify-center gap-3">
               {allQuizzes.map((q) => (
