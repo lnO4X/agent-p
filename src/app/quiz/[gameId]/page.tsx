@@ -3,9 +3,10 @@
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useI18n } from "@/i18n/context";
+import { trackEvent as track } from "@/lib/analytics";
 import { getGameQuiz, getAllGameQuizzes } from "@/lib/game-quizzes";
 import { Button } from "@/components/ui/button";
-import { ArrowLeft, ArrowRight, ClipboardList, Gamepad2 } from "lucide-react";
+import { ArrowLeft, ArrowRight, Gamepad2 } from "lucide-react";
 
 export default function GameQuizIntroPage() {
   const params = useParams<{ gameId: string }>();
@@ -85,22 +86,25 @@ export default function GameQuizIntroPage() {
           </div>
         </div>
 
-        {/* Start quiz button */}
+        {/* Start quiz button — redirects to main talent test */}
         <div className="space-y-3">
           <Button
             size="lg"
-            className="w-full h-14 text-lg pressable"
-            onClick={() => router.push(`/quiz/questions?game=${gameId}`)}
+            className="w-full h-14 text-lg bg-accent hover:bg-accent/90 text-accent-foreground pressable"
+            onClick={() => {
+              track("quiz_start", { mode: "game", gameId });
+              router.push("/quiz");
+            }}
           >
-            <ClipboardList size={20} className="mr-2" />
-            {isZh ? "开始测试" : "Start Quiz"}
+            <Gamepad2 size={20} className="mr-2" />
+            {isZh ? "测测你的天赋" : "Test Your Talent"}
             <ArrowRight size={20} className="ml-2" />
           </Button>
 
           <p className="text-xs text-muted-foreground text-center">
             {isZh
-              ? "39道题 · 约5分钟 · 无需注册"
-              : "39 questions · ~5 min · No registration"}
+              ? "3个小游戏 · 3分钟 · 无需注册"
+              : "3 mini-games · 3 min · No registration"}
           </p>
         </div>
 
