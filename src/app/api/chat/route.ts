@@ -184,8 +184,6 @@ export async function POST(request: NextRequest) {
   );
 
   // Stream response with retries and abort signal for graceful disconnection.
-  // maxRetries handles transient OpenRouter failures (429, 5xx).
-  // abortSignal handles client disconnections and 50s hard timeout.
   const result = streamText({
     model,
     system: systemPrompt,
@@ -203,9 +201,76 @@ export async function POST(request: NextRequest) {
     },
   });
 
-  // MiniMax M2.7 includes <think>...</think> in content.
-  // Strip thinking tags before sending to client.
-  return result.toUIMessageStreamResponse({
-    sendReasoning: false,
+  // MiniMax M2.7 embeds <think>...</think> in content that we must strip.
+  // Transform the stream to remove think tags before sending to client.
+  const originalStream = result.toUIMessageStreamResponse();
+  const reader = originalStream.body!.getReader();
+  const decoder = new TextDecoder();
+  let insideThink = false;
+
+  const filteredStream = new ReadableStream({
+    async pull(controller) {
+      const { done, value } = await reader.read();
+      if (done) {
+        controller.close();
+        return;
+      }
+
+      const text = decoder.decode(value, { stream: true });
+
+      // Process line by line — SSE format "data: {...}\n\n"
+      const lines = text.split("\n");
+      const filtered: string[] = [];
+
+      for (const line of lines) {
+        if (!line.startsWith("data: ") || line === "data: [DONE]") {
+          filtered.push(line);
+          continue;
+        }
+
+        try {
+          const json = JSON.parse(line.slice(6));
+          if (json.type === "text-delta" && json.delta) {
+            let delta = json.delta as string;
+
+            // Strip <think> opening tag
+            if (delta.includes("<think>")) {
+              insideThink = true;
+              delta = delta.replace(/<think>/g, "");
+            }
+
+            // Strip </think> closing tag
+            if (delta.includes("</think>")) {
+              insideThink = false;
+              delta = delta.replace(/<\/think>/g, "");
+              // Skip any remaining delta that was inside think
+              if (!delta.trim()) continue;
+            }
+
+            // Skip all content inside <think>...</think>
+            if (insideThink) continue;
+
+            // Skip empty deltas
+            if (!delta) continue;
+
+            json.delta = delta;
+            filtered.push(`data: ${JSON.stringify(json)}`);
+          } else {
+            filtered.push(line);
+          }
+        } catch {
+          filtered.push(line);
+        }
+      }
+
+      const output = filtered.join("\n");
+      if (output) {
+        controller.enqueue(new TextEncoder().encode(output));
+      }
+    },
+  });
+
+  return new Response(filteredStream, {
+    headers: originalStream.headers,
   });
 }
