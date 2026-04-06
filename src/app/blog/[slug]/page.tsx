@@ -27,8 +27,35 @@ export default async function BlogPostPage({
   const sections = post.sectionsEn;
   const related = BLOG_POSTS.filter((p) => p.slug !== slug).slice(0, 3);
 
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "BlogPosting",
+    headline: post.titleEn,
+    description: post.descriptionEn,
+    datePublished: post.date,
+    dateModified: post.date,
+    author: { "@type": "Organization", name: "GameTan", url: "https://gametan.ai" },
+    publisher: {
+      "@type": "Organization",
+      name: "GameTan",
+      url: "https://gametan.ai",
+      logo: { "@type": "ImageObject", url: "https://gametan.ai/icons/icon-512.png" },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": `https://gametan.ai/blog/${slug}` },
+    url: `https://gametan.ai/blog/${slug}`,
+    image: "https://gametan.ai/api/home-card",
+    inLanguage: "en",
+    keywords: post.keywords.join(", "),
+    timeRequired: `PT${post.readTimeMin}M`,
+    isAccessibleForFree: true,
+  };
+
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+      />
       <div className="max-w-2xl mx-auto px-5 py-8 w-full">
         {/* Back */}
         <Link
