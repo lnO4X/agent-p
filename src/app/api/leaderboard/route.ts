@@ -79,7 +79,10 @@ export async function GET() {
         },
       }));
 
-    return NextResponse.json({ success: true, data: leaderboard });
+    return NextResponse.json(
+      { success: true, data: leaderboard },
+      { headers: { "Cache-Control": "public, s-maxage=60, stale-while-revalidate=300" } }
+    );
   } catch (error) {
     console.error("Leaderboard error:", error);
     return NextResponse.json(

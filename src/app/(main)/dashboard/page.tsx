@@ -66,27 +66,29 @@ function DashboardContent() {
   }, [talents]);
 
   useEffect(() => {
-    // Parallel fetch — eliminates waterfall chain (was: leaderboard → then auth/me)
-    Promise.all([
-      fetch("/api/leaderboard").then((r) => r.json()).catch(() => null),
-      fetch("/api/auth/me").then((r) => r.json()).catch(() => null),
-      fetch("/api/talent-history").then((r) => r.json()).catch(() => null),
-    ]).then(([leaderboard, me, talentHistory]) => {
-      // Profile: match own username in leaderboard
-      if (leaderboard?.success && me?.data?.username) {
-        const myEntry = leaderboard.data.find(
-          (e: { username: string }) => e.username === me.data.username
-        );
-        if (myEntry?.talents) setTalents(myEntry.talents);
-      }
-      setLoadingProfile(false);
+    // Fast path: fetch user's own profile directly (skip heavy leaderboard)
+    // Talent history is deferred (non-critical for first paint)
+    fetch("/api/auth/me")
+      .then((r) => r.json())
+      .then((me) => {
+        if (me?.data?.latestTalents) setTalents(me.data.latestTalents);
+      })
+      .catch(() => {})
+      .finally(() => setLoadingProfile(false));
 
-      // Talent history (evolution tracker)
-      if (talentHistory?.success && talentHistory.data?.history?.length >= 2) {
-        setEvolutionHistory(talentHistory.data.history);
-        setEvolutionData(talentHistory.data.evolution);
-      }
-    });
+    // Deferred: talent history for evolution tracker (not blocking dashboard)
+    const timer = setTimeout(() => {
+      fetch("/api/talent-history")
+        .then((r) => r.json())
+        .then((talentHistory) => {
+          if (talentHistory?.success && talentHistory.data?.history?.length >= 2) {
+            setEvolutionHistory(talentHistory.data.history);
+            setEvolutionData(talentHistory.data.evolution);
+          }
+        })
+        .catch(() => {});
+    }, 500);
+    return () => clearTimeout(timer);
   }, []);
 
   // Time-aware greeting

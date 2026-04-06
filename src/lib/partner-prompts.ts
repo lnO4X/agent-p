@@ -254,6 +254,82 @@ export async function summarizeConversationContext(
   }
 }
 
+// ==================== GAME MECHANICS KNOWLEDGE ====================
+
+/**
+ * Game-specific knowledge that the Coach can reference when discussing test results.
+ * Auto-generated from game registry scorer distributions.
+ */
+export const GAME_KNOWLEDGE = `## 游戏测试机制知识
+
+你对 GameTan 的每个测试游戏了如指掌。当用户问到某个天赋时，你可以解释具体的游戏机制和他们的表现意味着什么。
+
+### reaction-speed (反应速度测试)
+- 10 轮点击测试：红屏等待 → 绿屏立即点击
+- 第 4 轮起出现干扰色（橙/青/黄），测试抗干扰能力
+- 误点会被记录在 metadata 中
+- 分布参数: mean=300ms, stdDev=80ms (越低越好)
+- 得分 50=约 300ms, 70=约 220ms, 90=约 160ms
+- 职业水平: <200ms (FPS), <180ms (CS2 顶级), <150ms (传说级)
+
+### pattern (模式识别测试)
+- 15 轮 4×4 色块网格，找出亮度不同的那个
+- 难度递增: 亮度差从 25→3（第15轮几乎看不出区别）
+- 分布参数: mean=8, stdDev=3 (正确数越高越好)
+- 得分 50=约 8 个正确, 70=约 11 个, 90=约 14 个
+- 这测量的是视觉敏感度和注意力
+
+### risk (风险决策测试)
+- 10 轮气球充气: 每次充气有爆炸概率 (pumps-2)×6%
+- 前 2 次充气安全(0% 爆炸)
+- 选择: 继续充气(冒险) vs 存入银行(保守)
+- 分布参数: mean=25, stdDev=8 (累计银行分越高越好)
+- 测量风险偏好和概率直觉
+
+### hand-eye (手眼协调测试)
+- 追踪移动目标并点击，测量精确度
+- 分布参数: mean=5, stdDev=2 (距离偏差越低越好)
+
+### memory (序列记忆测试)
+- 重复越来越长的闪烁序列
+- 分布参数: mean=7, stdDev=2 (记住的长度越高越好)
+
+### strategy (策略逻辑测试)
+- 塔防解谜: 在限定资源下选择最优防御布局
+- 分布参数: mean=50, stdDev=15
+
+### decision (快速分类测试)
+- 40 秒内快速分类多个物品
+- 测量决策速度和准确性
+- 分布参数: mean=20, stdDev=6
+
+### spatial (空间感知测试)
+- 3D 形状旋转匹配
+- 分布参数: mean=6, stdDev=2
+
+### rhythm (节拍感测试)
+- 跟随节拍点击，测量时间精度
+- 分布参数: mean=50, stdDev=15
+
+### multitask (多任务测试)
+- 同时处理两个任务（仅 PC）
+- 分布参数: mean=40, stdDev=12
+
+### emotional (情绪控制测试)
+- 在压力干扰下保持准确性
+- 分布参数: mean=50, stdDev=15
+
+### teamwork (团队协作测试)
+- 模拟协作场景下的决策
+- 分布参数: mean=50, stdDev=15
+
+### resource (资源管理测试)
+- 在限定资源下做最优分配
+- 分布参数: mean=50, stdDev=15
+
+引用这些知识时要自然，不要说"根据游戏机制"。直接说"你的反应平均约 260ms"而不是"根据测试分布参数"。
+`;
+
 // ==================== SYSTEM PROMPT BUILDER ====================
 
 /**
@@ -274,8 +350,9 @@ export function buildPartnerSystemPrompt(
 ): string {
   const parts: string[] = [];
 
-  // Layer 1: Personality definition
+  // Layer 1: Personality definition + game mechanics knowledge
   parts.push(definition);
+  parts.push(GAME_KNOWLEDGE);
 
   // Layer 2: Memory observations (partner-private)
   if (memory.trim()) {

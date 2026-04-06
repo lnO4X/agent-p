@@ -669,5 +669,15 @@
   "chat.voice.start": "语音输入",
   "partners.init.createFailed": "创建失败，请重试",
   "partners.init.networkError": "网络错误，请重试",
-  "chat.coachSetup": "AI 教练正在准备中..."
+  "chat.coachSetup": "AI 教练正在准备中...",
+  "quiz.tier.quick": "快速测试",
+  "quiz.tier.standard": "标准测试",
+  "quiz.tier.pro": "专业评估",
+  "quiz.tier.quickDesc": "3 个小游戏，3 分钟。快速了解你的天赋。",
+  "quiz.tier.standardDesc": "7 个游戏，10 分钟。深度分析 + AI 教练。",
+  "quiz.tier.proDesc": "完整 13 维评估。AI 教练、PDF 报告、历史追踪。",
+  "quiz.dimensions": "维度",
+  "result.cta.proTitle": "完整专业评估",
+  "result.cta.proDesc": "13 维天赋画像、AI 教练、PDF 报告、历史追踪",
+  "result.cta.proButton": "解锁专业评估"
 }

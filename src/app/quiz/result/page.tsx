@@ -774,38 +774,61 @@ function QuizResultContent() {
           </CardContent>
         </Card>
         ) : (
-        <Card className="border-primary/30 bg-primary/5 overflow-hidden">
-          <CardContent className="pt-5 pb-5">
-            <div className="text-center mb-3">
-              <div className="text-sm font-semibold mb-1">
-                {t("result.cta.quickOnly")}
+        <div className="space-y-3">
+          {/* Standard upgrade — free registration */}
+          <Card className="border-primary/30 bg-primary/5 overflow-hidden">
+            <CardContent className="pt-5 pb-5">
+              <div className="text-center mb-3">
+                <div className="text-sm font-semibold mb-1">
+                  {t("result.cta.quickOnly")}
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {t("result.cta.registerDesc")}
+                </p>
               </div>
-              <p className="text-xs text-muted-foreground">
-                {t("result.cta.registerDesc")}
+              <div className="grid grid-cols-3 gap-2 mb-4 text-center">
+                <div className="px-2 py-2 rounded-lg bg-muted/50">
+                  <div className="text-lg font-bold text-primary">7</div>
+                  <div className="text-[10px] text-muted-foreground">{t("result.cta.dimensions")}</div>
+                </div>
+                <div className="px-2 py-2 rounded-lg bg-muted/50">
+                  <div className="text-lg font-bold text-primary">AI</div>
+                  <div className="text-[10px] text-muted-foreground">{t("result.cta.coach")}</div>
+                </div>
+                <div className="px-2 py-2 rounded-lg bg-muted/50">
+                  <div className="text-lg font-bold text-primary">Pro</div>
+                  <div className="text-[10px] text-muted-foreground">{t("result.cta.deepCompare")}</div>
+                </div>
+              </div>
+              <Link href="/register" className="block">
+                <Button size="lg" className="w-full h-12 text-base">
+                  {t("result.cta.registerButton")}
+                  <ArrowRight size={18} className="ml-2" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+
+          {/* Pro upgrade — paid assessment */}
+          <Card className="border-accent/30 bg-accent/5 overflow-hidden">
+            <CardContent className="pt-4 pb-4">
+              <div className="flex items-center gap-2 mb-2">
+                <Crown size={16} className="text-accent" />
+                <span className="text-sm font-semibold">{t("result.cta.proTitle")}</span>
+                <span className="text-xs px-1.5 py-0.5 rounded-full bg-accent/15 text-accent font-medium">$3.99</span>
+              </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                {t("result.cta.proDesc")}
               </p>
-            </div>
-            <div className="grid grid-cols-3 gap-2 mb-4 text-center">
-              <div className="px-2 py-2 rounded-lg bg-muted/50">
-                <div className="text-lg font-bold text-primary">13</div>
-                <div className="text-[10px] text-muted-foreground">{t("result.cta.dimensions")}</div>
-              </div>
-              <div className="px-2 py-2 rounded-lg bg-muted/50">
-                <div className="text-lg font-bold text-primary">AI</div>
-                <div className="text-[10px] text-muted-foreground">{t("result.cta.coach")}</div>
-              </div>
-              <div className="px-2 py-2 rounded-lg bg-muted/50">
-                <div className="text-lg font-bold text-primary">Pro</div>
-                <div className="text-[10px] text-muted-foreground">{t("result.cta.deepCompare")}</div>
-              </div>
-            </div>
-            <Link href="/register" className="block">
-              <Button size="lg" className="w-full h-12 text-base">
-                {t("result.cta.registerButton")}
-                <ArrowRight size={18} className="ml-2" />
-              </Button>
-            </Link>
-          </CardContent>
-        </Card>
+              <Link href="/quiz?tier=pro" className="block">
+                <Button variant="outline" size="sm" className="w-full border-accent/30 text-accent hover:bg-accent/10">
+                  {t("result.cta.proButton")}
+                  <ArrowRight size={14} className="ml-1.5" />
+                </Button>
+              </Link>
+            </CardContent>
+          </Card>
+        </div>
         )}
         </motion.div>
 

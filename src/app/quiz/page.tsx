@@ -6,43 +6,58 @@ import { trackEvent as track } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n/context";
 import { gameRegistry } from "@/games";
-import { QUICK_TEST_GAMES } from "@/lib/archetype";
+import { TIER_CONFIGS, type TestTier } from "@/lib/test-tiers";
 import {
   Zap,
   Brain,
   Dice5,
   ArrowRight,
   Gamepad2,
+  Lock,
+  Crown,
+  ChevronRight,
 } from "lucide-react";
 import type { GameRawResult } from "@/types/game";
 
-type Phase = "intro" | "playing" | "transition";
+type Phase = "select" | "playing" | "transition";
 
-const GAME_META = [
-  { id: "reaction-speed", icon: Zap, labelZh: "反应速度", labelEn: "Reaction Speed", color: "text-blue-400" },
-  { id: "pattern", icon: Brain, labelZh: "模式识别", labelEn: "Pattern Recognition", color: "text-primary" },
-  { id: "risk", icon: Dice5, labelZh: "风险决策", labelEn: "Risk & Decision", color: "text-amber-400" },
-] as const;
+/** Icon map for talent-based game coloring */
+const TALENT_ICONS: Record<string, { icon: typeof Zap; color: string }> = {
+  "reaction-speed": { icon: Zap, color: "text-blue-400" },
+  "pattern": { icon: Brain, color: "text-primary" },
+  "risk": { icon: Dice5, color: "text-amber-400" },
+  "hand-eye": { icon: Zap, color: "text-emerald-400" },
+  "memory": { icon: Brain, color: "text-violet-400" },
+  "strategy": { icon: Brain, color: "text-cyan-400" },
+  "decision": { icon: Zap, color: "text-orange-400" },
+  "spatial": { icon: Brain, color: "text-indigo-400" },
+  "rhythm": { icon: Gamepad2, color: "text-pink-400" },
+  "multitask": { icon: Zap, color: "text-rose-400" },
+  "emotional": { icon: Brain, color: "text-teal-400" },
+  "teamwork": { icon: Gamepad2, color: "text-lime-400" },
+  "resource": { icon: Brain, color: "text-yellow-400" },
+};
 
 export default function QuizPage() {
   const router = useRouter();
-  const { locale, t } = useI18n();
-  const isZh = locale === "zh";
+  const { t } = useI18n();
 
-  const [phase, setPhase] = useState<Phase>("intro");
+  const [phase, setPhase] = useState<Phase>("select");
+  const [selectedTier, setSelectedTier] = useState<TestTier>("quick");
 
-  // ─── Mini-game state ───
+  // Game state
   const [gameIndex, setGameIndex] = useState(0);
   const [scores, setScores] = useState<number[]>([]);
 
-  const currentGameId = QUICK_TEST_GAMES[gameIndex];
+  const tierConfig = TIER_CONFIGS[selectedTier];
+  const gameIds = tierConfig.gameIds;
+  const currentGameId = gameIds[gameIndex];
   const currentPlugin = useMemo(
     () => gameRegistry.get(currentGameId),
     [currentGameId]
   );
   const GameComponent = currentPlugin?.component ?? null;
 
-  // ─── Mini-game handlers ───
   const handleComplete = useCallback(
     (result: GameRawResult) => {
       if (!currentPlugin) return;
@@ -54,58 +69,143 @@ export default function QuizPage() {
       const newScores = [...scores, normalized];
       setScores(newScores);
 
-      if (gameIndex < QUICK_TEST_GAMES.length - 1) {
+      if (gameIndex < gameIds.length - 1) {
         setPhase("transition");
       } else {
         const encoded = newScores.map((s) => Math.round(s)).join("-");
-        router.push(`/quiz/result?s=${encoded}&own=1`);
+        router.push(`/quiz/result?s=${encoded}&own=1&tier=${selectedTier}`);
       }
     },
-    [currentPlugin, scores, gameIndex, router]
+    [currentPlugin, scores, gameIndex, gameIds, router, selectedTier]
   );
 
   const handleAbort = useCallback(() => {
-    setPhase("intro");
+    setPhase("select");
     setGameIndex(0);
     setScores([]);
   }, []);
 
-  const startNextGame = () => {
-    setGameIndex((i) => i + 1);
+  const startTest = (tier: TestTier) => {
+    const config = TIER_CONFIGS[tier];
+    if (config.requiresAuth) {
+      // Check auth — redirect to login if needed
+      fetch("/api/auth/me", { credentials: "include" })
+        .then((r) => r.json())
+        .then((data) => {
+          if (!data.success) {
+            router.push(`/login?next=/quiz&tier=${tier}`);
+            return;
+          }
+          if (config.requiresPayment) {
+            // Check if user has premium
+            fetch("/api/auth/me", { credentials: "include" })
+              .then((r) => r.json())
+              .then(() => {
+                // For now, start the test — payment check is on results page
+                setSelectedTier(tier);
+                setGameIndex(0);
+                setScores([]);
+                track("quiz_start", { mode: tier });
+                setPhase("playing");
+              });
+            return;
+          }
+          setSelectedTier(tier);
+          setGameIndex(0);
+          setScores([]);
+          track("quiz_start", { mode: tier });
+          setPhase("playing");
+        })
+        .catch(() => router.push("/login?next=/quiz"));
+      return;
+    }
+    setSelectedTier(tier);
+    setGameIndex(0);
+    setScores([]);
+    track("quiz_start", { mode: tier });
     setPhase("playing");
   };
 
   // ═══════════════════════════════════════════════════
-  // INTRO SCREEN — Mini-games (talent test) is the default CTA
+  // TIER SELECTION SCREEN
   // ═══════════════════════════════════════════════════
-  if (phase === "intro") {
+  if (phase === "select") {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
-        <div className="max-w-md w-full text-center space-y-8">
-          <div className="space-y-3">
-            <h1 className="text-3xl md:text-4xl font-bold">
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+        <div className="max-w-lg w-full space-y-6">
+          <div className="text-center space-y-2">
+            <h1 className="text-2xl md:text-3xl font-bold">
               {t("quiz.proLevelTalent")}
             </h1>
-            <p className="text-muted-foreground text-base md:text-lg">
+            <p className="text-muted-foreground text-sm">
               {t("quiz.threeGamesDesc")}
             </p>
           </div>
 
-          {/* Primary CTA — Mini-Games (Talent Test) */}
-          <Button
-            size="lg"
-            className="w-full h-14 text-lg bg-accent hover:bg-accent/90 text-accent-foreground pressable"
-            onClick={() => {
-              track("quiz_start", { mode: "quick" });
-              setPhase("playing");
-            }}
-          >
-            <Gamepad2 size={20} className="mr-2" />
-            {t("quiz.testYourTalent")}
-            <ArrowRight size={20} className="ml-2" />
-          </Button>
+          {/* Tier Cards */}
+          <div className="space-y-3">
+            {(["quick", "standard", "pro"] as TestTier[]).map((tier) => {
+              const config = TIER_CONFIGS[tier];
+              const isQuick = tier === "quick";
+              const isPro = tier === "pro";
+              return (
+                <button
+                  key={tier}
+                  type="button"
+                  onClick={() => startTest(tier)}
+                  className={`w-full text-left rounded-2xl p-4 transition-all pressable ${
+                    isPro
+                      ? "bg-accent/10 border-2 border-accent/30 hover:border-accent/50"
+                      : "bg-muted/40 border border-foreground/5 hover:bg-muted/60"
+                  }`}
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-1">
+                        {isPro && <Crown className="w-4 h-4 text-accent" />}
+                        <span className="font-semibold text-sm">
+                          {t(`quiz.tier.${tier}`)}
+                        </span>
+                        {!isQuick && !isPro && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                            {t("common.free")}
+                          </span>
+                        )}
+                        {isPro && (
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-accent/15 text-accent font-medium">
+                            ${config.priceUsd}
+                          </span>
+                        )}
+                      </div>
+                      <p className="text-xs text-muted-foreground leading-relaxed">
+                        {t(`quiz.tier.${tier}Desc`)}
+                      </p>
+                      <div className="flex items-center gap-3 mt-2 text-xs text-muted-foreground/80">
+                        <span>{config.dimensions} {t("quiz.dimensions")}</span>
+                        <span>·</span>
+                        <span>~{config.timeMinutes} min</span>
+                        {config.features.aiCoach && (
+                          <>
+                            <span>·</span>
+                            <span>AI Coach</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                    <div className="flex-shrink-0 ml-3">
+                      {config.requiresAuth && !isPro ? (
+                        <Lock className="w-4 h-4 text-muted-foreground/40" />
+                      ) : (
+                        <ChevronRight className="w-5 h-5 text-muted-foreground/40" />
+                      )}
+                    </div>
+                  </div>
+                </button>
+              );
+            })}
+          </div>
 
-          <p className="text-xs text-muted-foreground">
+          <p className="text-center text-[11px] text-muted-foreground/60">
             {t("quiz.noRegistration")}
           </p>
         </div>
@@ -114,13 +214,14 @@ export default function QuizPage() {
   }
 
   // ═══════════════════════════════════════════════════
-  // MINI-GAME: Transition screen between games
+  // TRANSITION SCREEN
   // ═══════════════════════════════════════════════════
   if (phase === "transition") {
-    const nextMeta = GAME_META[gameIndex + 1];
-    const NextIcon = nextMeta?.icon;
+    const prevPlugin = gameRegistry.get(gameIds[gameIndex]);
+    const nextPlugin = gameRegistry.get(gameIds[gameIndex + 1]);
     const prevScore = scores[scores.length - 1];
-    const prevMeta = GAME_META[gameIndex];
+    const nextInfo = TALENT_ICONS[gameIds[gameIndex + 1]] ?? { icon: Brain, color: "text-primary" };
+    const NextIcon = nextInfo.icon;
 
     return (
       <div className="flex-1 flex flex-col items-center justify-center px-6 py-12">
@@ -130,36 +231,43 @@ export default function QuizPage() {
               {Math.round(prevScore)}
             </div>
             <div className="text-sm text-muted-foreground">
-              {isZh ? prevMeta.labelZh : prevMeta.labelEn}
+              {prevPlugin?.nameEn ?? prevPlugin?.name}
             </div>
           </div>
 
-          <div className="flex justify-center gap-2">
-            {GAME_META.map((_, i) => (
+          <div className="flex justify-center gap-1.5">
+            {gameIds.map((_, i) => (
               <div
                 key={i}
-                className={`h-2 w-12 rounded-full ${
-                  i <= gameIndex ? "bg-primary" : "bg-muted"
+                className={`h-2 rounded-full transition-all ${
+                  i <= gameIndex ? "bg-primary w-8" : "bg-muted w-6"
                 }`}
               />
             ))}
           </div>
 
-          {nextMeta && NextIcon && (
+          {nextPlugin && (
             <div className="space-y-3">
               <div className="text-muted-foreground text-sm">
                 {t("quiz.nextRound")}
               </div>
               <div className="flex items-center justify-center gap-3">
-                <NextIcon size={24} className={nextMeta.color} />
+                <NextIcon size={24} className={nextInfo.color} />
                 <span className="text-lg font-semibold">
-                  {isZh ? nextMeta.labelZh : nextMeta.labelEn}
+                  {nextPlugin.nameEn ?? nextPlugin.name}
                 </span>
               </div>
             </div>
           )}
 
-          <Button size="lg" className="w-full h-12" onClick={startNextGame}>
+          <Button
+            size="lg"
+            className="w-full h-12"
+            onClick={() => {
+              setGameIndex((i) => i + 1);
+              setPhase("playing");
+            }}
+          >
             {t("quiz.continue")}
             <ArrowRight size={18} className="ml-2" />
           </Button>
@@ -169,31 +277,31 @@ export default function QuizPage() {
   }
 
   // ═══════════════════════════════════════════════════
-  // MINI-GAME: Playing state
+  // PLAYING STATE
   // ═══════════════════════════════════════════════════
   if (phase === "playing" && GameComponent) {
-    const meta = GAME_META[gameIndex];
+    const plugin = gameRegistry.get(currentGameId);
     return (
       <div className="flex-1 flex flex-col">
         <div className="flex items-center justify-between px-4 py-2 border-b border-border">
           <div className="flex items-center gap-2 text-sm">
             <span className="text-muted-foreground">
-              {gameIndex + 1}/{QUICK_TEST_GAMES.length}
+              {gameIndex + 1}/{gameIds.length}
             </span>
             <span className="font-medium">
-              {isZh ? meta.labelZh : meta.labelEn}
+              {plugin?.nameEn ?? plugin?.name}
             </span>
           </div>
-          <div className="flex gap-1.5">
-            {GAME_META.map((_, i) => (
+          <div className="flex gap-1">
+            {gameIds.map((_, i) => (
               <div
                 key={i}
-                className={`h-1.5 w-8 rounded-full ${
+                className={`h-1.5 rounded-full transition-all ${
                   i < gameIndex
-                    ? "bg-primary"
+                    ? "bg-primary w-6"
                     : i === gameIndex
-                      ? "bg-primary/50"
-                      : "bg-muted"
+                      ? "bg-primary/50 w-6"
+                      : "bg-muted w-4"
                 }`}
               />
             ))}

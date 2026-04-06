@@ -669,5 +669,15 @@
   "chat.voice.start": "Voice input",
   "partners.init.createFailed": "Failed to create, please retry",
   "partners.init.networkError": "Network error, please retry",
-  "chat.coachSetup": "Your AI coach is being set up..."
+  "chat.coachSetup": "Your AI coach is being set up...",
+  "quiz.tier.quick": "Quick Test",
+  "quiz.tier.standard": "Standard Test",
+  "quiz.tier.pro": "Pro Assessment",
+  "quiz.tier.quickDesc": "3 mini-games in 3 minutes. Instant talent snapshot.",
+  "quiz.tier.standardDesc": "7 games, 10 min. Deeper analysis + AI Coach.",
+  "quiz.tier.proDesc": "Full 13-dimension assessment. AI Coach, PDF report, history.",
+  "quiz.dimensions": "dimensions",
+  "result.cta.proTitle": "Full Pro Assessment",
+  "result.cta.proDesc": "13-dimension talent profile, AI coaching, PDF report, history tracking",
+  "result.cta.proButton": "Unlock Pro Assessment"
 }
