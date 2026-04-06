@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Gamer Archetypes | GameTan",
+  title: "Gamer Archetypes",
   description:
     "16 unique gamer archetypes — discover your gaming personality, strengths, weaknesses, and compatible types.",
   openGraph: {

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Esports Talent Test | GameTan",
+  title: "Esports Talent Test",
   description:
     "3 minutes. 3 games. Test your reaction speed, pattern recognition, and decision-making against pro player benchmarks.",
   openGraph: {

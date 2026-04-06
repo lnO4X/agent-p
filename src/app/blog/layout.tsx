@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Blog — GameTan",
+  title: "Blog",
   description:
     "Guides, analysis, and insights about esports talent, gaming skills, and pro player performance.",
   openGraph: {

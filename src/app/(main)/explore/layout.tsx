@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Browse 300+ Games | GameTan",
+  title: "Browse 300+ Games",
   description:
     "Explore 300+ games across all platforms. Find your perfect match based on your gamer archetype.",
   openGraph: {
