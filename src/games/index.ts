@@ -12,6 +12,10 @@ import emotional from "./emotional";
 import teamwork from "./teamwork";
 import risk from "./risk";
 import resource from "./resource";
+import nBack from "./n-back";
+import flanker from "./flanker";
+import mot from "./mot";
+import taskSwitch from "./task-switch";
 
 const allGames = [
   reactionSpeed,
@@ -27,6 +31,10 @@ const allGames = [
   teamwork,
   risk,
   resource,
+  nBack,
+  flanker,
+  mot,
+  taskSwitch,
 ];
 
 allGames.forEach((game) => gameRegistry.register(game));

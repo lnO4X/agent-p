@@ -5,9 +5,11 @@ import type { GameComponentProps } from "@/types/game";
 
 type Phase = "waiting" | "ready" | "distractor" | "go" | "too-early" | "result";
 
-const TOTAL_ROUNDS = 10;
+const TOTAL_ROUNDS = 20;
 // Rounds where distractors start appearing (1-indexed)
-const DISTRACTOR_START_ROUND = 4;
+const DISTRACTOR_START_ROUND = 6;
+// First 2 rounds are unscored practice
+const PRACTICE_ROUNDS = 2;
 
 // Distractor colors that flash briefly to trick the player
 const DISTRACTOR_COLORS = [
@@ -133,15 +135,18 @@ export default function ReactionSpeedGame({
       setPhase("result");
 
       if (newTimes.length >= TOTAL_ROUNDS) {
-        // All rounds done
+        // All rounds done — exclude practice rounds from scored average
+        const scoredTimes = newTimes.slice(PRACTICE_ROUNDS);
         const avg =
-          newTimes.reduce((a, b) => a + b, 0) / newTimes.length;
+          scoredTimes.reduce((a, b) => a + b, 0) / scoredTimes.length;
         completeTimerRef.current = setTimeout(() => {
           onComplete({
             rawScore: avg,
             durationMs: Date.now() - startTimeRef.current,
             metadata: {
-              times: newTimes,
+              allTimes: newTimes,
+              scoredTimes,
+              practiceRounds: PRACTICE_ROUNDS,
               rounds: TOTAL_ROUNDS,
               falseClicks: falseClickCount,
             },

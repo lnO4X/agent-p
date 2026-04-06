@@ -1,6 +1,9 @@
 import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
+/**
+ * @normSource Initial estimate. Measures sustained attention under increasing difficulty, not stress tolerance. Pending calibration
+ */
 export const emotionalScorer: GameScorer = {
   perfectRawScore: 1.2,
   higherIsBetter: true,

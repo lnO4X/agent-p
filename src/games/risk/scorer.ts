@@ -1,12 +1,15 @@
 import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
+/**
+ * @normSource Adapted from BART, Lejuez et al. 2002. Scaled for 10-trial version
+ */
 export const riskScorer: GameScorer = {
   perfectRawScore: 150,
   higherIsBetter: true,
   distribution: {
-    mean: 60,
-    stdDev: 15,
+    mean: 25,
+    stdDev: 8,
   },
   normalize(rawScore: number): number {
     // rawScore = total banked points across 10 rounds

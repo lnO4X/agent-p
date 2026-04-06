@@ -2,18 +2,18 @@ import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
 /**
- * @normSource Initial estimate. No validated paradigm match. Pending calibration
+ * @normSource Pylyshyn & Storm 1988; Meyerhoff et al. 2017 meta-analysis.
+ * Accuracy ~65% for 4-target tracking among untrained adults.
  */
-export const resourceScorer: GameScorer = {
+export const motScorer: GameScorer = {
   perfectRawScore: 100,
   higherIsBetter: true,
   distribution: {
-    mean: 55,
+    mean: 65,
     stdDev: 15,
   },
   normalize(rawScore: number): number {
-    // rawScore = composite score (resources + demand bonus + balance bonus - zero penalty)
-    // already clamped 0-100 by the game, typical range: 20-90
+    // rawScore = average accuracy percentage across all trials (0-100)
     const clamped = Math.max(0, Math.min(100, rawScore));
     return sigmoidNormalize(
       clamped,

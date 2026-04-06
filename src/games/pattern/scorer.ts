@@ -1,6 +1,9 @@
 import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
+/**
+ * @normSource Initial estimate, pending calibration with N>500 user data
+ */
 export const patternScorer: GameScorer = {
   perfectRawScore: 15,
   higherIsBetter: true,

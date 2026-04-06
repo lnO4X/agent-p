@@ -1,12 +1,15 @@
 import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
+/**
+ * @normSource Human Benchmark 81M+ clicks, median 273ms. Bridges et al. 2020
+ */
 export const reactionSpeedScorer: GameScorer = {
   perfectRawScore: 150,
   higherIsBetter: false, // lower reaction time is better
   distribution: {
-    mean: 300,
-    stdDev: 80,
+    mean: 273,
+    stdDev: 50,
   },
   normalize(rawScore: number): number {
     // rawScore = average reaction time in ms (lower is better)

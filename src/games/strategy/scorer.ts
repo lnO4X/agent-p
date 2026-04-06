@@ -1,6 +1,9 @@
 import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
+/**
+ * @normSource Initial estimate. No validated paradigm match. Pending calibration
+ */
 export const strategyScorer: GameScorer = {
   perfectRawScore: 100,
   higherIsBetter: true,

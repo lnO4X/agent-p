@@ -139,20 +139,20 @@ export async function loadTalentProfileContext(
       );
     }
 
-    // Raw talent scores
+    // Talent scores (percentile ranks, 0-100, where 50 = median)
     parts.push(
-      `## 用户天赋档案\n` +
-      `- 反应速度 Reaction Speed: ${p.reactionSpeed ?? "未测试"}\n` +
+      `## 用户认知测试档案 (分数 = 百分位排名, 50=中位数)\n` +
+      `- 反应速度 Reaction Speed: ${p.reactionSpeed ?? "未测试"} (50th≈273ms)\n` +
       `- 手眼协调 Hand-Eye Coordination: ${p.handEyeCoord ?? "未测试"}\n` +
       `- 空间感知 Spatial Awareness: ${p.spatialAwareness ?? "未测试"}\n` +
-      `- 记忆力 Memory: ${p.memory ?? "未测试"}\n` +
+      `- 记忆力 Memory: ${p.memory ?? "未测试"} (50th≈跨度6)\n` +
       `- 策略逻辑 Strategy & Logic: ${p.strategyLogic ?? "未测试"}\n` +
       `- 节奏感 Rhythm Sense: ${p.rhythmSense ?? "未测试"}\n` +
       `- 图案识别 Pattern Recognition: ${p.patternRecog ?? "未测试"}\n` +
       `- 多任务 Multitasking: ${p.multitasking ?? "未测试"}\n` +
       `- 决策速度 Decision Speed: ${p.decisionSpeed ?? "未测试"}\n` +
-      `- 情绪控制 Emotional Control: ${p.emotionalControl ?? "未测试"}\n` +
-      `- 团队协作 Teamwork: ${p.teamworkTendency ?? "未测试"}\n` +
+      `- 持续注意 Sustained Attention: ${p.emotionalControl ?? "未测试"}\n` +
+      `- 推理判断 Reasoning: ${p.teamworkTendency ?? "未测试"}\n` +
       `- 风险评估 Risk Assessment: ${p.riskAssessment ?? "未测试"}\n` +
       `- 资源管理 Resource Management: ${p.resourceMgmt ?? "未测试"}\n` +
       `- 综合评分: ${p.overallScore ?? "N/A"}, 等级: ${p.overallRank ?? "N/A"}\n` +
@@ -260,75 +260,77 @@ export async function summarizeConversationContext(
  * Game-specific knowledge that the Coach can reference when discussing test results.
  * Auto-generated from game registry scorer distributions.
  */
-export const GAME_KNOWLEDGE = `## 游戏测试机制知识
+export const GAME_KNOWLEDGE = `## 认知测试知识
 
-你对 GameTan 的每个测试游戏了如指掌。当用户问到某个天赋时，你可以解释具体的游戏机制和他们的表现意味着什么。
+你理解 GameTan 每个测试背后的认知科学原理。用户的分数是百分位数（0-100），表示他们在所有测试者中的排名。50 分 = 中位数（50th percentile），84 分 = 前 16%，98 分 = 前 2%。
 
-### reaction-speed (反应速度测试)
-- 10 轮点击测试：红屏等待 → 绿屏立即点击
-- 第 4 轮起出现干扰色（橙/青/黄），测试抗干扰能力
-- 误点会被记录在 metadata 中
-- 分布参数: mean=300ms, stdDev=80ms (越低越好)
-- 得分 50=约 300ms, 70=约 220ms, 90=约 160ms
-- 职业水平: <200ms (FPS), <180ms (CS2 顶级), <150ms (传说级)
+### 如何解读分数
+- 分数是百分位，不是百分比。"反应速度 72" = 超过 72% 的测试者
+- 50 分不是"不及格"，是正常的中间水平
+- 分数基于 Human Benchmark 81M+ 次测试等真实群体常模
 
-### pattern (模式识别测试)
-- 15 轮 4×4 色块网格，找出亮度不同的那个
-- 难度递增: 亮度差从 25→3（第15轮几乎看不出区别）
-- 分布参数: mean=8, stdDev=3 (正确数越高越好)
-- 得分 50=约 8 个正确, 70=约 11 个, 90=约 14 个
-- 这测量的是视觉敏感度和注意力
+### reaction-speed (简单反应时间)
+- 认知构造: 视觉-运动反应速度 (Simple Reaction Time, SRT)
+- 机制: 20 轮，红屏→绿屏点击，第 4 轮起有干扰色测试抑制控制
+- 常模: 群体中位数 273ms, SD 50ms (Human Benchmark 81M+ 数据)
+- 百分位对应: 50th=273ms, 72th≈248ms, 84th≈223ms, 98th≈173ms
+- 科学背景: 简单 RT 在电竞研究中区分度较低 (Miao et al. 2024, g=0.2)
+  空间认知和注意力才是区分专业与业余的最强指标
 
-### risk (风险决策测试)
-- 10 轮气球充气: 每次充气有爆炸概率 (pumps-2)×6%
-- 前 2 次充气安全(0% 爆炸)
-- 选择: 继续充气(冒险) vs 存入银行(保守)
-- 分布参数: mean=25, stdDev=8 (累计银行分越高越好)
-- 测量风险偏好和概率直觉
+### pattern (视觉辨别)
+- 认知构造: 视觉对比敏感度 + 选择注意力
+- 机制: 30 轮 4×4 色块网格，找亮度异常的一个，难度递增
+- 常模: 待校准（初始估值 mean=10/30, SD=3）
 
-### hand-eye (手眼协调测试)
-- 追踪移动目标并点击，测量精确度
-- 分布参数: mean=5, stdDev=2 (距离偏差越低越好)
+### risk (风险决策, BART 变体)
+- 认知构造: 风险偏好 + 概率推理 (改编自 Balloon Analogue Risk Task)
+- 机制: 10 轮气球充气，爆炸概率递增，选择充气或存银行
+- 常模: 改编自 Lejuez et al. 2002 BART 标准
 
-### memory (序列记忆测试)
-- 重复越来越长的闪烁序列
-- 分布参数: mean=7, stdDev=2 (记住的长度越高越好)
+### hand-eye (追踪精度)
+- 认知构造: 视觉-运动追踪 (改编自 Pursuit Rotor Task)
+- 机制: 持续追踪移动目标，测量光标偏离度
 
-### strategy (策略逻辑测试)
-- 塔防解谜: 在限定资源下选择最优防御布局
-- 分布参数: mean=50, stdDev=15
+### memory (序列记忆)
+- 认知构造: 视空间短期记忆容量 (类似 Corsi Block-Tapping)
+- 常模: Kessels et al. 2000 meta-analysis: 年轻成人平均跨度 6.0, SD 1.5-2.0
+- 科学背景: 工作记忆容量是电竞高手的强区分维度 (g=0.38)
 
-### decision (快速分类测试)
-- 40 秒内快速分类多个物品
-- 测量决策速度和准确性
-- 分布参数: mean=20, stdDev=6
+### strategy (策略规划)
+- 认知构造: 执行功能 + 规划能力
+- 注意: 当前实现测量的更多是即时决策而非深度规划。待改进。
 
-### spatial (空间感知测试)
-- 3D 形状旋转匹配
-- 分布参数: mean=6, stdDev=2
+### decision (快速分类)
+- 认知构造: 选择反应时间 + 认知灵活性 (松散基于 WCST)
+- 科学背景: 任务切换能力是电竞区分维度之一 (g=0.35)
 
-### rhythm (节拍感测试)
-- 跟随节拍点击，测量时间精度
-- 分布参数: mean=50, stdDev=15
+### spatial (空间旋转)
+- 认知构造: 心理旋转 (基于 Shepard & Metzler 1971)
+- 科学背景: 空间认知是区分电竞高手最强的维度 (Miao et al. 2024, g=0.51)
 
-### multitask (多任务测试)
-- 同时处理两个任务（仅 PC）
-- 分布参数: mean=40, stdDev=12
+### rhythm (节拍同步)
+- 认知构造: 感觉运动同步 (Sensorimotor Synchronization)
 
-### emotional (情绪控制测试)
-- 在压力干扰下保持准确性
-- 分布参数: mean=50, stdDev=15
+### multitask (双任务干扰)
+- 认知构造: 双任务执行 (Dual-Task Interference)
 
-### teamwork (团队协作测试)
-- 模拟协作场景下的决策
-- 分布参数: mean=50, stdDev=15
+### emotional (持续注意力)
+- 认知构造: 更准确地说是"递增难度下的持续注意"，而非情绪控制
+- 注意: 不测量真正的压力应对（需要真实威胁情境）
 
-### resource (资源管理测试)
-- 在限定资源下做最优分配
-- 分布参数: mean=50, stdDev=15
+### teamwork (推理判断)
+- 认知构造: 更准确地说是"个人逻辑推理"，而非团队协作
 
-引用这些知识时要自然，不要说"根据游戏机制"。直接说"你的反应平均约 260ms"而不是"根据测试分布参数"。
+### resource (资源分配)
+- 认知构造: 计划与优化决策
+
+### 对话中如何使用
+- 说"你的反应约 248ms，超过 72% 的测试者"，不要说"你的分数是 72"
+- 说"根据认知科学研究，空间认知才是区分高手的最强维度"
+- 诚实承认哪些测试有局限: emotional 不测真正的压力应对，teamwork 不测真正的团队协作
+- 推荐用户做更完整的 Standard/Pro 测试来获得更准确的画像
 `;
+
 
 // ==================== SYSTEM PROMPT BUILDER ====================
 

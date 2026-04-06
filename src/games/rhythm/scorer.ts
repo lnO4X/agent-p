@@ -1,6 +1,9 @@
 import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
+/**
+ * @normSource Initial estimate based on sensorimotor synchronization literature. Pending calibration
+ */
 export const rhythmScorer: GameScorer = {
   perfectRawScore: 10,
   higherIsBetter: false, // lower ms deviation = better

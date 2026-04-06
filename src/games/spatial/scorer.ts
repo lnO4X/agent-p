@@ -1,6 +1,9 @@
 import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
+/**
+ * @normSource Initial estimate based on mental rotation literature (Shepard & Metzler 1971). Pending calibration
+ */
 export const spatialScorer: GameScorer = {
   perfectRawScore: 12,
   higherIsBetter: true,

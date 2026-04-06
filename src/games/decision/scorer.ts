@@ -1,6 +1,9 @@
 import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
+/**
+ * @normSource Initial estimate. Loosely based on WCST response speed literature. Pending calibration
+ */
 export const decisionScorer: GameScorer = {
   perfectRawScore: 3.0,
   higherIsBetter: true,

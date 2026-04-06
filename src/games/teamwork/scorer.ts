@@ -1,6 +1,9 @@
 import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
+/**
+ * @normSource Initial estimate. Measures individual deductive reasoning, not teamwork. Pending calibration
+ */
 export const teamworkScorer: GameScorer = {
   perfectRawScore: 140,
   higherIsBetter: true,

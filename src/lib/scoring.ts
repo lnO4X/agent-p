@@ -1,18 +1,61 @@
 import type { TalentCategory, Rank, GenreRecommendation } from "@/types/talent";
 import { GENRE_TALENT_MAP } from "./constants";
 
+/**
+ * Percentile-based normalization using the normal CDF (probit).
+ * Returns 0-100 where 50 = population median.
+ *
+ * Unlike the old sigmoid, this maps directly to percentile rank:
+ * - Score at mean → 50 (50th percentile)
+ * - Score 1 SD above mean → 84.1 (84th percentile)
+ * - Score 2 SD above mean → 97.7 (98th percentile)
+ *
+ * @param rawScore - Raw game score
+ * @param mean - Population mean (from published research or N>500 user data)
+ * @param stdDev - Population standard deviation
+ * @param higherIsBetter - Whether higher raw scores indicate better performance
+ */
+export function percentileNormalize(
+  rawScore: number,
+  mean: number,
+  stdDev: number,
+  higherIsBetter: boolean = true
+): number {
+  if (stdDev <= 0) return 50;
+  const z = higherIsBetter
+    ? (rawScore - mean) / stdDev
+    : (mean - rawScore) / stdDev;
+  // Normal CDF approximation (Abramowitz & Stegun, max error 1.5e-7)
+  const percentile = normalCDF(z) * 100;
+  return Math.round(Math.max(1, Math.min(99, percentile)) * 10) / 10;
+}
+
+/** Standard normal CDF — P(Z ≤ z) */
+function normalCDF(z: number): number {
+  // Abramowitz & Stegun approximation 26.2.17
+  if (z < -8) return 0;
+  if (z > 8) return 1;
+  const a1 = 0.254829592;
+  const a2 = -0.284496736;
+  const a3 = 1.421413741;
+  const a4 = -1.453152027;
+  const a5 = 1.061405429;
+  const p = 0.3275911;
+  const sign = z < 0 ? -1 : 1;
+  const x = Math.abs(z) / Math.SQRT2;
+  const t = 1.0 / (1.0 + p * x);
+  const y = 1.0 - ((((a5 * t + a4) * t + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+  return 0.5 * (1.0 + sign * y);
+}
+
+/** @deprecated Use percentileNormalize instead. Kept for backward compatibility during migration. */
 export function sigmoidNormalize(
   rawScore: number,
   mean: number,
   stdDev: number,
   higherIsBetter: boolean = true
 ): number {
-  if (stdDev <= 0) return rawScore >= mean ? 50 : 50;
-  const z = higherIsBetter
-    ? (rawScore - mean) / stdDev
-    : (mean - rawScore) / stdDev;
-  const sigmoid = 100 / (1 + Math.exp(-0.7 * z));
-  return Math.round(Math.max(0, Math.min(100, sigmoid)) * 10) / 10;
+  return percentileNormalize(rawScore, mean, stdDev, higherIsBetter);
 }
 
 export function computeTalentScore(

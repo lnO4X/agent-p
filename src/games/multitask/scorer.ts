@@ -1,6 +1,9 @@
 import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
+/**
+ * @normSource Initial estimate based on dual-task interference literature. Pending calibration
+ */
 export const multitaskScorer: GameScorer = {
   perfectRawScore: 100,
   higherIsBetter: true,
