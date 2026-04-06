@@ -107,13 +107,16 @@ function GameQuizResultContent() {
     typeof document !== "undefined" &&
     document.cookie.includes("auth-token=");
 
+  // No archetype at all (direct visit without params) → redirect to quiz
   // Archetype exists but no matching character for this game → fall back to generic result page
   useEffect(() => {
-    if (quiz && archetype && !character) {
+    if (!archetypeId && !talentScores) {
+      router.replace(`/quiz/${gameId}`);
+    } else if (quiz && archetype && !character) {
       const fallbackParams = new URLSearchParams(searchParams.toString());
       router.replace(`/quiz/result?${fallbackParams.toString()}`);
     }
-  }, [quiz, archetype, character, searchParams, router]);
+  }, [quiz, archetype, character, archetypeId, talentScores, gameId, searchParams, router]);
 
   // Not found: no quiz config
   if (!quiz) {
