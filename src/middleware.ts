@@ -33,6 +33,7 @@ const PUBLIC_PREFIXES = [
   "/archetype",
   "/pk", "/api/pk",
   "/play", "/api/play",
+  "/test",
   "/api/archetype/card",
   "/api/pk/card",
   "/api/home-card",
