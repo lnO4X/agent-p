@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getAllArchetypes } from "@/lib/archetype";
 import { ArchetypeIcon } from "@/components/archetype-icon";
 import { useI18n } from "@/i18n/context";
-import { Zap, Brain, Target, Gamepad2, ChevronRight, Users, Sparkles, AlertTriangle } from "lucide-react";
+import { Zap, Brain, Target, Gamepad2, ChevronRight, Users, Sparkles, AlertTriangle, HelpCircle } from "lucide-react";
 import { DistributionBar } from "@/components/distribution-bar";
 import { PRO_BENCHMARKS } from "@/lib/pro-benchmarks";
 
@@ -19,8 +19,35 @@ export default function Home() {
   const isZh = locale === "zh"; // kept for archetype dynamic data + DistributionBar prop
   const featured = FEATURED_IDS.map((id) => archetypes.find((a) => a.id === id)!).filter(Boolean);
 
+  const faqItems = [
+    { q: t("home.faq.q1"), a: t("home.faq.a1") },
+    { q: t("home.faq.q2"), a: t("home.faq.a2") },
+    { q: t("home.faq.q3"), a: t("home.faq.a3") },
+    { q: t("home.faq.q4"), a: t("home.faq.a4") },
+    { q: t("home.faq.q5"), a: t("home.faq.a5") },
+  ];
+
+  const faqJsonLd = {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    mainEntity: faqItems.map((item) => ({
+      "@type": "Question",
+      name: item.q,
+      acceptedAnswer: {
+        "@type": "Answer",
+        text: item.a,
+      },
+    })),
+  };
+
   return (
     <div className="min-h-[100dvh] flex flex-col bg-background overflow-x-hidden">
+      {/* FAQ JSON-LD for SEO rich results */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+
       {/* ─── Section 1: Hero ─── */}
       <section className="relative flex flex-col items-center justify-center px-5 pt-16 pb-10 md:pt-24 md:pb-16">
         {/* Background glow */}
@@ -304,6 +331,30 @@ export default function Home() {
           <p className="text-xs text-muted-foreground">
             {t("home.cta.sub")}
           </p>
+        </div>
+      </section>
+
+      {/* ─── Section 7: FAQ ─── */}
+      <section className="px-5 py-10 md:py-16 bg-muted/30">
+        <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
+          <h2 className="text-xl md:text-2xl font-bold text-center font-[family-name:var(--font-outfit)] flex items-center justify-center gap-2">
+            <HelpCircle size={22} className="text-primary" />
+            {t("home.faq.title")}
+          </h2>
+
+          <div className="space-y-4">
+            {faqItems.map((item, i) => (
+              <details key={i} className="group">
+                <summary className="flex items-start gap-3 cursor-pointer list-none text-sm font-semibold py-3 px-4 rounded-lg bg-background border border-border/50 hover:border-primary/30 transition-colors [&::-webkit-details-marker]:hidden">
+                  <ChevronRight size={16} className="text-primary shrink-0 mt-0.5 transition-transform group-open:rotate-90" />
+                  {item.q}
+                </summary>
+                <p className="text-xs text-muted-foreground mt-1 px-4 pb-3 leading-relaxed">
+                  {item.a}
+                </p>
+              </details>
+            ))}
+          </div>
         </div>
       </section>
 
