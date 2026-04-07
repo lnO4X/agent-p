@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useMemo, useEffect, useState, useCallback } from "react";
+import { Suspense, useMemo, useEffect, useState, useCallback, useRef } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { trackEvent as track } from "@/lib/analytics";
@@ -106,6 +106,7 @@ function QuizResultContent() {
   const isQuestionnaire = mode === "q" || mode === "scenario";
 
   const [copied, setCopied] = useState(false);
+  const hasTrackedComplete = useRef(false);
 
   // Detect shared view: if URL has &own=1, user just completed the quiz themselves.
   // No &own param = arrived via shared link (persists across refresh, no sessionStorage needed).
@@ -241,11 +242,15 @@ function QuizResultContent() {
           colors: [archetype.gradient[0], archetype.gradient[1], '#FFD700'],
         });
       }
-      track("quiz_complete", {
-        archetype: archetype.id,
-        tier: tierInfo?.tier ?? "unknown",
-        mode: mode === "scenario" ? "scenario" : isQuestionnaire ? "questionnaire" : "quick",
-      });
+      // Track quiz_complete only once per page mount to prevent funnel inflation
+      if (!hasTrackedComplete.current) {
+        hasTrackedComplete.current = true;
+        track("quiz_complete", {
+          archetype: archetype.id,
+          tier: tierInfo?.tier ?? "unknown",
+          mode: mode === "scenario" ? "scenario" : isQuestionnaire ? "questionnaire" : "quick",
+        });
+      }
     }
   }, [archetype, isQuestionnaire, isSharedView, tierInfo]);
 
