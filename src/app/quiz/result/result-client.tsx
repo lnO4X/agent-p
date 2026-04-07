@@ -1,7 +1,7 @@
 "use client";
 
 import { Suspense, useMemo, useEffect, useState, useCallback, useRef } from "react";
-import { motion } from "framer-motion";
+import { LazyMotion, domAnimation, m } from "framer-motion";
 import confetti from "canvas-confetti";
 import { trackEvent as track } from "@/lib/analytics";
 import { TIER_CONFIGS } from "@/lib/test-tiers";
@@ -277,6 +277,7 @@ function QuizResultContent() {
   ] as const;
 
   return (
+    <LazyMotion features={domAnimation}>
     <div className="flex-1 flex flex-col">
       {/* Hero section — talent tier primary, archetype secondary */}
       <div
@@ -290,16 +291,16 @@ function QuizResultContent() {
         {/* Talent Tier Badge — the main reveal */}
         {tierInfo ? (
           <>
-            <motion.div
+            <m.div
               className="mb-3"
               initial={{ scale: 0 }}
               animate={{ scale: 1 }}
               transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
             >
               <Trophy size={48} className="mx-auto text-primary" />
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               className="space-y-2 mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -318,10 +319,10 @@ function QuizResultContent() {
                   {avgScore}/100
                 </div>
               )}
-            </motion.div>
+            </m.div>
 
             {/* Archetype as secondary label */}
-            <motion.div
+            <m.div
               className="flex items-center justify-center gap-2 mb-2"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -331,21 +332,21 @@ function QuizResultContent() {
               <span className="text-sm text-muted-foreground">
                 {t("quizResult.archetypeLabel", { name: isZh ? archetype.name : archetype.nameEn })}
               </span>
-            </motion.div>
+            </m.div>
           </>
         ) : (
           <>
             {/* Questionnaire/scenario mode: archetype-focused (no pro benchmarks) */}
-            <motion.div
+            <m.div
               className="text-6xl md:text-7xl mb-4"
               initial={{ scale: 0, rotate: -180 }}
               animate={{ scale: 1, rotate: 0 }}
               transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
             >
               {archetype.icon}
-            </motion.div>
+            </m.div>
 
-            <motion.div
+            <m.div
               className="space-y-1 mb-4"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -371,21 +372,21 @@ function QuizResultContent() {
                   {archetype.nameEn}
                 </div>
               )}
-            </motion.div>
+            </m.div>
 
-            <motion.p
+            <m.p
               className="text-base md:text-lg text-foreground/80 italic max-w-md mx-auto"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ duration: 0.6, delay: 0.8 }}
             >
               &ldquo;{isZh ? archetype.tagline : archetype.taglineEn}&rdquo;
-            </motion.p>
+            </m.p>
           </>
         )}
 
         {/* Primary CTA — share (own result) or take quiz (shared view) */}
-        <motion.div
+        <m.div
           className="pt-4"
           initial={{ opacity: 0, y: 10 }}
           animate={{ opacity: 1, y: 0 }}
@@ -424,11 +425,11 @@ function QuizResultContent() {
             )}
           </Button>
           )}
-        </motion.div>
+        </m.div>
 
         {/* Result card download — own results only */}
         {!isSharedView && (
-          <motion.div
+          <m.div
             className="pt-3 flex justify-center"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
@@ -440,7 +441,7 @@ function QuizResultContent() {
               scores={scores}
               isZh={isZh}
             />
-          </motion.div>
+          </m.div>
         )}
       </div>
 
@@ -450,7 +451,7 @@ function QuizResultContent() {
       {/* Content */}
       <div className="px-6 py-6 max-w-lg mx-auto w-full space-y-5">
         {/* Score bars */}
-        <motion.div
+        <m.div
           className="space-y-2"
           initial="hidden"
           animate="visible"
@@ -465,7 +466,7 @@ function QuizResultContent() {
               .sort(([, a], [, b]) => (b ?? 0) - (a ?? 0))
               .slice(0, 5)
               .map(([talent, score]) => (
-                <motion.div
+                <m.div
                   key={talent}
                   className="flex items-center gap-3"
                   variants={{
@@ -488,7 +489,7 @@ function QuizResultContent() {
                   <span className="text-xs font-bold w-8">
                     {Math.round(score ?? 0)}
                   </span>
-                </motion.div>
+                </m.div>
               ))
           ) : scores ? (
             // Game mode: show 3 game scores with pro benchmark markers
@@ -496,7 +497,7 @@ function QuizResultContent() {
               const benchmark = PRO_BENCHMARKS[i];
               const isAbovePro = score >= (benchmark?.proAvg ?? 100);
               return (
-              <motion.div
+              <m.div
                 key={i}
                 className="space-y-1"
                 variants={{
@@ -544,15 +545,15 @@ function QuizResultContent() {
                     <span className="w-8" />
                   </div>
                 )}
-              </motion.div>
+              </m.div>
               );
             })
           ) : null}
-        </motion.div>
+        </m.div>
 
         {/* ── Reality Check Card (game mode only) — D6: macro impact first ── */}
         {simulatedRank && avgScore !== null && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 1.3 }}
@@ -608,12 +609,12 @@ function QuizResultContent() {
                 </div>
               </CardContent>
             </Card>
-          </motion.div>
+          </m.div>
         )}
 
         {/* ── D7: Highlight Card — emotional turnaround ── */}
         {scores && proGap && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 1.38 }}
@@ -637,12 +638,12 @@ function QuizResultContent() {
                 </Card>
               );
             })()}
-          </motion.div>
+          </m.div>
         )}
 
         {/* ── Pro Comparison Card (game mode only) ── */}
         {proGap && tierInfo && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 1.45 }}
@@ -718,12 +719,12 @@ function QuizResultContent() {
                 )}
               </CardContent>
             </Card>
-          </motion.div>
+          </m.div>
         )}
 
         {/* ── Deep Report Upsell (own result, not shared) ── */}
         {!isSharedView && !isQuestionnaire && scores && (
-          <motion.div
+          <m.div
             initial={{ opacity: 0, y: 15 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.4, delay: 1.48 }}
@@ -768,11 +769,11 @@ function QuizResultContent() {
                 </p>
               </CardContent>
             </Card>
-          </motion.div>
+          </m.div>
         )}
 
         {/* ── CTA card — quiz CTA for shared view, registration for own result ── */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 1.5 }}
@@ -853,10 +854,10 @@ function QuizResultContent() {
           </Card>
         </div>
         )}
-        </motion.div>
+        </m.div>
 
         {/* Description */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 1.65 }}
@@ -868,10 +869,10 @@ function QuizResultContent() {
             </p>
           </CardContent>
         </Card>
-        </motion.div>
+        </m.div>
 
         {/* Growth Edge (positive framing, matching main results page) */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 1.8 }}
@@ -894,10 +895,10 @@ function QuizResultContent() {
             </div>
           </CardContent>
         </Card>
-        </motion.div>
+        </m.div>
 
         {/* Nemesis & Ally */}
-        <motion.div
+        <m.div
           className="grid grid-cols-2 gap-3"
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
@@ -931,10 +932,10 @@ function QuizResultContent() {
               </CardContent>
             </Card>
           )}
-        </motion.div>
+        </m.div>
 
         {/* Evolution hint */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 2.1 }}
@@ -964,7 +965,7 @@ function QuizResultContent() {
             </div>
           </CardContent>
         </Card>
-        </motion.div>
+        </m.div>
 
         {/* Recommended games for this archetype */}
         <GameRecommendations
@@ -978,7 +979,7 @@ function QuizResultContent() {
         {/* PK Challenge CTA — hidden, feature paused */}
 
         {/* Challenge a friend */}
-        <motion.div
+        <m.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.4, delay: 2.25 }}
@@ -1018,7 +1019,7 @@ function QuizResultContent() {
               </Button>
             </CardContent>
           </Card>
-        </motion.div>
+        </m.div>
 
         {/* Secondary actions */}
         <div className="flex gap-3">
@@ -1051,5 +1052,6 @@ function QuizResultContent() {
       {/* NPS feedback — shows 3s after result reveal */}
       <NpsPrompt context="quiz_complete" isZh={isZh} delay={3000} />
     </div>
+    </LazyMotion>
   );
 }
