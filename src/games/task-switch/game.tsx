@@ -279,7 +279,7 @@ export default function TaskSwitchGame({
       <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
         <div
           className="h-full bg-primary transition-all duration-300"
-          style={{ width: `${((trialIndex) / TOTAL_TRIALS) * 100}%` }}
+          style={{ width: `${((trialIndex + 1) / TOTAL_TRIALS) * 100}%` }}
         />
       </div>
 
