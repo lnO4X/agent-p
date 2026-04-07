@@ -33,7 +33,6 @@ import {
   Trophy,
 } from "lucide-react";
 import { parseScores, parseTalentScores } from "@/lib/quiz-utils";
-import { NpsPrompt } from "@/components/nps-prompt";
 import { GameRecommendations } from "@/components/game-recommendations";
 import { AdSlot } from "@/components/ad-slot";
 import { ResultCardDownload } from "@/components/result-card-download";
@@ -1049,8 +1048,6 @@ function QuizResultContent() {
         </div>
       </div>
 
-      {/* NPS feedback — shows 3s after result reveal */}
-      <NpsPrompt context="quiz_complete" isZh={isZh} delay={3000} />
     </div>
     </LazyMotion>
   );

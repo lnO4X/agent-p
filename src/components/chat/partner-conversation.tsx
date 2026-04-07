@@ -10,10 +10,8 @@ import { MessageBubble } from "./message-bubble";
 import { MemoryBanner } from "./memory-banner";
 import { PartnerSettingsSheet } from "./partner-settings-sheet";
 import { getPartnerIcon } from "./partner-icons";
-import { VoiceButton } from "./voice-button";
-import { useVoice } from "@/hooks/use-voice";
 import Link from "next/link";
-import { ArrowLeft, Settings, Loader2, Volume2, VolumeX, Crown, Star } from "lucide-react";
+import { ArrowLeft, Settings, Loader2, Crown, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import type { Partner } from "@/types/partner";
 
@@ -57,41 +55,6 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
   const [submittingRating, setSubmittingRating] = useState(false);
   const retryTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
   const chatStartTrackedRef = useRef(false);
-
-  // Voice state
-  const [lastInputWasVoice, setLastInputWasVoice] = useState(false);
-  const [speakingMsgId, setSpeakingMsgId] = useState<string | null>(null);
-  const [speakLoading, setSpeakLoading] = useState(false);
-  const lastAutoPlayedRef = useRef<string | null>(null);
-  // Auto-play TTS toggle (persisted in localStorage)
-  const [autoPlayTts, setAutoPlayTts] = useState(() => {
-    if (typeof window === "undefined") return true;
-    const stored = localStorage.getItem("gametan-autoplay-tts");
-    return stored === null ? true : stored === "1";
-  });
-
-  const voiceHook = useVoice({
-    onTranscript: useCallback((text: string) => {
-      // Voice auto-send: transcript → direct send message
-      if (text.trim()) {
-        if (!chatStartTrackedRef.current) {
-          chatStartTrackedRef.current = true;
-          track("chat_start", { partnerId });
-        }
-        setLastInputWasVoice(true);
-        // We'll send via sendMessage in an effect
-        setPendingVoiceText(text.trim());
-      }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [partnerId]),
-    onError: (err) => {
-      console.warn("[voice]", err);
-    },
-    // Don't pass language — let Whisper auto-detect from audio content
-    // UI locale ≠ speech language (user may speak Chinese with English UI)
-  });
-
-  const [pendingVoiceText, setPendingVoiceText] = useState<string | null>(null);
 
   const { messages, setMessages, sendMessage, status, error } = useChat({
     transport: new DefaultChatTransport({
@@ -143,41 +106,10 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
 
   const isStreaming = status === "submitted" || status === "streaming";
 
-  // Send pending voice text as soon as sendMessage is available
-  useEffect(() => {
-    if (pendingVoiceText && !isStreaming) {
-      sendMessage({ text: pendingVoiceText });
-      setPendingVoiceText(null);
-    }
-  }, [pendingVoiceText, isStreaming, sendMessage]);
-
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
-
-  // Auto-play TTS when AI finishes responding and last input was voice
-  // Only auto-plays if autoPlayTts is enabled
-  // Uses message ID tracking instead of count comparison to avoid race conditions
-  useEffect(() => {
-    if (!autoPlayTts || !lastInputWasVoice || status !== "ready" || messages.length === 0) return;
-
-    const lastMsg = messages[messages.length - 1];
-    if (
-      lastMsg?.role === "assistant" &&
-      lastMsg.id !== lastAutoPlayedRef.current
-    ) {
-      const text = extractPartText(
-        lastMsg.parts as Array<{ type: string; text?: string }>
-      );
-      if (text) {
-        lastAutoPlayedRef.current = lastMsg.id;
-        handleSpeak(lastMsg.id, text);
-      }
-      setLastInputWasVoice(false);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [status, messages.length, lastInputWasVoice, autoPlayTts]);
 
   // Memory extraction on unmount
   const messagesRef = useRef(messages);
@@ -240,7 +172,6 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
       chatStartTrackedRef.current = true;
       track("chat_start", { partnerId });
     }
-    setLastInputWasVoice(false); // Text input — don't auto-play TTS
     sendMessage({ text });
     setInput("");
     // Reset textarea height
@@ -263,41 +194,6 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
     }
     sendMessage({ text: t(key) });
   };
-
-  // Per-message TTS: speak or stop
-  const handleSpeak = useCallback(
-    async (msgId: string, text: string) => {
-      if (speakingMsgId === msgId) {
-        // Stop current playback
-        voiceHook.stopPlaying();
-        setSpeakingMsgId(null);
-        return;
-      }
-
-      // Stop any existing playback first
-      voiceHook.stopPlaying();
-      setSpeakingMsgId(msgId);
-      setSpeakLoading(true);
-
-      try {
-        // Don't pass language — server auto-detects from text content
-        await voiceHook.speak(text);
-        setSpeakLoading(false);
-        // speakingMsgId will be cleared when audio ends
-      } catch {
-        setSpeakingMsgId(null);
-        setSpeakLoading(false);
-      }
-    },
-    [speakingMsgId, voiceHook]
-  );
-
-  // Clear speakingMsgId when voice stops playing
-  useEffect(() => {
-    if (!voiceHook.isPlaying && speakingMsgId && !speakLoading) {
-      setSpeakingMsgId(null);
-    }
-  }, [voiceHook.isPlaying, speakingMsgId, speakLoading]);
 
   const handleRating = useCallback(async (stars: number) => {
     if (!partner || submittingRating || hasRated) return;
@@ -359,27 +255,6 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
           <Icon className="w-4 h-4 text-primary" />
         </div>
         <span className="font-semibold text-sm flex-1">{partner.name}</span>
-        {voiceHook.isTtsAvailable && (
-          <button
-            type="button"
-            onClick={() => {
-              const next = !autoPlayTts;
-              setAutoPlayTts(next);
-              localStorage.setItem("gametan-autoplay-tts", next ? "1" : "0");
-            }}
-            className="pressable p-1"
-            title={autoPlayTts
-              ? t("chat.autoPlayOff")
-              : t("chat.autoPlayOn")
-            }
-          >
-            {autoPlayTts ? (
-              <Volume2 className="w-4.5 h-4.5 text-primary" />
-            ) : (
-              <VolumeX className="w-4.5 h-4.5 text-muted-foreground" />
-            )}
-          </button>
-        )}
         {partner.slot !== 0 && (
           <button
             type="button"
@@ -437,10 +312,6 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
               msg.id === messages[messages.length - 1]?.id &&
               msg.role === "assistant"
             }
-            voiceAvailable={voiceHook.isTtsAvailable}
-            onSpeak={(text) => handleSpeak(msg.id, text)}
-            isSpeaking={speakingMsgId === msg.id && voiceHook.isPlaying}
-            isSpeakLoading={speakingMsgId === msg.id && speakLoading}
           />
         ))}
         {status === "submitted" && (
@@ -586,15 +457,6 @@ export function PartnerConversation({ partnerId }: PartnerConversationProps) {
       {/* Input area */}
       <div className="px-4 pt-2 pb-[calc(0.5rem_+_3.5rem_+_env(safe-area-inset-bottom))] md:pb-2 border-t border-foreground/10 glass-nav">
         <div className="flex items-end gap-2">
-          {voiceHook.isSttAvailable && (
-            <VoiceButton
-              isRecording={voiceHook.isRecording}
-              isTranscribing={voiceHook.isTranscribing}
-              onStartRecording={voiceHook.startRecording}
-              onStopRecording={voiceHook.stopRecording}
-              disabled={isStreaming}
-            />
-          )}
           <textarea
             ref={textareaRef}
             value={input}

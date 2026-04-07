@@ -1,8 +1,8 @@
 import { NextRequest } from "next/server";
 import { requireAdminOrCronSecret } from "@/lib/admin";
 import { db } from "@/db";
-import { users, testSessions, partners, microChallenges, activationCodes } from "@/db/schema";
-import { eq, sql, gte, and, isNull } from "drizzle-orm";
+import { users, testSessions, partners } from "@/db/schema";
+import { eq, sql, gte } from "drizzle-orm";
 
 /**
  * GET /api/admin/stats — Aggregate dashboard statistics
@@ -23,9 +23,7 @@ export async function GET(request: NextRequest) {
     premiumUsersResult,
     registeredTodayResult,
     totalSessionsResult,
-    totalChallengesResult,
     totalPartnersResult,
-    unusedCodesResult,
   ] = await Promise.all([
     db.select({ count: sql<number>`count(*)` }).from(users),
     db
@@ -40,12 +38,7 @@ export async function GET(request: NextRequest) {
       .select({ count: sql<number>`count(*)` })
       .from(testSessions)
       .where(eq(testSessions.status, "completed")),
-    db.select({ count: sql<number>`count(*)` }).from(microChallenges),
     db.select({ count: sql<number>`count(*)` }).from(partners),
-    db
-      .select({ count: sql<number>`count(*)` })
-      .from(activationCodes)
-      .where(isNull(activationCodes.usedBy)),
   ]);
 
   return Response.json({
@@ -55,9 +48,7 @@ export async function GET(request: NextRequest) {
       premiumUsers: Number(premiumUsersResult[0]?.count ?? 0),
       registeredToday: Number(registeredTodayResult[0]?.count ?? 0),
       totalSessions: Number(totalSessionsResult[0]?.count ?? 0),
-      totalChallenges: Number(totalChallengesResult[0]?.count ?? 0),
       totalPartners: Number(totalPartnersResult[0]?.count ?? 0),
-      unusedCodes: Number(unusedCodesResult[0]?.count ?? 0),
     },
   });
 }

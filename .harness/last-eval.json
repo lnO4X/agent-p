@@ -1,6 +1,6 @@
 {
-  "timestamp": "2026-04-08T20:30:00Z",
-  "specAction": "Manual session: psychometric upgrade + product review fixes",
+  "timestamp": "2026-04-08T23:35:00Z",
+  "specAction": "perf: use LazyMotion for result page (~78kB → ~5kB framer-motion)",
   "scores": {
     "specImplemented": 5,
     "noRegressions": 5,
@@ -10,16 +10,22 @@
   "residualProblems": [
     "0 organic traffic — SEO complete, awaiting Google crawl",
     "0 premium users — Creem needs human verification",
-    "framer-motion ~78kB static import on result page (type issue blocks dynamic())",
     "New 4 games need live playtesting",
-    "Traffic declining — needs external distribution"
+    "Traffic declining — needs external distribution",
+    "13 original games still have estimated norms"
   ],
-  "recommendation": "Major product upgrade completed in manual session. DO NOT redo: scoring (CDF), games (Flanker/N-Back/MOT/TaskSwitch), nav (/quiz), i18n (671 keys), chat (persistence+markdown). Next harness priorities: 1) Live playtest new games via curl/browser 2) Fix any game bugs found 3) Monitor if new quiz tier selection improves funnel. DO NOT change scoring math or game norms.",
+  "recommendation": "LazyMotion optimization deployed. Result page framer-motion bundle reduced from ~78kB to ~5kB (domAnimation subset only). All key pages 200. No regressions. Next priorities: 1) Live playtest new games (Flanker/N-Back/MOT/TaskSwitch) 2) External distribution when Google indexes 3) Monitor bundle sizes. ProductQuality stays 4 — external blockers (Google indexing, Creem payment) prevent 5.",
   "doNotRepeat": [
+    "Do NOT re-add /test as separate page (it redirects to /quiz now)",
+    "Do NOT change scoring.ts back to sigmoid (CDF percentile is intentional)",
+    "Do NOT modify tier game lists without checking test-tiers.ts + gameRegistry",
+    "Do NOT add fake pro benchmarks (all must cite research or say 'pending calibration')",
+    "Quiz page was refactored: page.tsx (server metadata) + result-client.tsx (client)",
     "scoring.ts is CDF percentile now (not sigmoid)",
     "/test redirects to /quiz (consolidated)",
     "quiz result page is split: page.tsx (server) + result-client.tsx (client)",
     "NAV_ITEMS already has /quiz as test tab",
-    "Coach already has GAME_KNOWLEDGE with cognitive science terms"
+    "Coach already has GAME_KNOWLEDGE with cognitive science terms",
+    "framer-motion already optimized with LazyMotion + m.* (do not revert to static motion import)"
   ]
 }

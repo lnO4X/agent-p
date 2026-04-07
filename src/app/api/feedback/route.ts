@@ -1,9 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getAuthFromCookie } from "@/lib/auth";
-import { db } from "@/db";
-import { productFeedback } from "@/db/schema";
 import { z } from "zod";
-import { randomUUID } from "crypto";
 
 const feedbackSchema = z.object({
   score: z.number().min(1).max(10),
@@ -30,8 +27,8 @@ export async function POST(request: NextRequest) {
 
   const auth = await getAuthFromCookie();
 
-  await db.insert(productFeedback).values({
-    id: randomUUID(),
+  // productFeedback table removed — log for now so feedback isn't silently lost
+  console.log("[feedback]", {
     userId: auth?.sub ?? null,
     score: parsed.data.score,
     comment: parsed.data.comment ?? null,

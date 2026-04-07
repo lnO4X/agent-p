@@ -9,7 +9,7 @@ import {
   summarizeConversationContext,
 } from "@/lib/partner-prompts";
 import { db } from "@/db";
-import { partners, users, referrals, chatMessages } from "@/db/schema";
+import { partners, users, chatMessages } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { chatMessageSchema } from "@/lib/validations";
 import { checkRateLimit } from "@/lib/redis";
@@ -52,22 +52,9 @@ export async function POST(request: NextRequest) {
   const isPremium = userRow.length > 0 && userRow[0].tier === "premium" &&
     (!userRow[0].tierExpiresAt || userRow[0].tierExpiresAt >= new Date());
 
-  // Chat limits: Quick=0 (no coach), Standard=15/day, Pro=100/day
-  // Referral reward: 1+ referrals unlocks Standard-level chat (15/day)
-  let hasReferrals = false;
-  if (!isPremium) {
-    try {
-      const [refCount] = await db
-        .select({ count: sql<number>`count(*)` })
-        .from(referrals)
-        .where(eq(referrals.referrerId, auth.sub));
-      hasReferrals = Number(refCount?.count ?? 0) >= 1;
-    } catch {
-      // Non-blocking
-    }
-  }
+  // Chat limits: Standard=15/day, Pro=100/day
   const { getChatLimit } = await import("@/lib/test-tiers");
-  const dailyLimit = getChatLimit(isPremium ? "premium" : "free", hasReferrals);
+  const dailyLimit = getChatLimit(isPremium ? "premium" : "free");
   const { allowed } = await checkRateLimit(
     `rl:chat:${auth.sub}:${today}`,
     dailyLimit,

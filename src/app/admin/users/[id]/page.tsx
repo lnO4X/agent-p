@@ -8,12 +8,9 @@ import {
   Shield,
   FlaskConical,
   Bot,
-  Swords,
-  KeyRound,
   Brain,
   Calendar,
   Mail,
-  User,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -23,11 +20,9 @@ interface UserDetail {
   displayName: string | null;
   email: string | null;
   emailVerifiedAt: string | null;
-  isProfilePublic: boolean;
   isAdmin: boolean;
   tier: "free" | "premium";
   tierExpiresAt: string | null;
-  referralCode: string | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -70,21 +65,6 @@ interface PartnerInfo {
   createdAt: string;
 }
 
-interface Challenge {
-  id: string;
-  gameId: string;
-  talentCategory: string;
-  score: number;
-  completedAt: string;
-}
-
-interface CodeUsed {
-  id: string;
-  code: string;
-  durationDays: number;
-  usedAt: string | null;
-}
-
 interface KnowledgeEntry {
   id: string;
   category: string;
@@ -121,8 +101,6 @@ export default function AdminUserDetailPage({
   const [sessions, setSessions] = useState<Session[]>([]);
   const [profile, setProfile] = useState<TalentProfile | null>(null);
   const [partnersList, setPartnersList] = useState<PartnerInfo[]>([]);
-  const [challenges, setChallenges] = useState<Challenge[]>([]);
-  const [codesUsed, setCodesUsed] = useState<CodeUsed[]>([]);
   const [knowledge, setKnowledge] = useState<KnowledgeEntry[]>([]);
 
   useEffect(() => {
@@ -137,8 +115,6 @@ export default function AdminUserDetailPage({
           setSessions(data.data.sessions);
           setProfile(data.data.talentProfile);
           setPartnersList(data.data.partners);
-          setChallenges(data.data.challenges);
-          setCodesUsed(data.data.codesUsed);
           setKnowledge(data.data.knowledge);
         }
       } catch {
@@ -260,11 +236,6 @@ export default function AdminUserDetailPage({
           label="Premium 到期"
           value={user.tierExpiresAt ? new Date(user.tierExpiresAt).toLocaleDateString() : "—"}
         />
-        <InfoCard
-          icon={User}
-          label="Profile"
-          value={user.isProfilePublic ? "公开 Public" : "私密 Private"}
-        />
       </div>
 
       {/* Two-column layout */}
@@ -384,63 +355,6 @@ export default function AdminUserDetailPage({
             </div>
           ) : (
             <p className="text-sm text-muted-foreground py-4">暂无伙伴 No partners</p>
-          )}
-        </Section>
-
-        {/* Challenges */}
-        <Section title="每日挑战 Challenges" icon={Swords} count={challenges.length}>
-          {challenges.length > 0 ? (
-            <div className="space-y-1.5">
-              {challenges.slice(0, 15).map((c) => (
-                <div
-                  key={c.id}
-                  className="flex items-center justify-between text-sm py-1"
-                >
-                  <div className="flex items-center gap-2">
-                    <span className="text-xs text-muted-foreground w-24 truncate">
-                      {c.talentCategory.replace(/_/g, " ")}
-                    </span>
-                    <span className="text-xs font-medium tabular-nums">
-                      {c.score.toFixed(0)}
-                    </span>
-                  </div>
-                  <span className="text-xs text-muted-foreground">
-                    {new Date(c.completedAt).toLocaleDateString()}
-                  </span>
-                </div>
-              ))}
-              {challenges.length > 15 && (
-                <p className="text-xs text-muted-foreground text-center pt-1">
-                  +{challenges.length - 15} more
-                </p>
-              )}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground py-4">暂无挑战 No challenges</p>
-          )}
-        </Section>
-
-        {/* Codes Used */}
-        <Section title="激活码 Codes Used" icon={KeyRound} count={codesUsed.length}>
-          {codesUsed.length > 0 ? (
-            <div className="space-y-1.5">
-              {codesUsed.map((c) => (
-                <div
-                  key={c.id}
-                  className="flex items-center justify-between text-sm py-1"
-                >
-                  <code className="text-xs font-mono bg-muted px-2 py-0.5 rounded">
-                    {c.code}
-                  </code>
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                    <span>{c.durationDays}d</span>
-                    <span>{c.usedAt ? new Date(c.usedAt).toLocaleDateString() : "—"}</span>
-                  </div>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="text-sm text-muted-foreground py-4">未使用激活码 No codes</p>
           )}
         </Section>
 

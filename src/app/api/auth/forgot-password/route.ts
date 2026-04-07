@@ -5,7 +5,6 @@ import { db } from "@/db";
 import { users, verificationTokens } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/redis";
-import { sendEmail } from "@/lib/email/send";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
 
@@ -106,13 +105,23 @@ export async function POST(request: NextRequest) {
       createdAt: now,
     });
 
-    // Send reset email
+    // Send reset email via Resend
     const resetUrl = `${BASE_URL}/reset-password?token=${token}`;
-    await sendEmail({
-      to: user.email!,
-      subject: "重置密码 / Reset Your Password — GameTan",
-      html: resetPasswordHtml({ username: user.username, resetUrl }),
-    });
+    const resendKey = process.env.RESEND_API_KEY;
+    if (resendKey) {
+      await fetch("https://api.resend.com/emails", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${resendKey}`, "Content-Type": "application/json" },
+        body: JSON.stringify({
+          from: "GameTan <noreply@gametan.ai>",
+          to: user.email!,
+          subject: "重置密码 / Reset Your Password — GameTan",
+          html: resetPasswordHtml({ username: user.username, resetUrl }),
+        }),
+      });
+    } else {
+      console.log(`[forgot-password] No RESEND_API_KEY, reset URL: ${resetUrl}`);
+    }
 
     return NextResponse.json({ success: true });
   } catch (error) {

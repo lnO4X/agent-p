@@ -15,9 +15,6 @@ import {
   FlaskConical,
   Share2,
   TrendingUp,
-  Users,
-  Check,
-  Copy,
 } from "lucide-react";
 import { EvolutionTracker } from "@/components/evolution-tracker";
 import { scoreToArchetype } from "@/lib/archetype";
@@ -70,10 +67,6 @@ export default function MePage() {
   const [username, setUsername] = useState<string | null>(null);
   const [profile, setProfile] = useState<ProfileData | null>(null);
   const [sessions, setSessions] = useState<Session[]>([]);
-  const [referralCode, setReferralCode] = useState<string | null>(null);
-  const [referralCount, setReferralCount] = useState(0);
-  const [codeCopied, setCodeCopied] = useState(false);
-  const [linkCopied, setLinkCopied] = useState(false);
   const [loading, setLoading] = useState(true);
   const [evolutionHistory, setEvolutionHistory] = useState<
     { date: string; archetypeId: string | null; overallScore: number | null; talents: Partial<Record<TalentCategory, number>> }[]
@@ -89,11 +82,10 @@ export default function MePage() {
     async function load() {
       try {
         // Fetch latest talent profile + username
-        const [profileRes, sessionsRes, meRes, referralRes, talentHistoryRes] = await Promise.all([
+        const [profileRes, sessionsRes, meRes, talentHistoryRes] = await Promise.all([
           fetch("/api/leaderboard").then((r) => r.json()),
           fetch("/api/sessions").then((r) => r.json()),
           fetch("/api/auth/me").then((r) => r.json()).catch(() => ({ success: false })),
-          fetch("/api/referral").then((r) => r.json()).catch(() => ({ success: false })),
           fetch("/api/talent-history").then((r) => r.json()).catch(() => ({ success: false })),
         ]);
 
@@ -115,11 +107,6 @@ export default function MePage() {
               talents: myEntry.talents,
             });
           }
-        }
-
-        if (referralRes.success) {
-          setReferralCode(referralRes.data?.referralCode || null);
-          setReferralCount(referralRes.data?.totalReferrals || 0);
         }
 
         if (sessionsRes.success) {
@@ -345,77 +332,6 @@ export default function MePage() {
                   </div>
                 </Link>
               ))}
-            </div>
-          </CardContent>
-        </Card>
-      )}
-
-      {/* Referral card */}
-      {referralCode && (
-        <Card className="bg-green-500/5 border-green-500/20">
-          <CardContent className="pt-4 pb-4">
-            <div className="flex items-center justify-between mb-1">
-              <h2 className="text-sm font-semibold flex items-center gap-1.5">
-                <Users size={14} className="text-green-500" />
-                {t("me.referral")}
-              </h2>
-              <span className="text-xs font-medium text-green-600 dark:text-green-400">
-                {t("me.referralCount").replace("{count}", String(referralCount))}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mb-3">
-              {t("me.referralDesc")}
-            </p>
-            {/* Code display */}
-            <div className="flex items-center gap-2 mb-2">
-              <div className="flex-1 bg-muted rounded-lg px-3 py-2 font-mono text-sm tracking-wider text-center select-all">
-                {referralCode}
-              </div>
-              <button
-                type="button"
-                onClick={async () => {
-                  await navigator.clipboard.writeText(referralCode);
-                  setCodeCopied(true);
-                  setTimeout(() => setCodeCopied(false), 1500);
-                }}
-                className="p-2 rounded-lg bg-muted hover:bg-muted/80 active:scale-95 transition-transform"
-                title={t("me.referralCopyCode")}
-              >
-                {codeCopied ? <Check size={16} className="text-green-500" /> : <Copy size={16} className="text-muted-foreground" />}
-              </button>
-            </div>
-            {/* Share link buttons */}
-            <div className="flex gap-2">
-              <button
-                type="button"
-                onClick={async () => {
-                  const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai"}/register?ref=${referralCode}`;
-                  await navigator.clipboard.writeText(inviteLink);
-                  setLinkCopied(true);
-                  setTimeout(() => setLinkCopied(false), 1500);
-                }}
-                className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-green-500/10 text-green-700 dark:text-green-400 text-xs font-medium hover:bg-green-500/20 active:scale-95 transition-transform pressable"
-              >
-                {linkCopied ? <Check size={13} /> : <Copy size={13} />}
-                {t("me.referralCopyLink")}
-              </button>
-              {typeof navigator !== "undefined" && "share" in navigator && (
-                <button
-                  type="button"
-                  onClick={async () => {
-                    const inviteLink = `${process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai"}/register?ref=${referralCode}`;
-                    await navigator.share({
-                      title: t("me.referralShareTitle"),
-                      text: t("me.referralShareText", { code: referralCode }),
-                      url: inviteLink,
-                    });
-                  }}
-                  className="flex-1 flex items-center justify-center gap-1.5 py-2 rounded-lg bg-primary/10 text-primary text-xs font-medium hover:bg-primary/20 active:scale-95 transition-transform pressable"
-                >
-                  <Share2 size={13} />
-                  {t("me.shareBtn")}
-                </button>
-              )}
             </div>
           </CardContent>
         </Card>

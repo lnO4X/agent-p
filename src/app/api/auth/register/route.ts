@@ -2,20 +2,11 @@ import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 import bcrypt from "bcryptjs";
 import { db } from "@/db";
-import { users, referrals } from "@/db/schema";
+import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { registerSchema } from "@/lib/validations";
 import { createToken, setAuthCookie } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/redis";
-
-function generateReferralCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < 8; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
-}
 
 export async function POST(request: NextRequest) {
   try {
@@ -49,7 +40,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { username, password, referredBy } = parsed.data;
+    const { username, password } = parsed.data;
 
     // Check if username exists
     const existing = await db
@@ -73,33 +64,14 @@ export async function POST(request: NextRequest) {
     const passwordHash = await bcrypt.hash(password, 12);
     const now = new Date();
 
-    const referralCode = generateReferralCode();
-
     await db.insert(users).values({
       id,
       username,
       passwordHash,
       displayName: username,
-      referralCode,
       createdAt: now,
       updatedAt: now,
     });
-
-    // Track referral if referredBy code provided
-    if (referredBy) {
-      const referrer = await db
-        .select({ id: users.id })
-        .from(users)
-        .where(eq(users.referralCode, referredBy.toUpperCase()))
-        .limit(1);
-      if (referrer.length > 0) {
-        await db.insert(referrals).values({
-          id: nanoid(),
-          referrerId: referrer[0].id,
-          referredUserId: id,
-        });
-      }
-    }
 
     // Issue JWT
     const token = await createToken({ sub: id, username });

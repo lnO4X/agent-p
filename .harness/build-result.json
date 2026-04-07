@@ -1,14 +1,11 @@
 {
-  "timestamp": "2026-04-08T14:50:00Z",
+  "timestamp": "2026-04-08T23:30:00Z",
   "buildSuccess": true,
   "testsPass": true,
-  "testCount": 368,
   "pushed": true,
-  "commitHash": "bc42e45",
-  "commitMessage": "fix: show auth requirement upfront on quiz tier selection",
+  "commitHash": "db1ed92",
+  "commitMessage": "perf: use LazyMotion for result page (~78kB → ~5kB framer-motion)",
   "filesChanged": [
-    "src/app/quiz/page.tsx (auth UX: badge, spinner, removed silent Lock icon)",
-    "src/i18n/locales/en.json (added quiz.freeAccountRequired, quiz.loginToContinue)",
-    "src/i18n/locales/zh.json (added quiz.freeAccountRequired, quiz.loginToContinue)"
+    "src/app/quiz/result/result-client.tsx (motion → m, LazyMotion + domAnimation wrapper)"
   ]
 }

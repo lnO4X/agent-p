@@ -81,7 +81,7 @@ export const TIER_CONFIGS: Record<TestTier, TierConfig> = {
     ],
     dimensions: 7,
     timeMinutes: 10,
-    requiresAuth: true,
+    requiresAuth: false,
     requiresPayment: false,
     priceUsd: 0,
     dailyTestLimit: 5,
@@ -154,13 +154,8 @@ export function getUserTestTier(userTier: "free" | "premium"): TestTier {
  * Registered users = Standard (15/day). Premium = Pro (100/day).
  * Quick (0) is only for anonymous/unregistered — but they can't call /api/chat anyway (requires auth).
  */
-export function getChatLimit(
-  userTier: "free" | "premium",
-  hasReferrals: boolean
-): number {
+export function getChatLimit(userTier: "free" | "premium"): number {
   if (userTier === "premium") return TIER_CONFIGS.pro.dailyChatLimit;
-  // All registered users get Standard-level chat (15/day minimum)
-  // Referrals don't change chat limit anymore — Standard is the base for all registered users
   return TIER_CONFIGS.standard.dailyChatLimit;
 }
 

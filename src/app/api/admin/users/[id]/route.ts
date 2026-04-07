@@ -6,8 +6,6 @@ import {
   testSessions,
   talentProfiles,
   partners,
-  microChallenges,
-  activationCodes,
   userKnowledge,
 } from "@/db/schema";
 import { eq, desc } from "drizzle-orm";
@@ -36,8 +34,6 @@ export async function GET(
     sessionsResult,
     latestProfile,
     partnersList,
-    challengesList,
-    codesUsed,
     knowledgeEntries,
   ] = await Promise.all([
     db.select().from(users).where(eq(users.id, id)).limit(1),
@@ -73,28 +69,6 @@ export async function GET(
       .orderBy(partners.slot),
     db
       .select({
-        id: microChallenges.id,
-        gameId: microChallenges.gameId,
-        talentCategory: microChallenges.talentCategory,
-        score: microChallenges.score,
-        completedAt: microChallenges.completedAt,
-      })
-      .from(microChallenges)
-      .where(eq(microChallenges.userId, id))
-      .orderBy(desc(microChallenges.completedAt))
-      .limit(30),
-    db
-      .select({
-        id: activationCodes.id,
-        code: activationCodes.code,
-        durationDays: activationCodes.durationDays,
-        usedAt: activationCodes.usedAt,
-      })
-      .from(activationCodes)
-      .where(eq(activationCodes.usedBy, id))
-      .orderBy(desc(activationCodes.usedAt)),
-    db
-      .select({
         id: userKnowledge.id,
         category: userKnowledge.category,
         key: userKnowledge.key,
@@ -123,8 +97,6 @@ export async function GET(
       sessions: sessionsResult,
       talentProfile: latestProfile[0] || null,
       partners: partnersList,
-      challenges: challengesList,
-      codesUsed,
       knowledge: knowledgeEntries,
     },
   });

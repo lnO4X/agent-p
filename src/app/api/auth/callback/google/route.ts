@@ -1,20 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { nanoid } from "nanoid";
 import { db } from "@/db";
-import { users, referrals } from "@/db/schema";
+import { users } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
 import { createToken, AUTH_COOKIE_NAME, AUTH_COOKIE_MAX_AGE, LOGGED_IN_COOKIE_NAME } from "@/lib/auth";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
-
-function generateReferralCode(): string {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let code = "";
-  for (let i = 0; i < 8; i++) {
-    code += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return code;
-}
 
 interface GoogleUserInfo {
   id: string;
@@ -136,7 +127,6 @@ export async function GET(request: NextRequest) {
     } else {
       // Case 3: New user — create account
       const id = nanoid();
-      const referralCode = generateReferralCode();
       const username = googleUser.email
         ? googleUser.email.split("@")[0].replace(/[^a-zA-Z0-9_]/g, "_").slice(0, 20)
         : `user_${nanoid(8)}`;
@@ -159,7 +149,6 @@ export async function GET(request: NextRequest) {
         emailVerifiedAt: googleUser.verified_email ? now : null,
         googleId: googleUser.id,
         avatarUrl: googleUser.picture || null,
-        referralCode,
         createdAt: now,
         updatedAt: now,
       });
@@ -175,13 +164,9 @@ export async function GET(request: NextRequest) {
         passwordHash: null,
         failedLoginAttempts: 0,
         lockedUntil: null,
-        isProfilePublic: true,
         isAdmin: false,
         tier: "free" as const,
         tierExpiresAt: null,
-        referralCode,
-        steamId: null,
-        steamUsername: null,
         personalityType: null,
         createdAt: now,
         updatedAt: now,

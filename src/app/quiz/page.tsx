@@ -16,7 +16,6 @@ import {
   Lock,
   Crown,
   ChevronRight,
-  UserCircle,
 } from "lucide-react";
 import type { GameRawResult } from "@/types/game";
 
@@ -154,9 +153,8 @@ export default function QuizPage() {
                           {t(`quiz.tier.${tier}`)}
                         </span>
                         {!isQuick && !isPro && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium inline-flex items-center gap-1">
-                            <UserCircle className="w-3 h-3" />
-                            {t("quiz.freeAccountRequired")}
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
+                            {t("quiz.recommended")}
                           </span>
                         )}
                         {isPro && (

@@ -8,7 +8,6 @@ const PUBLIC_PATHS = [
   "/register",
   "/forgot-password",
   "/reset-password",
-  "/leaderboard",
   "/api/auth/login",
   "/api/auth/register",
   "/api/auth/captcha",
@@ -17,7 +16,6 @@ const PUBLIC_PATHS = [
   "/api/auth/google",
   "/api/auth/callback/google",
   "/api/auth/verify-email",
-  "/api/voice/health",
   "/api/feedback",
   "/api/analytics",
 ];
@@ -27,19 +25,13 @@ const SELF_AUTH_PREFIXES = ["/api/admin/", "/api/cron/", "/api/webhooks/"];
 
 /** Public prefixes — no auth required (shareable pages + their APIs) */
 const PUBLIC_PREFIXES = [
-  "/profile/", "/api/profile/",
   "/quiz", "/api/quiz/",
   "/explore", "/api/games/catalog",
   "/archetype",
-  "/pk", "/api/pk",
-  "/play", "/api/play",
-  "/test",
   "/api/archetype/card",
-  "/api/pk/card",
   "/api/home-card",
   "/api/billing/checkout",
   "/blog",
-  "/embed",
 ];
 
 /** Cache the encoded secret to avoid re-encoding on every request */

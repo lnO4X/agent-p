@@ -1,39 +1,12 @@
 {
-  "timestamp": "2026-04-08T21:00:00Z",
-  "traffic": {
-    "last24h": { "pageViews": 33, "uniqueSessions": 2 },
-    "last7d": { "pageViews": 91, "uniqueSessions": 12 }
-  },
-  "stats": {
-    "totalUsers": 8,
-    "premiumUsers": 0,
-    "totalSessions": 5
-  },
-  "recentPipeline": "See pipeline.jsonl — 11 consecutive ACTs, mostly SEO micro-optimizations",
+  "timestamp": "2026-04-07T17:30:43Z",
+  "traffic": {"success":true,"data":{"last24h":{"pageViews":0,"uniqueSessions":0},"last7d":{"pageViews":91,"uniqueSessions":12},"topPages":[],"topReferrers":[{"referrer":"https://gametan.ai/login","views":"30"},{"referrer":"https://vercel.com/","views":"25"},{"referrer":"https://gametan.ai/explore","views":"3"},{"referrer":"https://gametan.ai/dashboard","views":"1"}],"dailyTrend":[{"day":"2026-04-05","views":"37","sessions":"7"},{"day":"2026-04-06","views":"54","sessions":"7"}],"funnel":[{"event":"page_view","total":"91","unique_sessions":"12"},{"event":"quiz_complete","total":"4","unique_sessions":"4"},{"event":"quiz_start","total":"2","unique_sessions":"2"},{"event":"share_click","total":"2","unique_sessions":"2"}]}},
+  "stats": {"success":true,"data":{"totalUsers":8,"premiumUsers":0,"registeredToday":0,"totalSessions":5,"totalChallenges":5,"totalPartners":10,"unusedCodes":0}},
+  "recentPipeline": [{"ts":"2026-04-08T06:25:00Z","action":"ACT","spec":"Add internal links to FAQ answers for SEO interlinking (/quiz, /archetype, /chat)","eval_score":15,"traffic_24h":54,"users":8,"rationale":"FAQ answers now have <Link> to /quiz, /archetype, /chat. JSON-LD unchanged (plain text). SEO internal linking complete. Build green, pushed. ProductQuality stays 3 — main blockers: 0 organic traffic (Google indexing in progress, all on-page SEO complete) + 0 revenue (Creem pending). 8 consecutive ACTs."},{"ts":"2026-04-08T10:40:00Z","action":"ACT","spec":"Fix result page OG image: dynamic scores from URL params instead of hardcoded s=75-60-50","eval_score":15,"traffic_24h":33,"users":8,"rationale":"Shared quiz result links now show the users real archetype in social previews instead of a generic card. Server-side generateMetadata reads scores from URL params. Fallback to default when no params. Build green, 368 tests pass, pushed. CDN cache for old static pages will auto-expire. ProductQuality stays 3 — main blockers: 0 organic traffic (Google indexing in progress) + 0 revenue (Creem needs human API key setup). 9 consecutive ACTs."},{"ts":"2026-04-08T14:55:00Z","action":"ACT","spec":"Show auth requirement upfront on quiz tier selection — replace silent login redirect with clear badge + spinner","eval_score":15,"traffic_24h":33,"users":8,"rationale":"Standard tier had silent auth redirect — users clicked expecting to start test, got bounced to login. Now shows Free account required badge + spinner during auth check. Login page was #1 referrer (30 views/week) confirming this friction. Build green, 368 tests pass, pushed. ProductQuality stays 3 — external blockers (Google indexing, Creem payment). 10 consecutive ACTs."},{"ts":"2026-04-08T19:10:00Z","action":"ACT","spec":"Fix quiz_complete analytics deduplication with useRef guard","eval_score":15,"traffic_24h":32,"users":8,"rationale":"quiz_complete was firing on every result page visit (useEffect with multiple deps). Added hasTrackedComplete useRef guard so it only fires once per component mount. Fixes funnel anomaly where quiz_complete(4) > quiz_start(2). All key pages 200. Build green, pushed. ProductQuality stays 3 — external blockers (Google indexing, Creem payment). 11 consecutive ACTs."},{"ts":"2026-04-08T23:35:00Z","action":"ACT","spec":"Optimize framer-motion bundle: LazyMotion + m components on result page (~78kB → ~5kB)","eval_score":15,"traffic_24h":0,"users":8,"rationale":"Result page framer-motion reduced from ~78kB static import to ~5kB with LazyMotion+domAnimation+m.* shorthand. Mechanical replacement: motion.div→m.div, wrapped in <LazyMotion features={domAnimation}>. All key pages 200. Build green, pushed. ProductQuality stays 4 — external blockers (Google indexing, Creem payment). 12 consecutive ACTs."}],
   "questions": [
-    "SEO infrastructure is COMPLETE (JSON-LD, FAQ, sitemap, blog SSG, internal links). Should harness stop doing SEO and focus elsewhere?",
-    "4 new validated games (Flanker/N-Back/MOT/TaskSwitch) were added but never playtested live. Should harness test them?",
-    "Scoring was rebuilt from sigmoid to CDF percentile with real norms. Does the harness evaluator need updated quality criteria?",
-    "Quiz now has 3 tiers (Quick/Standard/Pro) with 17 games in Pro. Are there UX issues in the new flow?",
-    "Chat now has message persistence + markdown rendering. Is the Coach actually useful for users?",
-    "Traffic is declining (54→33 views/day). Is this a product problem or a distribution problem?",
-    "0 premium users. Is the $3.99 Pro tier pricing wrong, or is the upgrade CTA not visible enough?"
-  ],
-  "completedMilestones": [
-    "Psychometric upgrade: CDF percentile, real norms (HB 81M+), 4 validated games",
-    "i18n: 671 keys, 8 languages, isZh→t() migration complete",
-    "Chat persistence + markdown rendering",
-    "Quiz 3-tier selection UI",
-    "Nav consolidated to /quiz",
-    "Performance: loading.tsx, deferred fetches, leaderboard cache",
-    "SEO: JSON-LD (BlogPosting, FAQPage), sitemap, blog SSG, internal links",
-    "Coach: game mechanics knowledge, cognitive science terms",
-    "Result page: variable-length scores, Pro upgrade CTA, dynamic OG cards"
-  ],
-  "currentBlockers": [
-    "0 organic traffic — Google indexing pending (cannot fix with code)",
-    "0 premium — Creem payment flow untested by real users",
-    "New games untested in production",
-    "framer-motion static import (~78kB) on result page"
+    "Are recent actions producing measurable results?",
+    "Should we change strategy based on traffic trends?",
+    "What contradictions exist in our observations?",
+    "What should the next pipeline focus on?"
   ]
 }

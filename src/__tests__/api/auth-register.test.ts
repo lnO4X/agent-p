@@ -16,8 +16,7 @@ const mockSetAuthCookie = vi.hoisted(() => vi.fn());
 
 vi.mock("@/db", () => ({ db: mockDb }));
 vi.mock("@/db/schema", () => ({
-  users: { id: "id", username: "username", referralCode: "referralCode" },
-  referrals: { id: "id", referrerId: "referrerId", referredUserId: "referredUserId" },
+  users: { id: "id", username: "username" },
 }));
 vi.mock("@/lib/redis", () => ({ checkRateLimit: mockCheckRateLimit }));
 vi.mock("@/lib/auth", () => ({
@@ -132,7 +131,7 @@ describe("POST /api/auth/register", () => {
     expect(json.data.displayName).toBe("newuser");
   });
 
-  it("tracks referral code when provided", async () => {
+  it("creates user without referral tracking", async () => {
     // First select: check existing user — not found
     const existingChain = mockDbChain([]);
     mockDb.select.mockReturnValueOnce(existingChain);
@@ -141,15 +140,11 @@ describe("POST /api/auth/register", () => {
     const insertChain = mockDbChain();
     mockDb.insert.mockReturnValue(insertChain);
 
-    // Second select: find referrer by code — found
-    const referrerChain = mockDbChain([{ id: "referrer-id" }]);
-    mockDb.select.mockReturnValueOnce(referrerChain);
-
     mockCreateToken.mockResolvedValue("jwt.ref.token");
     mockSetAuthCookie.mockResolvedValue(undefined);
 
     const req = createRequest("POST", "http://localhost:3000/api/auth/register", {
-      body: { username: "newuser", password: "password123", referredBy: "ABCD1234" },
+      body: { username: "newuser", password: "password123" },
     });
 
     const res = await POST(req);
@@ -157,7 +152,7 @@ describe("POST /api/auth/register", () => {
 
     expect(res.status).toBe(200);
     expect(json.success).toBe(true);
-    // insert called twice: once for user, once for referral
-    expect(mockDb.insert).toHaveBeenCalledTimes(2);
+    // insert called once: for user only
+    expect(mockDb.insert).toHaveBeenCalledTimes(1);
   });
 });

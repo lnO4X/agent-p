@@ -24,21 +24,15 @@ export const users = pgTable(
     avatarUrl: text("avatar_url"),
     failedLoginAttempts: integer("failed_login_attempts").default(0).notNull(),
     lockedUntil: timestamp("locked_until"),
-    isProfilePublic: boolean("is_profile_public").default(true).notNull(),
     isAdmin: boolean("is_admin").default(false).notNull(),
     tier: text("tier", { enum: ["free", "premium"] }).notNull().default("free"),
     tierExpiresAt: timestamp("tier_expires_at"),
-    referralCode: text("referral_code"),
-    steamId: text("steam_id"),
-    steamUsername: text("steam_username"),
     personalityType: text("personality_type"), // "INTJ", "ENFP", etc. nullable — Jungian personality type
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },
   (table) => [
     uniqueIndex("users_username_idx").on(table.username),
-    uniqueIndex("users_referral_code_idx").on(table.referralCode),
-    uniqueIndex("users_steam_id_idx").on(table.steamId),
     uniqueIndex("users_google_id_idx").on(table.googleId),
     uniqueIndex("users_email_idx").on(table.email),
   ]
@@ -241,52 +235,6 @@ export const userKnowledge = pgTable(
   ]
 );
 
-// ==================== MICRO CHALLENGES ====================
-export const microChallenges = pgTable(
-  "micro_challenges",
-  {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id),
-    gameId: text("game_id").notNull(), // maps to games registry game ID
-    talentCategory: text("talent_category").notNull(),
-    score: real("score").notNull(), // normalized 0-100
-    completedAt: timestamp("completed_at").defaultNow().notNull(),
-  },
-  (table) => [
-    index("micro_challenges_user_completed_idx").on(
-      table.userId,
-      table.completedAt
-    ),
-  ]
-);
-
-// ==================== PK CHALLENGES (Social 1v1) ====================
-export const pkChallenges = pgTable(
-  "pk_challenges",
-  {
-    id: text("id").primaryKey(),
-    gameId: text("game_id").notNull(), // maps to game registry ID
-    creatorId: text("creator_id").references(() => users.id), // null = anonymous
-    creatorName: text("creator_name").notNull(), // display name (works without login)
-    creatorScore: real("creator_score").notNull(), // normalized 0-100
-    challengerId: text("challenger_id").references(() => users.id),
-    challengerName: text("challenger_name"),
-    challengerScore: real("challenger_score"),
-    status: text("status", {
-      enum: ["pending", "completed"],
-    })
-      .notNull()
-      .default("pending"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    completedAt: timestamp("completed_at"),
-  },
-  (table) => [
-    index("pk_challenges_creator_idx").on(table.creatorId),
-    index("pk_challenges_status_idx").on(table.status, table.createdAt),
-  ]
-);
 
 // ==================== GAME RECOMMENDATIONS ====================
 export const gameRecommendations = pgTable(
@@ -309,125 +257,6 @@ export const gameRecommendations = pgTable(
   ]
 );
 
-// ==================== REFERRALS ====================
-export const referrals = pgTable(
-  "referrals",
-  {
-    id: text("id").primaryKey(),
-    referrerId: text("referrer_id")
-      .notNull()
-      .references(() => users.id),
-    referredUserId: text("referred_user_id")
-      .notNull()
-      .references(() => users.id),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (table) => [
-    uniqueIndex("referrals_referred_user_idx").on(table.referredUserId),
-    index("referrals_referrer_idx").on(table.referrerId),
-  ]
-);
-
-// ==================== COMMUNITY POSTS ====================
-export const communityPosts = pgTable(
-  "community_posts",
-  {
-    id: text("id").primaryKey(),
-    authorId: text("author_id")
-      .notNull()
-      .references(() => users.id),
-    archetypeId: text("archetype_id").notNull(),
-    content: text("content").notNull(),
-    likeCount: integer("like_count").default(0).notNull(),
-    replyCount: integer("reply_count").default(0).notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (table) => [
-    index("community_posts_archetype_idx").on(table.archetypeId, table.createdAt),
-    index("community_posts_author_idx").on(table.authorId),
-  ]
-);
-
-export const communityReplies = pgTable(
-  "community_replies",
-  {
-    id: text("id").primaryKey(),
-    postId: text("post_id")
-      .notNull()
-      .references(() => communityPosts.id, { onDelete: "cascade" }),
-    authorId: text("author_id")
-      .notNull()
-      .references(() => users.id),
-    content: text("content").notNull(),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (table) => [
-    index("community_replies_post_idx").on(table.postId, table.createdAt),
-  ]
-);
-
-export const communityPostLikes = pgTable(
-  "community_post_likes",
-  {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id),
-    postId: text("post_id")
-      .notNull()
-      .references(() => communityPosts.id, { onDelete: "cascade" }),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (table) => [
-    uniqueIndex("community_post_likes_unique_idx").on(table.userId, table.postId),
-    index("community_post_likes_user_idx").on(table.userId),
-  ]
-);
-
-// ==================== NOTIFICATIONS ====================
-export const notifications = pgTable(
-  "notifications",
-  {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id, { onDelete: "cascade" }),
-    type: text("type", { enum: ["post_liked", "post_replied"] }).notNull(),
-    postId: text("post_id").references(() => communityPosts.id, {
-      onDelete: "cascade",
-    }),
-    senderId: text("sender_id").references(() => users.id, {
-      onDelete: "cascade",
-    }),
-    read: boolean("read").notNull().default(false),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (table) => [
-    index("notifications_user_idx").on(table.userId, table.createdAt),
-    index("notifications_unread_idx").on(table.userId, table.read),
-  ]
-);
-
-// ==================== STEAM GAME LIBRARY ====================
-export const steamGameLibrary = pgTable(
-  "steam_game_library",
-  {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id),
-    steamAppId: integer("steam_app_id").notNull(),
-    name: text("name").notNull(),
-    playtimeMinutes: integer("playtime_minutes").default(0).notNull(),
-    lastPlayed: timestamp("last_played"),
-    iconUrl: text("icon_url"),
-    syncedAt: timestamp("synced_at").defaultNow().notNull(),
-  },
-  (table) => [
-    uniqueIndex("steam_lib_user_app_idx").on(table.userId, table.steamAppId),
-    index("steam_lib_user_idx").on(table.userId),
-  ]
-);
 
 // ==================== FEEDBACK (data flywheel) ====================
 export const recommendationFeedback = pgTable(
@@ -470,48 +299,6 @@ export const chatFeedback = pgTable(
   ]
 );
 
-// ==================== SHARED PARTNER DEFINITIONS ====================
-export const sharedPartners = pgTable(
-  "shared_partners",
-  {
-    id: text("id").primaryKey(),
-    authorId: text("author_id")
-      .notNull()
-      .references(() => users.id),
-    name: text("name").notNull(),
-    avatar: text("avatar").notNull(),
-    description: text("description").notNull(), // Short pitch (max 200 chars)
-    definition: text("definition").notNull(),
-    tags: jsonb("tags").$type<string[]>().default([]),
-    usageCount: integer("usage_count").default(0).notNull(),
-    likeCount: integer("like_count").default(0).notNull(),
-    status: text("status", { enum: ["active", "hidden", "reported"] }).notNull().default("active"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    updatedAt: timestamp("updated_at").defaultNow().notNull(),
-  },
-  (table) => [
-    index("shared_partners_author_idx").on(table.authorId),
-    index("shared_partners_popular_idx").on(table.likeCount),
-  ]
-);
-
-export const sharedPartnerLikes = pgTable(
-  "shared_partner_likes",
-  {
-    id: text("id").primaryKey(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => users.id),
-    sharedPartnerId: text("shared_partner_id")
-      .notNull()
-      .references(() => sharedPartners.id),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (table) => [
-    uniqueIndex("shared_partner_likes_unique_idx").on(table.userId, table.sharedPartnerId),
-    index("shared_partner_likes_user_idx").on(table.userId),
-  ]
-);
 
 // ==================== CHAT MESSAGES (Conversation History) ====================
 export const chatMessages = pgTable(
@@ -544,22 +331,6 @@ export const siteSettings = pgTable("site_settings", {
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
 });
 
-// ==================== PRODUCT FEEDBACK (NPS) ====================
-export const productFeedback = pgTable(
-  "product_feedback",
-  {
-    id: text("id").primaryKey(),
-    userId: text("user_id").references(() => users.id), // nullable for anonymous
-    score: integer("score").notNull(), // 1-10 NPS score
-    comment: text("comment"), // optional text feedback
-    context: text("context").notNull(), // where: "quiz_complete", "first_chat", etc.
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-  },
-  (table) => [
-    index("product_feedback_user_idx").on(table.userId),
-    index("product_feedback_context_idx").on(table.context),
-  ]
-);
 
 // ==================== ANALYTICS EVENTS ====================
 export const analyticsEvents = pgTable(
@@ -581,20 +352,3 @@ export const analyticsEvents = pgTable(
   ]
 );
 
-// ==================== ACTIVATION CODES ====================
-export const activationCodes = pgTable(
-  "activation_codes",
-  {
-    id: text("id").primaryKey(),
-    code: text("code").notNull(),
-    tier: text("tier", { enum: ["premium"] }).notNull().default("premium"),
-    durationDays: integer("duration_days").notNull().default(30),
-    usedBy: text("used_by").references(() => users.id),
-    usedAt: timestamp("used_at"),
-    createdAt: timestamp("created_at").defaultNow().notNull(),
-    expiresAt: timestamp("expires_at"), // code itself can expire
-  },
-  (table) => [
-    uniqueIndex("activation_codes_code_idx").on(table.code),
-  ]
-);

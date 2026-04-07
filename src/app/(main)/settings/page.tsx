@@ -3,18 +3,10 @@
 import { useState, useEffect, useCallback } from "react";
 import { useI18n } from "@/i18n/context";
 import { ChangePasswordForm } from "@/components/auth/change-password-form";
-import { Mail, Check, Sun, Moon, Monitor, Gamepad2, Unlink, ExternalLink, Library } from "lucide-react";
+import { Mail, Check, Sun, Moon, Monitor } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 type ThemeMode = "system" | "light" | "dark";
-
-interface SteamStatus {
-  linked: boolean;
-  steamId?: string;
-  steamUsername?: string;
-  totalGames?: number;
-  totalPlaytimeHours?: number;
-}
 
 function getStoredTheme(): ThemeMode {
   if (typeof window === "undefined") return "dark";
@@ -39,10 +31,6 @@ export default function SettingsPage() {
   const [emailSaving, setEmailSaving] = useState(false);
   const [emailSuccess, setEmailSuccess] = useState(false);
   const [theme, setThemeState] = useState<ThemeMode>("dark");
-  const [steam, setSteam] = useState<SteamStatus | null>(null);
-  const [steamInput, setSteamInput] = useState("");
-  const [steamLinking, setSteamLinking] = useState(false);
-  const [steamError, setSteamError] = useState<string | null>(null);
 
   useEffect(() => {
     setThemeState(getStoredTheme());
@@ -56,17 +44,10 @@ export default function SettingsPage() {
   useEffect(() => {
     async function loadSettings() {
       try {
-        const [settingsRes, steamRes] = await Promise.all([
-          fetch("/api/settings"),
-          fetch("/api/integrations/steam"),
-        ]);
+        const settingsRes = await fetch("/api/settings");
         if (settingsRes.ok) {
           const data = await settingsRes.json();
           setEmail(data.data.email || null);
-        }
-        if (steamRes.ok) {
-          const data = await steamRes.json();
-          if (data.success) setSteam(data.data);
         }
       } catch {
         // ignore
@@ -99,45 +80,6 @@ export default function SettingsPage() {
       // ignore
     } finally {
       setEmailSaving(false);
-    }
-  };
-
-  const handleSteamLink = async () => {
-    const id = steamInput.trim();
-    if (!id) return;
-    setSteamLinking(true);
-    setSteamError(null);
-    try {
-      const res = await fetch("/api/integrations/steam", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ steamId: id }),
-      });
-      const data = await res.json();
-      if (data.success) {
-        // Refresh Steam status
-        const statusRes = await fetch("/api/integrations/steam");
-        const statusData = await statusRes.json();
-        if (statusData.success) setSteam(statusData.data);
-        setSteamInput("");
-      } else {
-        setSteamError(typeof data.error === "string" ? data.error : t("settings.steamInvalidId"));
-      }
-    } catch {
-      setSteamError(t("settings.steamNetworkError"));
-    } finally {
-      setSteamLinking(false);
-    }
-  };
-
-  const handleSteamUnlink = async () => {
-    if (!confirm(t("settings.steamUnlinkConfirm"))) return;
-    try {
-      await fetch("/api/integrations/steam", { method: "DELETE" });
-      setSteam({ linked: false });
-      setSteamInput("");
-    } catch {
-      // ignore
     }
   };
 
@@ -254,96 +196,6 @@ export default function SettingsPage() {
           )}
         </div>
       </div>
-
-      {/* Steam integration */}
-      {steam !== null && (
-        <div className="rounded-2xl ring-1 ring-foreground/10 bg-card overflow-hidden">
-          <div className="px-4 py-3.5 space-y-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Gamepad2 className="w-4 h-4 text-muted-foreground" />
-                <div className="space-y-0.5">
-                  <p className="text-sm font-medium">{t("settings.steam")}</p>
-                  <p className="text-xs text-muted-foreground">{t("settings.steamDesc")}</p>
-                </div>
-              </div>
-              {steam.linked && (
-                <span className="flex items-center gap-1 text-xs text-primary">
-                  <Check className="w-3.5 h-3.5" />
-                  {t("settings.steamLinked")}
-                </span>
-              )}
-            </div>
-
-            {steam.linked ? (
-              <div className="space-y-2">
-                {/* Stats row */}
-                <div className="flex items-center gap-3 bg-muted/50 rounded-xl px-3 py-2">
-                  <Library className="w-4 h-4 text-muted-foreground shrink-0" />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">
-                      {steam.steamUsername || steam.steamId}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {t("settings.steamGames").replace("{count}", String(steam.totalGames ?? 0))}
-                      {" · "}
-                      {t("settings.steamHours").replace("{hours}", String(steam.totalPlaytimeHours ?? 0))}
-                    </p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={handleSteamUnlink}
-                    className="flex items-center gap-1 text-xs text-destructive pressable"
-                  >
-                    <Unlink className="w-3.5 h-3.5" />
-                    {t("settings.steamUnlink")}
-                  </button>
-                </div>
-              </div>
-            ) : (
-              <div className="space-y-2">
-                <div className="flex items-end gap-2">
-                  <input
-                    type="text"
-                    value={steamInput}
-                    onChange={(e) => { setSteamInput(e.target.value); setSteamError(null); }}
-                    placeholder={t("settings.steamIdPlaceholder")}
-                    className={cn(
-                      "flex-1 rounded-xl px-3 py-2 text-sm",
-                      "bg-muted/50 border border-foreground/10",
-                      "focus:outline-none focus:ring-2 focus:ring-primary/30"
-                    )}
-                  />
-                  <button
-                    type="button"
-                    onClick={handleSteamLink}
-                    disabled={steamLinking || !steamInput.trim()}
-                    className={cn(
-                      "px-4 py-2 rounded-xl text-sm font-medium whitespace-nowrap",
-                      "bg-primary text-primary-foreground",
-                      "pressable disabled:opacity-40"
-                    )}
-                  >
-                    {steamLinking ? t("settings.steamLinking") : t("settings.steamLink")}
-                  </button>
-                </div>
-                {steamError && (
-                  <p className="text-xs text-destructive">{steamError}</p>
-                )}
-                <a
-                  href="https://store.steampowered.com/account/"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-primary transition-colors"
-                >
-                  <ExternalLink className="w-3 h-3" />
-                  {t("settings.steamFindId")}
-                </a>
-              </div>
-            )}
-          </div>
-        </div>
-      )}
 
       {/* Password section */}
       <ChangePasswordForm />
