@@ -1,39 +1,50 @@
 {
-  "ts": "2026-04-06T22:00:00Z",
+  "timestamp": "2026-04-08T20:30:00Z",
   "health": 200,
-  "traffic_24h": {
-    "pageViews": 37,
-    "uniqueSessions": 7,
-    "topPages": ["/chat:10", "/:4", "/me:4", "/dashboard:3", "/explore:3"],
-    "topReferrers": ["vercel.com:25"],
-    "funnel": {"page_view": 37, "quiz_complete": 2, "share_click": 1}
+  "traffic": {
+    "last24h": { "pageViews": 33, "uniqueSessions": 2 },
+    "last7d": { "pageViews": 91, "uniqueSessions": 12 },
+    "topPages": ["/archetype/commander(8)", "/dashboard(6)", "/me(4)", "/explore(3)", "/chat(2)", "/quiz(2)"],
+    "topReferrers": ["gametan.ai/login(30)", "vercel.com(25)"],
+    "funnel": { "page_view": "91/12", "quiz_complete": "4/4", "quiz_start": "2/2" }
   },
   "stats": {
     "totalUsers": 8,
     "premiumUsers": 0,
-    "registeredToday": 1,
+    "registeredToday": 0,
     "totalSessions": 5,
     "totalChallenges": 5,
     "totalPartners": 10
   },
-  "pipelineHistory": {
-    "last5Actions": ["SKIP","SKIP","SKIP","SKIP","ACT"],
-    "lastAction": "ACT",
-    "lastActionDetail": "Removed dead routes /recommend and /notifications",
-    "consecutiveSkips": 0
-  },
-  "lastEval": {
-    "score": 13,
-    "specImplemented": 5,
-    "noRegressions": 5,
-    "productQuality": 3,
-    "issues": [],
-    "residualProblems": [
-      "29 files still use isZh ternary",
-      "/challenge has 0 usage",
-      "0 organic traffic — all from vercel.com",
-      "7 users, 0 premium, no revenue path",
-      "/test/session/[sessionId] exists but /test requires auth"
-    ]
-  }
+  "lastEvalScore": 15,
+  "recentMajorChanges": [
+    "PSYCHOMETRIC UPGRADE: scoring.ts sigmoid → CDF percentile (real norms from Human Benchmark 81M+)",
+    "4 NEW VALIDATED GAMES: Flanker (g=0.42), N-Back (g=0.38), MOT (g=0.51), Task-Switch (g=0.35)",
+    "PRO TIER: 17 games (13 original + 4 validated). test-tiers.ts updated",
+    "QUIZ: 3-tier selection UI (Quick/Standard/Pro). /test redirects to /quiz",
+    "NAV: /quiz is now main test entry (was missing). Play tab → /quiz",
+    "CHAT: message persistence (DB table chat_messages), markdown rendering",
+    "i18n: 609 isZh migrated to t(), 288 new keys, 671 total",
+    "COACH: game mechanics knowledge injected (real ms data, cognitive science terms)",
+    "RESULT PAGE: supports variable-length scores (3/7/17), Pro upgrade CTA",
+    "PERF: loading.tsx skeleton, dashboard direct profile fetch (skip leaderboard)",
+    "Harness #10: auth badge on tier, OG dynamic image, analytics dedup"
+  ],
+  "consecutiveACTs": 10,
+  "residualProblems": [
+    "0 organic traffic — awaiting Google indexing (SEO work complete)",
+    "0 premium users — Creem payment needs human API key verification",
+    "framer-motion still static import on result page (~78kB, next/dynamic type incompatible)",
+    "New games (Flanker/N-Back/MOT/TaskSwitch) need live play-testing for bugs",
+    "13 original games still have estimated norms (only reaction/risk/memory have research norms)",
+    "No anti-cheat beyond min RT clamp on reaction speed",
+    "Traffic declining: needs external distribution (X, communities, SEO indexing)"
+  ],
+  "doNotRepeat": [
+    "Do NOT re-add /test as separate page (it redirects to /quiz now)",
+    "Do NOT change scoring.ts back to sigmoid (CDF percentile is intentional)",
+    "Do NOT modify tier game lists without checking test-tiers.ts + gameRegistry",
+    "Do NOT add fake pro benchmarks (all must cite research or say 'pending calibration')",
+    "Quiz page was refactored: page.tsx (server metadata) + result-client.tsx (client)"
+  ]
 }
