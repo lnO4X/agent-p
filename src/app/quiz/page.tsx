@@ -16,10 +16,11 @@ import {
   Lock,
   Crown,
   ChevronRight,
+  UserCircle,
 } from "lucide-react";
 import type { GameRawResult } from "@/types/game";
 
-type Phase = "select" | "playing" | "transition";
+type Phase = "select" | "playing" | "transition" | "checking";
 
 /** Icon map for talent-based game coloring */
 const TALENT_ICONS: Record<string, { icon: typeof Zap; color: string }> = {
@@ -88,7 +89,8 @@ export default function QuizPage() {
   const startTest = (tier: TestTier) => {
     const config = TIER_CONFIGS[tier];
     if (config.requiresAuth) {
-      // Check auth — redirect to login if needed
+      setSelectedTier(tier);
+      setPhase("checking");
       fetch("/api/auth/me", { credentials: "include" })
         .then((r) => r.json())
         .then((data) => {
@@ -96,27 +98,12 @@ export default function QuizPage() {
             router.push(`/login?next=/quiz&tier=${tier}`);
             return;
           }
-          if (config.requiresPayment) {
-            // Check if user has premium
-            fetch("/api/auth/me", { credentials: "include" })
-              .then((r) => r.json())
-              .then(() => {
-                // For now, start the test — payment check is on results page
-                setSelectedTier(tier);
-                setGameIndex(0);
-                setScores([]);
-                track("quiz_start", { mode: tier });
-                setPhase("playing");
-              });
-            return;
-          }
-          setSelectedTier(tier);
           setGameIndex(0);
           setScores([]);
           track("quiz_start", { mode: tier });
           setPhase("playing");
         })
-        .catch(() => router.push("/login?next=/quiz"));
+        .catch(() => router.push(`/login?next=/quiz&tier=${tier}`));
       return;
     }
     setSelectedTier(tier);
@@ -167,8 +154,9 @@ export default function QuizPage() {
                           {t(`quiz.tier.${tier}`)}
                         </span>
                         {!isQuick && !isPro && (
-                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium">
-                            {t("common.free")}
+                          <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary font-medium inline-flex items-center gap-1">
+                            <UserCircle className="w-3 h-3" />
+                            {t("quiz.freeAccountRequired")}
                           </span>
                         )}
                         {isPro && (
@@ -193,11 +181,7 @@ export default function QuizPage() {
                       </div>
                     </div>
                     <div className="flex-shrink-0 ml-3">
-                      {config.requiresAuth && !isPro ? (
-                        <Lock className="w-4 h-4 text-muted-foreground/40" />
-                      ) : (
-                        <ChevronRight className="w-5 h-5 text-muted-foreground/40" />
-                      )}
+                      <ChevronRight className="w-5 h-5 text-muted-foreground/40" />
                     </div>
                   </div>
                 </button>
@@ -207,6 +191,22 @@ export default function QuizPage() {
 
           <p className="text-center text-[11px] text-muted-foreground/60">
             {t("quiz.noRegistration")}
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // ═══════════════════════════════════════════════════
+  // CHECKING AUTH
+  // ═══════════════════════════════════════════════════
+  if (phase === "checking") {
+    return (
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8">
+        <div className="max-w-sm w-full text-center space-y-4">
+          <div className="w-8 h-8 border-2 border-primary border-t-transparent rounded-full animate-spin mx-auto" />
+          <p className="text-sm text-muted-foreground">
+            {t("quiz.loginToContinue")}
           </p>
         </div>
       </div>
