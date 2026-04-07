@@ -19,12 +19,53 @@ export default function Home() {
   const isZh = locale === "zh"; // kept for archetype dynamic data + DistributionBar prop
   const featured = FEATURED_IDS.map((id) => archetypes.find((a) => a.id === id)!).filter(Boolean);
 
-  const faqItems = [
-    { q: t("home.faq.q1"), a: t("home.faq.a1") },
-    { q: t("home.faq.q2"), a: t("home.faq.a2") },
-    { q: t("home.faq.q3"), a: t("home.faq.a3") },
-    { q: t("home.faq.q4"), a: t("home.faq.a4") },
-    { q: t("home.faq.q5"), a: t("home.faq.a5") },
+  const linkClass = "text-primary underline underline-offset-2 hover:text-primary/80 transition-colors";
+  const faqItems: { q: string; a: string; aJsx: React.ReactNode }[] = [
+    {
+      q: t("home.faq.q1"),
+      a: t("home.faq.a1"),
+      aJsx: isZh ? (
+        <>GameTan 通过互动小游戏测量 13 项真实游戏天赋维度——反应速度、模式识别、战略思维、多任务处理等。不是性格问卷。你的分数会与职业电竞选手基准对比。<Link href="/quiz" className={linkClass}>立即测试</Link>。</>
+      ) : (
+        <>GameTan measures 13 real gaming talent dimensions — reaction speed, pattern recognition, strategic thinking, multitasking, and more — through interactive mini-games. No personality quizzes. Your scores are compared against pro esports player benchmarks. <Link href="/quiz" className={linkClass}>Take the test now</Link>.</>
+      ),
+    },
+    {
+      q: t("home.faq.q2"),
+      a: t("home.faq.a2"),
+      aJsx: isZh ? (
+        <>每个小游戏都针对竞技游戏中的特定认知或运动技能设计。你的结果会与 FPS、MOBA 和策略游戏的职业电竞运动员数据进行排名对比。</>
+      ) : (
+        <>Each mini-game is designed to isolate a specific cognitive or motor skill used in competitive gaming. Your results are ranked against data from professional esports athletes across FPS, MOBA, and strategy genres.</>
+      ),
+    },
+    {
+      q: t("home.faq.q3"),
+      a: t("home.faq.a3"),
+      aJsx: isZh ? (
+        <>是的，核心天赋测试完全免费。完成 3 分钟<Link href="/quiz" className={linkClass}>测试</Link>后，你可以立即获得完整的 13 维度分数分析、原型分类和职业对比。</>
+      ) : (
+        <>Yes, the core talent test is 100% free. You get your full 13-dimension score breakdown, archetype classification, and pro comparison instantly after completing the 3-minute <Link href="/quiz" className={linkClass}>test</Link>.</>
+      ),
+    },
+    {
+      q: t("home.faq.q4"),
+      a: t("home.faq.a4"),
+      aJsx: isZh ? (
+        <>根据你的天赋画像，你会被匹配到 16 种玩家原型之一，如闪电刺客、先知、建筑师或狂战士。每个原型反映独特的优势组合。<Link href="/archetype" className={linkClass}>探索所有原型</Link>找到你的定位。</>
+      ) : (
+        <>Based on your talent profile, you are matched to one of 16 gamer archetypes like Lightning Assassin, Oracle, Architect, or Berserker. Each archetype reflects a unique combination of strengths. <Link href="/archetype" className={linkClass}>Explore all archetypes</Link> to find yours.</>
+      ),
+    },
+    {
+      q: t("home.faq.q5"),
+      a: t("home.faq.a5"),
+      aJsx: isZh ? (
+        <>当然可以。GameTan 会识别你最强和最弱的天赋维度。使用<Link href="/chat" className={linkClass}>AI 教练</Link>获取基于你画像的个性化训练建议。随时重新<Link href="/quiz" className={linkClass}>测试</Link>追踪进步。</>
+      ) : (
+        <>Absolutely. GameTan identifies your strongest and weakest talent dimensions. Use the <Link href="/chat" className={linkClass}>AI Coach</Link> to get personalized training advice based on your profile. Retake the <Link href="/quiz" className={linkClass}>test</Link> anytime to track improvement.</>
+      ),
+    },
   ];
 
   const faqJsonLd = {
@@ -350,7 +391,7 @@ export default function Home() {
                   {item.q}
                 </summary>
                 <p className="text-xs text-muted-foreground mt-1 px-4 pb-3 leading-relaxed">
-                  {item.a}
+                  {item.aJsx}
                 </p>
               </details>
             ))}
