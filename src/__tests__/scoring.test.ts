@@ -1,59 +1,86 @@
 import { describe, it, expect } from "vitest";
 import {
   sigmoidNormalize,
+  percentileNormalize,
   computeTalentScore,
   scoreToRank,
   computeOverallScore,
 } from "@/lib/scoring";
 
-describe("sigmoidNormalize", () => {
+describe("percentileNormalize (CDF-based)", () => {
   it("returns ~50 when rawScore equals mean", () => {
-    const result = sigmoidNormalize(50, 50, 10, true);
+    const result = percentileNormalize(50, 50, 10, true);
     expect(result).toBeCloseTo(50, 0);
   });
 
   it("returns >50 when rawScore is above mean (higherIsBetter=true)", () => {
-    const result = sigmoidNormalize(70, 50, 10, true);
+    const result = percentileNormalize(70, 50, 10, true);
     expect(result).toBeGreaterThan(50);
   });
 
   it("returns <50 when rawScore is below mean (higherIsBetter=true)", () => {
-    const result = sigmoidNormalize(30, 50, 10, true);
+    const result = percentileNormalize(30, 50, 10, true);
     expect(result).toBeLessThan(50);
   });
 
   it("inverts direction when higherIsBetter=false", () => {
     // For reaction time: lower is better
-    const fast = sigmoidNormalize(200, 300, 80, false);
-    const slow = sigmoidNormalize(400, 300, 80, false);
+    const fast = percentileNormalize(200, 300, 80, false);
+    const slow = percentileNormalize(400, 300, 80, false);
     expect(fast).toBeGreaterThan(slow);
   });
 
-  it("clamps between 0 and 100", () => {
-    const veryHigh = sigmoidNormalize(1000, 50, 10, true);
-    const veryLow = sigmoidNormalize(-1000, 50, 10, true);
-    expect(veryHigh).toBeLessThanOrEqual(100);
-    expect(veryHigh).toBeGreaterThanOrEqual(0);
-    expect(veryLow).toBeLessThanOrEqual(100);
-    expect(veryLow).toBeGreaterThanOrEqual(0);
+  it("clamps between 1 and 99", () => {
+    const veryHigh = percentileNormalize(1000, 50, 10, true);
+    const veryLow = percentileNormalize(-1000, 50, 10, true);
+    expect(veryHigh).toBeLessThanOrEqual(99);
+    expect(veryHigh).toBeGreaterThanOrEqual(1);
+    expect(veryLow).toBeLessThanOrEqual(99);
+    expect(veryLow).toBeGreaterThanOrEqual(1);
   });
 
-  it("produces asymptotic curve approaching 100 for very high scores", () => {
-    const score80 = sigmoidNormalize(80, 50, 10, true);
-    const score90 = sigmoidNormalize(90, 50, 10, true);
-    const score100 = sigmoidNormalize(100, 50, 10, true);
-    expect(score90).toBeGreaterThan(score80);
-    expect(score100).toBeGreaterThan(score90);
-    // Diminishing returns
-    const diff1 = score90 - score80;
-    const diff2 = score100 - score90;
-    expect(diff2).toBeLessThan(diff1);
+  it("maps 1 SD above mean to ~84th percentile", () => {
+    const result = percentileNormalize(60, 50, 10, true); // +1 SD
+    expect(result).toBeCloseTo(84.1, 0);
+  });
+
+  it("maps 2 SD above mean to ~97.7th percentile", () => {
+    const result = percentileNormalize(70, 50, 10, true); // +2 SD
+    expect(result).toBeCloseTo(97.7, 0);
+  });
+
+  it("maps 1 SD below mean to ~15.9th percentile", () => {
+    const result = percentileNormalize(40, 50, 10, true); // -1 SD
+    expect(result).toBeCloseTo(15.9, 0);
+  });
+
+  it("produces monotonically increasing scores within normal range", () => {
+    // Within ±2 SD of mean, scores are strictly increasing
+    const score40 = percentileNormalize(40, 50, 10, true); // -1 SD
+    const score50 = percentileNormalize(50, 50, 10, true); // mean
+    const score60 = percentileNormalize(60, 50, 10, true); // +1 SD
+    const score70 = percentileNormalize(70, 50, 10, true); // +2 SD
+    expect(score50).toBeGreaterThan(score40);
+    expect(score60).toBeGreaterThan(score50);
+    expect(score70).toBeGreaterThan(score60);
+    // Beyond ±3 SD, scores may hit the 1-99 clamp (ceiling/floor effect)
+    // This is correct behavior for a CDF-based percentile
+    const score80 = percentileNormalize(80, 50, 10, true); // +3 SD
+    expect(score80).toBeGreaterThanOrEqual(score70);
   });
 
   it("handles zero stdDev gracefully", () => {
-    // Should not throw or return NaN
-    const result = sigmoidNormalize(50, 50, 0, true);
+    const result = percentileNormalize(50, 50, 0, true);
+    expect(result).toBe(50);
     expect(Number.isFinite(result)).toBe(true);
+  });
+});
+
+describe("sigmoidNormalize (backward compat → delegates to percentileNormalize)", () => {
+  it("returns same as percentileNormalize", () => {
+    expect(sigmoidNormalize(60, 50, 10, true)).toBe(
+      percentileNormalize(60, 50, 10, true)
+    );
   });
 });
 

@@ -88,6 +88,7 @@ export default function FlankerGame({
   const timeoutTimerRef = useRef<ReturnType<typeof setTimeout>>(null!);
   const startTimeRef = useRef(Date.now());
   const respondedRef = useRef(false);
+  const lastResponseTimeRef = useRef(0);
 
   const startTrial = useCallback((index: number) => {
     respondedRef.current = false;
@@ -204,7 +205,10 @@ export default function FlankerGame({
   const handleDirection = useCallback(
     (dir: Direction) => {
       if (phase !== "stimulus" || respondedRef.current) return;
+      const now = performance.now();
+      if (now - lastResponseTimeRef.current < 200) return;
       respondedRef.current = true;
+      lastResponseTimeRef.current = now;
       clearTimeout(timeoutTimerRef.current);
       handleResponse(trialIndex, dir);
     },

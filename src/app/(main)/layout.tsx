@@ -21,10 +21,10 @@ interface NavItem {
 const NAV_ITEMS: NavItem[] = [
   { href: "/dashboard", labelKey: "nav.home", icon: Home },
   {
-    href: "/explore",
-    labelKey: "nav.play",
+    href: "/quiz",
+    labelKey: "nav.test",
     icon: Gamepad2,
-    activePrefixes: ["/play", "/explore", "/test"],
+    activePrefixes: ["/quiz", "/play", "/explore", "/test"],
   },
   {
     href: "/chat",

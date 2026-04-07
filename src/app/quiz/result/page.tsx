@@ -4,6 +4,8 @@ import { Suspense, useMemo, useEffect, useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import confetti from "canvas-confetti";
 import { trackEvent as track } from "@/lib/analytics";
+import { TIER_CONFIGS } from "@/lib/test-tiers";
+import { gameRegistry } from "@/games";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -62,17 +64,33 @@ function QuizResultContent() {
   const scores = parseScores(searchParams.get("s"));
   const talentScores = parseTalentScores(searchParams.get("scores"));
 
+  const tier = (searchParams.get("tier") ?? "quick") as "quick" | "standard" | "pro";
+
   const archetype = useMemo<Archetype | null>(() => {
     if (mode === "q" || mode === "scenario") {
-      // Questionnaire or scenario mode: use archetype from URL or compute from scores
       const aId = searchParams.get("archetype");
       if (aId) return getArchetype(aId) ?? null;
       if (talentScores) return scoreToArchetype(talentScores);
       return null;
     }
     if (!scores) return null;
-    return quickScoresToArchetype(scores[0], scores[1], scores[2]);
-  }, [scores, mode, searchParams, talentScores]);
+
+    // Quick test (3 scores) → use the 2-axis mapping
+    if (scores.length <= 3) {
+      return quickScoresToArchetype(scores[0], scores[1], scores[2]);
+    }
+
+    // Standard/Pro (7+ scores) → map scores to talent categories via tier config
+    const tierConfig = TIER_CONFIGS[tier as keyof typeof TIER_CONFIGS] ?? TIER_CONFIGS.quick;
+    const talentMap: Record<string, number> = {};
+    tierConfig.gameIds.forEach((gameId: string, i: number) => {
+      if (i < scores.length) {
+        const plugin = gameRegistry.get(gameId);
+        if (plugin) talentMap[plugin.primaryTalent] = scores[i];
+      }
+    });
+    return scoreToArchetype(talentMap as Record<string, number>);
+  }, [scores, mode, searchParams, talentScores, tier]);
 
   const nemesis = useMemo(
     () => (archetype ? getArchetype(archetype.nemesisId) : null),

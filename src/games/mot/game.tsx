@@ -332,13 +332,31 @@ export default function MOTGame({ onComplete, onAbort }: GameComponentProps) {
 
       {/* Game area */}
       <div
-        className="relative bg-slate-900 rounded-xl border border-slate-700 overflow-hidden"
+        className="relative bg-slate-900 rounded-xl border border-slate-700 overflow-hidden touch-none"
         style={{ width: CANVAS_W, height: CANVAS_H }}
+        onTouchStart={(e) => {
+          if (phase !== "select") return;
+          e.preventDefault();
+          const touch = e.touches[0];
+          const rect = e.currentTarget.getBoundingClientRect();
+          const tx = touch.clientX - rect.left;
+          const ty = touch.clientY - rect.top;
+          for (const c of circles) {
+            if (Math.hypot(c.x - tx, c.y - ty) <= CIRCLE_RADIUS) {
+              handleCircleClick(c.id);
+              return;
+            }
+          }
+        }}
       >
         {circles.map((c) => (
           <div
             key={c.id}
             onClick={() => handleCircleClick(c.id)}
+            onTouchStart={(e) => {
+              e.preventDefault();
+              handleCircleClick(c.id);
+            }}
             className={`absolute rounded-full border-2 transition-colors duration-150 ${getCircleColor(c)} ${
               phase === "select" ? "cursor-pointer hover:scale-110" : ""
             }`}
