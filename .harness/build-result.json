@@ -1,13 +1,14 @@
 {
-  "timestamp": "2026-04-06T18:25:00Z",
-  "buildPassed": true,
-  "commitSha": "24a8ec6",
+  "timestamp": "2026-04-08T14:50:00Z",
+  "buildSuccess": true,
+  "testsPass": true,
+  "testCount": 368,
   "pushed": true,
+  "commitHash": "bc42e45",
+  "commitMessage": "fix: show auth requirement upfront on quiz tier selection",
   "filesChanged": [
-    "src/app/(main)/recommend/page.tsx — DELETED",
-    "src/app/(main)/notifications/page.tsx — DELETED",
-    "src/app/robots.ts — removed /notifications from disallow"
-  ],
-  "linesRemoved": 358,
-  "linesAdded": 44
+    "src/app/quiz/page.tsx (auth UX: badge, spinner, removed silent Lock icon)",
+    "src/i18n/locales/en.json (added quiz.freeAccountRequired, quiz.loginToContinue)",
+    "src/i18n/locales/zh.json (added quiz.freeAccountRequired, quiz.loginToContinue)"
+  ]
 }
