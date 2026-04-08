@@ -36,6 +36,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://gametan.ai"),
   title: {
     default: "GameTan — Test Your Esports Talent",
     template: "%s | GameTan",
@@ -67,14 +68,21 @@ export const metadata: Metadata = {
     ],
     apple: "/icons/apple-touch-icon.png",
   },
+  alternates: {
+    canonical: "/",
+    languages: {
+      en: "/",
+      zh: "/",
+    },
+  },
   openGraph: {
     type: "website",
     siteName: "GameTan",
     title: "GameTan — Test Your Esports Talent",
     description:
       "3 mini-games measure your gaming talent against pro player benchmarks. Discover your esports talent tier.",
-    locale: "zh_CN",
-    alternateLocale: "en_US",
+    locale: "en_US",
+    alternateLocale: "zh_CN",
     images: [
       {
         url: "/api/home-card",
