@@ -27,12 +27,24 @@ describe("parseScores", () => {
     expect(parseScores("abc-def-ghi")).toBeNull();
   });
 
-  it("returns null for wrong number of parts (2 parts)", () => {
-    expect(parseScores("78-45")).toBeNull();
+  it("parses 2-part scores", () => {
+    expect(parseScores("78-45")).toEqual([78, 45]);
   });
 
-  it("returns null for wrong number of parts (4 parts)", () => {
-    expect(parseScores("78-45-62-99")).toBeNull();
+  it("parses 4-part scores", () => {
+    expect(parseScores("78-45-62-99")).toEqual([78, 45, 62, 99]);
+  });
+
+  it("parses 7-part standard tier scores", () => {
+    expect(parseScores("78-45-62-80-55-70-65")).toEqual([78, 45, 62, 80, 55, 70, 65]);
+  });
+
+  it("parses 17-part pro tier scores", () => {
+    const s = "78-45-62-80-55-70-65-90-42-68-73-81-59-77-66-83-71";
+    const result = parseScores(s);
+    expect(result).toHaveLength(17);
+    expect(result![0]).toBe(78);
+    expect(result![16]).toBe(71);
   });
 
   it("returns null for partially invalid input", () => {

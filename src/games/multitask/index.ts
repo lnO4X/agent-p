@@ -1,22 +1,22 @@
 import type { GamePlugin } from "@/types/game";
 import { multitaskScorer } from "./scorer";
-import MultitaskGame from "./game";
+import DualTaskGame from "./game";
 
 const plugin: GamePlugin = {
   id: "multitask",
-  name: "双重杂耍",
-  nameEn: "Dual Juggle",
-  description: "同时完成接球和数学题，测试你的多任务处理能力",
+  name: "双任务 注意力分配",
+  nameEn: "Dual-Task",
+  description: "同时追踪视觉目标和分类数字，测试注意力分配能力",
   primaryTalent: "multitasking",
   secondaryTalents: ["hand_eye_coord"],
   difficulty: "hard",
-  estimatedDurationSec: 35,
+  estimatedDurationSec: 50,
   instructions:
-    "左侧用方向键或A/D移动篮筐接住下落的球，右侧同时解答数学题并按Enter提交。持续30秒，尽量两边都兼顾！",
-  icon: "🤹",
+    "Track a moving dot and click when it turns red. Simultaneously classify numbers as odd (O) or even (E).",
+  icon: "🧩",
   scorer: multitaskScorer,
-  component: MultitaskGame,
-  mobileCompatible: false,
+  component: DualTaskGame,
+  mobileCompatible: true,
 };
 
 export default plugin;

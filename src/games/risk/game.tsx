@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback } from "react";
 import type { GameComponentProps } from "@/types/game";
 
-const TOTAL_ROUNDS = 10;
+const TOTAL_ROUNDS = 20;
 const SAFE_PUMPS = 2; // First 2 pumps per round guaranteed safe
 const POP_INCREMENT = 0.06; // After safe zone: 6%, 12%, 18%, ...
 

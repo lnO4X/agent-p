@@ -1,13 +1,14 @@
 import type { TalentCategory } from "@/types/talent";
 
 /**
- * Parse quick-test scores from URL: "78-45-62" → [78, 45, 62]
+ * Parse test scores from URL: "78-45-62" → [78, 45, 62]
+ * Accepts any number of scores (Quick=3, Standard=7, Pro=17).
  */
-export function parseScores(s: string | null): [number, number, number] | null {
+export function parseScores(s: string | null): number[] | null {
   if (!s) return null;
-  const parts = s.split("-").map(Number);
-  if (parts.length !== 3 || parts.some(isNaN)) return null;
-  return parts as [number, number, number];
+  const parts = s.split("-");
+  if (parts.length === 0 || parts.some((p) => p === "" || isNaN(Number(p)))) return null;
+  return parts.map(Number);
 }
 
 /**

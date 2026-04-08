@@ -3,7 +3,7 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
 
-const TOTAL_NOTES = 20;
+const TOTAL_NOTES = 30;
 const CANVAS_W = 400;
 const CANVAS_H = 500;
 const NOTE_RADIUS = 18;

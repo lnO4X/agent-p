@@ -97,6 +97,11 @@ export default function QuizPage() {
             router.push(`/login?next=/quiz&tier=${tier}`);
             return;
           }
+          // Payment gate: Pro tier requires premium subscription
+          if (config.requiresPayment && data.data?.tier !== "premium") {
+            router.push("/me/premium");
+            return;
+          }
           setGameIndex(0);
           setScores([]);
           track("quiz_start", { mode: tier });

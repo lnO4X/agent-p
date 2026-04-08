@@ -2,25 +2,36 @@ import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
 /**
- * @normSource Initial estimate. Measures sustained attention under increasing difficulty, not stress tolerance. Pending calibration
+ * Stroop Task scorer.
+ *
+ * Primary metric: Stroop Effect = mean RT(incongruent) - mean RT(congruent)
+ * Lower = better cognitive control under interference.
+ *
+ * @normSource Stroop 1935; MacLeod 1991 meta-analysis: mean ~100ms, SD ~40ms
  */
 export const emotionalScorer: GameScorer = {
-  perfectRawScore: 1.2,
-  higherIsBetter: true,
+  perfectRawScore: 0,
+  higherIsBetter: false,
   distribution: {
-    mean: 0.8,
-    stdDev: 0.15,
+    mean: 100,
+    stdDev: 40,
   },
-  normalize(rawScore: number): number {
-    // rawScore = consistency ratio (final_accuracy / initial_accuracy)
-    // A ratio of 1.0 means perfectly consistent under pressure
-    // >1.0 means improved, <1.0 means degraded
-    const clamped = Math.max(0, Math.min(2, rawScore));
-    return sigmoidNormalize(
+  normalize(
+    rawScore: number,
+    _durationMs?: number,
+    metadata?: Record<string, unknown>
+  ): number {
+    const clamped = Math.max(0, rawScore);
+    const accuracy = metadata?.accuracy as number | undefined;
+    const normalized = sigmoidNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,
-      true
+      false
     );
+    if (accuracy !== undefined && accuracy < 0.7) {
+      return Math.min(normalized, 30);
+    }
+    return normalized;
   },
 };

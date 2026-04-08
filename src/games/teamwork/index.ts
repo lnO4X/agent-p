@@ -1,21 +1,22 @@
 import type { GamePlugin } from "@/types/game";
 import { teamworkScorer } from "./scorer";
-import TeamworkGame from "./game";
+import PerspectiveGame from "./game";
 
 const plugin: GamePlugin = {
   id: "teamwork",
-  name: "协作模拟",
-  nameEn: "Coordination Sim",
-  description: "在团队场景中做出策略选择，测试你的协作倾向",
+  name: "视角判断",
+  nameEn: "Perspective Taking",
+  description: "从他人视角判断可见物品，测试协作认知能力",
   primaryTalent: "teamwork_tendency",
-  secondaryTalents: ["strategy_logic"],
+  secondaryTalents: ["spatial_awareness"],
   difficulty: "medium",
-  estimatedDurationSec: 60,
+  estimatedDurationSec: 50,
   instructions:
-    "每轮会展示一个工作场景和两个选项：独自完成（高风险高回报）或团队协作（稳定可靠）。AI队友会做出自己的选择，影响团队结果。共8轮，尽量最大化总分！",
-  icon: "🤝",
+    "A grid shows objects and a wall. A director stands on one side. Determine if the director can see the highlighted object.",
+  icon: "👁️‍🗨️",
   scorer: teamworkScorer,
-  component: TeamworkGame,
+  component: PerspectiveGame,
+  mobileCompatible: true,
 };
 
 export default plugin;

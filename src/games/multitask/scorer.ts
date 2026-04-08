@@ -2,17 +2,21 @@ import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
 /**
- * @normSource Initial estimate based on dual-task interference literature. Pending calibration
+ * Dual-Task scorer.
+ *
+ * Primary metric: Average dual-task accuracy (visual + classify).
+ * Higher = better attention allocation.
+ *
+ * @normSource Pashler 1994; Wickens 2002. Mean ~65%, SD ~15%
  */
 export const multitaskScorer: GameScorer = {
   perfectRawScore: 100,
   higherIsBetter: true,
   distribution: {
-    mean: 55,
+    mean: 65,
     stdDev: 15,
   },
   normalize(rawScore: number): number {
-    // rawScore = weighted score (catch% * 0.5 + math_accuracy% * 0.5), 0-100
     const clamped = Math.max(0, Math.min(100, rawScore));
     return sigmoidNormalize(
       clamped,

@@ -1,20 +1,21 @@
 import type { GamePlugin } from "@/types/game";
 import { strategyScorer } from "./scorer";
-import StrategyGame from "./game";
+import GoNoGoGame from "./game";
 
 const plugin: GamePlugin = {
   id: "strategy",
-  name: "塔防谜题",
-  nameEn: "Tower Defense Puzzle",
-  description: "在路径旁放置防御塔消灭敌人，测试策略思维",
+  name: "Go/No-Go 冲动控制",
+  nameEn: "Go/No-Go",
+  description: "在快速反应中控制冲动，测试执行功能与抑制控制",
   primaryTalent: "strategy_logic",
-  difficulty: "hard",
-  estimatedDurationSec: 45,
+  difficulty: "medium",
+  estimatedDurationSec: 50,
   instructions:
-    "敌人沿路径从左向右移动。每轮在路径旁放置3座防御塔，塔会自动攻击范围内的敌人。共2轮不同路径，消灭的敌人比例越高分数越高。",
-  icon: "🏰",
+    "Green circle = press space. Red circle = do NOT press. Most are green, building a 'press' habit. Can you resist the red ones?",
+  icon: "🚦",
   scorer: strategyScorer,
-  component: StrategyGame,
+  component: GoNoGoGame,
+  mobileCompatible: true,
 };
 
 export default plugin;

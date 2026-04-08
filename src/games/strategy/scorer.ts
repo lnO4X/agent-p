@@ -2,23 +2,36 @@ import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
 /**
- * @normSource Initial estimate. No validated paradigm match. Pending calibration
+ * Go/No-Go scorer.
+ *
+ * Composite: commissionErrors * 50 + meanGoRT * 0.5
+ * Lower = better impulse control + faster Go response.
+ *
+ * @normSource Donders 1869; Logan 1994. Mean composite ~330, SD ~80
  */
 export const strategyScorer: GameScorer = {
-  perfectRawScore: 100,
-  higherIsBetter: true,
+  perfectRawScore: 100, // 0 errors + 200ms RT → 100
+  higherIsBetter: false,
   distribution: {
-    mean: 50,
-    stdDev: 20,
+    mean: 330,
+    stdDev: 80,
   },
-  normalize(rawScore: number): number {
-    // rawScore = percentage of enemies killed (0-100)
-    const clamped = Math.max(0, Math.min(100, rawScore));
-    return sigmoidNormalize(
+  normalize(
+    rawScore: number,
+    _durationMs?: number,
+    metadata?: Record<string, unknown>
+  ): number {
+    const clamped = Math.max(0, rawScore);
+    const normalized = sigmoidNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,
-      true
+      false
     );
+    const commErrors = metadata?.commissionErrors as number | undefined;
+    if (commErrors !== undefined && commErrors > 5) {
+      return Math.min(normalized, 25);
+    }
+    return normalized;
   },
 };

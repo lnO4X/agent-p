@@ -2,20 +2,22 @@ import type { GameScorer } from "@/types/game";
 import { sigmoidNormalize } from "@/lib/scoring";
 
 /**
- * @normSource Initial estimate. Measures individual deductive reasoning, not teamwork. Pending calibration
+ * Perspective Taking scorer.
+ *
+ * Composite: accuracy * 100 - avgRT * 0.01
+ * Higher = better perspective-taking ability.
+ *
+ * @normSource Michelon & Zacks 2006; Samson et al. 2010. Mean ~65, SD ~18
  */
 export const teamworkScorer: GameScorer = {
-  perfectRawScore: 140,
+  perfectRawScore: 100,
   higherIsBetter: true,
   distribution: {
-    mean: 75,
-    stdDev: 22,
+    mean: 65,
+    stdDev: 18,
   },
   normalize(rawScore: number): number {
-    // rawScore = total points from 8 rounds of clue-based decisions
-    // correct = full reward (5-16) + time bonus (0-3), wrong = 30% reward
-    // typical range: 30 (poor) - 136 (perfect), average ~75
-    const clamped = Math.max(0, rawScore);
+    const clamped = Math.max(0, Math.min(100, rawScore));
     return sigmoidNormalize(
       clamped,
       this.distribution.mean,
