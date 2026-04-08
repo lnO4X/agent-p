@@ -130,29 +130,32 @@ export async function POST(request: NextRequest) {
           }
         }
 
-        // Get detailed description from RAWG (requires separate call)
-        if (!game.description && !updates.description) {
+        // Always fetch RAWG details if we need description, developer, or publisher
+        const needsDetail =
+          (!game.description && !updates.description) ||
+          (!game.developer && !updates.developer) ||
+          (!game.publisher && !updates.publisher);
+
+        if (needsDetail) {
           const details = await getRawgDetails(rawgMatch.id);
-          if (details?.description_raw) {
-            // Truncate to ~500 chars for DB storage
-            const desc = details.description_raw.slice(0, 500);
-            updates.descriptionEn = desc;
-            enrichedFields.push("descriptionEn");
-            if (!game.description) {
+          if (details) {
+            if (!game.description && !updates.description && details.description_raw) {
+              const desc = details.description_raw.slice(0, 500);
               updates.description = desc;
-              enrichedFields.push("description");
+              updates.descriptionEn = desc;
+              enrichedFields.push("description", "descriptionEn");
+            }
+            if (!game.developer && !updates.developer && details.developers?.length) {
+              updates.developer = details.developers[0].name;
+              enrichedFields.push("developer");
+            }
+            if (!game.publisher && !updates.publisher && details.publishers?.length) {
+              updates.publisher = details.publishers[0].name;
+              enrichedFields.push("publisher");
             }
           }
         }
 
-        if (!game.developer && !updates.developer && rawgMatch.developers?.length) {
-          updates.developer = rawgMatch.developers[0].name;
-          enrichedFields.push("developer");
-        }
-        if (!game.publisher && !updates.publisher && rawgMatch.publishers?.length) {
-          updates.publisher = rawgMatch.publishers[0].name;
-          enrichedFields.push("publisher");
-        }
         if (!game.rating && rawgMatch.metacritic) {
           updates.rating = Math.round(rawgMatch.metacritic / 10 * 10) / 10;
           enrichedFields.push("rating");
