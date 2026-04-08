@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
         sql`${games.coverUrl} LIKE '%capsule_231x87%'`,
       )
     )
+    .orderBy(games.updatedAt)
     .limit(BATCH_SIZE);
 
   if (needsEnrich.length === 0) {
@@ -67,7 +68,6 @@ export async function POST(request: NextRequest) {
 
   const results: { id: string; name: string; source: string; fields: string[] }[] = [];
   const errors: string[] = [];
-  const debug: { name: string; hasDesc: boolean; hasDev: boolean; steamId: number | null; rawgFound: boolean; detailFound: boolean; updateKeys: string[] }[] = [];
 
   for (const game of needsEnrich) {
     const updates: Record<string, unknown> = {};
@@ -163,21 +163,10 @@ export async function POST(request: NextRequest) {
         }
       }
 
-      // Debug tracking
-      debug.push({
-        name: game.name,
-        hasDesc: !!game.description,
-        hasDev: !!game.developer,
-        steamId: game.coverUrl ? extractSteamAppId(game.coverUrl) : null,
-        rawgFound: !!rawgMatch,
-        detailFound: enrichedFields.length > 0,
-        updateKeys: Object.keys(updates),
-      });
-
-      // Apply updates
-      if (Object.keys(updates).length > 0) {
-        updates.updatedAt = new Date();
-        await db.update(games).set(updates).where(eq(games.id, game.id));
+      // Apply updates (always touch updatedAt to avoid re-selecting unenrichable games)
+      updates.updatedAt = new Date();
+      await db.update(games).set(updates).where(eq(games.id, game.id));
+      if (enrichedFields.length > 0) {
         results.push({
           id: game.id,
           name: game.name,
@@ -197,7 +186,6 @@ export async function POST(request: NextRequest) {
       checked: needsEnrich.length,
       results,
       errors: errors.length > 0 ? errors : undefined,
-      debug: debug.slice(0, 5),
     },
   });
 }
