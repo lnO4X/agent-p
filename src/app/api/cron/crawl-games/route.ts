@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { games } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { crawlSteam, crawlTapTap } from "@/lib/crawlers";
+import { discoverRawgGames } from "@/lib/crawlers/rawg";
 import type { CrawledGame } from "@/lib/crawlers";
 
 /**
@@ -23,18 +24,26 @@ export async function POST(request: NextRequest) {
   const body = await request.json().catch(() => ({}));
   const source = (body.source as string) || "all";
   const limit = Math.min(Number(body.limit) || 20, 50);
+  const page = Number(body.page) || 1;
 
   const results: { source: string; added: number; skipped: number; errors: string[] }[] = [];
 
-  // Crawl Steam
-  if (source === "steam" || source === "all") {
+  // Crawl RAWG (free, preferred — searches competitive/esports games)
+  if (source === "rawg" || source === "all") {
+    const rawgResult = await discoverRawgGames(limit, page);
+    const { added, skipped } = await upsertGames(rawgResult.games);
+    results.push({ source: "rawg", added, skipped, errors: rawgResult.errors });
+  }
+
+  // Crawl Steam (Firecrawl — more expensive, use sparingly)
+  if (source === "steam") {
     const steamResult = await crawlSteam(limit);
     const { added, skipped } = await upsertGames(steamResult.games);
     results.push({ source: "steam", added, skipped, errors: steamResult.errors });
   }
 
   // Crawl TapTap
-  if (source === "taptap" || source === "all") {
+  if (source === "taptap") {
     const taptapResult = await crawlTapTap(limit);
     const { added, skipped } = await upsertGames(taptapResult.games);
     results.push({ source: "taptap", added, skipped, errors: taptapResult.errors });
