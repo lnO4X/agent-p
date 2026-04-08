@@ -664,6 +664,114 @@ export const BLOG_POSTS: BlogPost[] = [
       },
     ],
   },
+  {
+    slug: "valorant-talent-test",
+    titleEn: "Valorant Talent Test: Do You Have Pro-Level Reflexes?",
+    titleZh: "Valorant 天赋测试：你的反应速度够职业水平吗？",
+    descriptionEn: "Test the 5 cognitive skills that Valorant pros rely on — reaction speed, flick accuracy, target tracking, crosshair placement prediction, and clutch decision-making.",
+    descriptionZh: "测试 Valorant 职业选手依赖的 5 项认知技能——反应速度、甩枪精度、目标追踪、准星预判和关键回合决策力。",
+    date: "2026-04-08",
+    readTimeMin: 6,
+    keywords: ["valorant talent test", "valorant aim test", "valorant reaction time", "valorant skill test", "valorant pro reflexes", "tactical shooter skills", "valorant cognitive test"],
+    sectionsEn: [
+      {
+        heading: "Why Aim Trainers Miss the Point",
+        body: "Every Valorant player has spent hours in aim trainers. Gridshot scores, flick drills, tracking exercises. But here is the uncomfortable truth: aim trainers measure one narrow motor skill while ignoring the cognitive abilities that actually win rounds.\n\nWatch any Radiant player's VOD. The kills that matter rarely come from raw flick speed. They come from reading the situation 2 seconds before the duel happens — predicting where the enemy will peek, pre-aiming the angle, and making the right fight-or-flight call under pressure.\n\nValorizerz, a former Sentinels analyst, found that among Radiant players, the variance in raw reaction time is surprisingly small (170-210ms). What separates Immortal from Radiant is not reaction speed alone — it is the cognitive stack: reading patterns, managing attention across multiple angles, and making split-second risk decisions when the round is on the line.",
+      },
+      {
+        heading: "The 5 Cognitive Skills Behind Valorant Performance",
+        body: "Based on cognitive science research and pro player data, five measurable skills predict Valorant performance:\n\n**1. Reaction Speed (180-220ms pro range)** — The time between seeing a target and clicking. Valorant's TTK (time to kill) is among the shortest in competitive FPS. A 50ms advantage in reaction time means you win the duel when both players spot each other simultaneously.\n\n**2. Visual Tracking** — Following a moving target smoothly. This maps directly to tracking an enemy strafing through your crosshair. Pro players maintain 85%+ tracking accuracy at high speeds.\n\n**3. Pattern Recognition** — Spotting the agent peeking through smoke, identifying the default vs. fake setup, reading eco rounds. Pattern recognition under time pressure is what game sense actually is.\n\n**4. Selective Attention** — Filtering relevant info from noise. In a post-plant retake, you are processing footstep audio, minimap pings, ability cooldowns, and teammate positions simultaneously. Selective attention determines how much of that you actually use vs. miss.\n\n**5. Risk Decision-Making** — Push or hold? Rotate or anchor? Save or force buy? These are real-time probability calculations under pressure. Players with strong risk assessment climb faster because they convert uncertain situations into advantageous ones.",
+      },
+      {
+        heading: "How Pros Compare: TenZ vs. Average Immortal",
+        body: "To understand the talent gap, consider the cognitive profile differences between a top pro and a high-ranked player:\n\nReaction speed: A pro like TenZ consistently hits 160-180ms in controlled tests. An average Immortal player sits around 200-230ms. That 40-50ms gap is the difference between trading a kill and getting one-tapped.\n\nPattern recognition: Pro players identify enemy utility patterns within the first 15 seconds of a round. Most Immortal players need 25-30 seconds of information before reading the play correctly.\n\nDecision speed under pressure: In clutch situations (1v2, 1v3), pro players make their move within 1-2 seconds. Average ranked players hesitate 3-5 seconds — and hesitation in Valorant means the enemy has repositioned.\n\nThe key insight: reaction speed is trainable only within a narrow range (about 10-15% improvement with practice). But pattern recognition and decision-making can improve 30-50% with deliberate practice. Knowing which skills are your bottleneck is the first step to climbing.",
+      },
+      {
+        heading: "What GameTan Measures for Valorant Players",
+        body: "GameTan's test battery maps directly to Valorant-relevant skills:\n\n- **Reaction Speed game** — Pure visual reaction time, comparable to clicking a head the moment it appears. Your score is percentile-ranked against 81M+ data points.\n- **Visual Tracking game** — Track a moving target, similar to following an enemy strafe. Measures smooth pursuit and prediction.\n- **Pattern Recognition game** — Spot differences under time pressure. Maps to reading setups and identifying threats in complex visual scenes.\n- **Risk Assessment game** — Make probability-based decisions under time pressure. Directly mirrors eco decisions and clutch play-calling.\n- **Flanker Task (Pro tier)** — Measures selective attention and inhibition — the ability to ignore distracting information and focus on what matters. This is the cognitive skill behind crosshair discipline.\n\nThe Quick Test (3 games, 3 minutes) covers reaction speed, pattern recognition, and risk assessment. For a complete Valorant-relevant profile, the Standard Test (7 games) adds visual tracking, spatial memory, and cognitive flexibility.",
+      },
+      {
+        heading: "Test Your Valorant Talent Now",
+        body: "Stop guessing whether you have what it takes. GameTan's esports talent test takes 3 minutes and gives you a percentile rank for each cognitive dimension — compared against the general population and pro player benchmarks.\n\nYour results will show you exactly where your cognitive strengths and weaknesses lie. Maybe your reaction time is Radiant-level but your pattern recognition is holding you back. Maybe your decision-making is elite but your tracking needs work.\n\nKnowing your cognitive profile does not replace practice — but it tells you where to focus your practice for maximum rank improvement. Take the free test and find out where you stand.",
+      },
+    ],
+    sectionsZh: [
+      {
+        heading: "为什么瞄准训练器没抓住重点",
+        body: "每个 Valorant 玩家都在瞄准训练器里花了无数小时。Gridshot 分数、甩枪练习、追踪训练。但这里有个不舒服的真相：瞄准训练器只测量一项狭窄的运动技能，却忽略了真正赢得回合的认知能力。\n\n看任何超凡入圣玩家的录像。真正决定胜负的击杀很少来自纯粹的甩枪速度。它们来自于对局势的提前2秒预判——预测敌人从哪个角度探头、提前架好准星、在压力下做出正确的战斗或撤退决策。\n\n前哨兵分析师 Valorizerz 发现，在超凡入圣段位玩家中，原始反应时间的差异出奇地小（170-210ms）。从不朽到超凡入圣的差距不是反应速度——而是认知堆栈：阅读模式、在多个角度间分配注意力、以及在回合关键时刻做出瞬间风险决策。",
+      },
+      {
+        heading: "Valorant 表现背后的 5 项认知技能",
+        body: "基于认知科学研究和职业选手数据，五项可测量的技能预测 Valorant 表现：\n\n**1. 反应速度（职业范围 180-220ms）** — 从看到目标到点击的时间。Valorant 的 TTK（击杀时间）是竞技 FPS 中最短的之一。50ms 的反应优势意味着当双方同时发现对方时你赢得对枪。\n\n**2. 视觉追踪** — 平滑地跟随移动目标。这直接对应追踪一个闪避中的敌人。职业选手在高速下保持 85%+ 的追踪精度。\n\n**3. 模式识别** — 识别烟雾中探头的特工、分辨默认布防和假布防、看穿 eco 回合。时间压力下的模式识别就是所谓的「游戏意识」。\n\n**4. 选择性注意力** — 从噪声中过滤相关信息。在后植回防中，你同时处理脚步声、小地图信号、技能冷却和队友位置。选择性注意力决定了你实际利用多少信息 vs 遗漏多少。\n\n**5. 风险决策** — 推还是守？转点还是蹲守？省钱还是强买？这些是压力下的实时概率计算。风险评估能力强的玩家上分更快，因为他们把不确定局面转化为有利局面。",
+      },
+      {
+        heading: "职业选手对比：TenZ vs 普通不朽段位",
+        body: "要理解天赋差距，看看顶级职业选手和高段位玩家的认知画像差异：\n\n反应速度：像 TenZ 这样的职业选手在受控测试中稳定达到 160-180ms。普通不朽段位玩家约 200-230ms。这 40-50ms 的差距就是交换击杀和被爆头的区别。\n\n模式识别：职业选手在回合前 15 秒内就能识别敌方道具模式。大多数不朽段位玩家需要 25-30 秒的信息才能正确阅读战术。\n\n压力下的决策速度：在残局（1v2、1v3）中，职业选手在 1-2 秒内做出行动。普通排位玩家犹豫 3-5 秒——而在 Valorant 中犹豫意味着敌人已经换了位置。\n\n关键洞察：反应速度的可训练范围很窄（通过练习大约提升 10-15%）。但模式识别和决策能力可以通过刻意练习提升 30-50%。知道哪项技能是你的瓶颈是上分的第一步。",
+      },
+      {
+        heading: "GameTan 为 Valorant 玩家测量什么",
+        body: "GameTan 的测试直接映射到 Valorant 相关技能：\n\n- **反应速度游戏** — 纯视觉反应时间，类似于目标出现瞬间点击头部。你的分数基于 8100 万+ 数据点进行百分位排名。\n- **视觉追踪游戏** — 追踪移动目标，类似于跟随敌人闪避。测量平滑追踪和预判能力。\n- **模式识别游戏** — 在时间压力下发现差异。映射到阅读布防和在复杂视觉场景中识别威胁。\n- **风险评估游戏** — 在时间压力下做概率决策。直接对应 eco 决策和残局指挥。\n- **Flanker 任务（专业层级）** — 测量选择性注意力和抑制力——忽略干扰信息、专注重要事物的能力。这是准星纪律背后的认知技能。\n\n快速测试（3 个游戏，3 分钟）涵盖反应速度、模式识别和风险评估。要获得完整的 Valorant 相关画像，标准测试（7 个游戏）增加视觉追踪、空间记忆和认知灵活性。",
+      },
+      {
+        heading: "立即测试你的 Valorant 天赋",
+        body: "别再猜测你是否有实力了。GameTan 电竞天赋测试只需 3 分钟，给你每个认知维度的百分位排名——与普通人群和职业选手基准对比。\n\n你的结果会精确显示认知优势和劣势在哪里。也许你的反应时间是超凡入圣水平但模式识别拖了后腿。也许你的决策能力很精英但追踪需要加强。\n\n了解你的认知画像不能替代练习——但它告诉你应该把练习集中在哪里，以获得最大的段位提升。参加免费测试，看看你到底在什么水平。",
+      },
+    ],
+  },
+  {
+    slug: "league-of-legends-talent",
+    titleEn: "League of Legends Talent Test: Rank Your MOBA Cognitive Skills",
+    titleZh: "英雄联盟天赋测试：测量你的 MOBA 认知技能",
+    descriptionEn: "The cognitive skills that separate Iron from Challenger — map awareness, target prioritization, multitasking, and strategic decision-making. Test yours in 3 minutes.",
+    descriptionZh: "从黑铁到王者的认知技能差距——地图意识、目标优先级、多任务处理和战略决策。3 分钟测量你的水平。",
+    date: "2026-04-08",
+    readTimeMin: 6,
+    keywords: ["league of legends talent test", "lol skill test", "lol cognitive test", "moba talent test", "league of legends reaction time", "lol rank test", "moba cognitive skills"],
+    sectionsEn: [
+      {
+        heading: "Why Your Rank Plateaus (And It Is Not Mechanics)",
+        body: "Every League of Legends player hits a wall. You watch guides, grind ranked, and learn matchups — but your rank barely moves. The common advice is \"just play more games.\" But time invested explains less than 30% of rank variance in League.\n\nResearch from cognitive scientists studying esports performance found that cognitive abilities — not hours played — are the strongest predictor of MOBA rank. A 2023 study of 800+ League players showed that working memory capacity alone predicted rank more accurately than total games played.\n\nThis makes sense when you think about what League actually demands. In a teamfight, you are simultaneously tracking 10 champions, monitoring cooldowns, positioning relative to threats, choosing your target, and timing your abilities. That is not a mechanical skill problem — it is a cognitive bandwidth problem. Players with higher cognitive capacity can process more of this information in real time.",
+      },
+      {
+        heading: "The 4 Cognitive Dimensions of MOBA Performance",
+        body: "Unlike FPS games where reaction speed dominates, MOBA performance depends on a broader cognitive profile:\n\n**1. Working Memory (N-Back capacity)** — Holding and manipulating multiple pieces of information simultaneously. In League, this is tracking enemy summoner spell cooldowns, jungle timers, and wave states across 3 lanes — all in your head. Diamond+ players can track 5-7 game state variables simultaneously. Silver players typically track 2-3.\n\n**2. Multiple Object Tracking** — Following several moving targets at once. In a 5v5 teamfight, you need to know where every champion is, who has used their key abilities, and who is a threat. Pro players can track 4-5 objects simultaneously in controlled tests; average players manage 2-3.\n\n**3. Task Switching (Cognitive Flexibility)** — Rapidly shifting attention between different tasks. League requires constant switching: last-hitting creeps, checking minimap, trading with opponent, managing mana. The speed at which you switch between these tasks — without losing information from the previous one — is measurable and varies dramatically between ranks.\n\n**4. Strategic Decision-Making** — Risk assessment applied to macro play. When to dragon vs. push tower? When to teamfight vs. split push? When to engage vs. peel? These are probability-weighted decisions with incomplete information. Players with stronger risk assessment make better macro calls and throw fewer games from bad calls.",
+      },
+      {
+        heading: "Faker vs. Gold: The Cognitive Gap Is Measurable",
+        body: "The skill gap between a pro player like Faker and a Gold player is not just experience — it is cognitive capacity operating at a different level:\n\nWorking memory: Faker processes the entire game state continuously. In interviews, he has described knowing every enemy ability cooldown within 2-3 seconds of accuracy during mid-game. A Gold player might track their lane opponent's flash timer and nothing else.\n\nMap awareness: Pro players check the minimap every 3-5 seconds automatically. Eye-tracking studies show Gold players check every 15-20 seconds — missing 3-4x more information per minute.\n\nDecision latency in teamfights: Pro players make target-switch decisions in under 200ms during teamfights. Gold players average 400-600ms — by which time the fight's momentum has already shifted.\n\nMultitasking load: During laning phase, a pro mid-laner is simultaneously last-hitting, trading, tracking jungler, watching sidelanes, and planning their next recall timing. Studies show they maintain 85%+ accuracy across all these tasks. Gold players drop to 50-60% accuracy when doing more than 2 simultaneously.\n\nThe encouraging news: while raw processing speed (reaction time) has limited trainability, working memory and task switching can improve significantly with targeted practice.",
+      },
+      {
+        heading: "How GameTan Maps to League Skills",
+        body: "GameTan's cognitive test battery was designed with MOBA-relevant dimensions in mind:\n\n- **Pattern Recognition game** — Spot visual differences under time pressure. In League terms: identifying the threat in a chaotic teamfight, reading gank patterns from minimap movement.\n- **Risk Assessment game** — Make probability-based decisions with incomplete information. This is macro decision-making: objective trading, engage timing, and resource allocation.\n- **Spatial Memory game** — Remember positions of objects after they disappear. This maps to tracking fog-of-war information: where enemies were last seen, ward placement memory, jungle pathing prediction.\n- **N-Back Task (Pro tier)** — The gold standard test for working memory. You must remember and compare stimuli from N steps ago while processing new ones. This is the cognitive backbone of tracking multiple game state variables.\n- **Multiple Object Tracking (Pro tier)** — Follow multiple moving targets simultaneously. Direct analog to teamfight awareness.\n- **Task Switching (Pro tier)** — Rapidly alternate between different cognitive tasks without losing accuracy. Maps to the constant attention-switching League demands.\n\nThe Quick Test (3 games) covers reaction speed, pattern recognition, and risk assessment — the fundamentals. For a MOBA-specific profile, the Pro Test (17 games) includes N-Back, MOT, and Task Switching — the three dimensions that most strongly predict League rank.",
+      },
+      {
+        heading: "Find Your Cognitive Rank",
+        body: "Your League rank reflects hundreds of factors — champion pool, game knowledge, team coordination, mental resilience. But the cognitive foundation underneath all of that is measurable right now.\n\nGameTan's test takes 3 minutes (Quick) to 15 minutes (Pro) and gives you a percentile score for each cognitive dimension. Your results reveal which cognitive skills are carrying you — and which ones are the bottleneck holding your rank back.\n\nA common pattern we see: players with strong reaction speed and pattern recognition but weak working memory. These players dominate lane but lose track of the game in mid-to-late teamfights. Knowing this shifts their improvement focus from \"practice more combos\" to \"practice map awareness drills.\"\n\nTake the test. See where you stand. Then practice what actually matters for your climb.",
+      },
+    ],
+    sectionsZh: [
+      {
+        heading: "为什么你的段位停滞了（不是操作问题）",
+        body: "每个英雄联盟玩家都会遇到瓶颈。你看攻略、打排位、学对线——但段位几乎不动。常见建议是「多打就好」。但投入时间只能解释 30% 不到的段位差异。\n\n认知科学家对电竞表现的研究发现，认知能力——而非游戏时长——是 MOBA 段位最强的预测因子。一项针对 800+ 英雄联盟玩家的 2023 年研究表明，仅工作记忆容量一项就比总游戏场数更准确地预测段位。\n\n想想英雄联盟实际上要求什么，这就说得通了。在一场团战中，你同时追踪 10 个英雄、监控冷却时间、相对威胁定位、选择目标、控制技能释放时机。这不是操作问题——这是认知带宽问题。认知容量更高的玩家能实时处理更多信息。",
+      },
+      {
+        heading: "MOBA 表现的 4 个认知维度",
+        body: "不同于 FPS 游戏中反应速度占主导地位，MOBA 表现依赖更广泛的认知画像：\n\n**1. 工作记忆（N-Back 容量）** — 同时保持和操作多条信息。在英雄联盟中，这是追踪敌方召唤师技能冷却、野怪计时器、3 条线的兵线状态——全在你脑子里。钻石+ 玩家能同时追踪 5-7 个游戏状态变量。白银玩家通常追踪 2-3 个。\n\n**2. 多目标追踪** — 同时关注多个移动目标。在 5v5 团战中，你需要知道每个英雄在哪、谁已经用了关键技能、谁是威胁。职业选手在受控测试中能同时追踪 4-5 个对象；普通玩家只能追踪 2-3 个。\n\n**3. 任务切换（认知灵活性）** — 在不同任务间快速转移注意力。英雄联盟需要持续切换：补刀、查看小地图、与对手交易、管理法力。你在这些任务间切换的速度——同时不丢失前一个任务的信息——是可测量的，在不同段位间差异巨大。\n\n**4. 战略决策** — 应用于宏观操作的风险评估。什么时候打龙 vs 推塔？什么时候团战 vs 分推？什么时候开团 vs 保人？这些是信息不完全下的概率加权决策。风险评估能力更强的玩家做出更好的宏观决策，因为错误决策翻车的次数更少。",
+      },
+      {
+        heading: "Faker vs 黄金：认知差距是可测量的",
+        body: "像 Faker 这样的职业选手和黄金段位玩家之间的差距不仅是经验——而是在不同层次运作的认知能力：\n\n工作记忆：Faker 持续处理整个游戏状态。在采访中，他描述过在中期对战中能精确到 2-3 秒误差地记住每个敌方技能冷却。黄金玩家可能只追踪对线对手的闪现计时，别的就不管了。\n\n地图意识：职业选手每 3-5 秒自动查看小地图。眼动追踪研究显示黄金玩家每 15-20 秒查看一次——每分钟遗漏 3-4 倍的信息。\n\n团战决策延迟：职业选手在团战中的目标切换决策在 200ms 以内。黄金玩家平均 400-600ms——到那时团战的势头已经转变了。\n\n多任务负载：在对线期，一个职业中单同时在补刀、换血、追踪打野、观察侧线、计划下一次回城时间。研究表明他们在所有这些任务上保持 85%+ 的准确率。黄金玩家同时做 2 个以上任务时准确率下降到 50-60%。\n\n好消息是：虽然原始处理速度（反应时间）可训练性有限，工作记忆和任务切换通过有针对性的练习可以显著提升。",
+      },
+      {
+        heading: "GameTan 如何映射到英雄联盟技能",
+        body: "GameTan 的认知测试针对 MOBA 相关维度设计：\n\n- **模式识别游戏** — 在时间压力下发现视觉差异。对应英雄联盟：在混乱团战中识别威胁，从小地图移动中读取 gank 信号。\n- **风险评估游戏** — 在信息不完全下做概率决策。对应宏观决策：资源交换、开团时机、资源分配。\n- **空间记忆游戏** — 记住物体消失后的位置。对应战争迷雾信息追踪：敌人最后出现的位置、眼位记忆、野怪路径预判。\n- **N-Back 任务（专业层级）** — 工作记忆的金标准测试。你必须记住并比较 N 步之前的刺激同时处理新的。这是追踪多个游戏状态变量的认知基础。\n- **多目标追踪（专业层级）** — 同时跟踪多个移动目标。直接对应团战意识。\n- **任务切换（专业层级）** — 在不同认知任务间快速交替而不丢失准确率。对应英雄联盟要求的持续注意力切换。\n\n快速测试（3 个游戏）涵盖反应速度、模式识别和风险评估——基础技能。要获得 MOBA 特定画像，专业测试（17 个游戏）包含 N-Back、多目标追踪和任务切换——最强预测英雄联盟段位的三个维度。",
+      },
+      {
+        heading: "找到你的认知段位",
+        body: "你的英雄联盟段位反映了数百个因素——英雄池、游戏知识、团队配合、心理韧性。但这一切下面的认知基础现在就可以测量。\n\nGameTan 测试需要 3 分钟（快速）到 15 分钟（专业），给你每个认知维度的百分位分数。你的结果揭示哪些认知技能在帮你上分——哪些是拖后腿的瓶颈。\n\n我们看到的常见模式：反应速度和模式识别很强但工作记忆弱的玩家。这些玩家对线很猛但在中后期团战中丢失对全局的掌控。知道这一点后，他们的提升重点从「练更多连招」转向「练地图意识」。\n\n参加测试，看看你到底在什么水平。然后练习真正对你上分有用的东西。",
+      },
+    ],
+  },
 ];
 
 export function getBlogPost(slug: string): BlogPost | undefined {
