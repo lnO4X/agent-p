@@ -1,19 +1,20 @@
 {
-  "timestamp": "2026-04-08T23:15:00Z",
+  "timestamp": "2026-04-08T22:00:00Z",
   "phase": "OBSERVER",
   "health": 200,
   "traffic": {
-    "last24h": { "pageViews": 0, "uniqueSessions": 0 },
-    "last7d": { "pageViews": 91, "uniqueSessions": 12 },
-    "topPages": [],
+    "last24h": { "pageViews": 2, "uniqueSessions": 2 },
+    "last7d": { "pageViews": 93, "uniqueSessions": 12 },
+    "topPages": ["/admin/users(1)", "/chat/3_s4UnYwhLfAyxE6BvOMm(1)"],
     "topReferrers": ["gametan.ai/login(30)", "vercel.com(25)", "gametan.ai/explore(3)"],
     "dailyTrend": [
       { "day": "2026-04-05", "views": 37, "sessions": 7 },
-      { "day": "2026-04-06", "views": 54, "sessions": 7 }
+      { "day": "2026-04-06", "views": 54, "sessions": 7 },
+      { "day": "2026-04-07", "views": 2, "sessions": 2 }
     ],
     "funnel": {
-      "page_view": { "total": 91, "unique": 12 },
-      "quiz_complete": { "total": 4, "unique": 4 },
+      "page_view": { "total": 93, "unique": 12 },
+      "quiz_complete": { "total": 3, "unique": 3 },
       "quiz_start": { "total": 2, "unique": 2 },
       "share_click": { "total": 2, "unique": 2 }
     }
@@ -23,32 +24,36 @@
     "premiumUsers": 0,
     "registeredToday": 0,
     "totalSessions": 5,
-    "totalChallenges": 5,
     "totalPartners": 10
   },
   "lastEvalScore": 15,
   "lastEvalProductQuality": 4,
-  "consecutiveACTs": 11,
-  "dreamInputMilestones": [
+  "consecutiveACTs": 16,
+  "completedMilestones": [
+    "2026-04-08 MAJOR CLEANUP: 50+ files deleted, -8325 LOC (PK/embed/voice/leaderboard/play/test/results/profile/referral/email/NPS/Steam/LemonSqueezy)",
+    "2026-04-08 12 DB tables removed from schema (data preserved in prod)",
+    "2026-04-08 Standard tier no longer requires auth (requiresAuth: false)",
+    "2026-04-08 Creem payment CONFIRMED WORKING (checkout + webhook + user upgrade)",
+    "2026-04-08 Middleware cleaned (removed pk/embed/voice/leaderboard/profile paths)",
+    "2026-04-08 vercel.json updated (removed email-digest/referral-codes, added crawl-games weekly)",
     "Psychometric upgrade: CDF percentile, real norms (HB 81M+), 4 validated games",
-    "i18n: 671 keys, 8 languages, isZh->t() migration complete",
+    "i18n: 671 keys, isZh->t() migration complete",
     "Chat persistence + markdown rendering",
-    "Quiz 3-tier selection UI",
-    "Nav consolidated to /quiz",
-    "SEO: JSON-LD, FAQ, sitemap, blog SSG, internal links",
-    "Result page: variable-length scores, Pro upgrade CTA, dynamic OG cards"
+    "SEO complete: JSON-LD, FAQ, sitemap, blog SSG, internal links, metadataBase, canonical, hreflang",
+    "framer-motion LazyMotion optimization (~78kB -> ~5kB)"
   ],
-  "dreamInputBlockers": [
+  "currentBlockers": [
     "0 organic traffic — Google indexing pending",
-    "0 premium — Creem payment flow untested",
-    "New games untested in production",
-    "framer-motion static import (~78kB) on result page"
+    "0 premium users — Creem works but no one has paid yet",
+    "302 games missing descriptions and high-quality cover images"
   ],
-  "dreamInputQuestions": [
-    "SEO infrastructure is COMPLETE. Should harness stop SEO and focus elsewhere?",
-    "4 new validated games never playtested live. Should harness test them?",
-    "Traffic declining (54->33->0 views/day). Product or distribution problem?",
-    "0 premium users. Pricing wrong or upgrade CTA not visible enough?"
+  "residualProblems": [
+    "0 organic traffic — awaiting Google indexing (SEO work complete)",
+    "0 premium users — Creem payment needs human API key verification",
+    "13 original games still have estimated norms (only reaction/risk/memory have research norms)",
+    "No anti-cheat beyond min RT clamp on reaction speed",
+    "Traffic declining: needs external distribution (X, communities, SEO indexing)",
+    "Funnel anomaly: quiz_complete(3) > quiz_start(2) — historical data pre-dedup fix still in DB"
   ],
   "recentMajorChanges": [
     "PSYCHOMETRIC UPGRADE: scoring.ts sigmoid -> CDF percentile (real norms from Human Benchmark 81M+)",
@@ -60,27 +65,17 @@
     "i18n: 609 isZh migrated to t(), 288 new keys, 671 total",
     "COACH: game mechanics knowledge injected (real ms data, cognitive science terms)",
     "RESULT PAGE: supports variable-length scores (3/7/17), Pro upgrade CTA",
-    "Harness #11: auth badge on tier, OG dynamic image, analytics dedup"
-  ],
-  "residualProblems": [
-    "0 organic traffic — awaiting Google indexing (SEO work complete)",
-    "0 premium users — Creem payment needs human API key verification",
-    "framer-motion still static import on result page (~78kB, next/dynamic type incompatible)",
-    "New games (Flanker/N-Back/MOT/TaskSwitch) need live play-testing for bugs",
-    "13 original games still have estimated norms (only reaction/risk/memory have research norms)",
-    "No anti-cheat beyond min RT clamp on reaction speed",
-    "Traffic declining: needs external distribution (X, communities, SEO indexing)"
+    "Harness #12-16: LazyMotion, auth badge, OG dynamic, analytics dedup, game code review, explore meta, CTA timing, root layout SEO, blog content fix",
+    "SEO COMPLETE: internal links in FAQ, JSON-LD, sitemap, blog SSG, metadataBase, canonical, hreflang"
   ],
   "doNotRepeat": [
-    "Do NOT re-add /test as separate page (it redirects to /quiz now)",
-    "Do NOT change scoring.ts back to sigmoid (CDF percentile is intentional)",
-    "Do NOT modify tier game lists without checking test-tiers.ts + gameRegistry",
-    "Do NOT add fake pro benchmarks (all must cite research or say 'pending calibration')",
-    "Quiz page was refactored: page.tsx (server metadata) + result-client.tsx (client)",
-    "scoring.ts is CDF percentile now (not sigmoid)",
-    "/test redirects to /quiz (consolidated)",
-    "quiz result page is split: page.tsx (server) + result-client.tsx (client)",
-    "NAV_ITEMS already has /quiz as test tab",
-    "Coach already has GAME_KNOWLEDGE with cognitive science terms"
+    "50+ files ALREADY DELETED — PK/embed/voice/leaderboard/play/test/results/profile/referral/email/NPS/Steam/LemonSqueezy ALL GONE",
+    "12 DB tables ALREADY REMOVED from schema",
+    "Standard tier ALREADY free (requiresAuth: false) — do not add auth back",
+    "Creem ALREADY works — do not touch payment code",
+    "SEO ALREADY complete — stop doing SEO micro-optimizations",
+    "X account ALREADY unlocked — stop reminding about X 养号",
+    "scoring.ts is CDF percentile — do not revert to sigmoid",
+    "framer-motion already LazyMotion — do not revert"
   ]
 }

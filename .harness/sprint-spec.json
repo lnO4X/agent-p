@@ -1,12 +1,23 @@
 {
-  "timestamp": "2026-04-08T23:20:00Z",
+  "timestamp": "2026-04-08T22:10:00Z",
   "action": "ACT",
-  "spec": "Optimize framer-motion bundle: LazyMotion + m components on result page (~78kB → ~5kB)",
-  "rationale": "Result page is the viral sharing entry point (shared links land here). framer-motion static import adds ~78kB unnecessary JS. LazyMotion with domAnimation feature subset + m.* shorthand components reduces this to ~5kB. Mechanical replacement: motion.div → m.div, wrap in <LazyMotion features={domAnimation}>. No visual change, only bundle size improvement. This has been a residual problem for 5+ cycles.",
-  "files": ["src/app/quiz/result/result-client.tsx"],
-  "testCriteria": [
-    "GET /quiz/result?s=75-60-50 returns 200",
-    "No build errors",
-    "framer-motion/m import used instead of motion"
-  ]
+  "rationale": "Traffic at 2/day with 0 organic. All internal SEO done (375 sitemap URLs). 3 existing blog posts target generic keywords. Adding game-specific blog posts targets lower-competition long-tail keywords (valorant aim test, lol talent test) and creates shareable content for those communities. Last eval explicitly recommended this.",
+  "spec": {
+    "title": "Add 2 game-community-targeted blog posts (Valorant + League of Legends)",
+    "files": ["src/lib/blog-posts.ts"],
+    "changes": [
+      "Add blog post 'valorant-talent-test' targeting Valorant FPS community (EN+ZH)",
+      "Add blog post 'league-of-legends-talent' targeting MOBA community (EN+ZH)",
+      "Both posts reference GameTan test dimensions relevant to each game",
+      "Both posts include realistic pro player cognitive data",
+      "Both posts have CTA linking to /quiz"
+    ],
+    "testCriteria": [
+      "GET /blog/valorant-talent-test returns 200",
+      "GET /blog/league-of-legends-talent returns 200",
+      "GET /blog returns 200 and shows 5 posts total",
+      "GET /sitemap.xml includes both new blog URLs",
+      "npx next build succeeds"
+    ]
+  }
 }
