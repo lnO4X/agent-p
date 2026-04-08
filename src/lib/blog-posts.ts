@@ -38,7 +38,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "How GameTan Measures These Skills",
-        body: "GameTan uses 3 mini-games, each under 60 seconds, designed to isolate and measure one core skill:\n\n- **Reaction Speed Test**: 10 rounds measuring your response time to visual stimuli. Your average is compared against pro player benchmarks (pro average: 82/100).\n- **Pattern Recognition Test**: 15 rounds of increasingly difficult visual difference detection. Tests your ability to spot anomalies under time pressure.\n- **Risk Decision Test**: 10 rounds of a balloon-pump game that measures your risk tolerance and decision-making under uncertainty.\n\nScores are normalized using a sigmoid function to create a 0-100 scale, then compared against a database of pro player benchmarks.",
+        body: "GameTan offers three test tiers — Quick (3 games), Standard (7 games), and Pro (17 games) — each measuring core cognitive skills through real interactive challenges:\n\n- **Quick Test (3 min)**: Reaction Speed, Pattern Recognition, and Risk Decision — the three core dimensions that separate pro players from casuals.\n- **Standard Test (7 games)**: Adds visual tracking, spatial memory, selective attention, and cognitive flexibility for a fuller profile.\n- **Pro Test (17 games)**: Includes research-validated tasks like Flanker (inhibition), N-Back (working memory), Multiple Object Tracking, and Task Switching — the same paradigms used in cognitive science.\n\nScores are normalized using CDF percentile ranking against population norms from 81M+ data points (Human Benchmark). A score of 75 means you outperform 75% of the general population on that dimension.",
       },
       {
         heading: "What Your Score Actually Means",
@@ -60,7 +60,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "GameTan 如何测量这些技能",
-        body: "GameTan 使用 3 个小游戏，每个不到 60 秒，旨在隔离和测量一项核心技能：\n\n- **反应速度测试**：10 轮测量你对视觉刺激的响应时间。你的平均值与职业选手基准数据进行比较（职业平均：82/100）。\n- **模式识别测试**：15 轮逐渐增加难度的视觉差异检测。测试你在时间压力下发现异常的能力。\n- **风险决策测试**：10 轮气球打气游戏，测量你的风险承受能力和不确定性下的决策能力。\n\n分数使用 sigmoid 函数归一化为 0-100 分制，然后与职业选手基准数据库进行比较。",
+        body: "GameTan 提供三个测试层级 — 快速（3 个游戏）、标准（7 个游戏）和专业（17 个游戏）— 每个都通过真实的互动挑战测量核心认知技能：\n\n- **快速测试（3 分钟）**：反应速度、模式识别和风险决策 — 区分职业选手和普通玩家的三个核心维度。\n- **标准测试（7 个游戏）**：增加视觉追踪、空间记忆、选择性注意力和认知灵活性，获得更完整的画像。\n- **专业测试（17 个游戏）**：包含经过研究验证的任务，如 Flanker（抑制控制）、N-Back（工作记忆）、多目标追踪和任务切换 — 与认知科学中使用的范式相同。\n\n分数使用 CDF 百分位排名，基于 8100 万+ 数据点（Human Benchmark）的人口常模进行归一化。75 分意味着你在该维度上超过了 75% 的普通人群。",
       },
       {
         heading: "你的分数意味着什么",
@@ -412,7 +412,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "How GameTan Measures Your Cognitive Profile",
-        body: "GameTan isolates these three traits through 3 mini-games, each designed to measure one dimension independently:\n\n1. **Reaction Speed** — Pure visual stimulus response. No strategy, no pattern. Just how fast your neural pathways fire.\n\n2. **Pattern Recognition** — Sequences of increasing complexity. Tests both speed and accuracy of pattern detection.\n\n3. **Risk Decision** — Probabilistic choices under time pressure. Measures how your decision quality scales as time shrinks.\n\nYour scores are compared against pro player benchmarks from actual competitive data. The result isn't \"you're good\" or \"you're bad\" — it's a specific cognitive profile that maps to different game genres and roles.\n\nA player with exceptional pattern recognition but average reaction speed might thrive as a strategist in RTS games. Someone with elite reaction speed but developing pattern recognition might dominate in FPS but struggle in MOBA.",
+        body: "GameTan isolates these traits through a tiered test system — Quick (3 games), Standard (7), or Pro (17) — each measuring different dimensions:\n\n1. **Reaction Speed** — Pure visual stimulus response. No strategy, no pattern. Just how fast your neural pathways fire.\n\n2. **Pattern Recognition** — Sequences of increasing complexity. Tests both speed and accuracy of pattern detection.\n\n3. **Risk Decision** — Probabilistic choices under time pressure. Measures how your decision quality scales as time shrinks.\n\nThe Pro tier adds research-validated cognitive tasks (Flanker, N-Back, Multiple Object Tracking, Task Switching) for a 13-dimension profile. Your scores are ranked as percentiles against population norms from 81M+ data points. The result isn't \"you're good\" or \"you're bad\" — it's a specific cognitive profile that maps to different game genres and roles.\n\nA player with exceptional pattern recognition but average reaction speed might thrive as a strategist in RTS games. Someone with elite reaction speed but developing pattern recognition might dominate in FPS but struggle in MOBA.",
       },
     ],
     sectionsZh: [
@@ -430,7 +430,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "GameTan 如何测量你的认知画像",
-        body: "GameTan 通过 3 个小游戏隔离这三项特质，每个游戏独立测量一个维度：\n\n1. **反应速度** — 纯视觉刺激响应。没有策略，没有模式。只测量你的神经通路有多快。\n\n2. **模式识别** — 复杂度递增的序列。测试模式检测的速度和准确性。\n\n3. **风险决策** — 时间压力下的概率选择。测量你的决策质量如何随时间缩短而变化。\n\n你的分数会与来自实际竞技数据的职业选手基准进行对比。结果不是「你很好」或「你很差」——而是一个具体的认知画像，映射到不同的游戏类型和角色。\n\n一个模式识别出色但反应速度一般的玩家可能在 RTS 游戏中作为策略师大放异彩。一个反应速度顶尖但模式识别还在发展中的人可能在 FPS 中称霸但在 MOBA 中挣扎。",
+        body: "GameTan 通过分层测试系统隔离这些特质 — 快速（3 个游戏）、标准（7 个）或专业（17 个）— 每个层级测量不同维度：\n\n1. **反应速度** — 纯视觉刺激响应。没有策略，没有模式。只测量你的神经通路有多快。\n\n2. **模式识别** — 复杂度递增的序列。测试模式检测的速度和准确性。\n\n3. **风险决策** — 时间压力下的概率选择。测量你的决策质量如何随时间缩短而变化。\n\n专业层级增加了经过研究验证的认知任务（Flanker、N-Back、多目标追踪、任务切换），形成 13 维度画像。你的分数以百分位排名呈现，基于 8100 万+ 数据点的人口常模。结果不是「你很好」或「你很差」——而是一个具体的认知画像，映射到不同的游戏类型和角色。\n\n一个模式识别出色但反应速度一般的玩家可能在 RTS 游戏中作为策略师大放异彩。一个反应速度顶尖但模式识别还在发展中的人可能在 FPS 中称霸但在 MOBA 中挣扎。",
       },
     ],
   },
@@ -642,7 +642,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "Test Your Talent on Any Device",
-        body: "GameTan is designed to work on both mobile and desktop browsers. The three mini-games measure your core cognitive abilities — reaction speed, pattern recognition, and risk decision-making — regardless of your input device.\n\nYour scores are normalized to account for the slight input latency difference between touch screens and mice. A score of 75 on mobile represents the same cognitive ability as 75 on desktop.\n\nWhether you play PUBG Mobile on your phone, Valorant on PC, or both — take the 3-minute test to discover your esports talent profile. Many players are surprised to learn their cognitive strengths suggest a different game or role than the one they have been grinding.",
+        body: "GameTan is designed to work on both mobile and desktop browsers. The test tiers (Quick 3 / Standard 7 / Pro 17 games) measure your core cognitive abilities — reaction speed, pattern recognition, risk decision-making, and more — regardless of your input device.\n\nYour scores are normalized as percentile ranks against population norms, accounting for the slight input latency difference between touch screens and mice. A score of 75 on mobile represents the same cognitive ability as 75 on desktop.\n\nWhether you play PUBG Mobile on your phone, Valorant on PC, or both — take the Quick test (3 minutes) or go deeper with Standard or Pro tiers to discover your full esports talent profile. Many players are surprised to learn their cognitive strengths suggest a different game or role than the one they have been grinding.",
       },
     ],
     sectionsZh: [
@@ -660,7 +660,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "在任何设备上测试你的天赋",
-        body: "GameTan 设计为在手机和桌面浏览器上都能使用。三个迷你游戏衡量你的核心认知能力——反应速度、模式识别和风险决策——无论你使用什么输入设备。\n\n你的分数经过标准化处理，考虑了触摸屏和鼠标之间轻微的输入延迟差异。手机上的 75 分代表与桌面上 75 分相同的认知能力。\n\n无论你用手机玩 PUBG Mobile、用 PC 玩 Valorant，还是两者都玩——参加 3 分钟测试，发现你的电竞天赋画像。许多玩家惊讶地发现，他们的认知优势指向的游戏或角色与他们一直在肝的完全不同。",
+        body: "GameTan 设计为在手机和桌面浏览器上都能使用。测试层级（快速 3 / 标准 7 / 专业 17 个游戏）衡量你的核心认知能力——反应速度、模式识别、风险决策等——无论你使用什么输入设备。\n\n你的分数以百分位排名呈现，基于人口常模进行归一化，并考虑了触摸屏和鼠标之间轻微的输入延迟差异。手机上的 75 分代表与桌面上 75 分相同的认知能力。\n\n无论你用手机玩 PUBG Mobile、用 PC 玩 Valorant，还是两者都玩——参加快速测试（3 分钟），或深入体验标准或专业层级，发现你完整的电竞天赋画像。许多玩家惊讶地发现，他们的认知优势指向的游戏或角色与他们一直在肝的完全不同。",
       },
     ],
   },
