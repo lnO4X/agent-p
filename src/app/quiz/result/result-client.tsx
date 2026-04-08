@@ -775,7 +775,7 @@ function QuizResultContent() {
         <m.div
           initial={{ opacity: 0, y: 15 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4, delay: 1.5 }}
+          transition={{ duration: 0.4, delay: isSharedView ? 0.3 : 1.5 }}
         >
         {isSharedView ? (
         <Card className="border-accent/30 bg-accent/5 overflow-hidden">

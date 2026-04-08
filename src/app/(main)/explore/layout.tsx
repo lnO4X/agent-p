@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Browse 300+ Games",
+  title: "Browse 100+ Games",
   description:
-    "Explore 300+ games across all platforms. Find your perfect match based on your gamer archetype.",
+    "Explore 100+ games across all platforms. Find your perfect match based on your gamer archetype.",
   openGraph: {
-    title: "Browse 300+ Games | GameTan",
+    title: "Browse 100+ Games | GameTan",
     description:
-      "Explore 300+ games across all platforms. Find your perfect match.",
+      "Explore 100+ games across all platforms. Find your perfect match.",
   },
 };
 
