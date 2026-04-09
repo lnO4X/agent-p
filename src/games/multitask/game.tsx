@@ -56,6 +56,13 @@ export default function DualTaskGame({
   const dotYRef = useRef(50);
   const dotVxRef = useRef(2);
   const dotVyRef = useRef(1.5);
+  const pendingTimers = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  const scheduleTimer = useCallback((fn: () => void, ms: number) => {
+    const id = setTimeout(fn, ms);
+    pendingTimers.current.push(id);
+    return id;
+  }, []);
 
   const getTrialType = (idx: number): "single-visual" | "single-classify" | "dual" => {
     if (idx < 4) return "single-visual";
@@ -107,7 +114,7 @@ export default function DualTaskGame({
 
       if (hasClassify) {
         const delay = hasVisual ? 500 + Math.random() * 1000 : 300;
-        setTimeout(() => {
+        scheduleTimer(() => {
           setClassifyNum(randomNumber());
           setShowClassify(true);
         }, delay);
@@ -116,7 +123,7 @@ export default function DualTaskGame({
       setPhase(type);
 
       // Auto-end trial after duration
-      setTimeout(() => {
+      scheduleTimer(() => {
         clearInterval(animRef.current);
 
         const result: TrialResult = {
@@ -142,7 +149,7 @@ export default function DualTaskGame({
         }
         setPhase("feedback");
 
-        setTimeout(() => {
+        scheduleTimer(() => {
           const next = idx + 1;
           if (next >= TOTAL_TRIALS) {
             finishGame();
@@ -238,6 +245,7 @@ export default function DualTaskGame({
     return () => {
       clearTimeout(timerRef.current);
       clearInterval(animRef.current);
+      pendingTimers.current.forEach(clearTimeout);
     };
   }, []);
 
