@@ -4,37 +4,38 @@ import { useState, useEffect } from "react";
 import { useI18n } from "@/i18n/context";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
 import {
   Crown,
+  Target,
   Bot,
-  MessageSquare,
-  Brain,
-  Sparkles,
+  FileText,
+  TrendingUp,
+  Users,
+  BarChart3,
   Check,
   ArrowLeft,
   Loader2,
+  Zap,
 } from "lucide-react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-const FEATURES = [
-  { icon: Bot, labelKey: "premium.feature1" },
-  { icon: MessageSquare, labelKey: "premium.feature2" },
-  { icon: Brain, labelKey: "premium.feature3" },
-  { icon: Sparkles, labelKey: "premium.feature4" },
+const PRO_FEATURES = [
+  { icon: Target, labelKey: "premium.feature1" },
+  { icon: Bot, labelKey: "premium.feature2" },
+  { icon: FileText, labelKey: "premium.feature3" },
+  { icon: TrendingUp, labelKey: "premium.feature4" },
+  { icon: Users, labelKey: "premium.feature5" },
+  { icon: BarChart3, labelKey: "premium.feature6" },
 ];
 
 const PRODUCT = {
-  priceZh: "¥29.9",
-  priceEn: "$4.99",
+  priceUsd: "$3.99",
   days: 365,
 };
 
 export default function PremiumPage() {
-  const { t, locale } = useI18n();
-  const [code, setCode] = useState("");
-  const [activating, setActivating] = useState(false);
+  const { t } = useI18n();
   const [purchasing, setPurchasing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
@@ -42,11 +43,9 @@ export default function PremiumPage() {
   const [expiresAt, setExpiresAt] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check for successful purchase redirect
     const params = new URLSearchParams(window.location.search);
     if (params.get("purchased") === "1") {
       setSuccess(t("premium.purchaseActivated"));
-      // Clean URL
       window.history.replaceState({}, "", "/me/premium");
     }
 
@@ -58,39 +57,6 @@ export default function PremiumPage() {
       })
       .catch(() => {});
   }, [t]);
-
-  const handleActivate = async () => {
-    const trimmed = code.trim().toUpperCase();
-    if (!trimmed) return;
-
-    setActivating(true);
-    setError(null);
-    setSuccess(null);
-
-    try {
-      const res = await fetch("/api/billing/activate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code: trimmed }),
-      });
-      const json = await res.json();
-
-      if (json.success) {
-        setCurrentTier("premium");
-        setExpiresAt(json.data.expiresAt);
-        setSuccess(
-          t("premium.activateSuccess", { days: json.data.durationDays })
-        );
-        setCode("");
-      } else {
-        setError(json.error?.message || t("premium.activateFailed"));
-      }
-    } catch {
-      setError(t("premium.networkError"));
-    } finally {
-      setActivating(false);
-    }
-  };
 
   const handlePurchase = async () => {
     setPurchasing(true);
@@ -106,9 +72,8 @@ export default function PremiumPage() {
       const json = await res.json();
 
       if (json.success && json.data?.url) {
-        // Redirect to LemonSqueezy checkout
         window.location.href = json.data.url;
-        return; // Don't set purchasing=false — page is navigating away
+        return;
       } else {
         setError(json.error || t("premium.purchaseFailed"));
       }
@@ -132,8 +97,8 @@ export default function PremiumPage() {
 
       {/* Hero */}
       <div className="text-center space-y-3 py-4">
-        <div className="w-16 h-16 rounded-2xl bg-yellow-500/10 flex items-center justify-center mx-auto">
-          <Crown size={32} className="text-yellow-500" />
+        <div className="w-16 h-16 rounded-2xl bg-accent/10 flex items-center justify-center mx-auto">
+          <Crown size={32} className="text-accent" />
         </div>
         <h1 className="text-2xl font-bold">{t("premium.title")}</h1>
         <p className="text-sm text-muted-foreground">{t("premium.price")}</p>
@@ -143,7 +108,7 @@ export default function PremiumPage() {
       <Card
         className={cn(
           currentTier === "premium"
-            ? "border-yellow-500/30 bg-yellow-500/5"
+            ? "border-accent/30 bg-accent/5"
             : ""
         )}
       >
@@ -155,7 +120,7 @@ export default function PremiumPage() {
             <span
               className={cn(
                 "text-sm font-semibold",
-                currentTier === "premium" ? "text-yellow-600" : ""
+                currentTier === "premium" ? "text-accent" : ""
               )}
             >
               {currentTier === "premium"
@@ -173,15 +138,36 @@ export default function PremiumPage() {
         </CardContent>
       </Card>
 
-      {/* Features */}
+      {/* Free tier comparison */}
       <Card>
         <CardContent className="pt-4 pb-4 space-y-3">
-          {FEATURES.map((f) => {
+          <h3 className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+            {t("premium.freeIncluded")}
+          </h3>
+          <div className="space-y-2">
+            {["premium.freeFeature1", "premium.freeFeature2", "premium.freeFeature3"].map((key) => (
+              <div key={key} className="flex items-center gap-2 text-sm text-muted-foreground">
+                <Check size={14} className="text-muted-foreground/60 flex-shrink-0" />
+                <span>{t(key)}</span>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Pro features */}
+      <Card className="border-accent/20">
+        <CardContent className="pt-4 pb-4 space-y-3">
+          <h3 className="text-xs font-semibold text-accent uppercase tracking-wider flex items-center gap-1">
+            <Zap size={12} />
+            {t("premium.proUnlocks")}
+          </h3>
+          {PRO_FEATURES.map((f) => {
             const Icon = f.icon;
             return (
               <div key={f.labelKey} className="flex items-center gap-3">
-                <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
-                  <Icon size={16} className="text-primary" />
+                <div className="w-8 h-8 rounded-lg bg-accent/10 flex items-center justify-center flex-shrink-0">
+                  <Icon size={16} className="text-accent" />
                 </div>
                 <span className="text-sm">{t(f.labelKey)}</span>
               </div>
@@ -190,13 +176,11 @@ export default function PremiumPage() {
         </CardContent>
       </Card>
 
-      {/* Purchase */}
-      <Card className="border-yellow-500/30 bg-yellow-500/5">
+      {/* Purchase CTA */}
+      <Card className="border-accent/30 bg-accent/5">
         <CardContent className="pt-4 pb-4 space-y-4">
           <div className="text-center">
-            <div className="text-3xl font-bold">
-              {locale === "zh" ? PRODUCT.priceZh : PRODUCT.priceEn}
-            </div>
+            <div className="text-3xl font-bold">{PRODUCT.priceUsd}</div>
             <div className="text-sm text-muted-foreground mt-1">
               {t("premium.oneTimePurchase")}
             </div>
@@ -205,7 +189,7 @@ export default function PremiumPage() {
           <Button
             onClick={handlePurchase}
             disabled={purchasing || currentTier === "premium"}
-            className="w-full bg-yellow-500 hover:bg-yellow-600 text-white"
+            className="w-full bg-accent hover:bg-accent/90 text-white"
           >
             {purchasing ? (
               <Loader2 size={16} className="animate-spin mr-2" />
@@ -223,7 +207,7 @@ export default function PremiumPage() {
         </CardContent>
       </Card>
 
-      {/* Success / Error messages */}
+      {/* Success / Error */}
       {error && (
         <p className="text-xs text-red-500 text-center">{error}</p>
       )}
@@ -233,30 +217,6 @@ export default function PremiumPage() {
           {success}
         </p>
       )}
-
-      {/* Activation code input */}
-      <Card>
-        <CardContent className="pt-4 pb-4 space-y-3">
-          <h2 className="text-sm font-semibold">{t("premium.activate")}</h2>
-          <div className="flex gap-2">
-            <Input
-              value={code}
-              onChange={(e) => setCode(e.target.value.toUpperCase())}
-              placeholder={t("premium.activatePlaceholder")}
-              className="font-mono tracking-widest uppercase"
-              maxLength={12}
-            />
-            <Button
-              onClick={handleActivate}
-              disabled={activating || !code.trim()}
-              className="flex-shrink-0"
-              variant="outline"
-            >
-              {activating ? "..." : t("common.confirm")}
-            </Button>
-          </div>
-        </CardContent>
-      </Card>
     </div>
   );
 }
