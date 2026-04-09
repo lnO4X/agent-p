@@ -60,7 +60,6 @@ export async function POST(request: Request) {
           user_id: auth.sub,
           username: user[0].username,
         },
-        ...(user[0].email ? { customer_email: user[0].email } : {}),
       }),
     });
 

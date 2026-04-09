@@ -347,7 +347,7 @@ export default function MePage() {
               {t("dashboard.testDescription")}
             </p>
             <Link
-              href="/test"
+              href="/quiz"
               className="inline-block px-6 py-2 bg-primary text-primary-foreground rounded-xl text-sm font-medium pressable"
             >
               {t("dashboard.startTestBtn")}

@@ -375,7 +375,7 @@ function GrowthSection({ archetypeId, isZh, t }: { archetypeId: string; isZh: bo
             {t("archetype.wantExactScores")}
           </p>
           <Link
-            href="/test"
+            href="/quiz"
             className="inline-flex items-center gap-1 text-sm font-medium text-primary hover:underline"
           >
             {t("archetype.startFullTest")}
