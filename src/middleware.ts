@@ -18,6 +18,8 @@ const PUBLIC_PATHS = [
   "/api/auth/verify-email",
   "/api/feedback",
   "/api/analytics",
+  "/privacy",
+  "/terms",
 ];
 
 /** API paths that handle their own auth (Bearer token, cron secret, etc.) */

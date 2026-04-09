@@ -419,6 +419,14 @@ export default function Home() {
           <Link href="/blog" className="hover:text-foreground transition-colors">
             {t("home.footer.blog")}
           </Link>
+          <span>·</span>
+          <Link href="/privacy" className="hover:text-foreground transition-colors">
+            Privacy
+          </Link>
+          <span>·</span>
+          <Link href="/terms" className="hover:text-foreground transition-colors">
+            Terms
+          </Link>
         </div>
       </footer>
     </div>
