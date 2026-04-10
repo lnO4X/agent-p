@@ -1,0 +1,45 @@
+# GameTan — Esports Talent Detection
+
+> GameTan measures real gaming talent through cognitive science mini-games and compares results to pro player benchmarks.
+
+## What is GameTan?
+GameTan (gametan.ai) is an esports talent assessment platform. Players complete scientifically-designed mini-games that measure cognitive abilities essential for competitive gaming: reaction speed, pattern recognition, spatial awareness, memory, decision speed, rhythm sense, impulse control, visual attention, multitasking, emotional control, risk assessment, and teamwork cognition.
+
+## How it works
+1. Choose a tier: Quick (3 games, 3 min, free), Standard (7 games, 10 min, free), or Pro (17 games, 25 min, $3.99)
+2. Play cognitive mini-games based on published research (Stroop, Go/No-Go, UFOV, N-Back, Flanker, MOT, etc.)
+3. Get your talent profile with percentile scores and pro player comparison
+4. Discover your gamer archetype (16 types based on talent distribution)
+5. AI Coach analyzes your results and recommends games that match your strengths
+
+## Key pages
+- Homepage: https://gametan.ai/
+- Start quiz: https://gametan.ai/quiz
+- Browse games: https://gametan.ai/explore
+- Gamer archetypes: https://gametan.ai/archetype
+- Blog: https://gametan.ai/blog
+- Privacy: https://gametan.ai/privacy
+- Terms: https://gametan.ai/terms
+
+## Scientific basis
+Games are based on established cognitive science paradigms:
+- Reaction Speed: Simple/Choice RT (Bridges et al. 2020)
+- Stroop Task: Cognitive interference (Stroop 1935; MacLeod 1991)
+- Go/No-Go: Impulse control (Donders 1869; Logan 1994)
+- UFOV: Visual attention breadth (Ball et al. 1988)
+- N-Back: Working memory (Owen et al. 2005; Jaeggi et al. 2010)
+- Flanker: Interference control (Eriksen & Eriksen 1974)
+- MOT: Visual tracking (Pylyshyn & Storm 1988)
+- Task Switch: Cognitive flexibility (Monsell 2003)
+- BART: Risk assessment (Lejuez et al. 2002)
+- Dual-Task: Attention allocation (Pashler 1994)
+- Perspective Taking: Theory of mind (Michelon & Zacks 2006)
+- Corsi Block: Short-term memory (Kessels et al. 2000)
+- Mental Rotation: Spatial reasoning (Shepard & Metzler 1971)
+
+## Pricing
+- Free: Quick Test (3 games) and Standard Test (7 games)
+- Pro Assessment: $3.99 one-time, 365 days — full 17-dimension analysis, AI coaching, PDF report
+
+## Contact
+admin@gametan.ai

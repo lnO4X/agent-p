@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Terms of Service | GameTan",
+  title: "Terms of Service",
+  description: "GameTan terms of service — usage rules, Pro Assessment pricing, and account policies.",
+  alternates: { canonical: "/terms" },
 };
 
 export default function TermsPage() {
