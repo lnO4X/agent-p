@@ -6,7 +6,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { getAllArchetypes } from "@/lib/archetype";
 import { ArchetypeIcon } from "@/components/archetype-icon";
 import { useI18n } from "@/i18n/context";
-import { Zap, Brain, Target, Gamepad2, ChevronRight, Users, Sparkles, AlertTriangle, HelpCircle } from "lucide-react";
+import { Zap, Brain, Target, Gamepad2, ChevronRight, Users, Sparkles, AlertTriangle, HelpCircle, Crown } from "lucide-react";
 import { DistributionBar } from "@/components/distribution-bar";
 import { PRO_BENCHMARKS } from "@/lib/pro-benchmarks";
 
@@ -357,7 +357,36 @@ export default function Home() {
         </div>
       </section>
 
-      {/* ─── Section 5: Social Proof ─── */}
+      {/* ─── Section 5: Pricing ─── */}
+      <section className="px-5 py-10 md:py-16">
+        <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
+          <h2 className="text-xl md:text-2xl font-bold text-center font-[family-name:var(--font-outfit)]">
+            {isZh ? "简单定价" : "Simple Pricing"}
+          </h2>
+          <div className="grid gap-3 md:grid-cols-3">
+            <div className="rounded-2xl border border-border/50 bg-muted/30 p-4 space-y-2">
+              <div className="text-sm font-semibold">{isZh ? "快速测试" : "Quick Test"}</div>
+              <div className="text-2xl font-bold text-primary">{isZh ? "免费" : "Free"}</div>
+              <p className="text-xs text-muted-foreground">{isZh ? "3 个游戏 · 3 分钟 · 3 维度" : "3 games · 3 min · 3 dimensions"}</p>
+            </div>
+            <div className="rounded-2xl border border-primary/30 bg-primary/5 p-4 space-y-2">
+              <div className="text-sm font-semibold">{isZh ? "标准测试" : "Standard Test"}</div>
+              <div className="text-2xl font-bold text-primary">{isZh ? "免费" : "Free"}</div>
+              <p className="text-xs text-muted-foreground">{isZh ? "7 个游戏 · 10 分钟 · AI 教练" : "7 games · 10 min · AI Coach"}</p>
+            </div>
+            <div className="rounded-2xl border-2 border-accent/30 bg-accent/5 p-4 space-y-2">
+              <div className="flex items-center gap-2">
+                <Crown size={14} className="text-accent" />
+                <span className="text-sm font-semibold">{isZh ? "Pro 评估" : "Pro Assessment"}</span>
+              </div>
+              <div className="text-2xl font-bold text-accent">$3.99</div>
+              <p className="text-xs text-muted-foreground">{isZh ? "17 维度 · PDF 报告 · 365 天" : "17 dimensions · PDF report · 365 days"}</p>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ─── Section 6: Social Proof ─── */}
       <section className="px-5 py-10 md:py-16 bg-muted/30">
         <div className="max-w-lg md:max-w-2xl mx-auto space-y-6">
           <div className="flex items-center justify-center gap-6 text-center">

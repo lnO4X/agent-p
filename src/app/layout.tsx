@@ -169,6 +169,22 @@ export default function RootLayout({
                 timeRequired: "PT3M",
                 inLanguage: ["en", "zh"],
               },
+              {
+                "@context": "https://schema.org",
+                "@type": "Product",
+                name: "GameTan Pro Assessment",
+                description: "Full 17-dimension esports talent analysis with AI coaching, PDF report, pro player comparison, and 365 days access.",
+                url: "https://gametan.ai/quiz",
+                brand: { "@type": "Brand", name: "GameTan" },
+                offers: {
+                  "@type": "Offer",
+                  price: "3.99",
+                  priceCurrency: "USD",
+                  availability: "https://schema.org/InStock",
+                  url: "https://gametan.ai/quiz",
+                  validFrom: "2026-04-01",
+                },
+              },
             ]),
           }}
         />
