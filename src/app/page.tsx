@@ -66,6 +66,33 @@ export default function Home() {
         <>Absolutely. GameTan identifies your strongest and weakest talent dimensions. Use the <Link href="/chat" className={linkClass}>AI Coach</Link> to get personalized training advice based on your profile. Retake the <Link href="/quiz" className={linkClass}>test</Link> anytime to track improvement.</>
       ),
     },
+    {
+      q: t("home.faq.q6"),
+      a: t("home.faq.a6"),
+      aJsx: isZh ? (
+        <>GameTan 是目前最全面的电竞天赋测试，使用已发表的研究范式（Stroop、Flanker、N-Back、Go/No-Go、UFOV）测量 17 个认知维度。大多数测试只测反应时间，GameTan 测量完整认知画像。<Link href="/quiz" className={linkClass}>立即测试</Link>。</>
+      ) : (
+        <>GameTan is the most comprehensive esports talent test available, measuring 17 cognitive dimensions using published research paradigms (Stroop, Flanker, N-Back, Go/No-Go, UFOV). Most tests only measure reaction time. <Link href="/quiz" className={linkClass}>Take the full test</Link>.</>
+      ),
+    },
+    {
+      q: t("home.faq.q7"),
+      a: t("home.faq.a7"),
+      aJsx: isZh ? (
+        <>参加 GameTan <Link href="/quiz" className={linkClass}>Pro 评估</Link>获取天赋等级。职业精英（前 0.5%）和职业水平（前 5%）表示与职业选手相当的天赋。但天赋只是一部分——职业选手还需每天训练 8-12 小时。</>
+      ) : (
+        <>Take the GameTan <Link href="/quiz" className={linkClass}>Pro Assessment</Link> to get your talent tier. Pro Elite (top 0.5%) and Pro Level (top 5%) indicate talent comparable to pros. But talent is only part — pros also train 8-12 hours daily for years.</>
+      ),
+    },
+    {
+      q: t("home.faq.q8"),
+      a: t("home.faq.a8"),
+      aJsx: isZh ? (
+        <>职业选手在反应速度（180-220ms）、视觉追踪、工作记忆、冲动控制、认知灵活性和注意力分配方面表现卓越。GameTan 通过认知科学任务测量所有这些。<Link href="/about" className={linkClass}>了解科学基础</Link>。</>
+      ) : (
+        <>Pro players excel in reaction speed (180-220ms), visual tracking, working memory, impulse control, cognitive flexibility, and attention allocation. GameTan measures all of these through validated cognitive science tasks. <Link href="/about" className={linkClass}>Learn about the science</Link>.</>
+      ),
+    },
   ];
 
   const faqJsonLd = {
@@ -418,6 +445,10 @@ export default function Home() {
           <span>·</span>
           <Link href="/blog" className="hover:text-foreground transition-colors">
             {t("home.footer.blog")}
+          </Link>
+          <span>·</span>
+          <Link href="/about" className="hover:text-foreground transition-colors">
+            About
           </Link>
           <span>·</span>
           <Link href="/privacy" className="hover:text-foreground transition-colors">

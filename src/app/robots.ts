@@ -9,6 +9,14 @@ export default function robots(): MetadataRoute.Robots {
         allow: "/",
         disallow: ["/api/", "/dashboard", "/settings", "/me/", "/chat/"],
       },
+      // Explicitly allow AI search crawlers
+      { userAgent: "GPTBot", allow: "/" },
+      { userAgent: "ChatGPT-User", allow: "/" },
+      { userAgent: "Claude-Web", allow: "/" },
+      { userAgent: "Bingbot", allow: "/" },
+      { userAgent: "PerplexityBot", allow: "/" },
+      { userAgent: "Bytespider", allow: "/" },
+      { userAgent: "GoogleOther", allow: "/" },
     ],
     sitemap: `${baseUrl}/sitemap.xml`,
   };

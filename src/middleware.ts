@@ -20,6 +20,7 @@ const PUBLIC_PATHS = [
   "/api/analytics",
   "/privacy",
   "/terms",
+  "/about",
 ];
 
 /** API paths that handle their own auth (Bearer token, cron secret, etc.) */
