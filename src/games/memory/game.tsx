@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
+import { useI18n } from "@/i18n/context";
 
 const GRID_SIZE = 3;
 const INITIAL_SEQ_LENGTH = 3;
@@ -12,6 +13,8 @@ export default function MemoryGame({
   onComplete,
   onAbort,
 }: GameComponentProps) {
+  const { locale } = useI18n();
+  const isZh = locale === "zh";
   const [phase, setPhase] = useState<
     "idle" | "showing" | "input" | "success" | "fail" | "done"
   >("idle");
@@ -153,24 +156,25 @@ export default function MemoryGame({
   return (
     <div className="flex flex-col items-center gap-4 w-full">
       <div className="flex justify-between w-full max-w-xs text-sm text-muted-foreground px-2">
-        <span>关卡: {level}</span>
+        <span>{isZh ? "关卡:" : "Level:"} {level}</span>
         <span>
-          序列长度: {seqLength} | 最高: {maxAchieved}
+          {isZh ? "序列长度:" : "Sequence:"} {seqLength} | {isZh ? "最高:" : "Best:"} {maxAchieved}
         </span>
       </div>
 
       {phase === "idle" && (
         <div className="w-full max-w-sm bg-slate-800 rounded-xl p-8 text-center">
-          <p className="text-lg mb-4">记住闪烁顺序</p>
+          <p className="text-lg mb-4">{isZh ? "记住闪烁顺序" : "Remember the Sequence"}</p>
           <p className="text-sm text-muted-foreground mb-6">
-            方块会按顺序闪烁，请按相同顺序点击方块。序列从3开始，每成功一次加1。
-            直到记错为止，记录你达到的最长序列。
+            {isZh
+              ? "方块会按顺序闪烁，请按相同顺序点击方块。序列从3开始，每成功一次加1。直到记错为止，记录你达到的最长序列。"
+              : "Squares flash in sequence. Click them back in the same order. Starts at 3, grows by 1 each success. Game ends on first mistake."}
           </p>
           <button
             onClick={startGame}
             className="px-6 py-3 bg-primary hover:bg-primary/90 text-white rounded-lg font-bold text-lg transition-colors"
           >
-            开始测试
+            {isZh ? "开始测试" : "Start Test"}
           </button>
         </div>
       )}
@@ -179,18 +183,18 @@ export default function MemoryGame({
         <>
           <div className="text-sm text-center min-h-[1.5rem]">
             {phase === "showing" && (
-              <span className="text-yellow-400">请观察...</span>
+              <span className="text-yellow-400">{isZh ? "请观察..." : "Watch..."}</span>
             )}
             {phase === "input" && (
               <span className="text-blue-400">
-                请点击! ({playerInput.length}/{sequence.length})
+                {isZh ? "请点击!" : "Your turn!"} ({playerInput.length}/{sequence.length})
               </span>
             )}
             {phase === "success" && (
-              <span className="text-green-400">正确! 序列加长!</span>
+              <span className="text-green-400">{isZh ? "正确! 序列加长!" : "Correct! Sequence grows!"}</span>
             )}
             {phase === "fail" && (
-              <span className="text-red-400">错误! 游戏结束</span>
+              <span className="text-red-400">{isZh ? "错误! 游戏结束" : "Wrong! Game Over"}</span>
             )}
           </div>
 
@@ -228,9 +232,9 @@ export default function MemoryGame({
 
       {phase === "done" && (
         <div className="w-full max-w-sm bg-slate-800 rounded-xl p-8 text-center">
-          <p className="text-2xl font-bold mb-2">测试完成!</p>
+          <p className="text-2xl font-bold mb-2">{isZh ? "测试完成!" : "Test Complete!"}</p>
           <p className="text-4xl font-bold text-primary">{maxAchieved}</p>
-          <p className="text-sm text-muted-foreground mt-2">最长序列长度</p>
+          <p className="text-sm text-muted-foreground mt-2">{isZh ? "最长序列长度" : "Longest Sequence"}</p>
         </div>
       )}
 
@@ -238,7 +242,7 @@ export default function MemoryGame({
         onClick={onAbort}
         className="text-sm text-muted-foreground hover:text-foreground"
       >
-        放弃测试
+        {isZh ? "放弃测试" : "Abort Test"}
       </button>
     </div>
   );

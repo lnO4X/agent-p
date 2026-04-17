@@ -24,7 +24,7 @@ const NAV_ITEMS: NavItem[] = [
     href: "/quiz",
     labelKey: "nav.test",
     icon: Gamepad2,
-    activePrefixes: ["/quiz", "/play", "/explore", "/test"],
+    activePrefixes: ["/quiz", "/play", "/explore"],
   },
   {
     href: "/chat",

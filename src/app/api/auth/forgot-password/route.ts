@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { users, verificationTokens } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { checkRateLimit } from "@/lib/redis";
+import { logger } from "@/lib/logger";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
 
@@ -119,13 +120,13 @@ export async function POST(request: NextRequest) {
           html: resetPasswordHtml({ username: user.username, resetUrl }),
         }),
       });
-    } else {
+    } else if (process.env.NODE_ENV !== "production") {
       console.log(`[forgot-password] No RESEND_API_KEY, reset URL: ${resetUrl}`);
     }
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Forgot password error:", error);
+    logger.error("auth.forgot-password", "Forgot password failed", error);
     return NextResponse.json(
       {
         success: false,

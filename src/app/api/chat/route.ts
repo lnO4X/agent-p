@@ -13,6 +13,7 @@ import { partners, users, chatMessages } from "@/db/schema";
 import { eq, and, sql } from "drizzle-orm";
 import { chatMessageSchema } from "@/lib/validations";
 import { checkRateLimit } from "@/lib/redis";
+import { logger } from "@/lib/logger";
 
 // Allow longer streaming responses (up to 60 seconds)
 export const maxDuration = 60;
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
       recentMessages as Parameters<typeof convertToModelMessages>[0]
     );
   } catch (err) {
-    console.error("[chat] convertToModelMessages error:", err);
+    logger.error("chat", "convertToModelMessages error", err);
     return Response.json(
       { success: false, error: "Failed to process messages" },
       { status: 400 }
@@ -197,7 +198,7 @@ export async function POST(request: NextRequest) {
     ]),
     onError: (event) => {
       if (event.error instanceof Error && event.error.name === "AbortError") return;
-      console.error("[chat] Stream error:", event.error);
+      logger.error("chat", "Stream error", event.error);
     },
   });
 
@@ -251,7 +252,7 @@ export async function POST(request: NextRequest) {
           .where(sql`id = ANY(${oldIds})`);
       }
     } catch (err) {
-      console.error("[chat] Failed to persist messages:", err);
+      logger.error("chat", "Failed to persist messages", err);
     }
   };
 

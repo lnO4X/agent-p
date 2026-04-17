@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { games } from "@/db/schema";
 import { SEED_GAMES } from "@/lib/seed-games";
 import { sql } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/admin/seed
@@ -14,15 +15,12 @@ import { sql } from "drizzle-orm";
  *   ?force=true  — delete all seed-sourced games first, then re-insert
  */
 export async function POST(request: Request) {
-  // Auth check
+  // Auth check — always enforce CRON_SECRET regardless of environment
   const authHeader = request.headers.get("authorization");
   const cronSecret = process.env.CRON_SECRET;
-  const isDev = process.env.NODE_ENV === "development";
 
-  if (!isDev) {
-    if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
+  if (!cronSecret || authHeader !== `Bearer ${cronSecret}`) {
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   try {
@@ -102,9 +100,9 @@ export async function POST(request: Request) {
       totalGamesInDb: Number(countResult[0]?.count ?? 0),
     });
   } catch (error) {
-    console.error("Seed error:", error);
+    logger.error("admin.seed", "Seed failed", error);
     return NextResponse.json(
-      { error: "Seed failed", details: String(error) },
+      { success: false, error: "Seed failed", details: String(error) },
       { status: 500 }
     );
   }

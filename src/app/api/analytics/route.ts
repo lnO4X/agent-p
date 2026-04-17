@@ -5,6 +5,7 @@ import { analyticsEvents, users } from "@/db/schema";
 import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { randomUUID } from "crypto";
+import { logger } from "@/lib/logger";
 
 const eventSchema = z.object({
   event: z.string().min(1).max(50),
@@ -20,10 +21,10 @@ const eventSchema = z.object({
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json().catch(() => null);
-    if (!body) return NextResponse.json({ ok: true });
+    if (!body) return NextResponse.json({ success: true });
 
     const parsed = eventSchema.safeParse(body);
-    if (!parsed.success) return NextResponse.json({ ok: true });
+    if (!parsed.success) return NextResponse.json({ success: true });
 
     const auth = await getAuthFromCookie().catch(() => null);
     const ua = request.headers.get("user-agent") || undefined;
@@ -39,11 +40,11 @@ export async function POST(request: NextRequest) {
         referrer: parsed.data.referrer ?? null,
         userAgent: ua,
       })
-      .catch((err) => console.error("[analytics] DB error:", err));
+      .catch((err) => logger.error("analytics", "DB error", err));
 
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ success: true });
   } catch {
-    return NextResponse.json({ ok: true });
+    return NextResponse.json({ success: true });
   }
 }
 
@@ -85,7 +86,7 @@ export async function GET() {
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    console.error("[api/analytics] GET error:", msg);
+    logger.error("analytics", "GET error", error);
     return NextResponse.json(
       { success: false, error: msg },
       { status: 500 }

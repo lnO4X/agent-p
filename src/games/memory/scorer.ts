@@ -1,5 +1,5 @@
 import type { GameScorer } from "@/types/game";
-import { sigmoidNormalize } from "@/lib/scoring";
+import { percentileNormalize } from "@/lib/scoring";
 
 /**
  * @normSource Corsi block-tapping span, Kessels et al. 2000 meta-analysis: mean=6.0, SD=1.5-2.0
@@ -14,7 +14,7 @@ export const memoryScorer: GameScorer = {
   normalize(rawScore: number): number {
     // rawScore = max sequence length achieved
     const clamped = Math.max(0, rawScore);
-    return sigmoidNormalize(
+    return percentileNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,

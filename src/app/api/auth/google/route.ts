@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { logger } from "@/lib/logger";
 
 export async function GET(request: NextRequest) {
   try {
@@ -48,7 +49,7 @@ export async function GET(request: NextRequest) {
     });
     return response;
   } catch (error) {
-    console.error("Google OAuth init error:", error);
+    logger.error("auth.google", "Google OAuth init failed", error);
     return NextResponse.json(
       {
         success: false,

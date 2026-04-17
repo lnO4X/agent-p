@@ -88,17 +88,14 @@ export async function verifyCaptcha(
   token: string,
   answer: string
 ): Promise<boolean> {
-  const rows = await db
-    .select()
-    .from(captchaSessions)
+  // Atomic delete-then-check: delete first to prevent concurrent reuse
+  const deleted = await db
+    .delete(captchaSessions)
     .where(eq(captchaSessions.id, token))
-    .limit(1);
+    .returning();
 
-  // Always delete the captcha (one-time use)
-  await db.delete(captchaSessions).where(eq(captchaSessions.id, token));
-
-  if (rows.length === 0) return false;
-  const session = rows[0];
+  if (deleted.length === 0) return false;
+  const session = deleted[0];
 
   if (new Date() > session.expiresAt) return false;
   return session.answer === answer.trim();

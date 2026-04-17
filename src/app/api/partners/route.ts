@@ -53,7 +53,7 @@ async function ensureCoach(userId: string) {
 export async function GET() {
   const auth = await getAuthFromCookie();
   if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   // Ensure Talent Coach coach exists
@@ -99,14 +99,14 @@ export async function GET() {
 export async function POST(request: Request) {
   const auth = await getAuthFromCookie();
   if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await request.json();
   const parsed = createPartnerSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.flatten() },
+      { success: false, error: parsed.error.flatten() },
       { status: 400 }
     );
   }

@@ -12,7 +12,7 @@ export async function GET(request: NextRequest) {
     request.headers.get("authorization")
   );
   if (!auth) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const today = new Date();

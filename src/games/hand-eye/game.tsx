@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
+import { useI18n } from "@/i18n/context";
 
 const GAME_DURATION = 20_000; // 20 seconds
 const TARGET_RADIUS = 30;
@@ -20,6 +21,8 @@ export default function HandEyeGame({
   onComplete,
   onAbort,
 }: GameComponentProps) {
+  const { locale } = useI18n();
+  const isZh = locale === "zh";
   const [phase, setPhase] = useState<"idle" | "playing" | "done">("idle");
   const [timeLeft, setTimeLeft] = useState(GAME_DURATION / 1000);
   const [trackPct, setTrackPct] = useState(0);
@@ -187,24 +190,26 @@ export default function HandEyeGame({
   return (
     <div className="flex flex-col items-center gap-4 w-full">
       <div className="flex justify-between w-full max-w-[600px] text-sm text-muted-foreground px-2">
-        <span>追踪率: {trackPct}%</span>
-        {phase === "playing" && <span>剩余: {timeLeft}s</span>}
+        <span>{isZh ? "追踪率:" : "Tracking:"} {trackPct}%</span>
+        {phase === "playing" && <span>{isZh ? "剩余:" : "Remaining:"} {timeLeft}s</span>}
       </div>
 
       {phase === "idle" && (
         <div className="w-full max-w-[600px] flex flex-col items-center gap-4">
           <div className="bg-slate-800 rounded-xl p-8 text-center">
             <p className="text-lg mb-4">
-              保持鼠标/光标在移动的红色目标圆上
+              {isZh ? "保持鼠标/光标在移动的红色目标圆上" : "Keep your cursor on the moving red target"}
             </p>
             <p className="text-sm text-muted-foreground mb-6">
-              目标会在画布内随机移动，持续20秒。追踪率越高分数越高。
+              {isZh
+                ? "目标会在画布内随机移动，持续20秒。追踪率越高分数越高。"
+                : "The target moves randomly for 20 seconds. Higher tracking = higher score."}
             </p>
             <button
               onClick={startGame}
               className="px-6 py-3 bg-green-600 hover:bg-green-500 text-white rounded-lg font-bold text-lg transition-colors"
             >
-              开始测试
+              {isZh ? "开始测试" : "Start Test"}
             </button>
           </div>
         </div>
@@ -223,9 +228,9 @@ export default function HandEyeGame({
 
       {phase === "done" && (
         <div className="w-full max-w-[600px] bg-slate-800 rounded-xl p-8 text-center">
-          <p className="text-2xl font-bold mb-2">测试完成!</p>
+          <p className="text-2xl font-bold mb-2">{isZh ? "测试完成!" : "Test Complete!"}</p>
           <p className="text-4xl font-bold text-green-400">{trackPct}%</p>
-          <p className="text-sm text-muted-foreground mt-2">追踪准确率</p>
+          <p className="text-sm text-muted-foreground mt-2">{isZh ? "追踪准确率" : "Tracking Accuracy"}</p>
         </div>
       )}
 
@@ -233,7 +238,7 @@ export default function HandEyeGame({
         onClick={onAbort}
         className="text-sm text-muted-foreground hover:text-foreground"
       >
-        放弃测试
+        {isZh ? "放弃测试" : "Abort Test"}
       </button>
     </div>
   );

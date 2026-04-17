@@ -3,6 +3,14 @@ import { requireAdminOrCronSecret } from "@/lib/admin";
 import { db } from "@/db";
 import { games } from "@/db/schema";
 import { eq, sql, ilike, or, desc, asc } from "drizzle-orm";
+import { z } from "zod";
+
+const patchGameSchema = z.object({
+  gameId: z.string().min(1),
+  status: z.enum(["active", "hidden", "pending"]).optional(),
+  popularity: z.number().optional(),
+  rating: z.number().optional(),
+});
 
 /**
  * GET /api/admin/games — List games with search, filter, pagination
@@ -14,7 +22,7 @@ export async function GET(request: NextRequest) {
     request.headers.get("authorization")
   );
   if (!auth) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const { searchParams } = request.nextUrl;
@@ -103,37 +111,37 @@ export async function PATCH(request: NextRequest) {
     request.headers.get("authorization")
   );
   if (!auth) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: {
-    gameId?: string;
-    status?: string;
-    popularity?: number;
-    rating?: number;
-  };
+  let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+    return Response.json({ success: false, error: "Invalid JSON" }, { status: 400 });
   }
 
-  if (!body.gameId) {
-    return Response.json({ error: "gameId required" }, { status: 400 });
+  const parsed = patchGameSchema.safeParse(body);
+  if (!parsed.success) {
+    return Response.json(
+      { success: false, error: "Invalid request: " + JSON.stringify(parsed.error.flatten()) },
+      { status: 400 }
+    );
   }
+  const validated = parsed.data;
 
   const updates: Record<string, unknown> = { updatedAt: new Date() };
-  if (body.status && ["active", "hidden", "pending"].includes(body.status)) {
-    updates.status = body.status;
+  if (validated.status) {
+    updates.status = validated.status;
   }
-  if (typeof body.popularity === "number") {
-    updates.popularity = body.popularity;
+  if (typeof validated.popularity === "number") {
+    updates.popularity = validated.popularity;
   }
-  if (typeof body.rating === "number") {
-    updates.rating = body.rating;
+  if (typeof validated.rating === "number") {
+    updates.rating = validated.rating;
   }
 
-  await db.update(games).set(updates).where(eq(games.id, body.gameId));
+  await db.update(games).set(updates).where(eq(games.id, validated.gameId));
 
   return Response.json({ success: true });
 }

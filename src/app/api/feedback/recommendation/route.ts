@@ -18,13 +18,13 @@ const feedbackSchema = z.object({
 export async function POST(request: Request) {
   const auth = await getAuthFromCookie();
   if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await request.json();
   const parsed = feedbackSchema.safeParse(body);
   if (!parsed.success) {
-    return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
+    return NextResponse.json({ success: false, error: parsed.error.flatten() }, { status: 400 });
   }
 
   const { gameId, signal } = parsed.data;
@@ -52,7 +52,7 @@ export async function POST(request: Request) {
 export async function GET() {
   const auth = await getAuthFromCookie();
   if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const feedback = await db

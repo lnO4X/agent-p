@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { changePasswordSchema } from "@/lib/validations";
 import { getAuthFromCookie } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/redis";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -97,7 +98,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Change password error:", error);
+    logger.error("auth.change-password", "Change password failed", error);
     return NextResponse.json(
       {
         success: false,

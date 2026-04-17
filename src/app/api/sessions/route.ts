@@ -6,6 +6,7 @@ import { eq, desc, and, sql } from "drizzle-orm";
 import { getAuthFromCookie } from "@/lib/auth";
 
 import { getTestLimit } from "@/lib/test-tiers";
+import { logger } from "@/lib/logger";
 
 const isDev = process.env.NODE_ENV === "development";
 const noLimit = isDev || process.env.DISABLE_TEST_LIMIT === "true";
@@ -90,7 +91,7 @@ export async function POST() {
 
     return NextResponse.json({ success: true, data: { id } });
   } catch (error) {
-    console.error("Create session error:", error);
+    logger.error("sessions", "Create session failed", error);
     return NextResponse.json(
       {
         success: false,
@@ -142,7 +143,7 @@ export async function GET() {
       },
     });
   } catch (error) {
-    console.error("List sessions error:", error);
+    logger.error("sessions", "List sessions failed", error);
     return NextResponse.json(
       {
         success: false,

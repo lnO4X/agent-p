@@ -4,6 +4,7 @@ import { z } from "zod";
 import { db } from "@/db";
 import { users, verificationTokens } from "@/db/schema";
 import { eq, and, isNull, gt } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 const resetPasswordSchema = z.object({
   token: z.string().min(1, "缺少令牌 / Token is required"),
@@ -85,7 +86,7 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json({ success: true });
   } catch (error) {
-    console.error("Reset password error:", error);
+    logger.error("auth.reset-password", "Reset password failed", error);
     return NextResponse.json(
       {
         success: false,

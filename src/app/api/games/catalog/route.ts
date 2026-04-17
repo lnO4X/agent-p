@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { games } from "@/db/schema";
 import { sql, and, ilike, eq } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 // In-memory cache for catalog queries (keyed by query string)
 const catalogCache = new Map<string, { data: unknown; timestamp: number }>();
@@ -114,7 +115,7 @@ export async function GET(request: Request) {
       headers: { "Cache-Control": "public, s-maxage=3600, stale-while-revalidate=86400" },
     });
   } catch (error) {
-    console.error("Catalog error:", error);
+    logger.error("games.catalog", "Catalog query failed", error);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "获取游戏列表失败" } },
       { status: 500 }

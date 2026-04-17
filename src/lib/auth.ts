@@ -39,7 +39,7 @@ export async function setAuthCookie(token: string) {
   cookieStore.set(COOKIE_NAME, token, {
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "strict",
     maxAge: COOKIE_MAX_AGE,
     path: "/",
   });
@@ -47,7 +47,7 @@ export async function setAuthCookie(token: string) {
   cookieStore.set(LOGGED_IN_COOKIE, "1", {
     httpOnly: false,
     secure: process.env.NODE_ENV === "production",
-    sameSite: "lax",
+    sameSite: "strict",
     maxAge: COOKIE_MAX_AGE,
     path: "/",
   });

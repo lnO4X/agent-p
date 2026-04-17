@@ -5,6 +5,7 @@ import { partners, talentProfiles } from "@/db/schema";
 import { eq, desc, and } from "drizzle-orm";
 import { getModel } from "@/lib/ai";
 import { generateText } from "ai";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/partners/[id]/greeting — Generate a proactive greeting
@@ -89,7 +90,7 @@ Generate ONE short, natural greeting (1-2 sentences, max 100 chars) that referen
 
     return NextResponse.json({ greeting });
   } catch (error) {
-    console.error("Greeting error:", error);
+    logger.error("partners.greeting", "Greeting generation failed", error);
     return NextResponse.json({ greeting: null });
   }
 }

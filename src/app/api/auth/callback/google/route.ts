@@ -4,6 +4,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq, or } from "drizzle-orm";
 import { createToken, AUTH_COOKIE_NAME, AUTH_COOKIE_MAX_AGE, LOGGED_IN_COOKIE_NAME } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
 
@@ -24,7 +25,7 @@ export async function GET(request: NextRequest) {
 
     // Handle Google errors (user cancelled, etc.)
     if (error) {
-      console.error("Google OAuth error:", error);
+      logger.error("auth.callback.google", "Google OAuth error", error);
       return NextResponse.redirect(`${BASE_URL}/login?error=google`);
     }
 
@@ -36,7 +37,7 @@ export async function GET(request: NextRequest) {
     const storedState = request.cookies.get("google_oauth_state")?.value;
 
     if (!storedState || storedState !== state) {
-      console.error("Google OAuth state mismatch");
+      logger.error("auth.callback.google", "Google OAuth state mismatch");
       return NextResponse.redirect(`${BASE_URL}/login?error=google`);
     }
 
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
     const clientId = process.env.GOOGLE_CLIENT_ID;
     const clientSecret = process.env.GOOGLE_CLIENT_SECRET;
     if (!clientId || !clientSecret) {
-      console.error("Google OAuth credentials not configured");
+      logger.error("auth.callback.google", "Google OAuth credentials not configured");
       return NextResponse.redirect(`${BASE_URL}/login?error=google`);
     }
 
@@ -63,7 +64,7 @@ export async function GET(request: NextRequest) {
 
     if (!tokenRes.ok) {
       const err = await tokenRes.text();
-      console.error("Google token exchange failed:", tokenRes.status, err.slice(0, 200));
+      logger.error("auth.callback.google", "Google token exchange failed", undefined, { status: tokenRes.status, error: err.slice(0, 200) });
       return NextResponse.redirect(`${BASE_URL}/login?error=google`);
     }
 
@@ -77,13 +78,13 @@ export async function GET(request: NextRequest) {
     );
 
     if (!userInfoRes.ok) {
-      console.error("Google userinfo failed:", userInfoRes.status);
+      logger.error("auth.callback.google", "Google userinfo failed", undefined, { status: userInfoRes.status });
       return NextResponse.redirect(`${BASE_URL}/login?error=google`);
     }
 
     const googleUser: GoogleUserInfo = await userInfoRes.json();
     if (!googleUser.id) {
-      console.error("Google userinfo missing id");
+      logger.error("auth.callback.google", "Google userinfo missing id");
       return NextResponse.redirect(`${BASE_URL}/login?error=google`);
     }
 
@@ -200,7 +201,7 @@ export async function GET(request: NextRequest) {
     response.cookies.delete("google_oauth_state");
     return response;
   } catch (error) {
-    console.error("Google callback error:", error);
+    logger.error("auth.callback.google", "Google callback failed", error);
     return NextResponse.redirect(`${BASE_URL}/login?error=google`);
   }
 }

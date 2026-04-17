@@ -1,5 +1,5 @@
 import type { GameScorer } from "@/types/game";
-import { sigmoidNormalize } from "@/lib/scoring";
+import { percentileNormalize } from "@/lib/scoring";
 
 /**
  * @normSource Pylyshyn & Storm 1988; Meyerhoff et al. 2017 meta-analysis.
@@ -15,7 +15,7 @@ export const motScorer: GameScorer = {
   normalize(rawScore: number): number {
     // rawScore = average accuracy percentage across all trials (0-100)
     const clamped = Math.max(0, Math.min(100, rawScore));
-    return sigmoidNormalize(
+    return percentileNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,

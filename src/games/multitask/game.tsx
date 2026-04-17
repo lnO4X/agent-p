@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
+import { useI18n } from "@/i18n/context";
 
 /**
  * Dual-Task — Attention allocation paradigm (Pashler 1994)
@@ -34,6 +35,8 @@ export default function DualTaskGame({
   onComplete,
   onAbort,
 }: GameComponentProps) {
+  const { locale } = useI18n();
+  const isZh = locale === "zh";
   const [phase, setPhase] = useState<TaskPhase>("idle");
   const [trialIndex, setTrialIndex] = useState(0);
   const [dotX, setDotX] = useState(50);
@@ -138,10 +141,10 @@ export default function DualTaskGame({
         setDotIsRed(false);
 
         if (!visualRespondedRef.current && hasVisual) {
-          setFeedbackText("未点击红点");
+          setFeedbackText(isZh ? "未点击红点" : "Missed red dot");
           setFeedbackOk(false);
         } else if (!classifyRespondedRef.current && hasClassify) {
-          setFeedbackText("未分类数字");
+          setFeedbackText(isZh ? "未分类数字" : "Missed number");
           setFeedbackOk(false);
         } else {
           setFeedbackText("✓");
@@ -159,7 +162,7 @@ export default function DualTaskGame({
         }, 500);
       }, TRIAL_DURATION_MS);
     },
-    [startDotMovement]
+    [startDotMovement, isZh]
   );
 
   const finishGame = useCallback(() => {
@@ -263,23 +266,23 @@ export default function DualTaskGame({
     return (
       <div className="flex flex-col items-center gap-6 w-full max-w-lg mx-auto">
         <div className="text-center space-y-3 p-6 bg-muted/30 rounded-xl">
-          <h3 className="text-lg font-bold">双任务 注意力分配测试</h3>
+          <h3 className="text-lg font-bold">{isZh ? "双任务 注意力分配测试" : "Dual-Task Attention Test"}</h3>
           <p className="text-sm text-muted-foreground">
-            <strong>视觉任务</strong>: 追踪移动的圆点，变红时点击/按空格<br />
-            <strong>分类任务</strong>: 数字出现时，奇数按 O，偶数按 E
+            <strong>{isZh ? "视觉任务" : "Visual task"}</strong>: {isZh ? "追踪移动的圆点，变红时点击/按空格" : "Track the moving dot, click/press space when it turns red"}<br />
+            <strong>{isZh ? "分类任务" : "Classification task"}</strong>: {isZh ? "数字出现时，奇数按 O，偶数按 E" : "When a number appears, press O for odd, E for even"}
           </p>
           <p className="text-xs text-muted-foreground mt-2">
-            先单独练习，再同时进行两个任务。共 {TOTAL_TRIALS} 轮
+            {isZh ? `先单独练习，再同时进行两个任务。共 ${TOTAL_TRIALS} 轮` : `Practice each task alone first, then do both together. ${TOTAL_TRIALS} trials total`}
           </p>
         </div>
         <button
           onClick={startGame}
           className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-bold text-lg hover:opacity-90 transition"
         >
-          开始测试
+          {isZh ? "开始测试" : "Start Test"}
         </button>
         <button onClick={onAbort} className="text-sm text-muted-foreground hover:text-foreground">
-          放弃测试
+          {isZh ? "放弃测试" : "Abort Test"}
         </button>
       </div>
     );
@@ -288,11 +291,11 @@ export default function DualTaskGame({
   return (
     <div className="flex flex-col items-center gap-3 w-full max-w-lg mx-auto">
       <div className="flex justify-between w-full text-sm text-muted-foreground px-2">
-        <span>第 {trialIndex + 1}/{TOTAL_TRIALS} 轮</span>
+        <span>{isZh ? "第" : "Trial"} {trialIndex + 1}/{TOTAL_TRIALS} {isZh ? "轮" : ""}</span>
         <span className={`text-xs px-2 py-0.5 rounded ${
           trialType === "dual" ? "bg-purple-500/20 text-purple-400" : "bg-blue-500/20 text-blue-400"
         }`}>
-          {trialType === "single-visual" ? "单: 视觉" : trialType === "single-classify" ? "单: 分类" : "双任务"}
+          {trialType === "single-visual" ? (isZh ? "单: 视觉" : "Single: Visual") : trialType === "single-classify" ? (isZh ? "单: 分类" : "Single: Classify") : (isZh ? "双任务" : "Dual-Task")}
         </span>
       </div>
 
@@ -316,7 +319,7 @@ export default function DualTaskGame({
           />
           {dotIsRed && (
             <div className="absolute bottom-2 left-1/2 -translate-x-1/2 text-xs text-red-400 font-bold animate-pulse">
-              点击!
+              {isZh ? "点击!" : "Click!"}
             </div>
           )}
         </div>
@@ -335,19 +338,19 @@ export default function DualTaskGame({
                   onClick={() => handleClassify(true)}
                   className="flex-1 py-3 bg-amber-600 hover:bg-amber-500 text-white rounded-xl font-bold transition"
                 >
-                  O 奇数
+                  {isZh ? "O 奇数" : "O Odd"}
                 </button>
                 <button
                   onClick={() => handleClassify(false)}
                   className="flex-1 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-xl font-bold transition"
                 >
-                  E 偶数
+                  {isZh ? "E 偶数" : "E Even"}
                 </button>
               </div>
             </>
           ) : (
             <div className="text-center text-sm text-muted-foreground py-4">
-              等待数字出现...
+              {isZh ? "等待数字出现..." : "Waiting for number..."}
             </div>
           )}
         </div>
@@ -360,7 +363,7 @@ export default function DualTaskGame({
       )}
 
       <button onClick={onAbort} className="text-sm text-muted-foreground hover:text-foreground mt-1">
-        放弃测试
+        {isZh ? "放弃测试" : "Abort Test"}
       </button>
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
+import { useI18n } from "@/i18n/context";
 
 /**
  * Stroop Task — Classic cognitive interference paradigm (Stroop, 1935)
@@ -54,6 +55,8 @@ export default function StroopGame({
   onComplete,
   onAbort,
 }: GameComponentProps) {
+  const { locale } = useI18n();
+  const isZh = locale === "zh";
   const [phase, setPhase] = useState<"idle" | "fixation" | "stimulus" | "feedback" | "done">("idle");
   const [trialIndex, setTrialIndex] = useState(0);
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
@@ -161,28 +164,30 @@ export default function StroopGame({
     return (
       <div className="flex flex-col items-center gap-6 w-full max-w-lg mx-auto">
         <div className="text-center space-y-3 p-6 bg-muted/30 rounded-xl">
-          <h3 className="text-lg font-bold">Stroop 色词测试</h3>
+          <h3 className="text-lg font-bold">{isZh ? "Stroop 色词测试" : "Stroop Color-Word Test"}</h3>
           <p className="text-sm text-muted-foreground">
-            屏幕显示颜色词，文字颜色和词义可能不同。判断文字的<strong>颜色</strong>，忽略词义。
+            {isZh
+              ? <>屏幕显示颜色词，文字颜色和词义可能不同。判断文字的<strong>颜色</strong>，忽略词义。</>
+              : <>A color word is shown in a different ink color. Identify the <strong>ink color</strong>, not the word meaning.</>}
           </p>
           <div className="grid grid-cols-2 gap-2 mt-4">
             {COLORS.map((c, i) => (
               <div key={i} className="flex items-center gap-2 text-sm">
                 <div className="w-4 h-4 rounded" style={{ backgroundColor: c.hex }} />
-                <span>{c.name} — 按 {c.key.toUpperCase()}</span>
+                <span>{isZh ? c.name : c.nameEn} — {isZh ? "按" : "press"} {c.key.toUpperCase()}</span>
               </div>
             ))}
           </div>
-          <p className="text-xs text-muted-foreground mt-2">共 {TOTAL_TRIALS} 题</p>
+          <p className="text-xs text-muted-foreground mt-2">{isZh ? `共 ${TOTAL_TRIALS} 题` : `${TOTAL_TRIALS} trials total`}</p>
         </div>
         <button
           onClick={startGame}
           className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-bold text-lg hover:opacity-90 transition"
         >
-          开始测试
+          {isZh ? "开始测试" : "Start Test"}
         </button>
         <button onClick={onAbort} className="text-sm text-muted-foreground hover:text-foreground">
-          放弃测试
+          {isZh ? "放弃测试" : "Abort Test"}
         </button>
       </div>
     );
@@ -191,8 +196,8 @@ export default function StroopGame({
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-lg mx-auto">
       <div className="flex justify-between w-full text-sm text-muted-foreground px-2">
-        <span>第 {trialIndex + 1}/{TOTAL_TRIALS} 题</span>
-        <span>正确: {correctCount.current}</span>
+        <span>{isZh ? `第 ${trialIndex + 1}/${TOTAL_TRIALS} 题` : `Trial ${trialIndex + 1}/${TOTAL_TRIALS}`}</span>
+        <span>{isZh ? "正确:" : "Correct:"} {correctCount.current}</span>
       </div>
 
       <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
@@ -203,7 +208,7 @@ export default function StroopGame({
         {phase === "fixation" && <div className="text-4xl text-white/40">+</div>}
         {phase === "stimulus" && currentTrial && (
           <div className="text-5xl md:text-7xl font-black select-none" style={{ color: COLORS[currentTrial.inkIndex].hex }}>
-            {COLORS[currentTrial.wordIndex].nameEn}
+            {isZh ? COLORS[currentTrial.wordIndex].name : COLORS[currentTrial.wordIndex].nameEn}
           </div>
         )}
         {phase === "feedback" && (
@@ -228,10 +233,14 @@ export default function StroopGame({
         </div>
       )}
 
-      <p className="text-xs text-muted-foreground">选择文字的<strong>颜色</strong>，不是词义</p>
+      <p className="text-xs text-muted-foreground">
+        {isZh
+          ? <>选择文字的<strong>颜色</strong>，不是词义</>
+          : <>Select the text <strong>COLOR</strong>, not the word meaning</>}
+      </p>
 
       <button onClick={onAbort} className="text-sm text-muted-foreground hover:text-foreground">
-        放弃测试
+        {isZh ? "放弃测试" : "Abort Test"}
       </button>
     </div>
   );

@@ -1,5 +1,5 @@
 import type { GameScorer } from "@/types/game";
-import { sigmoidNormalize } from "@/lib/scoring";
+import { percentileNormalize } from "@/lib/scoring";
 
 /**
  * @normSource Initial estimate, pending calibration with N>500 user data
@@ -14,7 +14,7 @@ export const patternScorer: GameScorer = {
   normalize(rawScore: number): number {
     // rawScore = number of correct answers (0-15)
     const clamped = Math.max(0, Math.min(15, rawScore));
-    return sigmoidNormalize(
+    return percentileNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { generateCaptcha, cleanupExpiredCaptchas } from "@/lib/captcha";
 import { checkRateLimit } from "@/lib/redis";
+import { logger } from "@/lib/logger";
 
 // Captcha must NEVER be cached — each request generates a unique token
 export const dynamic = "force-dynamic";
@@ -44,7 +45,7 @@ export async function GET(request: NextRequest) {
       }
     );
   } catch (error) {
-    console.error("Captcha generation error:", error);
+    logger.error("auth.captcha", "Captcha generation failed", error);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "验证码生成失败" } },
       { status: 500 }

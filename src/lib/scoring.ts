@@ -48,16 +48,6 @@ function normalCDF(z: number): number {
   return 0.5 * (1.0 + sign * y);
 }
 
-/** @deprecated Use percentileNormalize instead. Kept for backward compatibility during migration. */
-export function sigmoidNormalize(
-  rawScore: number,
-  mean: number,
-  stdDev: number,
-  higherIsBetter: boolean = true
-): number {
-  return percentileNormalize(rawScore, mean, stdDev, higherIsBetter);
-}
-
 export function computeTalentScore(
   scores: Array<{ normalizedScore: number; isPrimary: boolean }>
 ): number {

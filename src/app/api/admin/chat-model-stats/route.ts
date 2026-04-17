@@ -22,10 +22,10 @@ export async function GET(request: NextRequest) {
     request.headers.get("authorization")
   );
   if (!auth) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  const rows = await db.execute(sql`
+  const result = await db.execute(sql`
     SELECT
       COALESCE(model_id, 'unknown') AS model_id,
       COUNT(*)::int AS count,
@@ -40,7 +40,12 @@ export async function GET(request: NextRequest) {
     ORDER BY count DESC
   `);
 
-  const models: ModelStat[] = (rows as unknown as Array<Record<string, unknown>>).map((r) => ({
+  // Drizzle db.execute() return shape varies across versions — handle both array and {rows} formats
+  const rows: Array<Record<string, unknown>> = Array.isArray(result)
+    ? (result as Array<Record<string, unknown>>)
+    : ((result as { rows?: Array<Record<string, unknown>> }).rows ?? []);
+
+  const models: ModelStat[] = rows.map((r) => ({
     modelId: String(r.model_id),
     count: Number(r.count),
     avgRating: Number(r.avg_rating),

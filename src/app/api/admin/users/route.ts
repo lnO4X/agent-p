@@ -3,6 +3,13 @@ import { requireAdminOrCronSecret } from "@/lib/admin";
 import { db } from "@/db";
 import { users, testSessions, partners } from "@/db/schema";
 import { eq, sql, ilike, or, desc } from "drizzle-orm";
+import { z } from "zod";
+
+const patchUserSchema = z.object({
+  userId: z.string().min(1),
+  tier: z.enum(["free", "premium"]).optional(),
+  isAdmin: z.boolean().optional(),
+});
 
 /**
  * GET /api/admin/users — List users with search & pagination
@@ -14,7 +21,7 @@ export async function GET(request: NextRequest) {
     request.headers.get("authorization")
   );
   if (!auth) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const { searchParams } = request.nextUrl;
@@ -82,35 +89,40 @@ export async function PATCH(request: NextRequest) {
     request.headers.get("authorization")
   );
   if (!auth) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  let body: { userId?: string; tier?: string; isAdmin?: boolean };
+  let body: unknown;
   try {
     body = await request.json();
   } catch {
-    return Response.json({ error: "Invalid JSON" }, { status: 400 });
+    return Response.json({ success: false, error: "Invalid JSON" }, { status: 400 });
   }
 
-  if (!body.userId) {
-    return Response.json({ error: "userId required" }, { status: 400 });
+  const parsed = patchUserSchema.safeParse(body);
+  if (!parsed.success) {
+    return Response.json(
+      { success: false, error: "Invalid request: " + JSON.stringify(parsed.error.flatten()) },
+      { status: 400 }
+    );
   }
+  const validated = parsed.data;
 
   const updates: Record<string, unknown> = { updatedAt: new Date() };
-  if (body.tier === "free" || body.tier === "premium") {
-    updates.tier = body.tier;
-    if (body.tier === "premium") {
+  if (validated.tier === "free" || validated.tier === "premium") {
+    updates.tier = validated.tier;
+    if (validated.tier === "premium") {
       // Set 30 days premium
       const expires = new Date();
       expires.setDate(expires.getDate() + 30);
       updates.tierExpiresAt = expires;
     }
   }
-  if (typeof body.isAdmin === "boolean") {
-    updates.isAdmin = body.isAdmin;
+  if (typeof validated.isAdmin === "boolean") {
+    updates.isAdmin = validated.isAdmin;
   }
 
-  await db.update(users).set(updates).where(eq(users.id, body.userId));
+  await db.update(users).set(updates).where(eq(users.id, validated.userId));
 
   return Response.json({ success: true });
 }

@@ -26,7 +26,7 @@ const BATCH_SIZE = 20;
 export async function POST(request: NextRequest) {
   const auth = request.headers.get("authorization");
   if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   // Find games needing enrichment: missing description OR developer OR has small Steam cover

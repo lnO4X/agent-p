@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import type { GameComponentProps } from "@/types/game";
+import { useI18n } from "@/i18n/context";
 
 /**
  * Perspective Taking — Visual perspective / Theory of Mind (Michelon & Zacks 2006)
@@ -89,6 +90,8 @@ export default function PerspectiveGame({
   onComplete,
   onAbort,
 }: GameComponentProps) {
+  const { locale } = useI18n();
+  const isZh = locale === "zh";
   const [phase, setPhase] = useState<"idle" | "playing" | "feedback" | "done">("idle");
   const [trialIndex, setTrialIndex] = useState(0);
   const [trial, setTrial] = useState<Trial | null>(null);
@@ -164,24 +167,25 @@ export default function PerspectiveGame({
     return (
       <div className="flex flex-col items-center gap-6 w-full max-w-lg mx-auto">
         <div className="text-center space-y-3 p-6 bg-muted/30 rounded-xl">
-          <h3 className="text-lg font-bold">视角判断 协作认知测试</h3>
+          <h3 className="text-lg font-bold">{isZh ? "视角判断 协作认知测试" : "Perspective Taking - Theory of Mind Test"}</h3>
           <p className="text-sm text-muted-foreground">
-            网格中有物品和一面墙。墙的另一边有一个导演。
-            判断导演能否看到指定物品。
+            {isZh
+              ? "网格中有物品和一面墙。墙的另一边有一个导演。判断导演能否看到指定物品。"
+              : "A grid contains objects and a wall. A director stands on the other side. Judge whether the director can see the highlighted object."}
           </p>
           <p className="text-xs text-muted-foreground mt-2">
-            需要从他人的视角思考 — 协作中最重要的能力
+            {isZh ? "需要从他人的视角思考 — 协作中最重要的能力" : "Think from others' perspective — the most important skill in teamwork"}
           </p>
-          <p className="text-xs text-muted-foreground">共 {TOTAL_TRIALS} 题</p>
+          <p className="text-xs text-muted-foreground">{isZh ? `共 ${TOTAL_TRIALS} 题` : `${TOTAL_TRIALS} trials`}</p>
         </div>
         <button
           onClick={startGame}
           className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-bold text-lg hover:opacity-90 transition"
         >
-          开始测试
+          {isZh ? "开始测试" : "Start Test"}
         </button>
         <button onClick={onAbort} className="text-sm text-muted-foreground hover:text-foreground">
-          放弃测试
+          {isZh ? "放弃测试" : "Abort Test"}
         </button>
       </div>
     );
@@ -190,8 +194,8 @@ export default function PerspectiveGame({
   return (
     <div className="flex flex-col items-center gap-3 w-full max-w-lg mx-auto">
       <div className="flex justify-between w-full text-sm text-muted-foreground px-2">
-        <span>第 {trialIndex + 1}/{TOTAL_TRIALS} 题</span>
-        <span>正确: {correct}</span>
+        <span>{isZh ? `第 ${trialIndex + 1}/${TOTAL_TRIALS} 题` : `Trial ${trialIndex + 1}/${TOTAL_TRIALS}`}</span>
+        <span>{isZh ? "正确:" : "Correct:"} {correct}</span>
       </div>
 
       <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
@@ -205,12 +209,12 @@ export default function PerspectiveGame({
             {/* Director label */}
             {trial.directorSide === "top" && (
               <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-blue-400 font-bold">
-                👤 导演在此
+                {isZh ? "👤 导演在此" : "👤 Director here"}
               </div>
             )}
             {trial.directorSide === "right" && (
               <div className="absolute top-1/2 -right-8 -translate-y-1/2 text-xs text-blue-400 font-bold rotate-90 whitespace-nowrap">
-                👤 导演
+                {isZh ? "👤 导演" : "👤 Director"}
               </div>
             )}
 
@@ -243,7 +247,7 @@ export default function PerspectiveGame({
                             : "bg-slate-900/50 border border-slate-800/30"
                     }`}
                   >
-                    {isWall && <span className="text-xs text-stone-400">墙</span>}
+                    {isWall && <span className="text-xs text-stone-400">{isZh ? "墙" : "Wall"}</span>}
                     {!isWall && obj && <span className="select-none">{obj.emoji}</span>}
                   </div>
                 );
@@ -254,11 +258,15 @@ export default function PerspectiveGame({
           {/* Question */}
           <div className="text-center space-y-2 py-2">
             <p className="text-sm font-bold">
-              导演能看到 <span className="text-xl">{trial.questionObject.emoji}</span> 吗？
+              {isZh
+                ? <>导演能看到 <span className="text-xl">{trial.questionObject.emoji}</span> 吗？</>
+                : <>Can the director see <span className="text-xl">{trial.questionObject.emoji}</span>?</>}
             </p>
             {phase === "feedback" && (
               <p className={`text-sm font-bold ${lastCorrect ? "text-green-400" : "text-red-400"}`}>
-                {lastCorrect ? "✓ 正确!" : `✗ 答案是 ${trial.answer ? "能看到" : "看不到"}`}
+                {lastCorrect
+                  ? (isZh ? "✓ 正确!" : "✓ Correct!")
+                  : (isZh ? `✗ 答案是 ${trial.answer ? "能看到" : "看不到"}` : `✗ Answer: ${trial.answer ? "Visible" : "Hidden"}`)}
               </p>
             )}
           </div>
@@ -270,13 +278,13 @@ export default function PerspectiveGame({
                 onClick={() => handleAnswer(true)}
                 className="flex-1 py-4 bg-green-600 hover:bg-green-500 text-white rounded-xl font-bold text-lg transition"
               >
-                能看到
+                {isZh ? "能看到" : "Visible"}
               </button>
               <button
                 onClick={() => handleAnswer(false)}
                 className="flex-1 py-4 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-lg transition"
               >
-                看不到
+                {isZh ? "看不到" : "Hidden"}
               </button>
             </div>
           )}
@@ -284,7 +292,7 @@ export default function PerspectiveGame({
       )}
 
       <button onClick={onAbort} className="text-sm text-muted-foreground hover:text-foreground mt-1">
-        放弃测试
+        {isZh ? "放弃测试" : "Abort Test"}
       </button>
     </div>
   );

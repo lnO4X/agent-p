@@ -8,6 +8,7 @@ import { eq, and } from "drizzle-orm";
 import { buildMemoryExtractionPrompt } from "@/lib/partner-prompts";
 import { memoryExtractionSchema } from "@/lib/validations";
 import { nanoid } from "nanoid";
+import { logger } from "@/lib/logger";
 
 /** Parse structured knowledge entries from LLM output */
 function parseKnowledgeEntries(
@@ -89,7 +90,7 @@ export async function DELETE(
 
     return NextResponse.json({ success: true });
   } catch (err) {
-    console.error("Memory clear failed:", err);
+    logger.error("partners.memory", "Memory clear failed", err);
     return NextResponse.json(
       { success: false, error: "Failed to clear memory" },
       { status: 500 }
@@ -136,7 +137,7 @@ export async function POST(
   const model = await getModel(partner[0].modelId);
   if (!model) {
     return NextResponse.json(
-      { error: "AI model not configured" },
+      { success: false, error: "AI model not configured" },
       { status: 503 }
     );
   }
@@ -243,9 +244,9 @@ export async function POST(
       knowledgeCount: knowledgeEntries.length,
     });
   } catch (err) {
-    console.error("Memory extraction failed:", err);
+    logger.error("partners.memory", "Memory extraction failed", err);
     return NextResponse.json(
-      { error: "Memory extraction failed" },
+      { success: false, error: "Memory extraction failed" },
       { status: 500 }
     );
   }

@@ -1,6 +1,5 @@
 import { describe, it, expect } from "vitest";
 import {
-  sigmoidNormalize,
   percentileNormalize,
   computeTalentScore,
   scoreToRank,
@@ -73,14 +72,6 @@ describe("percentileNormalize (CDF-based)", () => {
     const result = percentileNormalize(50, 50, 0, true);
     expect(result).toBe(50);
     expect(Number.isFinite(result)).toBe(true);
-  });
-});
-
-describe("sigmoidNormalize (backward compat → delegates to percentileNormalize)", () => {
-  it("returns same as percentileNormalize", () => {
-    expect(sigmoidNormalize(60, 50, 10, true)).toBe(
-      percentileNormalize(60, 50, 10, true)
-    );
   });
 });
 

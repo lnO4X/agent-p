@@ -8,7 +8,7 @@ import { eq } from "drizzle-orm";
 export async function GET() {
   const auth = await getAuthFromCookie();
   if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const user = await db
@@ -22,7 +22,7 @@ export async function GET() {
     .limit(1);
 
   if (user.length === 0) {
-    return NextResponse.json({ error: "User not found" }, { status: 404 });
+    return NextResponse.json({ success: false, error: "User not found" }, { status: 404 });
   }
 
   return NextResponse.json({ success: true, data: user[0] });

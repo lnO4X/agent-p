@@ -1,5 +1,5 @@
 import type { GameScorer } from "@/types/game";
-import { sigmoidNormalize } from "@/lib/scoring";
+import { percentileNormalize } from "@/lib/scoring";
 
 /**
  * Go/No-Go scorer.
@@ -22,7 +22,7 @@ export const strategyScorer: GameScorer = {
     metadata?: Record<string, unknown>
   ): number {
     const clamped = Math.max(0, rawScore);
-    const normalized = sigmoidNormalize(
+    const normalized = percentileNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,

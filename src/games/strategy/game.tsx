@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
+import { useI18n } from "@/i18n/context";
 
 /**
  * Go/No-Go Task — Impulse control paradigm (Donders 1969; Logan 1994)
@@ -39,6 +40,8 @@ export default function GoNoGoGame({
   onComplete,
   onAbort,
 }: GameComponentProps) {
+  const { locale } = useI18n();
+  const isZh = locale === "zh";
   const [phase, setPhase] = useState<"idle" | "fixation" | "stimulus" | "feedback" | "done">("idle");
   const [trialIndex, setTrialIndex] = useState(0);
   const [feedbackText, setFeedbackText] = useState("");
@@ -99,10 +102,10 @@ export default function GoNoGoGame({
             const trial = trialsRef.current[next];
             if (trial?.isGo) {
               omissionErrors.current++;
-              setFeedbackText("太慢!");
+              setFeedbackText(isZh ? "太慢!" : "Too slow!");
               setFeedbackOk(false);
             } else {
-              setFeedbackText("✓ 正确抑制");
+              setFeedbackText(isZh ? "✓ 正确抑制" : "✓ Correct inhibition");
               setFeedbackOk(true);
             }
             setPhase("feedback");
@@ -111,7 +114,7 @@ export default function GoNoGoGame({
         }, STIMULUS_MS);
       }, fixDuration);
     }
-  }, [trialIndex, onComplete]);
+  }, [trialIndex, onComplete, isZh]);
 
   const startGame = useCallback(() => {
     trialsRef.current = generateTrials();
@@ -131,10 +134,10 @@ export default function GoNoGoGame({
           const trial = trialsRef.current[0];
           if (trial?.isGo) {
             omissionErrors.current++;
-            setFeedbackText("太慢!");
+            setFeedbackText(isZh ? "太慢!" : "Too slow!");
             setFeedbackOk(false);
           } else {
-            setFeedbackText("✓ 正确抑制");
+            setFeedbackText(isZh ? "✓ 正确抑制" : "✓ Correct inhibition");
             setFeedbackOk(true);
           }
           setPhase("feedback");
@@ -142,7 +145,7 @@ export default function GoNoGoGame({
         }
       }, STIMULUS_MS);
     }, fixDuration);
-  }, [advanceToNext]);
+  }, [advanceToNext, isZh]);
 
   const handlePress = useCallback(() => {
     if (phase !== "stimulus" || respondedRef.current) return;
@@ -157,13 +160,13 @@ export default function GoNoGoGame({
       setFeedbackOk(true);
     } else {
       commissionErrors.current++;
-      setFeedbackText("✗ 不该按!");
+      setFeedbackText(isZh ? "✗ 不该按!" : "✗ Should not press!");
       setFeedbackOk(false);
     }
 
     setPhase("feedback");
     timerRef.current = setTimeout(() => advanceToNext(), 400);
-  }, [phase, currentTrial, advanceToNext]);
+  }, [phase, currentTrial, advanceToNext, isZh]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -188,23 +191,26 @@ export default function GoNoGoGame({
     return (
       <div className="flex flex-col items-center gap-6 w-full max-w-lg mx-auto">
         <div className="text-center space-y-3 p-6 bg-muted/30 rounded-xl">
-          <h3 className="text-lg font-bold">Go/No-Go 冲动控制测试</h3>
+          <h3 className="text-lg font-bold">{isZh ? "Go/No-Go 冲动控制测试" : "Go/No-Go Impulse Control Test"}</h3>
           <p className="text-sm text-muted-foreground">
-            🟢 绿色圆 → 立即按空格键或点击<br />
-            🔴 红色圆 → 不要按! 忍住冲动
+            {isZh ? (
+              <>🟢 绿色圆 → 立即按空格键或点击<br />🔴 红色圆 → 不要按! 忍住冲动</>
+            ) : (
+              <>🟢 Green circle → Press SPACE or click immediately<br />🔴 Red circle → Do NOT press! Resist the urge</>
+            )}
           </p>
           <p className="text-xs text-muted-foreground mt-2">
-            共 {TOTAL_TRIALS} 题，多数是绿色，少数红色陷阱
+            {isZh ? `共 ${TOTAL_TRIALS} 题，多数是绿色，少数红色陷阱` : `${TOTAL_TRIALS} trials — mostly green, with red traps`}
           </p>
         </div>
         <button
           onClick={startGame}
           className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-bold text-lg hover:opacity-90 transition"
         >
-          开始测试
+          {isZh ? "开始测试" : "Start Test"}
         </button>
         <button onClick={onAbort} className="text-sm text-muted-foreground hover:text-foreground">
-          放弃测试
+          {isZh ? "放弃测试" : "Abort Test"}
         </button>
       </div>
     );
@@ -213,8 +219,8 @@ export default function GoNoGoGame({
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-lg mx-auto">
       <div className="flex justify-between w-full text-sm text-muted-foreground px-2">
-        <span>第 {trialIndex + 1}/{TOTAL_TRIALS} 题</span>
-        <span>误按: {commissionErrors.current}</span>
+        <span>{isZh ? `第 ${trialIndex + 1}/${TOTAL_TRIALS} 题` : `Trial ${trialIndex + 1}/${TOTAL_TRIALS}`}</span>
+        <span>{isZh ? "误按:" : "Errors:"} {commissionErrors.current}</span>
       </div>
 
       <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
@@ -245,11 +251,11 @@ export default function GoNoGoGame({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        🟢 按空格/点击 | 🔴 不要按
+        {isZh ? "🟢 按空格/点击 | 🔴 不要按" : "🟢 Press SPACE/Click | 🔴 Don't press"}
       </p>
 
       <button onClick={onAbort} className="text-sm text-muted-foreground hover:text-foreground">
-        放弃测试
+        {isZh ? "放弃测试" : "Abort Test"}
       </button>
     </div>
   );

@@ -1,5 +1,5 @@
 import type { GameScorer } from "@/types/game";
-import { sigmoidNormalize } from "@/lib/scoring";
+import { percentileNormalize } from "@/lib/scoring";
 
 /**
  * @normSource Initial estimate based on sensorimotor synchronization literature. Pending calibration
@@ -14,7 +14,7 @@ export const rhythmScorer: GameScorer = {
   normalize(rawScore: number): number {
     // rawScore = average timing deviation in ms (lower is better)
     const clamped = Math.max(0, rawScore);
-    return sigmoidNormalize(
+    return percentileNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,

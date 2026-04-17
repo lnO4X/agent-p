@@ -1,5 +1,5 @@
 import type { GameScorer } from "@/types/game";
-import { sigmoidNormalize } from "@/lib/scoring";
+import { percentileNormalize } from "@/lib/scoring";
 
 /**
  * Dual-Task scorer.
@@ -18,7 +18,7 @@ export const multitaskScorer: GameScorer = {
   },
   normalize(rawScore: number): number {
     const clamped = Math.max(0, Math.min(100, rawScore));
-    return sigmoidNormalize(
+    return percentileNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,

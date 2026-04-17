@@ -5,6 +5,7 @@ import { gameScores } from "@/db/schema";
 import { submitScoreSchema } from "@/lib/validations";
 import { getAuthFromCookie } from "@/lib/auth";
 import { gameRegistry } from "@/games";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: Request) {
   try {
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
       data: { id, normalizedScore, talentCategory: game.primaryTalent },
     });
   } catch (error) {
-    console.error("Submit score error:", error);
+    logger.error("scores", "Submit score failed", error);
     return NextResponse.json(
       {
         success: false,

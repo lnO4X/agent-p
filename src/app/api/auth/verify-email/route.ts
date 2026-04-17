@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { db } from "@/db";
 import { users, verificationTokens } from "@/db/schema";
 import { eq, and, isNull, gt } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 const BASE_URL = process.env.NEXT_PUBLIC_BASE_URL || "https://gametan.ai";
 
@@ -52,7 +53,7 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.redirect(`${BASE_URL}/dashboard?email_verified=1`);
   } catch (error) {
-    console.error("Verify email error:", error);
+    logger.error("auth.verify-email", "Verify email failed", error);
     return NextResponse.redirect(`${BASE_URL}/login?error=invalid_token`);
   }
 }

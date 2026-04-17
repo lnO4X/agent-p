@@ -2,6 +2,7 @@ import { NextRequest } from "next/server";
 import { requireAdminOrCronSecret } from "@/lib/admin";
 import { db } from "@/db";
 import { sql } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/admin/analytics — Registration trend + funnel + activity data
@@ -104,7 +105,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    console.error("[admin/analytics] Error:", msg);
+    logger.error("admin.analytics", "Analytics query failed", error);
     return Response.json(
       { success: false, error: msg },
       { status: 500 }

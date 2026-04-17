@@ -18,6 +18,7 @@ import { TALENT_CATEGORIES, type TalentCategory } from "@/types/talent";
 import { gameRegistry } from "@/games";
 import { generateGameRecommendations } from "@/lib/game-recommender";
 import { scoreToArchetype } from "@/lib/archetype";
+import { logger } from "@/lib/logger";
 
 export async function POST(
   _request: Request,
@@ -138,7 +139,7 @@ export async function POST(
 
     // Generate game recommendations asynchronously (non-blocking)
     generateGameRecommendations(profileId, talentScores, genres).catch(
-      (err) => console.error("Failed to generate game recommendations:", err)
+      (err) => logger.error("sessions.complete", "Failed to generate game recommendations", err)
     );
 
     return NextResponse.json({
@@ -152,7 +153,7 @@ export async function POST(
       },
     });
   } catch (error) {
-    console.error("Complete session error:", error);
+    logger.error("sessions.complete", "Complete session failed", error);
     return NextResponse.json(
       {
         success: false,

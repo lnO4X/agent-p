@@ -30,8 +30,9 @@ export async function checkRateLimit(
   try {
     const r = getRedis();
     if (!r) {
-      // No Redis configured — fail open (allow the request)
-      return { allowed: true, remaining: maxRequests, resetInSeconds: windowSeconds };
+      // No Redis configured — fail closed (reject the request)
+      console.warn("[redis] Rate limiting unavailable — no Redis configured, rejecting request");
+      return { allowed: false, remaining: 0, resetInSeconds: windowSeconds };
     }
 
     const current = await r.incr(key);
@@ -45,8 +46,9 @@ export async function checkRateLimit(
       remaining,
       resetInSeconds: ttl > 0 ? ttl : windowSeconds,
     };
-  } catch {
-    // If Redis is down, fail open (allow the request)
-    return { allowed: true, remaining: maxRequests, resetInSeconds: windowSeconds };
+  } catch (err) {
+    // If Redis is down, fail closed (reject the request)
+    console.error("[redis] Rate limiting error — rejecting request:", err);
+    return { allowed: false, remaining: 0, resetInSeconds: windowSeconds };
   }
 }

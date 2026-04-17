@@ -7,6 +7,7 @@ import { eq } from "drizzle-orm";
 import { registerSchema } from "@/lib/validations";
 import { createToken, setAuthCookie } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/redis";
+import { logger } from "@/lib/logger";
 
 export async function POST(request: NextRequest) {
   try {
@@ -83,7 +84,7 @@ export async function POST(request: NextRequest) {
       data: { id, username, displayName: username, token },
     });
   } catch (error) {
-    console.error("Register error:", error);
+    logger.error("auth.register", "Register failed", error);
     return NextResponse.json(
       {
         success: false,

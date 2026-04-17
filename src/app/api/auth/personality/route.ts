@@ -5,6 +5,7 @@ import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { PERSONALITY_CODES } from "@/lib/personality-types";
+import { logger } from "@/lib/logger";
 
 const setPersonalitySchema = z.object({
   personalityType: z
@@ -44,7 +45,7 @@ export async function GET() {
       data: { personalityType: result[0].personalityType },
     });
   } catch (err) {
-    console.error("GET /api/auth/personality error:", err);
+    logger.error("auth.personality", "GET failed", err);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to fetch personality type" } },
       { status: 500 }
@@ -91,7 +92,7 @@ export async function POST(request: NextRequest) {
       data: { personalityType: parsed.data.personalityType },
     });
   } catch (err) {
-    console.error("POST /api/auth/personality error:", err);
+    logger.error("auth.personality", "POST failed", err);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "Failed to set personality type" } },
       { status: 500 }

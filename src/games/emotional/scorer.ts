@@ -1,5 +1,5 @@
 import type { GameScorer } from "@/types/game";
-import { sigmoidNormalize } from "@/lib/scoring";
+import { percentileNormalize } from "@/lib/scoring";
 
 /**
  * Stroop Task scorer.
@@ -23,7 +23,7 @@ export const emotionalScorer: GameScorer = {
   ): number {
     const clamped = Math.max(0, rawScore);
     const accuracy = metadata?.accuracy as number | undefined;
-    const normalized = sigmoidNormalize(
+    const normalized = percentileNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,

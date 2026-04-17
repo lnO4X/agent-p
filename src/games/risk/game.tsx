@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import type { GameComponentProps } from "@/types/game";
+import { useI18n } from "@/i18n/context";
 
 const TOTAL_ROUNDS = 20;
 const SAFE_PUMPS = 2; // First 2 pumps per round guaranteed safe
@@ -11,6 +12,8 @@ export default function RiskGame({
   onComplete,
   onAbort,
 }: GameComponentProps) {
+  const { locale } = useI18n();
+  const isZh = locale === "zh";
   const [phase, setPhase] = useState<"idle" | "pumping" | "banked" | "popped" | "done">("idle");
   const [round, setRound] = useState(1);
   const [pumps, setPumps] = useState(0);
@@ -119,29 +122,29 @@ export default function RiskGame({
     return (
       <div className="flex flex-col items-center gap-6 w-full max-w-lg mx-auto">
         <div className="text-center space-y-3 p-6 bg-muted/30 rounded-xl">
-          <h3 className="text-lg font-bold">风险骰子 - 操作说明</h3>
+          <h3 className="text-lg font-bold">{isZh ? "风险骰子 - 操作说明" : "Risk Dice - Instructions"}</h3>
           <p className="text-sm text-muted-foreground">
-            给气球充气, 每次充气增加1-3分到奖池
+            {isZh ? "给气球充气, 每次充气增加1-3分到奖池" : "Inflate the balloon — each pump adds 1-3 points to the pot"}
           </p>
           <p className="text-sm text-muted-foreground">
-            前{SAFE_PUMPS}次充气安全, 之后爆炸概率递增!
+            {isZh ? `前${SAFE_PUMPS}次充气安全, 之后爆炸概率递增!` : `First ${SAFE_PUMPS} pumps are safe, then explosion probability increases!`}
           </p>
           <p className="text-sm text-muted-foreground">
-            先充气再点&quot;收钱&quot;将奖池收入囊中, 爆炸则清零
+            {isZh ? "先充气再点\"收钱\"将奖池收入囊中, 爆炸则清零" : "Pump then click 'Cash Out' to bank points. Explosion = lose all"}
           </p>
-          <p className="text-sm text-muted-foreground">共 {TOTAL_ROUNDS} 轮</p>
+          <p className="text-sm text-muted-foreground">{isZh ? `共 ${TOTAL_ROUNDS} 轮` : `${TOTAL_ROUNDS} rounds`}</p>
         </div>
         <button
           onClick={startGame}
           className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-bold text-lg hover:opacity-90 transition"
         >
-          开始游戏
+          {isZh ? "开始游戏" : "Start Game"}
         </button>
         <button
           onClick={onAbort}
           className="text-sm text-muted-foreground hover:text-foreground"
         >
-          放弃测试
+          {isZh ? "放弃测试" : "Abort Test"}
         </button>
       </div>
     );
@@ -152,11 +155,11 @@ export default function RiskGame({
       {/* Header */}
       <div className="flex justify-between w-full text-sm px-1">
         <span className="text-muted-foreground">
-          第 {round}/{TOTAL_ROUNDS} 轮
+          {isZh ? `第 ${round}/${TOTAL_ROUNDS} 轮` : `Round ${round}/${TOTAL_ROUNDS}`}
         </span>
         <span className="text-muted-foreground">
-          已收: <span className="text-green-400 font-bold">{totalBanked}</span>{" "}
-          分
+          {isZh ? "已收:" : "Banked:"} <span className="text-green-400 font-bold">{totalBanked}</span>{" "}
+          {isZh ? "分" : "pts"}
         </span>
       </div>
 
@@ -177,19 +180,19 @@ export default function RiskGame({
             className={`text-center ${shakeAnim ? "animate-pulse" : ""}`}
           >
             <div className="text-6xl mb-2">💥</div>
-            <p className="text-red-400 font-bold text-lg">气球爆了!</p>
+            <p className="text-red-400 font-bold text-lg">{isZh ? "气球爆了!" : "Balloon Popped!"}</p>
             <p className="text-sm text-muted-foreground">
-              本轮 {pumps} 次充气, 损失所有奖池
+              {isZh ? `本轮 ${pumps} 次充气, 损失所有奖池` : `${pumps} pumps this round, lost entire pot`}
             </p>
           </div>
         ) : phase === "banked" ? (
           <div className="text-center">
             <div className="text-6xl mb-2">💰</div>
             <p className="text-green-400 font-bold text-lg">
-              成功收钱!
+              {isZh ? "成功收钱!" : "Cashed Out!"}
             </p>
             <p className="text-sm text-muted-foreground">
-              本轮收入 {roundHistory[roundHistory.length - 1]?.earned || 0} 分
+              {isZh ? `本轮收入 ${roundHistory[roundHistory.length - 1]?.earned || 0} 分` : `Earned ${roundHistory[roundHistory.length - 1]?.earned || 0} pts this round`}
             </p>
           </div>
         ) : (
@@ -203,12 +206,12 @@ export default function RiskGame({
             </div>
             <div className="mt-2 space-y-1">
               <p className="text-2xl font-bold text-foreground">
-                奖池: {currentPot} 分
+                {isZh ? `奖池: ${currentPot} 分` : `Pot: ${currentPot} pts`}
               </p>
               <p className="text-xs text-muted-foreground">
-                充气次数: {pumps} | 下次爆炸概率:{" "}
+                {isZh ? "充气次数:" : "Pumps:"} {pumps} | {isZh ? "下次爆炸概率:" : "Pop chance:"}{" "}
                 {popChanceDisplay === 0 ? (
-                  <span className="text-green-400">安全</span>
+                  <span className="text-green-400">{isZh ? "安全" : "Safe"}</span>
                 ) : (
                   <span className="text-red-400">~{popChanceDisplay}%</span>
                 )}
@@ -225,14 +228,14 @@ export default function RiskGame({
             onClick={pump}
             className="flex-1 py-4 bg-red-600 hover:bg-red-500 text-white rounded-xl font-bold text-lg transition"
           >
-            🫁 充气
+            {isZh ? "🫁 充气" : "🫁 Pump"}
           </button>
           <button
             onClick={bank}
             disabled={currentPot === 0}
             className="flex-1 py-4 bg-green-600 hover:bg-green-500 disabled:opacity-30 disabled:cursor-not-allowed text-white rounded-xl font-bold text-lg transition"
           >
-            {currentPot === 0 ? "← 先充气" : "💰 收钱"}
+            {currentPot === 0 ? (isZh ? "← 先充气" : "← Pump first") : (isZh ? "💰 收钱" : "💰 Cash Out")}
           </button>
         </div>
       )}
@@ -242,14 +245,14 @@ export default function RiskGame({
           onClick={nextRound}
           className="w-full py-4 bg-primary text-primary-foreground rounded-xl font-bold text-lg hover:opacity-90 transition"
         >
-          {round < TOTAL_ROUNDS ? "下一轮" : "查看结果"}
+          {round < TOTAL_ROUNDS ? (isZh ? "下一轮" : "Next Round") : (isZh ? "查看结果" : "See Results")}
         </button>
       )}
 
       {/* History */}
       {roundHistory.length > 0 && (
         <div className="w-full space-y-1">
-          <p className="text-xs text-muted-foreground">历史记录:</p>
+          <p className="text-xs text-muted-foreground">{isZh ? "历史记录:" : "History:"}</p>
           <div className="flex gap-1.5 flex-wrap">
             {roundHistory.map((r, i) => (
               <div
@@ -259,7 +262,7 @@ export default function RiskGame({
                     ? "bg-red-600/20 text-red-400"
                     : "bg-green-600/20 text-green-400"
                 }`}
-                title={`${r.pumps}次充气, ${r.popped ? "爆炸" : `收入${r.earned}分`}`}
+                title={isZh ? `${r.pumps}次充气, ${r.popped ? "爆炸" : `收入${r.earned}分`}` : `${r.pumps} pumps, ${r.popped ? "popped" : `earned ${r.earned} pts`}`}
               >
                 {r.popped ? "💥0" : `+${r.earned}`}
               </div>
@@ -272,7 +275,7 @@ export default function RiskGame({
         onClick={onAbort}
         className="text-sm text-muted-foreground hover:text-foreground mt-2"
       >
-        放弃测试
+        {isZh ? "放弃测试" : "Abort Test"}
       </button>
     </div>
   );

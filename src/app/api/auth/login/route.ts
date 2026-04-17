@@ -6,6 +6,7 @@ import { eq } from "drizzle-orm";
 import { loginSchema } from "@/lib/validations";
 import { createToken, setAuthCookie } from "@/lib/auth";
 import { checkRateLimit } from "@/lib/redis";
+import { logger } from "@/lib/logger";
 
 const MAX_FAILED_ATTEMPTS = 5;
 const LOCKOUT_MINUTES = 15;
@@ -145,7 +146,7 @@ export async function POST(request: NextRequest) {
       },
     });
   } catch (error) {
-    console.error("Login error:", error);
+    logger.error("auth.login", "Login failed", error);
     return NextResponse.json(
       {
         success: false,

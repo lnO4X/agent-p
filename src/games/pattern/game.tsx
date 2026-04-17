@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
+import { useI18n } from "@/i18n/context";
 
 const GRID = 4;
 const TOTAL_ROUNDS = 15;
@@ -61,6 +62,8 @@ export default function PatternGame({
   onComplete,
   onAbort,
 }: GameComponentProps) {
+  const { locale } = useI18n();
+  const isZh = locale === "zh";
   const [phase, setPhase] = useState<
     "idle" | "playing" | "feedback" | "done"
   >("idle");
@@ -141,25 +144,26 @@ export default function PatternGame({
     <div className="flex flex-col items-center gap-4 w-full">
       <div className="flex justify-between w-full max-w-xs text-sm text-muted-foreground px-2">
         <span>
-          第 {round + 1}/{TOTAL_ROUNDS} 轮
+          {isZh ? "第" : "Round"} {round + 1}/{TOTAL_ROUNDS} {isZh ? "轮" : ""}
         </span>
         <span>
-          正确: {correct}/{round + (phase === "feedback" || phase === "done" ? 1 : 0)}
+          {isZh ? "正确:" : "Correct:"} {correct}/{round + (phase === "feedback" || phase === "done" ? 1 : 0)}
         </span>
       </div>
 
       {phase === "idle" && (
         <div className="w-full max-w-sm bg-slate-800 rounded-xl p-8 text-center">
-          <p className="text-lg mb-4">找出不同颜色的方块</p>
+          <p className="text-lg mb-4">{isZh ? "找出不同颜色的方块" : "Find the Different Tile"}</p>
           <p className="text-sm text-muted-foreground mb-6">
-            4x4方格中有一个方块颜色与其它略有不同。每轮颜色差异会越来越小。
-            共15轮，找对越多分数越高。
+            {isZh
+              ? "4x4方格中有一个方块颜色与其它略有不同。每轮颜色差异会越来越小。共15轮，找对越多分数越高。"
+              : "One tile in the 4x4 grid has a slightly different color. The difference gets smaller each round. 15 rounds \u2014 find as many as you can."}
           </p>
           <button
             onClick={startGame}
             className="px-6 py-3 bg-cyan-600 hover:bg-cyan-500 text-white rounded-lg font-bold text-lg transition-colors"
           >
-            开始测试
+            {isZh ? "开始测试" : "Start Test"}
           </button>
         </div>
       )}
@@ -167,7 +171,7 @@ export default function PatternGame({
       {(phase === "playing" || phase === "feedback") && (
         <>
           <p className="text-sm text-muted-foreground">
-            点击颜色不同的方块
+            {isZh ? "点击颜色不同的方块" : "Click the tile with a different color"}
           </p>
           <div
             className="grid gap-2"
@@ -206,23 +210,23 @@ export default function PatternGame({
             <p
               className={`text-sm font-bold ${wasCorrect ? "text-green-400" : "text-red-400"}`}
             >
-              {wasCorrect ? "正确!" : "错误!"}
+              {wasCorrect ? (isZh ? "正确!" : "Correct!") : (isZh ? "错误!" : "Wrong!")}
             </p>
           )}
 
           <p className="text-xs text-muted-foreground">
-            难度: {round + 1}/{TOTAL_ROUNDS} (差异越来越小)
+            {isZh ? "难度:" : "Difficulty:"} {round + 1}/{TOTAL_ROUNDS} {isZh ? "(差异越来越小)" : "(getting harder)"}
           </p>
         </>
       )}
 
       {phase === "done" && (
         <div className="w-full max-w-sm bg-slate-800 rounded-xl p-8 text-center">
-          <p className="text-2xl font-bold mb-2">测试完成!</p>
+          <p className="text-2xl font-bold mb-2">{isZh ? "测试完成!" : "Test Complete!"}</p>
           <p className="text-4xl font-bold text-cyan-400">
             {correct}/{TOTAL_ROUNDS}
           </p>
-          <p className="text-sm text-muted-foreground mt-2">正确辨别</p>
+          <p className="text-sm text-muted-foreground mt-2">{isZh ? "正确辨别" : "Correct Identifications"}</p>
         </div>
       )}
 
@@ -230,7 +234,7 @@ export default function PatternGame({
         onClick={onAbort}
         className="text-sm text-muted-foreground hover:text-foreground"
       >
-        放弃测试
+        {isZh ? "放弃测试" : "Abort Test"}
       </button>
     </div>
   );

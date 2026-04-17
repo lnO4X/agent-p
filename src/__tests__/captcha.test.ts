@@ -14,9 +14,10 @@ const mockFns = vi.hoisted(() => {
   const insert = vi.fn();
   const values = vi.fn();
   const del = vi.fn();
+  const returning = vi.fn();
 
   const db: Record<string, ReturnType<typeof vi.fn>> = {
-    select, from, where, limit, insert, values, delete: del,
+    select, from, where, limit, insert, values, delete: del, returning,
   };
 
   // Chain setup
@@ -27,8 +28,9 @@ const mockFns = vi.hoisted(() => {
   insert.mockReturnValue(db);
   values.mockResolvedValue(undefined);
   del.mockReturnValue(db);
+  returning.mockResolvedValue([]);
 
-  return { db, select, from, where, limit, insert, values, del };
+  return { db, select, from, where, limit, insert, values, del, returning };
 });
 
 vi.mock("@/db", () => ({
@@ -57,7 +59,7 @@ import {
 } from "@/lib/captcha";
 
 function resetDbChain() {
-  const { db, select, from, where, limit, insert, values, del } = mockFns;
+  const { db, select, from, where, limit, insert, values, del, returning } = mockFns;
   select.mockReturnValue(db);
   from.mockReturnValue(db);
   where.mockReturnValue(db);
@@ -65,6 +67,7 @@ function resetDbChain() {
   insert.mockReturnValue(db);
   values.mockResolvedValue(undefined);
   del.mockReturnValue(db);
+  returning.mockResolvedValue([]);
 }
 
 describe("captcha", () => {
@@ -126,14 +129,14 @@ describe("captcha", () => {
 
   describe("verifyCaptcha", () => {
     it("returns false when token not found in DB", async () => {
-      mockFns.limit.mockResolvedValueOnce([]);
+      mockFns.returning.mockResolvedValueOnce([]);
       const result = await verifyCaptcha("unknown-token", "42");
       expect(result).toBe(false);
     });
 
     it("returns true for correct answer", async () => {
       const futureDate = new Date(Date.now() + 60000);
-      mockFns.limit.mockResolvedValueOnce([
+      mockFns.returning.mockResolvedValueOnce([
         { id: "tok", answer: "42", expiresAt: futureDate },
       ]);
       const result = await verifyCaptcha("tok", "42");
@@ -142,7 +145,7 @@ describe("captcha", () => {
 
     it("returns true for answer with whitespace (trimmed)", async () => {
       const futureDate = new Date(Date.now() + 60000);
-      mockFns.limit.mockResolvedValueOnce([
+      mockFns.returning.mockResolvedValueOnce([
         { id: "tok", answer: "42", expiresAt: futureDate },
       ]);
       const result = await verifyCaptcha("tok", "  42  ");
@@ -151,7 +154,7 @@ describe("captcha", () => {
 
     it("returns false for wrong answer", async () => {
       const futureDate = new Date(Date.now() + 60000);
-      mockFns.limit.mockResolvedValueOnce([
+      mockFns.returning.mockResolvedValueOnce([
         { id: "tok", answer: "42", expiresAt: futureDate },
       ]);
       const result = await verifyCaptcha("tok", "99");
@@ -160,19 +163,21 @@ describe("captcha", () => {
 
     it("returns false for expired captcha", async () => {
       const pastDate = new Date(Date.now() - 60000);
-      mockFns.limit.mockResolvedValueOnce([
+      mockFns.returning.mockResolvedValueOnce([
         { id: "tok", answer: "42", expiresAt: pastDate },
       ]);
       const result = await verifyCaptcha("tok", "42");
       expect(result).toBe(false);
     });
 
-    it("always deletes the captcha (one-time use)", async () => {
-      mockFns.limit.mockResolvedValueOnce([
+    it("atomically deletes the captcha (one-time use, prevents race condition)", async () => {
+      mockFns.returning.mockResolvedValueOnce([
         { id: "tok", answer: "42", expiresAt: new Date(Date.now() + 60000) },
       ]);
       await verifyCaptcha("tok", "42");
+      // Delete is called (via delete().where().returning()) — atomic one-time use
       expect(mockFns.del).toHaveBeenCalled();
+      expect(mockFns.returning).toHaveBeenCalled();
     });
   });
 

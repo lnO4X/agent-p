@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useI18n } from "@/i18n/context";
 import type { GameComponentProps } from "@/types/game";
 
 /**
@@ -33,6 +34,8 @@ export default function UFOVGame({
   onComplete,
   onAbort,
 }: GameComponentProps) {
+  const { locale } = useI18n();
+  const isZh = locale === "zh";
   const [phase, setPhase] = useState<"idle" | "fixation" | "stimulus" | "mask" | "respond" | "feedback" | "done">("idle");
   const [trialIndex, setTrialIndex] = useState(0);
   const [targetPos, setTargetPos] = useState(0);
@@ -131,24 +134,27 @@ export default function UFOVGame({
     return (
       <div className="flex flex-col items-center gap-6 w-full max-w-lg mx-auto">
         <div className="text-center space-y-3 p-6 bg-muted/30 rounded-xl">
-          <h3 className="text-lg font-bold">UFOV 视野测试</h3>
+          <h3 className="text-lg font-bold">{isZh ? "UFOV 视野测试" : "UFOV Visual Field Test"}</h3>
           <p className="text-sm text-muted-foreground">
-            注视中心十字。目标会在周围8个位置之一短暂闪现。
-            目标消失后，点击你认为它出现的位置。
+            {isZh
+              ? "注视中心十字。目标会在周围8个位置之一短暂闪现。目标消失后，点击你认为它出现的位置。"
+              : "Focus on the center cross. A target will briefly flash at one of 8 positions. After it disappears, click where you think it appeared."}
           </p>
           <p className="text-xs text-muted-foreground mt-2">
-            答对→显示时间缩短(更难) | 答错→显示时间加长
+            {isZh
+              ? "答对→显示时间缩短(更难) | 答错→显示时间加长"
+              : "Correct \u2192 shorter display (harder) | Wrong \u2192 longer display"}
           </p>
-          <p className="text-xs text-muted-foreground">共 {TOTAL_TRIALS} 题</p>
+          <p className="text-xs text-muted-foreground">{isZh ? `共 ${TOTAL_TRIALS} 题` : `${TOTAL_TRIALS} trials`}</p>
         </div>
         <button
           onClick={startGame}
           className="px-8 py-3 bg-primary text-primary-foreground rounded-lg font-bold text-lg hover:opacity-90 transition"
         >
-          开始测试
+          {isZh ? "开始测试" : "Start Test"}
         </button>
         <button onClick={onAbort} className="text-sm text-muted-foreground hover:text-foreground">
-          放弃测试
+          {isZh ? "放弃测试" : "Abort Test"}
         </button>
       </div>
     );
@@ -157,9 +163,9 @@ export default function UFOVGame({
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-lg mx-auto">
       <div className="flex justify-between w-full text-sm text-muted-foreground px-2">
-        <span>第 {trialIndex + 1}/{TOTAL_TRIALS} 题</span>
-        <span>正确: {correctCount.current}</span>
-        <span>显示: {currentDuration}ms</span>
+        <span>{isZh ? `第 ${trialIndex + 1}/${TOTAL_TRIALS} 题` : `Trial ${trialIndex + 1}/${TOTAL_TRIALS}`}</span>
+        <span>{isZh ? "正确" : "Correct"}: {correctCount.current}</span>
+        <span>{isZh ? "显示" : "Display"}: {currentDuration}ms</span>
       </div>
 
       <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
@@ -217,11 +223,13 @@ export default function UFOVGame({
       </div>
 
       <p className="text-xs text-muted-foreground">
-        {phase === "respond" ? "点击目标出现的位置" : "注视中心"}
+        {phase === "respond"
+          ? (isZh ? "点击目标出现的位置" : "Click where the target appeared")
+          : (isZh ? "注视中心" : "Focus on center")}
       </p>
 
       <button onClick={onAbort} className="text-sm text-muted-foreground hover:text-foreground">
-        放弃测试
+        {isZh ? "放弃测试" : "Abort Test"}
       </button>
     </div>
   );

@@ -18,6 +18,7 @@ const PUBLIC_PATHS = [
   "/api/auth/verify-email",
   "/api/feedback",
   "/api/analytics",
+  "/api/health",
   "/privacy",
   "/terms",
   "/about",

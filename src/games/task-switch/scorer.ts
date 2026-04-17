@@ -1,5 +1,5 @@
 import type { GameScorer } from "@/types/game";
-import { sigmoidNormalize } from "@/lib/scoring";
+import { percentileNormalize } from "@/lib/scoring";
 
 /**
  * @normSource Monsell 2003; switch cost ~100-200ms. Kiesel et al. 2010 meta-analysis.
@@ -16,7 +16,7 @@ export const taskSwitchScorer: GameScorer = {
     // rawScore = switch cost in ms (lower is better)
     // Clamp to reasonable range
     const clamped = Math.max(0, Math.min(500, rawScore));
-    return sigmoidNormalize(
+    return percentileNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,

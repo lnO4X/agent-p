@@ -27,8 +27,9 @@ export async function POST(request: NextRequest) {
 
   const auth = await getAuthFromCookie();
 
-  // productFeedback table removed — log for now so feedback isn't silently lost
-  console.log("[feedback]", {
+  // productFeedback table removed — log via structured logger (visible in Vercel logs)
+  const { logger } = await import("@/lib/logger");
+  logger.info("feedback", "User feedback received", {
     userId: auth?.sub ?? null,
     score: parsed.data.score,
     comment: parsed.data.comment ?? null,

@@ -3,6 +3,7 @@ import { getAuthFromCookie } from "@/lib/auth";
 import { db } from "@/db";
 import { users } from "@/db/schema";
 import { eq } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 /**
  * POST /api/billing/checkout — Create a Creem checkout session
@@ -65,7 +66,7 @@ export async function POST(request: Request) {
 
     if (!response.ok) {
       const errorText = await response.text();
-      console.error("[billing/checkout] Creem error:", errorText);
+      logger.error("billing.checkout", "Creem API error", undefined, { errorText });
       return NextResponse.json(
         { success: false, error: "Failed to create checkout" },
         { status: 502 }
@@ -87,7 +88,7 @@ export async function POST(request: Request) {
       data: { url: checkoutUrl },
     });
   } catch (err) {
-    console.error("[billing/checkout] error:", err);
+    logger.error("billing.checkout", "Checkout failed", err);
     return NextResponse.json(
       { success: false, error: "Server error" },
       { status: 500 }

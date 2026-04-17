@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useCallback, useEffect } from "react";
+import { useI18n } from "@/i18n/context";
 import type { GameComponentProps } from "@/types/game";
 
 type Phase = "waiting" | "ready" | "distractor" | "go" | "too-early" | "result";
@@ -23,6 +24,8 @@ export default function ReactionSpeedGame({
   onComplete,
   onAbort,
 }: GameComponentProps) {
+  const { locale } = useI18n();
+  const isZh = locale === "zh";
   const [phase, setPhase] = useState<Phase>("waiting");
   const [round, setRound] = useState(0);
   const [times, setTimes] = useState<number[]>([]);
@@ -212,12 +215,12 @@ export default function ReactionSpeedGame({
     <div className="flex flex-col items-center gap-4 w-full">
       <div className="flex justify-between w-full max-w-lg text-sm text-muted-foreground px-2">
         <span>
-          第 {round}/{TOTAL_ROUNDS} 轮
+          {isZh ? `第 ${round}/${TOTAL_ROUNDS} 轮` : `Round ${round}/${TOTAL_ROUNDS}`}
         </span>
         <div className="flex gap-3">
-          {times.length > 0 && <span>平均: {avgTime}ms</span>}
+          {times.length > 0 && <span>{isZh ? "平均" : "Avg"}: {avgTime}ms</span>}
           {round >= DISTRACTOR_START_ROUND && (
-            <span className="text-orange-400 text-xs">⚡ 干扰模式</span>
+            <span className="text-orange-400 text-xs">{isZh ? "⚡ 干扰模式" : "⚡ Distractor Mode"}</span>
           )}
         </div>
       </div>
@@ -228,24 +231,26 @@ export default function ReactionSpeedGame({
       >
         {phase === "waiting" && (
           <div className="text-center">
-            <div>点击开始</div>
+            <div>{isZh ? "点击开始" : "Click to Start"}</div>
             <div className="text-sm mt-2 opacity-60">
-              第{DISTRACTOR_START_ROUND}轮起出现干扰色, 只点绿色!
+              {isZh
+                ? `第${DISTRACTOR_START_ROUND}轮起出现干扰色, 只点绿色!`
+                : `Distractors appear from round ${DISTRACTOR_START_ROUND}. Only click GREEN!`}
             </div>
           </div>
         )}
-        {phase === "ready" && "等待绿色..."}
-        {phase === "distractor" && "等待绿色..."}
-        {phase === "go" && "点击!"}
-        {phase === "too-early" && "太早了! 点击重试"}
+        {phase === "ready" && (isZh ? "等待绿色..." : "Wait for green...")}
+        {phase === "distractor" && (isZh ? "等待绿色..." : "Wait for green...")}
+        {phase === "go" && (isZh ? "点击!" : "Click!")}
+        {phase === "too-early" && (isZh ? "太早了! 点击重试" : "Too early! Click to retry")}
         {phase === "result" && (
           <div className="text-center">
             <div className="text-4xl">{currentTime}ms</div>
             {round < TOTAL_ROUNDS && (
-              <div className="text-sm mt-2 opacity-75">点击继续</div>
+              <div className="text-sm mt-2 opacity-75">{isZh ? "点击继续" : "Click to Continue"}</div>
             )}
             {round >= TOTAL_ROUNDS && (
-              <div className="text-sm mt-2 opacity-75">测试完成!</div>
+              <div className="text-sm mt-2 opacity-75">{isZh ? "测试完成!" : "Test Complete!"}</div>
             )}
           </div>
         )}
@@ -255,7 +260,7 @@ export default function ReactionSpeedGame({
         onClick={onAbort}
         className="text-sm text-muted-foreground hover:text-foreground"
       >
-        放弃测试
+        {isZh ? "放弃测试" : "Abort Test"}
       </button>
     </div>
   );

@@ -1,5 +1,5 @@
 import type { GameScorer } from "@/types/game";
-import { sigmoidNormalize } from "@/lib/scoring";
+import { percentileNormalize } from "@/lib/scoring";
 
 /**
  * @normSource Adapted from BART, Lejuez et al. 2002. Scaled for 10-trial version
@@ -14,7 +14,7 @@ export const riskScorer: GameScorer = {
   normalize(rawScore: number): number {
     // rawScore = total banked points across 10 rounds
     const clamped = Math.max(0, rawScore);
-    return sigmoidNormalize(
+    return percentileNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,

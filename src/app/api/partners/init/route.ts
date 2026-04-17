@@ -3,6 +3,7 @@ import { streamText, convertToModelMessages } from "ai";
 import { getModel } from "@/lib/ai";
 import { getAuthFromCookie } from "@/lib/auth";
 import { INIT_AGENT_PROMPT } from "@/lib/partner-prompts";
+import { logger } from "@/lib/logger";
 
 // POST /api/partners/init — Partner creation mini-chat (streaming)
 export async function POST(request: NextRequest) {
@@ -40,7 +41,7 @@ export async function POST(request: NextRequest) {
       recentMessages as Parameters<typeof convertToModelMessages>[0]
     );
   } catch (err) {
-    console.error("[partners/init] convertToModelMessages error:", err);
+    logger.error("partners.init", "convertToModelMessages error", err);
     return Response.json({ success: false, error: "Failed to process messages" }, { status: 400 });
   }
 

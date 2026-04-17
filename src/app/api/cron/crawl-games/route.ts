@@ -16,9 +16,17 @@ import type { CrawledGame } from "@/lib/crawlers";
  * Upserts crawled games by slug. New games are set to status="pending" for admin review.
  */
 export async function POST(request: NextRequest) {
+  // Rate limit cron auth to prevent brute force
+  const clientIp = request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() || "unknown";
+  const { checkRateLimit } = await import("@/lib/redis");
+  const { allowed } = await checkRateLimit(`rl:cron-auth:${clientIp}`, 10, 60);
+  if (!allowed) {
+    return NextResponse.json({ success: false, error: "Too many requests" }, { status: 429 });
+  }
+
   const auth = request.headers.get("authorization");
   if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await request.json().catch(() => ({}));

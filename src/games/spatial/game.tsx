@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
+import { useI18n } from "@/i18n/context";
 
 const TOTAL_ROUNDS = 12;
 
@@ -153,6 +154,8 @@ export default function SpatialGame({
   onComplete,
   onAbort,
 }: GameComponentProps) {
+  const { locale } = useI18n();
+  const isZh = locale === "zh";
   const [phase, setPhase] = useState<"idle" | "playing" | "feedback" | "done">(
     "idle"
   );
@@ -220,25 +223,26 @@ export default function SpatialGame({
     <div className="flex flex-col items-center gap-4 w-full">
       <div className="flex justify-between w-full max-w-lg text-sm text-muted-foreground px-2">
         <span>
-          第 {round + 1}/{TOTAL_ROUNDS} 轮
+          {isZh ? `第 ${round + 1}/${TOTAL_ROUNDS} 轮` : `Round ${round + 1}/${TOTAL_ROUNDS}`}
         </span>
         <span>
-          正确: {correct}/{round + (phase === "feedback" || phase === "done" ? 1 : 0)}
+          {isZh ? "正确:" : "Correct:"} {correct}/{round + (phase === "feedback" || phase === "done" ? 1 : 0)}
         </span>
       </div>
 
       {phase === "idle" && (
         <div className="w-full max-w-lg bg-slate-800 rounded-xl p-8 text-center">
-          <p className="text-lg mb-4">找出正确的旋转形状</p>
+          <p className="text-lg mb-4">{isZh ? "找出正确的旋转形状" : "Find the Correct Rotation"}</p>
           <p className="text-sm text-muted-foreground mb-6">
-            上方会显示一个原始形状，下方4个选项中只有一个是正确的旋转。
-            其余是镜像或错误旋转。共12轮，形状逐渐变得复杂。
+            {isZh
+              ? "上方会显示一个原始形状，下方4个选项中只有一个是正确的旋转。其余是镜像或错误旋转。共12轮，形状逐渐变得复杂。"
+              : "A shape is shown above. One of the 4 options below is the correct rotation. Others are mirrors or wrong rotations. 12 rounds — shapes get more complex."}
           </p>
           <button
             onClick={startGame}
             className="px-6 py-3 bg-blue-600 hover:bg-blue-500 text-white rounded-lg font-bold text-lg transition-colors"
           >
-            开始测试
+            {isZh ? "开始测试" : "Start Test"}
           </button>
         </div>
       )}
@@ -247,7 +251,7 @@ export default function SpatialGame({
         <div className="w-full max-w-lg flex flex-col items-center gap-6">
           {/* Original shape */}
           <div className="bg-slate-800 rounded-xl p-4 flex flex-col items-center">
-            <p className="text-xs text-muted-foreground mb-2">原始形状</p>
+            <p className="text-xs text-muted-foreground mb-2">{isZh ? "原始形状" : "Original Shape"}</p>
             <ShapeSVG
               points={roundData.shape.points}
               color={roundData.shape.color}
@@ -256,7 +260,7 @@ export default function SpatialGame({
           </div>
 
           <p className="text-sm text-muted-foreground">
-            哪个是正确的旋转？
+            {isZh ? "哪个是正确的旋转？" : "Which is the correct rotation?"}
           </p>
 
           {/* Options */}
@@ -298,7 +302,7 @@ export default function SpatialGame({
             <p
               className={`text-sm font-bold ${wasCorrect ? "text-green-400" : "text-red-400"}`}
             >
-              {wasCorrect ? "正确!" : "错误!"}
+              {wasCorrect ? (isZh ? "正确!" : "Correct!") : (isZh ? "错误!" : "Wrong!")}
             </p>
           )}
         </div>
@@ -306,11 +310,11 @@ export default function SpatialGame({
 
       {phase === "done" && (
         <div className="w-full max-w-lg bg-slate-800 rounded-xl p-8 text-center">
-          <p className="text-2xl font-bold mb-2">测试完成!</p>
+          <p className="text-2xl font-bold mb-2">{isZh ? "测试完成!" : "Test Complete!"}</p>
           <p className="text-4xl font-bold text-blue-400">
             {correct}/{TOTAL_ROUNDS}
           </p>
-          <p className="text-sm text-muted-foreground mt-2">正确回答</p>
+          <p className="text-sm text-muted-foreground mt-2">{isZh ? "正确回答" : "Correct Answers"}</p>
         </div>
       )}
 
@@ -318,7 +322,7 @@ export default function SpatialGame({
         onClick={onAbort}
         className="text-sm text-muted-foreground hover:text-foreground"
       >
-        放弃测试
+        {isZh ? "放弃测试" : "Abort Test"}
       </button>
     </div>
   );

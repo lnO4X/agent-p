@@ -8,6 +8,7 @@ import { getModel } from "@/lib/ai";
 import { buildTalentAnalysisPrompt } from "@/lib/prompts";
 import { recommendGenres } from "@/lib/scoring";
 import { type TalentCategory } from "@/types/talent";
+import { logger } from "@/lib/logger";
 
 const TALENT_PROFILE_KEYS: Record<string, TalentCategory> = {
   reactionSpeed: "reaction_speed",
@@ -91,7 +92,7 @@ export async function POST(request: Request) {
 
     return result.toTextStreamResponse();
   } catch (error) {
-    console.error("AI analyze error:", error);
+    logger.error("ai.analyze", "AI analyze failed", error);
     return NextResponse.json(
       {
         success: false,

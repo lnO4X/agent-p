@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { testSessions, gameScores, talentProfiles } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
 import { getAuthFromCookie } from "@/lib/auth";
+import { logger } from "@/lib/logger";
 
 export async function GET(
   _request: Request,
@@ -60,7 +61,7 @@ export async function GET(
       },
     });
   } catch (error) {
-    console.error("Get session error:", error);
+    logger.error("sessions.get", "Get session failed", error);
     return NextResponse.json(
       {
         success: false,

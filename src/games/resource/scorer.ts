@@ -1,5 +1,5 @@
 import type { GameScorer } from "@/types/game";
-import { sigmoidNormalize } from "@/lib/scoring";
+import { percentileNormalize } from "@/lib/scoring";
 
 /**
  * UFOV scorer.
@@ -23,7 +23,7 @@ export const resourceScorer: GameScorer = {
   ): number {
     const clamped = Math.max(30, rawScore);
     const accuracy = metadata?.accuracy as number | undefined;
-    const normalized = sigmoidNormalize(
+    const normalized = percentileNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,

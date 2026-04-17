@@ -18,7 +18,7 @@ export async function GET(request: NextRequest) {
     request.headers.get("authorization")
   );
   if (!auth) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const settings = await db.select().from(siteSettings);
@@ -38,13 +38,13 @@ export async function POST(request: NextRequest) {
     request.headers.get("authorization")
   );
   if (!auth) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const body = await request.json();
   const parsed = updateSettingsSchema.safeParse(body);
   if (!parsed.success) {
-    return Response.json({ error: parsed.error.flatten() }, { status: 400 });
+    return Response.json({ success: false, error: parsed.error.flatten() }, { status: 400 });
   }
 
   const { key, value } = parsed.data;

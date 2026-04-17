@@ -1,5 +1,6 @@
 import { ImageResponse } from "next/og";
 import { quickScoresToArchetype } from "@/lib/archetype";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -184,7 +185,7 @@ export async function GET(request: Request) {
       }
     );
   } catch (error) {
-    console.error("Archetype card error:", error);
+    logger.error("quiz.card", "Archetype card failed", error);
     return new Response("Error generating card", { status: 500 });
   }
 }

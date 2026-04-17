@@ -1,5 +1,5 @@
 import type { GameScorer } from "@/types/game";
-import { sigmoidNormalize } from "@/lib/scoring";
+import { percentileNormalize } from "@/lib/scoring";
 
 /**
  * @normSource Initial estimate. Loosely based on WCST response speed literature. Pending calibration
@@ -14,7 +14,7 @@ export const decisionScorer: GameScorer = {
   normalize(rawScore: number): number {
     // rawScore = correct decisions per second (higher is better)
     const clamped = Math.max(0, rawScore);
-    return sigmoidNormalize(
+    return percentileNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,

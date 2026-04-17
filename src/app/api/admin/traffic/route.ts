@@ -3,6 +3,7 @@ import { db } from "@/db";
 import { analyticsEvents } from "@/db/schema";
 import { sql } from "drizzle-orm";
 import { requireAdminOrCronSecret } from "@/lib/admin";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/admin/traffic — Traffic summary for harness/evaluator
@@ -136,7 +137,7 @@ export async function GET(request: NextRequest) {
     });
   } catch (error) {
     const msg = error instanceof Error ? error.message : String(error);
-    console.error("[admin/traffic] Error:", msg);
+    logger.error("admin.traffic", "Traffic query failed", error);
     return NextResponse.json({ success: false, error: msg }, { status: 500 });
   }
 }

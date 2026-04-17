@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { db } from "@/db";
 import { games } from "@/db/schema";
 import { eq, and } from "drizzle-orm";
+import { logger } from "@/lib/logger";
 
 /**
  * GET /api/games/catalog/[slug]
@@ -33,7 +34,7 @@ export async function GET(
       data: result[0],
     });
   } catch (error) {
-    console.error("Game detail error:", error);
+    logger.error("games.catalog", "Game detail failed", error);
     return NextResponse.json(
       { success: false, error: { code: "INTERNAL_ERROR", message: "获取游戏详情失败" } },
       { status: 500 }

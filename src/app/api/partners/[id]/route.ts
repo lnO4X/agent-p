@@ -12,7 +12,7 @@ export async function GET(
 ) {
   const auth = await getAuthFromCookie();
   if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
   const { id } = await params;
   const result = await db
@@ -29,7 +29,7 @@ export async function GET(
     .where(and(eq(partners.id, id), eq(partners.userId, auth.sub)))
     .limit(1);
   if (result.length === 0) {
-    return NextResponse.json({ error: "Partner not found" }, { status: 404 });
+    return NextResponse.json({ success: false, error: "Partner not found" }, { status: 404 });
   }
   return NextResponse.json({ success: true, data: result[0] });
 }
@@ -41,7 +41,7 @@ export async function PUT(
 ) {
   const auth = await getAuthFromCookie();
   if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
@@ -50,7 +50,7 @@ export async function PUT(
   const parsed = updatePartnerSchema.safeParse(body);
   if (!parsed.success) {
     return NextResponse.json(
-      { error: parsed.error.flatten() },
+      { success: false, error: parsed.error.flatten() },
       { status: 400 }
     );
   }
@@ -63,7 +63,7 @@ export async function PUT(
     .limit(1);
 
   if (existing.length === 0) {
-    return NextResponse.json({ error: "Partner not found" }, { status: 404 });
+    return NextResponse.json({ success: false, error: "Partner not found" }, { status: 404 });
   }
 
   const updateData: Record<string, unknown> = {
@@ -92,7 +92,7 @@ export async function DELETE(
 ) {
   const auth = await getAuthFromCookie();
   if (!auth) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
@@ -105,12 +105,12 @@ export async function DELETE(
     .limit(1);
 
   if (existing.length === 0) {
-    return NextResponse.json({ error: "Partner not found" }, { status: 404 });
+    return NextResponse.json({ success: false, error: "Partner not found" }, { status: 404 });
   }
 
   if (existing[0].slot === 0) {
     return NextResponse.json(
-      { error: "无法删除内置伙伴" },
+      { success: false, error: "无法删除内置伙伴" },
       { status: 403 }
     );
   }

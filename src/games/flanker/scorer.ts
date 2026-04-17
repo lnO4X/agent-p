@@ -1,5 +1,5 @@
 import type { GameScorer } from "@/types/game";
-import { sigmoidNormalize } from "@/lib/scoring";
+import { percentileNormalize } from "@/lib/scoring";
 
 /**
  * Flanker Effect scorer.
@@ -28,7 +28,7 @@ export const flankerScorer: GameScorer = {
 
     // Penalize low accuracy: if accuracy < 70%, cap normalized score at 30
     const accuracy = metadata?.accuracy as number | undefined;
-    const normalized = sigmoidNormalize(
+    const normalized = percentileNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,

@@ -1,6 +1,7 @@
 import { ImageResponse } from "next/og";
 import { getGameQuiz, getCharacterForArchetype } from "@/lib/game-quizzes";
 import { getArchetype } from "@/lib/archetype";
+import { logger } from "@/lib/logger";
 
 export const runtime = "nodejs";
 
@@ -177,7 +178,7 @@ export async function GET(
       }
     );
   } catch (error) {
-    console.error("Game card error:", error);
+    logger.error("quiz.game-card", "Game card failed", error);
     return new Response("Error generating card", { status: 500 });
   }
 }

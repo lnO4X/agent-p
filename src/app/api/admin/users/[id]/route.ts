@@ -23,7 +23,7 @@ export async function GET(
     request.headers.get("authorization")
   );
   if (!auth) {
-    return Response.json({ error: "Unauthorized" }, { status: 401 });
+    return Response.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
   const { id } = await params;
@@ -84,7 +84,7 @@ export async function GET(
 
   const user = userResult[0];
   if (!user) {
-    return Response.json({ error: "User not found" }, { status: 404 });
+    return Response.json({ success: false, error: "User not found" }, { status: 404 });
   }
 
   // Don't leak password hash
