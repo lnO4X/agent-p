@@ -1,10 +1,10 @@
 {
-  "timestamp": "2026-04-08T22:25:00Z",
+  "timestamp": "2026-04-14T08:20:00Z",
+  "specAction": "ACT",
+  "executionSummary": "Ran enrich-games endpoint 16 times. First call enriched 15 games, second pass enriched 6 more. Total: 21 games enriched with descriptions/developers/publishers from RAWG+Steam. Remaining unenriched games are mostly Chinese titles without RAWG/Steam API coverage.",
+  "totalEnriched": 21,
+  "codeChanged": false,
   "buildPassed": true,
-  "testsPassed": true,
-  "committed": true,
-  "pushed": true,
-  "commitHash": "5a0edcd",
-  "filesChanged": ["src/lib/blog-posts.ts"],
-  "summary": "Added 2 game-community-targeted blog posts: valorant-talent-test (EN+ZH) and league-of-legends-talent (EN+ZH). Each maps GameTan cognitive tests to game-specific skills with pro player data. Targets long-tail keywords for organic discovery."
+  "deployNeeded": false,
+  "errors": []
 }

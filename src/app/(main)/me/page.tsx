@@ -17,6 +17,7 @@ import {
   TrendingUp,
 } from "lucide-react";
 import { EvolutionTracker } from "@/components/evolution-tracker";
+import { RetestReminder } from "@/components/retest-reminder";
 import { scoreToArchetype } from "@/lib/archetype";
 import type { Archetype } from "@/lib/archetype";
 import type { TalentCategory, Rank } from "@/types/talent";
@@ -264,6 +265,9 @@ export default function MePage() {
         </Card>
       )}
 
+      {/* ─── Retest Reminder ─── */}
+      <RetestReminder />
+
       {/* ─── Evolution Tracker ─── */}
       {evolutionHistory.length >= 2 && (
         <EvolutionTracker history={evolutionHistory} evolution={evolutionData} />
@@ -302,10 +306,10 @@ export default function MePage() {
                 {t("me.testHistory")}
               </h2>
               <Link
-                href="/results"
-                className="text-xs text-muted-foreground hover:text-foreground"
+                href="/me/history"
+                className="text-xs text-primary hover:underline"
               >
-                {t("dashboard.viewAll")} →
+                {locale === "zh" ? "查看历史" : "View History"} →
               </Link>
             </div>
             <div className="space-y-2">

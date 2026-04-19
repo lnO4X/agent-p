@@ -8,7 +8,7 @@ import { ArchetypeIcon } from "@/components/archetype-icon";
 import { useI18n } from "@/i18n/context";
 import { Zap, Brain, Target, Gamepad2, ChevronRight, Users, Sparkles, AlertTriangle, HelpCircle, Crown } from "lucide-react";
 import { DistributionBar } from "@/components/distribution-bar";
-import { PRO_BENCHMARKS } from "@/lib/pro-benchmarks";
+import { GAMER_TOP5_AVG } from "@/lib/literature-norms";
 
 // Featured archetypes to preview (show 4 most distinctive)
 const FEATURED_IDS = ["lightning-assassin", "oracle", "berserker", "architect"];
@@ -185,7 +185,7 @@ export default function Home() {
 
           <DistributionBar
             userScore={45}
-            proAvg={Math.round(PRO_BENCHMARKS.reduce((a, b) => a + b.proAvg, 0) / PRO_BENCHMARKS.length)}
+            referenceScore={GAMER_TOP5_AVG}
             isZh={isZh}
           />
 

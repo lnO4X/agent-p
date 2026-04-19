@@ -4,14 +4,15 @@ import RhythmGame from "./game";
 
 const plugin: GamePlugin = {
   id: "rhythm",
-  name: "节拍捕手",
-  nameEn: "Beat Catcher",
-  description: "在正确时机击打落下的音符，测试节奏感",
+  name: "节拍同步",
+  nameEn: "Beat Sync",
+  description:
+    "与节拍器同步敲击——感觉运动同步（SMS）范式，测量你与 120 BPM 节拍的平均时间偏差",
   primaryTalent: "rhythm_sense",
   difficulty: "medium",
-  estimatedDurationSec: 40,
+  estimatedDurationSec: 30,
   instructions:
-    "音符从上方落下，到达蓝色命中区域时按空格键或点击画布。节奏从90BPM开始逐渐加快，共20个音符。计时偏差越小分数越高。",
+    "跟随固定 120 BPM 节拍敲击空格键或点击。测量你的敲击与节拍的绝对时间偏差（毫秒），偏差越小同步越好。标准 SMS 范式（Repp 2005）。",
   icon: "🎵",
   scorer: rhythmScorer,
   component: RhythmGame,

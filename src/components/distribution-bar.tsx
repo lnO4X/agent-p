@@ -1,44 +1,54 @@
 "use client";
 
-import { DISTRIBUTION_BINS } from "@/lib/pro-benchmarks";
+import { DISTRIBUTION_BINS } from "@/lib/literature-norms";
 import { useI18n } from "@/i18n/context";
 
 interface DistributionBarProps {
   userScore: number;
-  proAvg: number;
+  /** Literature top-5%-of-gamers reference value (published studies) */
+  referenceScore: number;
   isZh: boolean;
   className?: string;
 }
 
 /**
- * Mini bell-curve distribution chart — 10 vertical bars representing score bins.
- * Marks the user's position and the pro average line.
+ * Mini distribution chart — 10 vertical bars representing score bins.
+ * Marks the user's position and a literature-based reference position
+ * (top 5% of gamers in published research).
  */
-export function DistributionBar({ userScore, proAvg, isZh, className }: DistributionBarProps) {
+export function DistributionBar({
+  userScore,
+  referenceScore,
+  isZh,
+  className,
+}: DistributionBarProps) {
   const { t } = useI18n();
   const maxBin = Math.max(...DISTRIBUTION_BINS);
   const userBin = Math.min(Math.floor(userScore / 10), 9);
-  const proBin = Math.min(Math.floor(proAvg / 10), 9);
+  const refBin = Math.min(Math.floor(referenceScore / 10), 9);
 
   return (
     <div
       className={className}
       role="img"
-      aria-label={t("distribution.ariaLabel", { score: Math.round(userScore), proAvg })}
+      aria-label={t("distribution.ariaLabel", {
+        score: Math.round(userScore),
+        proAvg: referenceScore,
+      })}
     >
       {/* Bars */}
       <div className="flex items-end gap-[3px] h-16">
         {DISTRIBUTION_BINS.map((pct, i) => {
           const height = Math.max(4, (pct / maxBin) * 100);
           const isUser = i === userBin;
-          const isPro = i === proBin;
+          const isRef = i === refBin;
           return (
             <div key={i} className="flex-1 flex flex-col items-center gap-0.5">
               <div
                 className={`w-full rounded-t-sm transition-all ${
                   isUser
                     ? "bg-primary"
-                    : isPro
+                    : isRef
                       ? "bg-accent/60"
                       : "bg-muted-foreground/20"
                 }`}
@@ -53,7 +63,7 @@ export function DistributionBar({ userScore, proAvg, isZh, className }: Distribu
       <div className="flex items-center gap-[3px] mt-1">
         {DISTRIBUTION_BINS.map((_, i) => {
           const isUser = i === userBin;
-          const isPro = i === proBin;
+          const isRef = i === refBin;
           return (
             <div key={i} className="flex-1 text-center">
               {isUser && (
@@ -61,9 +71,9 @@ export function DistributionBar({ userScore, proAvg, isZh, className }: Distribu
                   {t("distribution.you")}
                 </div>
               )}
-              {isPro && !isUser && (
+              {isRef && !isUser && (
                 <div className="text-[9px] text-accent font-bold leading-tight">
-                  Pro
+                  {isZh ? "前 5%" : "Top 5%"}
                 </div>
               )}
             </div>
@@ -79,12 +89,16 @@ export function DistributionBar({ userScore, proAvg, isZh, className }: Distribu
         </span>
         <span className="flex items-center gap-1">
           <span className="w-2 h-2 rounded-sm bg-accent/60 inline-block" />
-          {t("distribution.proAvg", { score: proAvg })}
+          {isZh
+            ? `文献前 5% (${referenceScore})`
+            : `Literature top 5% (${referenceScore})`}
         </span>
       </div>
-      {/* D10: Data disclaimer */}
+      {/* Data disclaimer — literature-sourced, not pro data */}
       <div className="text-[10px] text-muted-foreground/50 text-center mt-1">
-        {t("distribution.disclaimer")}
+        {isZh
+          ? "基于已发表的玩家认知研究（Dale & Green 2017; Kowal et al. 2018）"
+          : "Based on published gamer cognitive research (Dale & Green 2017; Kowal et al. 2018)"}
       </div>
     </div>
   );

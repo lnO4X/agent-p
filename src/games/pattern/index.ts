@@ -2,19 +2,28 @@ import type { GamePlugin } from "@/types/game";
 import { patternScorer } from "./scorer";
 import PatternGame from "./game";
 
+/**
+ * Posner Cueing Task (Posner 1980; Posner & Petersen 1990).
+ *
+ * A canonical attention paradigm measuring attentional orienting.
+ * Metric: Validity Effect = mean RT(invalid) - mean RT(valid).
+ * Lower effect = more efficient attention reorienting.
+ */
 const plugin: GamePlugin = {
   id: "pattern",
-  name: "图案矩阵",
-  nameEn: "Pattern Matrix",
-  description: "从相似颜色中找出不同方块，测试图案识别能力",
+  name: "\u6CE8\u610F\u529B\u805A\u7126", // 注意力聚焦
+  nameEn: "Attention Focus",
+  description:
+    "Posner \u6CE8\u610F\u7EBF\u7D22\u4EFB\u52A1 \u2014 \u6D4B\u91CF\u7EBF\u7D22\u8BEF\u5BFC\u65F6\u6CE8\u610F\u529B\u7684\u91CD\u65B0\u5B9A\u5411\u901F\u5EA6",
   primaryTalent: "pattern_recog",
-  difficulty: "easy",
-  estimatedDurationSec: 45,
+  difficulty: "medium",
+  estimatedDurationSec: 120,
   instructions:
-    "4x4方格中有一个方块颜色与其它略有不同，点击找出它。每轮颜色差异会越来越小，共15轮。找对越多分数越高。",
-  icon: "🎨",
+    "Watch the fixation cross. A cue will briefly flash on one side, then a target (*) appears. Press LEFT or RIGHT arrow (or tap the box) indicating the target's location. Ignore the cue when it misleads you.",
+  icon: "\uD83C\uDFAF", // 🎯
   scorer: patternScorer,
   component: PatternGame,
+  mobileCompatible: true,
 };
 
 export default plugin;

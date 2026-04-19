@@ -1,23 +1,5 @@
 {
-  "timestamp": "2026-04-08T22:10:00Z",
-  "action": "ACT",
-  "rationale": "Traffic at 2/day with 0 organic. All internal SEO done (375 sitemap URLs). 3 existing blog posts target generic keywords. Adding game-specific blog posts targets lower-competition long-tail keywords (valorant aim test, lol talent test) and creates shareable content for those communities. Last eval explicitly recommended this.",
-  "spec": {
-    "title": "Add 2 game-community-targeted blog posts (Valorant + League of Legends)",
-    "files": ["src/lib/blog-posts.ts"],
-    "changes": [
-      "Add blog post 'valorant-talent-test' targeting Valorant FPS community (EN+ZH)",
-      "Add blog post 'league-of-legends-talent' targeting MOBA community (EN+ZH)",
-      "Both posts reference GameTan test dimensions relevant to each game",
-      "Both posts include realistic pro player cognitive data",
-      "Both posts have CTA linking to /quiz"
-    ],
-    "testCriteria": [
-      "GET /blog/valorant-talent-test returns 200",
-      "GET /blog/league-of-legends-talent returns 200",
-      "GET /blog returns 200 and shows 5 posts total",
-      "GET /sitemap.xml includes both new blog URLs",
-      "npx next build succeeds"
-    ]
-  }
+  "timestamp": "2026-04-19T16:30:00Z",
+  "action": "SKIP",
+  "reason": "31st consecutive SKIP. Site healthy, no bugs, no broken flows. Traffic 8 PV/7d with Google organic referrer. 0 premium. Growth bottleneck is external (indexing/content distribution), not code. No actionable code work."
 }

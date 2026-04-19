@@ -21,10 +21,10 @@ const scorers = [
   { name: "spatial", scorer: spatialScorer, sampleScores: [2, 5, 7, 10, 12] },
   { name: "memory", scorer: memoryScorer, sampleScores: [3, 5, 6, 8, 12] },
   { name: "strategy", scorer: strategyScorer, sampleScores: [10, 30, 50, 75, 95] },
-  { name: "rhythm", scorer: rhythmScorer, sampleScores: [150, 100, 80, 50, 15] },
-  { name: "pattern", scorer: patternScorer, sampleScores: [3, 7, 10, 13, 15] },
+  { name: "rhythm", scorer: rhythmScorer, sampleScores: [80, 60, 30, 20, 10] },
+  { name: "pattern", scorer: patternScorer, sampleScores: [0, 20, 40, 60, 100] },
   { name: "multitask", scorer: multitaskScorer, sampleScores: [15, 35, 55, 75, 95] },
-  { name: "decision", scorer: decisionScorer, sampleScores: [0.3, 0.8, 1.2, 1.8, 2.5] },
+  { name: "decision", scorer: decisionScorer, sampleScores: [-30, -10, 0, 12, 30] },
   { name: "emotional", scorer: emotionalScorer, sampleScores: [0.4, 0.7, 0.8, 1.0, 1.15] },
   { name: "teamwork", scorer: teamworkScorer, sampleScores: [20, 50, 75, 100, 130] },
   { name: "risk", scorer: riskScorer, sampleScores: [15, 40, 60, 80, 120] },
@@ -92,9 +92,35 @@ describe("Specific scorer edge cases", () => {
     expect(slow).toBeLessThan(30);
   });
 
-  it("rhythm: perfect timing (10ms) scores very high", () => {
-    const perfect = rhythmScorer.normalize(10);
-    expect(perfect).toBeGreaterThan(80);
+  it("rhythm (SMS): excellent 20ms asynchrony lands in top ~20% (>=78th percentile)", () => {
+    // Mean 30ms, SD 12ms → 20ms = +0.83 SD above mean (lower is better)
+    // Normal CDF(0.83) ≈ 0.797 → 79.7th percentile
+    const excellent = rhythmScorer.normalize(20);
+    expect(excellent).toBeGreaterThanOrEqual(78);
+  });
+
+  it("rhythm (SMS): typical 30ms asynchrony normalizes to ~50th percentile", () => {
+    const typical = rhythmScorer.normalize(30);
+    expect(typical).toBeGreaterThan(45);
+    expect(typical).toBeLessThan(55);
+  });
+
+  it("rhythm (SMS): poor 60ms asynchrony lands in bottom ~20% (<=20th percentile)", () => {
+    const poor = rhythmScorer.normalize(60);
+    expect(poor).toBeLessThanOrEqual(20);
+  });
+
+  it("rhythm (SMS): >30% missed beats caps normalized score at 25", () => {
+    // Even with perfect 10ms asynchrony on the minority matched, >30% missed
+    // means the subject couldn't follow the rhythm. Cap at 25.
+    const capped = rhythmScorer.normalize(10, undefined, { missedBeats: 15 });
+    expect(capped).toBeLessThanOrEqual(25);
+  });
+
+  it("rhythm (SMS): <=30% missed beats does NOT trigger cap", () => {
+    // 9 missed (28%) should not cap; 20ms asynchrony stays in the top band.
+    const notCapped = rhythmScorer.normalize(20, undefined, { missedBeats: 9 });
+    expect(notCapped).toBeGreaterThan(25);
   });
 
   it("spatial: perfect 12/12 scores very high", () => {
@@ -122,8 +148,59 @@ describe("Specific scorer edge cases", () => {
     expect(consistent).toBeGreaterThan(55);
   });
 
-  it("decision: 2 correct/sec normalizes well above average", () => {
-    const fast = decisionScorer.normalize(2.0);
-    expect(fast).toBeGreaterThan(70);
+  it("decision (IGT): typical net score +12 normalizes to ~50th percentile", () => {
+    const typical = decisionScorer.normalize(12);
+    expect(typical).toBeGreaterThan(45);
+    expect(typical).toBeLessThan(55);
+  });
+
+  it("decision (IGT): strong net score +30 lands in top ~10% (>=85th percentile)", () => {
+    const strong = decisionScorer.normalize(30);
+    expect(strong).toBeGreaterThanOrEqual(85);
+  });
+
+  it("decision (IGT): poor net score -30 lands in bottom ~10% (<=15th percentile)", () => {
+    const poor = decisionScorer.normalize(-30);
+    expect(poor).toBeLessThanOrEqual(15);
+  });
+
+  it("decision (IGT): raw score clamps to [-60, +60]", () => {
+    const capHigh = decisionScorer.normalize(500);
+    const capHighest = decisionScorer.normalize(60);
+    expect(capHigh).toBeCloseTo(capHighest, 1);
+
+    const capLow = decisionScorer.normalize(-500);
+    const capLowest = decisionScorer.normalize(-60);
+    expect(capLow).toBeCloseTo(capLowest, 1);
+  });
+
+  // ---- Posner Cueing Task (pattern) ----
+
+  it("pattern (Posner): validity effect of 0ms scores high", () => {
+    // A 0ms validity effect means attention reorients instantly — ~2 SDs better than mean.
+    const perfect = patternScorer.normalize(0);
+    expect(perfect).toBeGreaterThan(80);
+  });
+
+  it("pattern (Posner): typical 40ms validity effect normalizes to ~50th percentile", () => {
+    const typical = patternScorer.normalize(40);
+    expect(typical).toBeGreaterThan(45);
+    expect(typical).toBeLessThan(55);
+  });
+
+  it("pattern (Posner): 80ms validity effect (slow reorienting) scores below average", () => {
+    const slow = patternScorer.normalize(80);
+    expect(slow).toBeLessThan(30);
+  });
+
+  it("pattern (Posner): low accuracy (<70%) caps score at 30", () => {
+    // Even with a perfect 0ms validity effect, <70% accuracy signals guessing.
+    const capped = patternScorer.normalize(0, undefined, { accuracy: 0.5 });
+    expect(capped).toBeLessThanOrEqual(30);
+  });
+
+  it("pattern (Posner): good accuracy (>=70%) does NOT trigger the cap", () => {
+    const notCapped = patternScorer.normalize(0, undefined, { accuracy: 0.9 });
+    expect(notCapped).toBeGreaterThan(30);
   });
 });

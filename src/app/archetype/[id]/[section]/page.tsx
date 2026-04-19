@@ -281,15 +281,15 @@ function GrowthSection({ archetypeId, isZh, t }: { archetypeId: string; isZh: bo
     hand_eye_coord: { zh: "手眼协调", en: "Hand-Eye Coordination" },
     spatial_awareness: { zh: "空间感知", en: "Spatial Awareness" },
     memory: { zh: "记忆力", en: "Memory" },
-    strategy_logic: { zh: "策略逻辑", en: "Strategy & Logic" },
+    strategy_logic: { zh: "反应抑制", en: "Response Inhibition" },
     rhythm_sense: { zh: "节奏感", en: "Rhythm Sense" },
     pattern_recog: { zh: "模式识别", en: "Pattern Recognition" },
     multitasking: { zh: "多任务处理", en: "Multitasking" },
     decision_speed: { zh: "决策速度", en: "Decision Speed" },
-    emotional_control: { zh: "情绪控制", en: "Emotional Control" },
-    teamwork_tendency: { zh: "团队协作", en: "Teamwork" },
+    emotional_control: { zh: "干扰抑制", en: "Interference Suppression" },
+    teamwork_tendency: { zh: "视角转换", en: "Perspective Taking" },
     risk_assessment: { zh: "风险评估", en: "Risk Assessment" },
-    resource_mgmt: { zh: "资源管理", en: "Resource Management" },
+    resource_mgmt: { zh: "视觉注意广度", en: "Visual Attention Breadth" },
   };
 
   const weakName = TALENT_NAMES[archetype.weakTalent] || { zh: "未知", en: "Unknown" };

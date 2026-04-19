@@ -6,7 +6,7 @@ import { useEffect, useState } from "react";
 import { useAuth } from "@/hooks/use-auth";
 import { useI18n } from "@/i18n/context";
 import { Button } from "@/components/ui/button";
-import { Home, Gamepad2, Brain, User, Globe } from "lucide-react";
+import { Home, Gamepad2, Brain, User, Globe, UsersRound } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { LOCALE_LABELS, getLocales, type Locale } from "@/i18n/index";
 
@@ -40,6 +40,15 @@ const NAV_ITEMS: NavItem[] = [
   },
 ];
 
+// Shown in addition to NAV_ITEMS when the user has at least one team.
+// On desktop it's a full tab; on the mobile bottom-bar it's surfaced via /me.
+const TEAM_NAV_ITEM: NavItem = {
+  href: "/team",
+  labelKey: "nav.team",
+  icon: UsersRound,
+  activePrefixes: ["/team"],
+};
+
 function isActive(pathname: string, item: NavItem) {
   if (item.activePrefixes) {
     return item.activePrefixes.some((p) => pathname.startsWith(p));
@@ -57,10 +66,34 @@ export default function MainLayout({
   const { t, locale, setLocale } = useI18n();
   const [showLangMenu, setShowLangMenu] = useState(false);
   const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [hasTeam, setHasTeam] = useState(false);
 
   useEffect(() => {
-    setIsLoggedIn(document.cookie.includes("logged-in="));
+    const loggedIn = document.cookie.includes("logged-in=");
+    setIsLoggedIn(loggedIn);
+    if (!loggedIn) return;
+    // Best-effort team presence check; silently ignore failures so nav never blocks.
+    let cancelled = false;
+    (async () => {
+      try {
+        const res = await fetch("/api/team");
+        const json = await res.json();
+        if (cancelled) return;
+        if (json.success && Array.isArray(json.data?.orgs)) {
+          setHasTeam(json.data.orgs.length > 0);
+        }
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
   }, []);
+
+  const navItems: NavItem[] = hasTeam
+    ? [...NAV_ITEMS, TEAM_NAV_ITEM]
+    : NAV_ITEMS;
 
   return (
     <div className="min-h-[100dvh] bg-background flex flex-col">
@@ -71,7 +104,7 @@ export default function MainLayout({
             {t("app.name")}
           </Link>
           <nav className="flex items-center gap-1">
-            {NAV_ITEMS.map((item) => {
+            {navItems.map((item) => {
               const Icon = item.icon;
               const active = isActive(pathname, item);
               return (

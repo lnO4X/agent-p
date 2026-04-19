@@ -352,3 +352,103 @@ export const analyticsEvents = pgTable(
   ]
 );
 
+
+// ==================== B2B TEAMS / ORGANIZATIONS ====================
+//
+// Month-4 B2B foundation: coaches create organizations, invite players,
+// view team-level cognitive profiles, and (in a follow-up) export data.
+//
+// Role hierarchy: admin > coach > player
+// Plans: beta (default, waitlist/pilot), starter, pro, enterprise
+export const organizations = pgTable(
+  "organizations",
+  {
+    id: text("id").primaryKey(), // nanoid
+    name: text("name").notNull(),
+    slug: text("slug").notNull(), // URL-friendly unique identifier
+    plan: text("plan", {
+      enum: ["starter", "pro", "enterprise", "beta"],
+    })
+      .notNull()
+      .default("beta"),
+    ownerId: text("owner_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "restrict" }),
+    maxMembers: integer("max_members").notNull().default(10),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    updatedAt: timestamp("updated_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("organizations_slug_idx").on(table.slug),
+    index("organizations_owner_idx").on(table.ownerId),
+  ]
+);
+
+export const orgMembers = pgTable(
+  "org_members",
+  {
+    id: text("id").primaryKey(), // nanoid
+    orgId: text("org_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    role: text("role", { enum: ["admin", "coach", "player"] })
+      .notNull()
+      .default("player"),
+    // Optional per-member metadata
+    displayName: text("display_name"), // coach-assigned alias
+    notes: text("notes"), // coach's private notes
+    addedAt: timestamp("added_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("org_members_unique_org_user").on(table.orgId, table.userId),
+    index("org_members_org_idx").on(table.orgId),
+    index("org_members_user_idx").on(table.userId),
+  ]
+);
+
+export const orgInvites = pgTable(
+  "org_invites",
+  {
+    id: text("id").primaryKey(), // nanoid
+    orgId: text("org_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    email: text("email").notNull(),
+    role: text("role", { enum: ["admin", "coach", "player"] })
+      .notNull()
+      .default("player"),
+    token: text("token").notNull(), // for invite URL
+    expiresAt: timestamp("expires_at").notNull(),
+    acceptedAt: timestamp("accepted_at"),
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+  },
+  (table) => [
+    uniqueIndex("org_invites_token_idx").on(table.token),
+    index("org_invites_org_idx").on(table.orgId),
+    index("org_invites_email_idx").on(table.email),
+  ]
+);
+
+export const apiTokens = pgTable(
+  "api_tokens",
+  {
+    id: text("id").primaryKey(), // nanoid
+    orgId: text("org_id")
+      .notNull()
+      .references(() => organizations.id, { onDelete: "cascade" }),
+    name: text("name").notNull(), // display label ("CI bot", "Analytics pipeline")
+    tokenHash: text("token_hash").notNull(), // bcrypt/sha256 of the raw token
+    lastUsedAt: timestamp("last_used_at"),
+    expiresAt: timestamp("expires_at"), // null = never expires
+    createdAt: timestamp("created_at").defaultNow().notNull(),
+    revokedAt: timestamp("revoked_at"),
+  },
+  (table) => [
+    uniqueIndex("api_tokens_token_hash_idx").on(table.tokenHash),
+    index("api_tokens_org_idx").on(table.orgId),
+  ]
+);
+

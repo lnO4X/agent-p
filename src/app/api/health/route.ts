@@ -61,7 +61,14 @@ function checkGameRegistry(): HealthCheck {
   };
 }
 
+// Module-level cache — locale files are static between deploys, so we only
+// read + parse them once per serverless instance. This avoids 8 disk reads
+// + 8 JSON.parse calls on every /api/health invocation.
+let _i18nCache: HealthCheck | null = null;
+
 function checkI18n(): HealthCheck {
+  if (_i18nCache) return _i18nCache;
+
   try {
     const localesDir = path.join(process.cwd(), "src", "i18n", "locales");
     const files = fs.readdirSync(localesDir).filter((f) => f.endsWith(".json"));
@@ -80,13 +87,15 @@ function checkI18n(): HealthCheck {
       .filter(([, count]) => count !== expected)
       .map(([file, count]) => `${file}: ${count} (expected ${expected})`);
 
-    return {
+    _i18nCache = {
       ok: mismatches.length === 0,
       locales: files.length,
       keysPerLocale: expected,
       mismatches,
     };
+    return _i18nCache;
   } catch (err) {
+    // Don't cache errors — retry next time
     return { ok: false, error: String(err) };
   }
 }

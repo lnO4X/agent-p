@@ -23,3 +23,255 @@
 {"ts":"2026-04-08T13:04:20Z","action":"ACT","spec":"?","traffic_24h":0,"users":8,"duration_min":9}
 {"ts":"2026-04-08T13:44:13Z","action":"ACT","spec":"?","traffic_24h":0,"users":8,"duration_min":9}
 {"ts":"2026-04-08T14:22:49Z","action":"ACT","spec":"?","traffic_24h":0,"users":8,"duration_min":8}
+{"ts":"2026-04-09T18:00:00Z","action":"SKIP","spec":"No actionable items. Site healthy, no bugs. External blockers only.","eval_score":15,"traffic_24h":10,"users":8,"rationale":"After 17 consecutive ACTs, all internal improvements exhausted. Remaining blockers: Google indexing, Creem verification, external distribution. Quiet is correct."}
+{"ts":"2026-04-08T16:58:34Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":3}
+{"ts":"2026-04-08T19:01:43Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":3}
+{"ts":"2026-04-09T22:01:00Z","action":"SKIP","spec":"Site healthy, traffic improving (38 PV/day). No bugs. External blockers only.","eval_score":14,"traffic_24h":38,"users":8,"rationale":"All growth blockers external: Google indexing, Creem verification, distribution. Quiet is correct."}
+{"ts":"2026-04-08T21:04:39Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":2}
+{"ts":"2026-04-08T23:06:57Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":2}
+{"ts":"2026-04-09T08:30:00Z","action":"SKIP","spec":"Site healthy, 38 PV/day, 5 unique sessions. Funnel working. All blockers external.","eval_score":14,"traffic_24h":38,"users":8,"rationale":"6th consecutive SKIP. No bugs, no regressions. Waiting for Google indexing and organic traffic."}
+{"ts":"2026-04-09T01:12:44Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":5}
+{"ts":"2026-04-09T03:16:39Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":3}
+{"ts":"2026-04-09T12:15:00Z","action":"SKIP","spec":"Site healthy, 38 PV/day, 5 unique. 8th SKIP. Funnel works. All blockers external.","eval_score":14,"traffic_24h":38,"users":8,"rationale":"No bugs, no regressions. Waiting for Google organic traffic."}
+{"ts":"2026-04-09T05:23:53Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":7}
+{"ts":"2026-04-09T07:28:26Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":4}
+{"ts":"2026-04-09T08:19:06Z","action":"SKIP","spec":"9th SKIP. Healthy, 38 PV/day, funnel intact. Awaiting organic traffic.","eval_score":14,"traffic_24h":38,"users":8,"rationale":"No bugs, no regressions. All blockers external."}
+{"ts":"2026-04-09T09:32:33Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":4}
+{"ts":"2026-04-09T11:35:21Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":2}
+{"ts":"2026-04-09T12:19:00Z","action":"SKIP","spec":"10th SKIP. Healthy, 38 PV/day, funnel intact. Awaiting organic traffic.","eval_score":14,"traffic_24h":38,"users":8,"rationale":"No bugs, no regressions. All blockers external."}
+{"ts":"2026-04-09T13:37:45Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":2}
+{"ts":"2026-04-09T15:37:54Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":0}
+{"ts":"2026-04-10T00:22:00Z","action":"SKIP","spec":"11th SKIP. Healthy, ~28 PV/day avg, funnel intact. Awaiting organic traffic.","eval_score":14,"traffic_24h":41,"users":8,"rationale":"No bugs, no regressions. All blockers external."}
+{"ts":"2026-04-09T17:42:44Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":4}
+{"ts":"2026-04-09T19:46:40Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":3}
+{"ts":"2026-04-10T04:37:00Z","action":"SKIP","spec":"12th SKIP. Healthy, ~21 PV/day, funnel intact. Awaiting organic traffic.","eval_score":14,"traffic_24h":16,"users":8,"rationale":"No bugs, no regressions. All blockers external."}
+{"ts":"2026-04-09T21:50:49Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":4}
+{"ts":"2026-04-09T23:56:12Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":5}
+{"ts":"2026-04-10T08:30:00Z","action":"SKIP","spec":"13th SKIP. Healthy, ~21 PV/day, funnel intact. Awaiting organic traffic.","eval_score":14,"traffic_24h":16,"users":8,"rationale":"No bugs, no regressions. All blockers external."}
+{"ts":"2026-04-10T01:58:49Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":2}
+{"ts":"2026-04-10T04:03:36Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":4}
+{"ts":"2026-04-10T12:27:00Z","action":"SKIP","spec":"14th SKIP. Healthy, ~21 PV/day, funnel intact. Awaiting organic traffic.","eval_score":14,"traffic_24h":16,"users":8,"rationale":"No bugs, no regressions. All blockers external."}
+{"ts":"2026-04-10T06:07:06Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":3}
+{"ts":"2026-04-10T08:11:00Z","action":"SKIP","spec":"?","traffic_24h":0,"users":8,"duration_min":3}
+{"ts":"2026-04-10T16:30:00Z","action":"SKIP","spec":"6th SKIP. 26 PV/4 sessions/24h, 9 users, funnel intact. No bugs.","eval_score":5,"traffic_24h":26,"users":9,"rationale":"All blockers external."}
+{"ts":"2026-04-10T10:14:42Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":3}
+{"ts":"2026-04-10T20:30:00Z","action":"SKIP","spec":"7th SKIP. 26 PV/4 sessions/24h, 9 users, funnel intact. No bugs.","eval_score":5,"traffic_24h":26,"users":9,"rationale":"All blockers external."}
+{"ts":"2026-04-10T12:19:32Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":4}
+{"ts":"2026-04-10T14:24:11Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":4}
+{"ts":"2026-04-11T00:15:00Z","action":"SKIP","spec":"Systems nominal. 21 PV/10 sessions/24h, 9 users, Google referrals appearing. No bugs.","eval_score":5,"traffic_24h":21,"users":9,"rationale":"All blockers external."}
+{"ts":"2026-04-10T16:28:20Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":4}
+{"ts":"2026-04-10T18:31:32Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":3}
+{"ts":"2026-04-11T04:30:00Z","action":"SKIP","spec":"Systems nominal. 16 PV/8 sessions/24h, Google referrals growing, 1 new signup. No bugs.","eval_score":5,"traffic_24h":16,"users":9,"rationale":"All blockers external. Organic growth signal positive."}
+{"ts":"2026-04-10T20:34:35Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":3}
+{"ts":"2026-04-10T22:39:11Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":4}
+{"ts":"2026-04-11T08:30:00Z","action":"SKIP","spec":"Systems nominal. 16 PV/8 sessions/24h. Google referrals growing. No bugs. No actionable items.","eval_score":5,"traffic_24h":16,"users":9,"rationale":"All blockers external. Steady organic growth."}
+{"ts":"2026-04-11T00:42:09Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":2}
+{"ts":"2026-04-11T02:47:40Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":5}
+{"ts":"2026-04-11T12:32:00Z","action":"SKIP","spec":"Systems nominal. 16 PV/8 sessions/24h. Google refs 6/7d. No bugs. No actionable items.","eval_score":5,"traffic_24h":16,"users":9,"rationale":"All blockers external. Steady state."}
+{"ts":"2026-04-11T04:50:40Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":2}
+{"ts":"2026-04-11T06:54:33Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":3}
+{"ts":"2026-04-11T16:30:00Z","action":"SKIP","spec":"Steady state. 12PV/8sess/24h. Google 6refs/7d. Funnel 4.7%→25%. No bugs. All blockers external.","traffic_24h":12,"users":9,"duration_min":2}
+{"ts":"2026-04-11T08:57:35Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":3}
+{"ts":"2026-04-11T11:00:16Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":2}
+{"ts":"2026-04-11T13:04:51Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":4}
+{"ts":"2026-04-11T15:08:40Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":3}
+{"ts":"2026-04-11T22:58:00Z","action":"SKIP","spec":"Steady state. 12PV/8sess/24h. Google 6refs/7d. All endpoints 200. 6th SKIP today — nothing changed.","traffic_24h":12,"users":9,"duration_min":2}
+{"ts":"2026-04-12T00:15:00Z","action":"SKIP","spec":"Steady state. 6PV/2sess/24h. Site 200. 8th consecutive SKIP.","traffic_24h":6,"users":9,"duration_min":2}
+{"ts":"2026-04-11T17:13:03Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":4}
+{"ts":"2026-04-11T19:17:46Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":4}
+{"ts":"2026-04-12T04:30:00Z","action":"SKIP","spec":"Steady state. 6PV/2sess/24h. Site 200. 10th consecutive SKIP.","traffic_24h":6,"users":9,"duration_min":2}
+{"ts":"2026-04-11T20:58:46Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":3}
+{"ts":"2026-04-11T21:20:48Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":3}
+{"ts":"2026-04-11T23:02:54Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":4}
+{"ts":"2026-04-11T23:27:31Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":6}
+{"ts":"2026-04-12T08:00:00Z","action":"SKIP","spec":"Steady state. 6PV/2sess/24h. Site 200. 12th consecutive SKIP.","traffic_24h":6,"users":9,"duration_min":2}
+{"ts":"2026-04-12T01:07:06Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":4}
+{"ts":"2026-04-12T01:31:19Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":3}
+{"ts":"2026-04-12T03:12:07Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":5}
+{"ts":"2026-04-12T03:34:52Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":3}
+{"ts":"2026-04-12T11:35:00Z","action":"SKIP","spec":"Steady state. 6PV/2sess/24h. Site 200. 13th+ consecutive SKIP.","traffic_24h":6,"users":9,"duration_min":2}
+{"ts":"2026-04-12T05:15:51Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":3}
+{"ts":"2026-04-12T05:38:28Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":3}
+{"ts":"2026-04-12T07:20:21Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":4}
+{"ts":"2026-04-12T07:43:57Z","action":"SKIP","spec":"?","traffic_24h":0,"users":9,"duration_min":5}
+{"ts":"2026-04-12T15:30:00Z","action":"SKIP","spec":"Steady state. 4PV/1sess/24h. 1 new user (total 10). Site 200. 14th+ consecutive SKIP.","traffic_24h":4,"users":10,"duration_min":2}
+{"ts":"2026-04-12T09:24:05Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-12T09:49:06Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":5}
+{"ts":"2026-04-12T11:28:16Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-12T11:54:51Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":5}
+{"ts":"2026-04-12T20:30:00Z","action":"SKIP","spec":"Steady state. 4PV/1sess/24h. 10 users. Site 200. 6th+ SKIP of the day.","traffic_24h":4,"users":10,"duration_min":2}
+{"ts":"2026-04-12T13:31:49Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-12T13:58:55Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-12T15:36:35Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-12T16:03:09Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-13T04:15:00Z","action":"SKIP","spec":"Steady state. 4PV/1sess/24h, 157PV/25sess/7d. 10 users. Site 200. All endpoints healthy.","traffic_24h":4,"users":10,"duration_min":2}
+{"ts":"2026-04-12T17:40:20Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-12T18:06:43Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-12T19:43:56Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-12T20:11:17Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-13T08:30:00Z","action":"SKIP","spec":"Steady state. 6PV/2sess/24h, 138PV/25sess/7d. 10 users, 1 new. Site 200. All endpoints healthy.","traffic_24h":6,"users":10,"duration_min":2}
+{"ts":"2026-04-12T21:46:57Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-12T22:15:50Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-12T23:51:55Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-13T00:18:54Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-13T16:15:00Z","action":"SKIP","spec":"Steady state. 6PV/2sess/24h, 138PV/25sess/7d. 10 users, 0 new. Site 200. No bugs.","traffic_24h":6,"users":10,"duration_min":2}
+{"ts":"2026-04-13T01:56:56Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-13T02:23:25Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-13T04:00:34Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-13T18:30:00Z","action":"SKIP","spec":"Steady state. 6PV/2sess/24h, 117PV/22sess/7d. 10 users, 0 premium, 0 new. Site 200. No bugs.","traffic_24h":6,"users":10,"duration_min":1}
+{"ts":"2026-04-13T04:26:17Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":2}
+{"ts":"2026-04-13T06:03:09Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":2}
+{"ts":"2026-04-13T06:31:32Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":5}
+{"ts":"2026-04-13T08:05:57Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":2}
+{"ts":"2026-04-13T22:00:00Z","action":"SKIP","spec":"Steady state. 2PV/1sess/24h, 117PV/22sess/7d. 10 users, 0 premium, 0 new. Site 200. No bugs.","traffic_24h":2,"users":10,"duration_min":1}
+{"ts":"2026-04-13T08:35:23Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-13T10:10:15Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-13T10:39:53Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-13T12:12:42Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":2}
+{"ts":"2026-04-14T04:15:00Z","action":"SKIP","spec":"Steady state. 2PV/1sess/24h, 116PV/21sess/7d. 10 users, 0 premium. No bugs.","traffic_24h":2,"users":10,"duration_min":1}
+{"ts":"2026-04-13T12:42:54Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-13T14:16:02Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-13T14:45:57Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-13T16:16:24Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":0}
+{"ts":"2026-04-14T08:22:00Z","action":"ACT","spec":"Enriched 21 games (descriptions+developers) via RAWG+Steam API. ~280 remaining are Chinese titles without API coverage.","traffic_24h":7,"users":10,"duration_min":7}
+{"ts":"2026-04-13T16:54:47Z","action":"ACT","spec":"?","traffic_24h":0,"users":10,"duration_min":8}
+{"ts":"2026-04-13T17:43:00Z","action":"ACT","spec":"?","traffic_24h":0,"users":10,"duration_min":18}
+{"ts":"2026-04-13T18:21:34Z","action":"ACT","spec":"?","traffic_24h":0,"users":10,"duration_min":8}
+{"ts":"2026-04-13T18:23:43Z","action":"ACT","spec":"?","traffic_24h":0,"users":10,"duration_min":7}
+{"ts":"2026-04-13T18:57:55Z","action":"ACT","spec":"?","traffic_24h":0,"users":10,"duration_min":6}
+{"ts":"2026-04-13T19:00:10Z","action":"ACT","spec":"?","traffic_24h":0,"users":10,"duration_min":6}
+{"ts":"2026-04-13T19:33:56Z","action":"ACT","spec":"?","traffic_24h":0,"users":10,"duration_min":6}
+{"ts":"2026-04-13T19:39:34Z","action":"ACT","spec":"?","traffic_24h":0,"users":10,"duration_min":9}
+{"ts":"2026-04-13T20:11:14Z","action":"ACT","spec":"?","traffic_24h":0,"users":10,"duration_min":7}
+{"ts":"2026-04-13T20:16:38Z","action":"ACT","spec":"?","traffic_24h":0,"users":10,"duration_min":7}
+{"ts":"2026-04-14T14:01:00Z","action":"SKIP","spec":"stable, no bugs, traffic external dependency","traffic_24h":5,"users":10,"duration_min":2}
+{"ts":"2026-04-13T20:45:20Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-13T20:50:53Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-13T22:49:42Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-13T22:54:19Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-14T22:15:00Z","action":"SKIP","spec":"stable, no bugs, 6th consecutive SKIP","traffic_24h":5,"users":10,"duration_min":2}
+{"ts":"2026-04-14T00:53:45Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-14T00:59:11Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-14T02:58:18Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-14T03:01:39Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":2}
+{"ts":"2026-04-14T23:15:00Z","action":"SKIP","spec":"stable, no bugs, 7th consecutive SKIP","traffic_24h":5,"users":10,"duration_min":2}
+{"ts":"2026-04-14T05:02:28Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-14T05:04:07Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":2}
+{"ts":"2026-04-14T07:07:02Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-14T07:08:21Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-15T04:15:00Z","action":"SKIP","spec":"stable, no bugs, 8th consecutive SKIP","traffic_24h":5,"users":10,"duration_min":2}
+{"ts":"2026-04-14T09:11:19Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-14T09:12:38Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-14T11:15:11Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-14T11:17:15Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-14T20:30:00Z","action":"SKIP","spec":"stable, no bugs, 9th consecutive SKIP","traffic_24h":5,"users":10,"duration_min":2}
+{"ts":"2026-04-14T13:20:10Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-14T13:21:16Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-14T15:24:01Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-14T15:25:23Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-15T08:15:00Z","action":"SKIP","spec":"stable, no bugs, 10th consecutive SKIP","traffic_24h":0,"users":10,"duration_min":2}
+{"ts":"2026-04-14T17:28:32Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-14T17:32:08Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":8}
+{"ts":"2026-04-14T19:32:33Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-14T19:36:25Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-15T16:00:00Z","action":"SKIP","spec":"stable, no bugs, 11th consecutive SKIP","traffic_24h":0,"users":10,"duration_min":2}
+{"ts":"2026-04-14T21:39:14Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":6}
+{"ts":"2026-04-14T21:39:16Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":2}
+{"ts":"2026-04-14T23:42:39Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-14T23:43:16Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-15T22:00:00Z","action":"SKIP","spec":"stable, no bugs, 12th consecutive SKIP","traffic_7d":87,"users":10,"duration_min":2}
+{"ts":"2026-04-15T00:59:06Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-15T01:46:43Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-15T01:47:51Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-15T03:02:18Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-15T03:51:23Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-15T03:52:18Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":5}
+{"ts":"2026-04-15T04:18:39Z","action":"SKIP","spec":"No actionable items","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-15T05:06:47Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-15T05:55:45Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-15T05:56:10Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-15T07:12:51Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":6}
+{"ts":"2026-04-15T08:00:33Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-15T08:01:16Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":5}
+{"ts":"2026-04-15T16:32:00Z","action":"SKIP","spec":"no actionable items","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-15T09:16:19Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-15T10:03:58Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":2}
+{"ts":"2026-04-15T10:04:31Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-15T11:19:50Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-15T12:07:24Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-15T12:08:33Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-15T12:19:03Z","action":"SKIP","spec":"no actionable items","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-15T13:23:52Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-15T14:11:47Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-15T14:13:02Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-16T12:00:00Z","action":"SKIP","spec":"no actionable items","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-15T16:58:30Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-15T19:02:07Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-16T16:30:00Z","action":"SKIP","spec":"product stable, no actionable items","traffic_7d":49,"traffic_24h":0,"users":10,"premium":0,"duration_min":3}
+{"ts":"2026-04-15T21:06:35Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-15T23:09:31Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":2}
+{"ts":"2026-04-16T20:00:00Z","action":"SKIP","spec":"Product stable, 0 PV last 3 days, no bugs, no actionable items","traffic_7d":49,"traffic_24h":0,"users":10,"premium":0,"duration_min":3}
+{"ts":"2026-04-16T01:12:22Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":2}
+{"ts":"2026-04-16T03:14:55Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":2}
+{"ts":"2026-04-16T12:34:00Z","action":"SKIP","spec":"Product stable, 0 PV/24h, 49 PV/7d, no bugs, no actionable items. 6th consecutive SKIP.","traffic_7d":49,"traffic_24h":0,"users":10,"premium":0,"duration_min":3}
+{"ts":"2026-04-16T05:18:11Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-16T07:23:27Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":5}
+{"ts":"2026-04-16T16:20:00Z","action":"SKIP","spec":"Product stable, 0 PV/24h, 49 PV/7d, no bugs, no actionable items. 8th consecutive SKIP.","traffic_7d":49,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-16T09:26:15Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":2}
+{"ts":"2026-04-16T11:29:17Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-16T20:32:00Z","action":"SKIP","spec":"10th consecutive SKIP. Product stable, 0 PV/24h, 49 PV/7d, no bugs, no actionable items.","traffic_7d":49,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-16T13:35:28Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":6}
+{"ts":"2026-04-16T15:39:58Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-17T04:06:00Z","action":"SKIP","spec":"12th+ consecutive SKIP. Product stable, traffic 38 PV/7d (declining from 49), 0 PV/24h, no bugs.","traffic_7d":38,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-16T17:43:02Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-16T19:46:48Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-17T08:18:00Z","action":"SKIP","spec":"14th+ consecutive SKIP. Product stable, traffic 33 PV/7d (declining from 38), 0 PV/24h, no bugs.","traffic_7d":33,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-16T21:50:06Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-16T23:54:47Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-17T16:00:00Z","action":"SKIP","spec":"15th consecutive SKIP. Product stable, traffic 33 PV/7d (declining), 0 PV/24h, no bugs. Growth bottleneck is external marketing.","traffic_7d":33,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-17T01:59:28Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":4}
+{"ts":"2026-04-17T04:03:09Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-17T18:30:00Z","action":"SKIP","spec":"16th consecutive SKIP. Product stable, traffic 33 PV/7d (declining), 0 PV/24h, no bugs. Growth bottleneck is external marketing.","traffic_7d":33,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-17T06:07:05Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-17T08:10:40Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-17T16:20:00Z","action":"SKIP","spec":"18th consecutive SKIP. Traffic declining 23 PV/7d (was 33), 0 PV last 4 days. Site healthy, no bugs. Growth bottleneck is external marketing.","traffic_7d":23,"traffic_24h":0,"users":10,"premium":0,"duration_min":3}
+{"ts":"2026-04-17T10:14:17Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-17T20:16:00Z","action":"SKIP","spec":"19th consecutive SKIP. Traffic 23 PV/7d (declining), 0/24h. Site healthy, no bugs. Growth bottleneck is external marketing.","traffic_7d":23,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-17T12:22:16Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":7}
+{"ts":"2026-04-17T14:35:24Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":13}
+{"ts":"2026-04-18T00:18:00Z","action":"SKIP","spec":"20th consecutive SKIP. Traffic 17 PV/7d (declining from 23), 0/24h. Site healthy, no bugs. Growth bottleneck is external marketing.","traffic_7d":17,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-17T16:39:38Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":4}
+{"ts":"2026-04-17T18:44:00Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":4}
+{"ts":"2026-04-18T04:20:00Z","action":"SKIP","spec":"21st consecutive SKIP. Traffic 17 PV/7d (declining), 0/24h. Site healthy, no bugs. Growth bottleneck is external marketing.","traffic_7d":17,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-17T20:47:28Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-17T22:52:01Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":4}
+{"ts":"2026-04-18T08:20:00Z","action":"SKIP","spec":"22nd consecutive SKIP. Traffic 17 PV/7d (flat), 0/24h. Site healthy, no bugs. Growth bottleneck is external marketing.","traffic_7d":17,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-18T00:55:35Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-18T03:01:35Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":6}
+{"ts":"2026-04-18T12:42:00Z","action":"SKIP","spec":"23rd consecutive SKIP. Traffic 17 PV/7d (flat), 0/24h. Site healthy, no bugs. Growth bottleneck is external marketing.","traffic_7d":17,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-18T05:07:11Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":5}
+{"ts":"2026-04-18T07:11:21Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":4}
+{"ts":"2026-04-18T16:31:00Z","action":"SKIP","spec":"25th consecutive SKIP. Traffic 11 PV/7d (declining from 17), 0/24h. Site healthy, no bugs. Growth bottleneck is external marketing.","traffic_7d":11,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-18T09:14:01Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":2}
+{"ts":"2026-04-18T11:18:22Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":4}
+{"ts":"2026-04-18T20:18:00Z","action":"SKIP","spec":"26th consecutive SKIP. Traffic 11 PV/7d (0/24h), 10 users, 0 premium. Site healthy, no bugs. Growth bottleneck is external.","traffic_7d":11,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-18T13:23:14Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":4}
+{"ts":"2026-04-18T15:27:42Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":4}
+{"ts":"2026-04-19T00:15:00Z","action":"SKIP","spec":"27th consecutive SKIP. Traffic 11 PV/7d (0/24h), 10 users, 0 premium. Site healthy, no bugs. Growth bottleneck is external.","traffic_7d":11,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-18T17:31:14Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-18T19:34:52Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-19T04:30:00Z","action":"SKIP","spec":"28th consecutive SKIP. Traffic 11 PV/7d (0/24h), 10 users, 0 premium. Site healthy, no bugs. Growth bottleneck is external.","traffic_7d":11,"traffic_24h":0,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-18T20:58:36Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-18T21:37:18Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":2}
+{"ts":"2026-04-18T23:01:59Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-18T23:40:56Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-19T08:30:00Z","action":"SKIP","spec":"29th consecutive SKIP. Traffic 12 PV/7d (1/24h), 10 users, 0 premium. Organic referrers appearing (Google, DDG). Site healthy, no bugs.","traffic_7d":12,"traffic_24h":1,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-19T01:04:38Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":2}
+{"ts":"2026-04-19T01:43:04Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":2}
+{"ts":"2026-04-19T03:09:24Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":4}
+{"ts":"2026-04-19T03:47:28Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":4}
+{"ts":"2026-04-19T12:26:00Z","action":"SKIP","spec":"30th consecutive SKIP. Traffic 12 PV/7d (1/24h), 10 users, 0 premium. Organic referrers present (Google, DDG). Site healthy, no bugs.","traffic_7d":12,"traffic_24h":1,"users":10,"premium":0,"duration_min":2}
+{"ts":"2026-04-19T05:12:51Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-19T05:51:19Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-19T07:17:33Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":4}
+{"ts":"2026-04-19T07:54:17Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":2}

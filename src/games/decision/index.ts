@@ -4,18 +4,20 @@ import DecisionGame from "./game";
 
 const plugin: GamePlugin = {
   id: "decision",
-  name: "快速分类",
-  nameEn: "Rapid Triage",
-  description: "根据变化的规则快速分类卡片，测试决策速度和灵活性",
+  name: "决策者",
+  nameEn: "Decision Maker",
+  description:
+    "从四副牌中抽牌学习哪副有利、哪副有害 — 测量在不确定性和延迟反馈下的决策能力（简化版 Iowa Gambling Task）",
   primaryTalent: "decision_speed",
   secondaryTalents: ["pattern_recog"],
   difficulty: "medium",
-  estimatedDurationSec: 40,
+  estimatedDurationSec: 180,
   instructions:
-    "屏幕上会出现带有表情符号的卡片，根据当前规则将其分到左边或右边。使用方向键或点击按钮分类。注意每8张卡片规则会改变！",
+    "从四副牌 (A/B/C/D) 中选择抽牌。每张牌会给你奖励，部分牌会扣分。两副牌长期来看亏损，两副牌长期来看盈利。通过试错找出有利的牌堆，最大化余额。共 100 轮（前 10 轮为练习）。",
   icon: "🃏",
   scorer: decisionScorer,
   component: DecisionGame,
+  mobileCompatible: true,
 };
 
 export default plugin;

@@ -22,6 +22,8 @@ const PUBLIC_PATHS = [
   "/privacy",
   "/terms",
   "/about",
+  "/methodology",
+  "/for-teams",
 ];
 
 /** API paths that handle their own auth (Bearer token, cron secret, etc.) */
@@ -36,6 +38,9 @@ const PUBLIC_PREFIXES = [
   "/api/home-card",
   "/api/billing/checkout",
   "/blog",
+  // Invite landing — users visit this link before logging in, then log in + accept.
+  "/team/invite/",
+  "/api/team/invite/",
 ];
 
 /** Cache the encoded secret to avoid re-encoding on every request */

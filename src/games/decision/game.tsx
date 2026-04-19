@@ -4,240 +4,237 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
 import { useI18n } from "@/i18n/context";
 
-interface CardItem {
-  emoji: string;
-  name: string;
-  nameEn: string;
-  categories: Record<string, string>; // ruleKey -> category value
+/**
+ * Simplified Iowa Gambling Task (IGT).
+ *
+ * Four decks with different risk/reward profiles. Players learn which decks
+ * are advantageous through experience.
+ *
+ * - Deck A (disadvantageous): +$100 / 50% chance -$250  → avg -$25/card
+ * - Deck B (disadvantageous): +$100 / 10% chance -$1250 → avg -$25/card
+ * - Deck C (advantageous):    +$50  / 50% chance -$50   → avg +$25/card
+ * - Deck D (advantageous):    +$50  / 10% chance -$250  → avg +$25/card
+ *
+ * 100 trials total (10 practice + 90 scored). Net score is computed over the
+ * LAST 60 scored trials (final three IGT blocks) — this is when learning has
+ * stabilised and the measure discriminates best (Bechara 2001).
+ */
+
+type DeckId = "A" | "B" | "C" | "D";
+
+const DECK_IDS: DeckId[] = ["A", "B", "C", "D"];
+const PRACTICE_TRIALS = 10;
+const SCORED_TRIALS = 90;
+const TOTAL_TRIALS = PRACTICE_TRIALS + SCORED_TRIALS; // 100
+const NET_SCORE_WINDOW = 60; // last 60 scored trials
+const STARTING_BALANCE = 2000;
+
+/** Deterministic pseudo-random in [0, 1) from (trialIdx, deck). */
+function seededRandom(trialIdx: number, deck: DeckId): number {
+  const deckCode = deck.charCodeAt(0); // 65..68
+  // Mix trial and deck into a 32-bit int using a simple LCG-like hash.
+  let s = (trialIdx * 2654435761) ^ (deckCode * 40503);
+  s = (s ^ (s >>> 13)) >>> 0;
+  s = (Math.imul(s, 1540483477) ^ (s >>> 15)) >>> 0;
+  return (s >>> 0) / 4294967296;
 }
 
-interface Rule {
-  key: string;
-  label: string;
-  labelEn: string;
-  leftLabel: string;
-  leftLabelEn: string;
-  rightLabel: string;
-  rightLabelEn: string;
-  classify: (item: CardItem) => "left" | "right";
+interface DrawResult {
+  gain: number;
+  loss: number;
+  net: number;
 }
 
-const ITEMS: CardItem[] = [
-  { emoji: "🍎", name: "苹果", nameEn: "Apple", categories: { bio: "生物", color: "红色", type: "水果" } },
-  { emoji: "🍌", name: "香蕉", nameEn: "Banana", categories: { bio: "生物", color: "非红色", type: "水果" } },
-  { emoji: "🍇", name: "葡萄", nameEn: "Grape", categories: { bio: "生物", color: "非红色", type: "水果" } },
-  { emoji: "🍒", name: "樱桃", nameEn: "Cherry", categories: { bio: "生物", color: "红色", type: "水果" } },
-  { emoji: "🐕", name: "狗", nameEn: "Dog", categories: { bio: "生物", color: "非红色", type: "动物" } },
-  { emoji: "🐈", name: "猫", nameEn: "Cat", categories: { bio: "生物", color: "非红色", type: "动物" } },
-  { emoji: "🐟", name: "鱼", nameEn: "Fish", categories: { bio: "生物", color: "非红色", type: "动物" } },
-  { emoji: "🦊", name: "狐狸", nameEn: "Fox", categories: { bio: "生物", color: "红色", type: "动物" } },
-  { emoji: "🚗", name: "汽车", nameEn: "Car", categories: { bio: "非生物", color: "红色", type: "载具" } },
-  { emoji: "🚌", name: "公交", nameEn: "Bus", categories: { bio: "非生物", color: "非红色", type: "载具" } },
-  { emoji: "✈️", name: "飞机", nameEn: "Plane", categories: { bio: "非生物", color: "非红色", type: "载具" } },
-  { emoji: "🚂", name: "火车", nameEn: "Train", categories: { bio: "非生物", color: "非红色", type: "载具" } },
-  { emoji: "🔨", name: "锤子", nameEn: "Hammer", categories: { bio: "非生物", color: "非红色", type: "工具" } },
-  { emoji: "🔧", name: "扳手", nameEn: "Wrench", categories: { bio: "非生物", color: "非红色", type: "工具" } },
-  { emoji: "✂️", name: "剪刀", nameEn: "Scissors", categories: { bio: "非生物", color: "红色", type: "工具" } },
-  { emoji: "📎", name: "回形针", nameEn: "Paperclip", categories: { bio: "非生物", color: "非红色", type: "工具" } },
-];
-
-const RULES: Rule[] = [
-  {
-    key: "bio",
-    label: "生物 / 非生物",
-    labelEn: "Living / Non-living",
-    leftLabel: "生物",
-    leftLabelEn: "Living",
-    rightLabel: "非生物",
-    rightLabelEn: "Non-living",
-    classify: (item) => (item.categories.bio === "生物" ? "left" : "right"),
-  },
-  {
-    key: "color",
-    label: "红色 / 非红色",
-    labelEn: "Red / Non-red",
-    leftLabel: "红色",
-    leftLabelEn: "Red",
-    rightLabel: "非红色",
-    rightLabelEn: "Non-red",
-    classify: (item) => (item.categories.color === "红色" ? "left" : "right"),
-  },
-  {
-    key: "type_fruit",
-    label: "水果 / 非水果",
-    labelEn: "Fruit / Not Fruit",
-    leftLabel: "水果",
-    leftLabelEn: "Fruit",
-    rightLabel: "非水果",
-    rightLabelEn: "Not Fruit",
-    classify: (item) => (item.categories.type === "水果" ? "left" : "right"),
-  },
-  {
-    key: "type_animal",
-    label: "动物 / 非动物",
-    labelEn: "Animal / Not Animal",
-    leftLabel: "动物",
-    leftLabelEn: "Animal",
-    rightLabel: "非动物",
-    rightLabelEn: "Not Animal",
-    classify: (item) => (item.categories.type === "动物" ? "left" : "right"),
-  },
-];
-
-const TOTAL_CARDS = 32;
-const RULE_CHANGE_INTERVAL = 8;
-
-function shuffle<T>(arr: T[]): T[] {
-  const result = [...arr];
-  for (let i = result.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [result[i], result[j]] = [result[j], result[i]];
+function drawCard(deck: DeckId, trialIdx: number): DrawResult {
+  const r = seededRandom(trialIdx, deck);
+  let gain = 0;
+  let loss = 0;
+  if (deck === "A") {
+    gain = 100;
+    loss = r < 0.5 ? -250 : 0;
+  } else if (deck === "B") {
+    gain = 100;
+    loss = r < 0.1 ? -1250 : 0;
+  } else if (deck === "C") {
+    gain = 50;
+    loss = r < 0.5 ? -50 : 0;
+  } else if (deck === "D") {
+    gain = 50;
+    loss = r < 0.1 ? -250 : 0;
   }
-  return result;
+  return { gain, loss, net: gain + loss };
 }
 
-export default function DecisionGame({
-  onComplete,
-  onAbort,
-}: GameComponentProps) {
+const DECK_STYLES: Record<DeckId, { bg: string; border: string; text: string; label: string }> = {
+  A: {
+    bg: "bg-rose-600/80 hover:bg-rose-500",
+    border: "border-rose-400",
+    text: "text-rose-50",
+    label: "A",
+  },
+  B: {
+    bg: "bg-amber-600/80 hover:bg-amber-500",
+    border: "border-amber-400",
+    text: "text-amber-50",
+    label: "B",
+  },
+  C: {
+    bg: "bg-emerald-600/80 hover:bg-emerald-500",
+    border: "border-emerald-400",
+    text: "text-emerald-50",
+    label: "C",
+  },
+  D: {
+    bg: "bg-sky-600/80 hover:bg-sky-500",
+    border: "border-sky-400",
+    text: "text-sky-50",
+    label: "D",
+  },
+};
+
+interface PickRecord {
+  trial: number; // 0-indexed
+  deck: DeckId;
+  gain: number;
+  loss: number;
+  net: number;
+  isScored: boolean;
+  balanceAfter: number;
+}
+
+export default function DecisionGame({ onComplete, onAbort }: GameComponentProps) {
   const { locale } = useI18n();
   const isZh = locale === "zh";
-  const [phase, setPhase] = useState<"idle" | "playing" | "feedback" | "done">("idle");
-  const [cardIndex, setCardIndex] = useState(0);
-  const [currentRule, setCurrentRule] = useState<Rule>(RULES[0]);
-  const [currentItem, setCurrentItem] = useState<CardItem>(ITEMS[0]);
-  const [correct, setCorrect] = useState(0);
-  const [feedback, setFeedback] = useState<"correct" | "wrong" | null>(null);
-  const [ruleChangeAlert, setRuleChangeAlert] = useState(false);
-  const [animateOut, setAnimateOut] = useState<"left" | "right" | null>(null);
+
+  const [phase, setPhase] = useState<"idle" | "playing" | "reveal" | "done">("idle");
+  const [trial, setTrial] = useState(0); // 0-indexed next trial
+  const [balance, setBalance] = useState(STARTING_BALANCE);
+  const [lastResult, setLastResult] = useState<{
+    deck: DeckId;
+    gain: number;
+    loss: number;
+  } | null>(null);
+  const [flippingDeck, setFlippingDeck] = useState<DeckId | null>(null);
 
   const startTimeRef = useRef(0);
-  const deckRef = useRef<CardItem[]>([]);
-  const rulesRef = useRef<Rule[]>([]);
-  const correctRef = useRef(0);
-  const cardTimesRef = useRef<number[]>([]);
-  const cardStartRef = useRef(0);
+  const picksRef = useRef<PickRecord[]>([]);
+  const balanceRef = useRef(STARTING_BALANCE);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
 
-  const buildDeck = useCallback(() => {
-    const deck: CardItem[] = [];
-    while (deck.length < TOTAL_CARDS) {
-      const shuffled = shuffle(ITEMS);
-      deck.push(...shuffled);
-    }
-    return deck.slice(0, TOTAL_CARDS);
-  }, []);
-
-  const buildRuleSequence = useCallback(() => {
-    const numRules = Math.ceil(TOTAL_CARDS / RULE_CHANGE_INTERVAL);
-    const seq: Rule[] = [];
-    const shuffled = shuffle(RULES);
-    for (let i = 0; i < numRules; i++) {
-      seq.push(shuffled[i % shuffled.length]);
-    }
-    return seq;
-  }, []);
-
-  const getRuleForCard = useCallback((index: number): Rule => {
-    const ruleIdx = Math.floor(index / RULE_CHANGE_INTERVAL);
-    return rulesRef.current[ruleIdx] || RULES[0];
-  }, []);
-
   const startGame = useCallback(() => {
-    deckRef.current = buildDeck();
-    rulesRef.current = buildRuleSequence();
-    correctRef.current = 0;
-    cardTimesRef.current = [];
     startTimeRef.current = Date.now();
-    cardStartRef.current = Date.now();
-
-    const firstRule = getRuleForCard(0);
-    setCurrentRule(firstRule);
-    setCurrentItem(deckRef.current[0]);
-    setCardIndex(0);
-    setCorrect(0);
+    picksRef.current = [];
+    balanceRef.current = STARTING_BALANCE;
+    setBalance(STARTING_BALANCE);
+    setTrial(0);
+    setLastResult(null);
+    setFlippingDeck(null);
     setPhase("playing");
-    setFeedback(null);
-    setRuleChangeAlert(false);
-  }, [buildDeck, buildRuleSequence, getRuleForCard]);
+  }, []);
 
-  const advanceCard = useCallback(
-    (nextIndex: number) => {
-      if (nextIndex >= TOTAL_CARDS) {
-        setPhase("done");
-        const totalTimeMs = Date.now() - startTimeRef.current;
-        const totalTimeSec = totalTimeMs / 1000;
-        const rawScore = totalTimeSec > 0 ? correctRef.current / totalTimeSec : 0;
+  const finishGame = useCallback(() => {
+    const picks = picksRef.current;
+    const scoredPicks = picks.filter((p) => p.isScored);
+    const windowPicks = scoredPicks.slice(-NET_SCORE_WINDOW);
 
-        onComplete({
-          rawScore: Math.round(rawScore * 1000) / 1000,
-          durationMs: totalTimeMs,
-          metadata: {
-            correct: correctRef.current,
-            total: TOTAL_CARDS,
-            accuracy: Math.round((correctRef.current / TOTAL_CARDS) * 1000) / 10,
-            cardTimes: cardTimesRef.current,
-          },
-        });
-        return;
-      }
+    const countIn = (decks: DeckId[]) =>
+      windowPicks.filter((p) => decks.includes(p.deck)).length;
 
-      const newRule = getRuleForCard(nextIndex);
-      const prevRule = getRuleForCard(nextIndex - 1);
+    const aCount = countIn(["A"]);
+    const bCount = countIn(["B"]);
+    const cCount = countIn(["C"]);
+    const dCount = countIn(["D"]);
+    const advantageous = cCount + dCount;
+    const disadvantageous = aCount + bCount;
+    const netScore = advantageous - disadvantageous;
 
-      if (newRule.key !== prevRule.key) {
-        setRuleChangeAlert(true);
-        timeoutsRef.current.push(setTimeout(() => setRuleChangeAlert(false), 1200));
-      }
+    const totalAll = picks.length || 1;
+    const aFullCount = picks.filter((p) => p.deck === "A").length;
+    const bFullCount = picks.filter((p) => p.deck === "B").length;
+    const cFullCount = picks.filter((p) => p.deck === "C").length;
+    const dFullCount = picks.filter((p) => p.deck === "D").length;
 
-      setCurrentRule(newRule);
-      setCurrentItem(deckRef.current[nextIndex]);
-      setCardIndex(nextIndex);
-      cardStartRef.current = Date.now();
-      setAnimateOut(null);
-    },
-    [getRuleForCard, onComplete]
-  );
+    onComplete({
+      rawScore: netScore,
+      durationMs: Date.now() - startTimeRef.current,
+      metadata: {
+        netScore,
+        advantageousPicks: advantageous,
+        disadvantageousPicks: disadvantageous,
+        scoredWindowSize: windowPicks.length,
+        windowCounts: { A: aCount, B: bCount, C: cCount, D: dCount },
+        totalCounts: {
+          A: aFullCount,
+          B: bFullCount,
+          C: cFullCount,
+          D: dFullCount,
+        },
+        totalTrials: totalAll,
+        practiceTrials: PRACTICE_TRIALS,
+        scoredTrials: scoredPicks.length,
+        finalBalance: balanceRef.current,
+        startingBalance: STARTING_BALANCE,
+      },
+    });
+  }, [onComplete]);
 
-  const handleChoice = useCallback(
-    (choice: "left" | "right") => {
+  const pickDeck = useCallback(
+    (deck: DeckId) => {
       if (phase !== "playing") return;
 
-      const cardTime = Date.now() - cardStartRef.current;
-      cardTimesRef.current.push(cardTime);
+      const trialIdx = trial; // 0-indexed
+      const result = drawCard(deck, trialIdx);
+      const isScored = trialIdx >= PRACTICE_TRIALS;
+      const newBalance = balanceRef.current + result.net;
+      balanceRef.current = newBalance;
 
-      const correctAnswer = currentRule.classify(currentItem);
-      const isCorrect = choice === correctAnswer;
+      picksRef.current.push({
+        trial: trialIdx,
+        deck,
+        gain: result.gain,
+        loss: result.loss,
+        net: result.net,
+        isScored,
+        balanceAfter: newBalance,
+      });
 
-      if (isCorrect) {
-        correctRef.current++;
-        setCorrect(correctRef.current);
-      }
+      setFlippingDeck(deck);
+      setLastResult({ deck, gain: result.gain, loss: result.loss });
+      setBalance(newBalance);
+      setPhase("reveal");
 
-      setFeedback(isCorrect ? "correct" : "wrong");
-      setAnimateOut(choice);
-      setPhase("feedback");
-
-      timeoutsRef.current.push(setTimeout(() => {
-        setFeedback(null);
-        setPhase("playing");
-        advanceCard(cardIndex + 1);
-      }, 400));
+      timeoutsRef.current.push(
+        setTimeout(() => {
+          const nextTrial = trialIdx + 1;
+          if (nextTrial >= TOTAL_TRIALS) {
+            setPhase("done");
+            finishGame();
+            return;
+          }
+          setTrial(nextTrial);
+          setLastResult(null);
+          setFlippingDeck(null);
+          setPhase("playing");
+        }, 900)
+      );
     },
-    [phase, currentRule, currentItem, cardIndex, advanceCard]
+    [phase, trial, finishGame]
   );
 
-  // Keyboard controls
+  // Keyboard: A/B/C/D to pick decks quickly.
   useEffect(() => {
     const handleKey = (e: KeyboardEvent) => {
       if (phase !== "playing") return;
-      if (e.key === "ArrowLeft" || e.key === "a") handleChoice("left");
-      if (e.key === "ArrowRight" || e.key === "d") handleChoice("right");
+      const key = e.key.toUpperCase();
+      if (key === "A" || key === "B" || key === "C" || key === "D") {
+        pickDeck(key as DeckId);
+      }
     };
     window.addEventListener("keydown", handleKey);
     return () => window.removeEventListener("keydown", handleKey);
-  }, [phase, handleChoice]);
+  }, [phase, pickDeck]);
 
+  // Cleanup pending timeouts on unmount.
   useEffect(() => {
     const timeouts = timeoutsRef.current;
     return () => {
@@ -245,21 +242,39 @@ export default function DecisionGame({
     };
   }, []);
 
+  // ----- idle / instruction screen -----
   if (phase === "idle") {
     return (
       <div className="flex flex-col items-center gap-6 w-full max-w-lg mx-auto">
         <div className="text-center space-y-3 p-6 bg-muted/30 rounded-xl">
-          <h3 className="text-lg font-bold">{isZh ? "快速分类 - 操作说明" : "Quick Sort - Instructions"}</h3>
+          <h3 className="text-lg font-bold">
+            {isZh ? "决策者 — 操作说明" : "Decision Maker — Instructions"}
+          </h3>
           <p className="text-sm text-muted-foreground">
-            {isZh ? "根据当前规则将卡片分到左边或右边" : "Sort cards left or right based on the current rule"}
+            {isZh
+              ? "你有 $2000 起始余额。每轮从 A/B/C/D 四副牌中选一副抽一张牌。"
+              : "You start with $2000. Each trial, pick one of four decks (A/B/C/D) to draw a card."}
           </p>
           <p className="text-sm text-muted-foreground">
-            {isZh ? "使用 ← → 键或点击按钮进行分类" : "Use ← → keys or click buttons to sort"}
+            {isZh
+              ? "每张牌都会给你奖励，部分牌会带来损失。两副牌长期亏损，两副牌长期盈利。"
+              : "Each card gives a gain; some also bring a loss. Two decks lose in the long run, two decks win in the long run."}
           </p>
           <p className="text-sm text-muted-foreground">
-            {isZh ? "注意: 每8张卡片规则会变化！" : "Note: The rule changes every 8 cards!"}
+            {isZh
+              ? "通过试错找出有利的牌堆，最大化余额。"
+              : "Discover which decks are advantageous through trial and error, and maximise your balance."}
           </p>
-          <p className="text-sm text-muted-foreground">{isZh ? `共 ${TOTAL_CARDS} 张卡片` : `${TOTAL_CARDS} cards total`}</p>
+          <p className="text-sm text-muted-foreground">
+            {isZh
+              ? `共 ${TOTAL_TRIALS} 轮（前 ${PRACTICE_TRIALS} 轮为练习，不计分）。`
+              : `${TOTAL_TRIALS} trials total (first ${PRACTICE_TRIALS} are practice, unscored).`}
+          </p>
+          <p className="text-xs text-muted-foreground">
+            {isZh
+              ? "可使用键盘 A / B / C / D 快速选择"
+              : "Use A / B / C / D keys for quick selection"}
+          </p>
         </div>
         <button
           onClick={startGame}
@@ -277,81 +292,114 @@ export default function DecisionGame({
     );
   }
 
+  // ----- main play view (playing | reveal | done) -----
+  const trialNumber = Math.min(trial + 1, TOTAL_TRIALS);
+  const isPractice = trial < PRACTICE_TRIALS;
+  const progressPct = (trial / TOTAL_TRIALS) * 100;
+
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-lg mx-auto">
+      {/* Balance */}
+      <div className="w-full flex flex-col items-center gap-1 py-2">
+        <span className="text-xs uppercase tracking-wide text-muted-foreground">
+          {isZh ? "余额" : "Balance"}
+        </span>
+        <span
+          className={`text-3xl font-mono font-bold ${
+            balance >= STARTING_BALANCE ? "text-emerald-400" : "text-rose-400"
+          }`}
+        >
+          ${balance.toLocaleString()}
+        </span>
+      </div>
+
       {/* Progress */}
       <div className="flex justify-between w-full text-sm text-muted-foreground px-1">
         <span>
-          {isZh ? "卡片" : "Card"} {cardIndex + 1}/{TOTAL_CARDS}
+          {isZh ? "第" : "Trial"} {trialNumber}/{TOTAL_TRIALS}
         </span>
-        <span>
-          {isZh ? "正确:" : "Correct:"} {correct}/{cardIndex + 1}
+        <span
+          className={
+            isPractice ? "text-yellow-400 font-medium" : "text-muted-foreground"
+          }
+        >
+          {isPractice
+            ? isZh
+              ? "练习阶段 — 熟悉牌堆"
+              : "Practice — learning the decks"
+            : isZh
+              ? "正式计分阶段"
+              : "Scored phase"}
         </span>
       </div>
-
-      {/* Progress bar */}
       <div className="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
         <div
-          className="h-full bg-primary transition-all duration-300"
-          style={{ width: `${(cardIndex / TOTAL_CARDS) * 100}%` }}
+          className={`h-full transition-all duration-300 ${
+            isPractice ? "bg-yellow-500/70" : "bg-primary"
+          }`}
+          style={{ width: `${progressPct}%` }}
         />
       </div>
 
-      {/* Rule banner */}
-      <div
-        className={`w-full text-center py-2 rounded-lg font-bold transition-all ${
-          ruleChangeAlert
-            ? "bg-yellow-500/20 text-yellow-400 border border-yellow-500/40 scale-105"
-            : "bg-muted/30 text-muted-foreground"
-        }`}
-      >
-        {ruleChangeAlert && <span className="mr-2">{isZh ? "规则变更!" : "Rule Changed!"}</span>}
-        {isZh ? "当前规则:" : "Current Rule:"} {isZh ? currentRule.label : currentRule.labelEn}
+      {/* Feedback slot — fixed height so decks don't jump */}
+      <div className="w-full h-20 flex items-center justify-center">
+        {lastResult ? (
+          <div className="text-center space-y-1">
+            <p className="text-sm text-muted-foreground">
+              {isZh ? `牌堆 ${lastResult.deck}` : `Deck ${lastResult.deck}`}
+            </p>
+            <p className="text-lg font-mono font-bold">
+              <span className="text-emerald-400">+${lastResult.gain}</span>
+              {lastResult.loss < 0 && (
+                <>
+                  <span className="text-muted-foreground mx-2">/</span>
+                  <span className="text-rose-400">
+                    -${Math.abs(lastResult.loss)}
+                  </span>
+                </>
+              )}
+            </p>
+          </div>
+        ) : (
+          <p className="text-sm text-muted-foreground">
+            {isZh ? "选择一副牌抽一张..." : "Pick a deck to draw a card..."}
+          </p>
+        )}
       </div>
 
-      {/* Card */}
-      <div
-        className={`relative w-40 h-48 bg-slate-800 rounded-2xl border-2 flex flex-col items-center justify-center gap-2 transition-all duration-300 ${
-          feedback === "correct"
-            ? "border-green-500"
-            : feedback === "wrong"
-              ? "border-red-500"
-              : "border-slate-600"
-        } ${
-          animateOut === "left"
-            ? "-translate-x-32 opacity-0 rotate-[-15deg]"
-            : animateOut === "right"
-              ? "translate-x-32 opacity-0 rotate-[15deg]"
-              : ""
-        }`}
-      >
-        <span className="text-6xl">{currentItem.emoji}</span>
-        <span className="text-sm text-muted-foreground">{isZh ? currentItem.name : currentItem.nameEn}</span>
+      {/* Decks */}
+      <div className="grid grid-cols-4 gap-3 w-full">
+        {DECK_IDS.map((deck) => {
+          const s = DECK_STYLES[deck];
+          const isFlipping = flippingDeck === deck;
+          return (
+            <button
+              key={deck}
+              onClick={() => pickDeck(deck)}
+              disabled={phase !== "playing"}
+              aria-label={isZh ? `抽牌堆 ${deck}` : `Draw from deck ${deck}`}
+              className={`relative aspect-[3/4] rounded-xl border-2 ${s.border} ${s.bg} ${s.text} font-bold text-3xl flex items-center justify-center transition-all duration-300 disabled:cursor-not-allowed ${
+                isFlipping ? "scale-110 -translate-y-2 shadow-2xl" : ""
+              } ${phase !== "playing" && !isFlipping ? "opacity-60" : ""}`}
+            >
+              <span className="drop-shadow">{s.label}</span>
+              <span className="absolute bottom-1 text-[10px] font-normal opacity-70">
+                {isZh ? "牌堆" : "Deck"}
+              </span>
+            </button>
+          );
+        })}
       </div>
 
-      {/* Buttons */}
-      <div className="flex gap-6 w-full">
-        <button
-          onClick={() => handleChoice("left")}
-          disabled={phase !== "playing"}
-          className="flex-1 py-4 bg-blue-600 hover:bg-blue-500 disabled:opacity-50 text-white rounded-xl font-bold text-lg transition"
-        >
-          ← {isZh ? currentRule.leftLabel : currentRule.leftLabelEn}
-        </button>
-        <button
-          onClick={() => handleChoice("right")}
-          disabled={phase !== "playing"}
-          className="flex-1 py-4 bg-orange-600 hover:bg-orange-500 disabled:opacity-50 text-white rounded-xl font-bold text-lg transition"
-        >
-          {isZh ? currentRule.rightLabel : currentRule.rightLabelEn} →
-        </button>
-      </div>
-
-      <p className="text-xs text-muted-foreground">{isZh ? "← → 键或 A/D 键快速选择" : "← → or A/D keys for quick selection"}</p>
+      <p className="text-xs text-muted-foreground">
+        {isZh
+          ? "点击牌堆或按 A / B / C / D 抽牌"
+          : "Click a deck or press A / B / C / D to draw"}
+      </p>
 
       <button
         onClick={onAbort}
-        className="text-sm text-muted-foreground hover:text-foreground"
+        className="text-sm text-muted-foreground hover:text-foreground mt-2"
       >
         {isZh ? "放弃测试" : "Abort Test"}
       </button>

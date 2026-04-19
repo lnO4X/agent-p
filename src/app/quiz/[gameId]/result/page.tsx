@@ -30,15 +30,15 @@ const TALENT_LABELS_ZH: Record<string, string> = {
   hand_eye_coord: "手眼协调",
   spatial_awareness: "空间感知",
   memory: "记忆力",
-  strategy_logic: "策略逻辑",
+  strategy_logic: "反应抑制",
   rhythm_sense: "节奏感",
   pattern_recog: "图案识别",
   multitasking: "多任务",
   decision_speed: "决策速度",
-  emotional_control: "情绪控制",
-  teamwork_tendency: "团队协作",
+  emotional_control: "干扰抑制",
+  teamwork_tendency: "视角转换",
   risk_assessment: "风险评估",
-  resource_mgmt: "资源管理",
+  resource_mgmt: "视觉注意广度",
 };
 
 /** Parse questionnaire talent scores from URL: "reaction_speed:75,memory:60,..." */

@@ -34,15 +34,15 @@ const TALENT_LABELS: Record<string, { zh: string; en: string }> = {
   hand_eye_coord: { zh: "手眼协调", en: "hand-eye coordination" },
   spatial_awareness: { zh: "空间感知", en: "spatial awareness" },
   memory: { zh: "记忆力", en: "memory" },
-  strategy_logic: { zh: "策略逻辑", en: "strategic thinking" },
+  strategy_logic: { zh: "反应抑制", en: "response inhibition" },
   rhythm_sense: { zh: "节奏感", en: "rhythm sense" },
   pattern_recog: { zh: "模式识别", en: "pattern recognition" },
   multitasking: { zh: "多线程操作", en: "multitasking" },
   decision_speed: { zh: "决策速度", en: "decision speed" },
-  emotional_control: { zh: "情绪控制", en: "emotional control" },
-  teamwork_tendency: { zh: "团队协作", en: "teamwork" },
+  emotional_control: { zh: "干扰抑制", en: "interference suppression" },
+  teamwork_tendency: { zh: "视角转换", en: "perspective taking" },
   risk_assessment: { zh: "风险评估", en: "risk assessment" },
-  resource_mgmt: { zh: "资源管理", en: "resource management" },
+  resource_mgmt: { zh: "视觉注意广度", en: "visual attention breadth" },
 };
 
 // ==================== HELPER FUNCTIONS ====================

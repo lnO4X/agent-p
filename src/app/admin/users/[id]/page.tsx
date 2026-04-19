@@ -79,15 +79,15 @@ const TALENT_LABELS: Record<string, string> = {
   handEyeCoord: "手眼协调 Coordination",
   spatialAwareness: "空间感知 Spatial",
   memory: "记忆力 Memory",
-  strategyLogic: "策略逻辑 Strategy",
+  strategyLogic: "反应抑制 Response Inhibition",
   rhythmSense: "节奏感 Rhythm",
   patternRecog: "模式识别 Pattern",
   multitasking: "多线程 Multitask",
   decisionSpeed: "决策速度 Decision",
-  emotionalControl: "情绪控制 Emotion",
-  teamworkTendency: "团队倾向 Teamwork",
+  emotionalControl: "干扰抑制 Interference Suppression",
+  teamworkTendency: "视角转换 Perspective Taking",
   riskAssessment: "风险评估 Risk",
-  resourceMgmt: "资源管理 Resource",
+  resourceMgmt: "视觉注意广度 Visual Attention Breadth",
 };
 
 export default function AdminUserDetailPage({
