@@ -111,6 +111,7 @@ export const TIER_CONFIGS: Record<TestTier, TierConfig> = {
       "strategy",
       "rhythm",
       "pattern",
+      "posner",
       "multitask",
       "decision",
       "emotional",

@@ -3,8 +3,16 @@
 import { useState, useRef, useCallback, useMemo, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
 import { useI18n } from "@/i18n/context";
+import { playSound } from "@/lib/audio-fx";
+import {
+  ParticleBurst,
+  ComboCounter,
+  useScreenShake,
+} from "@/components/game-fx";
 
-const TOTAL_ROUNDS = 12;
+const PRACTICE_ROUNDS = 2;
+const SCORED_ROUNDS = 12;
+const TOTAL_ROUNDS = PRACTICE_ROUNDS + SCORED_ROUNDS;
 
 interface Point {
   x: number;
@@ -156,25 +164,42 @@ export default function SpatialGame({
 }: GameComponentProps) {
   const { locale } = useI18n();
   const isZh = locale === "zh";
-  const [phase, setPhase] = useState<"idle" | "playing" | "feedback" | "done">(
+  const [phase, setPhase] = useState<"idle" | "playing" | "feedback" | "practice-done" | "done">(
     "idle"
   );
   const [round, setRound] = useState(0);
   const [correct, setCorrect] = useState(0);
   const [selected, setSelected] = useState<number | null>(null);
   const [wasCorrect, setWasCorrect] = useState(false);
+  const [streak, setStreak] = useState(0);
+  const [burstTrigger, setBurstTrigger] = useState(0);
+  const [endBurstTrigger, setEndBurstTrigger] = useState(0);
+  const [lastComplexity, setLastComplexity] = useState(3);
   const startTimeRef = useRef(0);
   const roundResults = useRef<boolean[]>([]);
   const gameSeedRef = useRef(0);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const feedbackTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const { trigger: shake, style: shakeStyle } = useScreenShake();
 
   const roundData = useMemo(() => generateRound(round, gameSeedRef.current), [round]);
 
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      if (feedbackTimeoutRef.current) clearTimeout(feedbackTimeoutRef.current);
     };
   }, []);
+
+  // Level-up chime on complexity increase (every 2 rounds).
+  useEffect(() => {
+    if (phase !== "playing") return;
+    const complexity = 3 + Math.floor(round / 2);
+    if (complexity > lastComplexity && round > 0) {
+      playSound("coin", 0.15);
+      setLastComplexity(complexity);
+    }
+  }, [round, phase, lastComplexity]);
 
   const startGame = useCallback(() => {
     startTimeRef.current = Date.now();
@@ -182,6 +207,8 @@ export default function SpatialGame({
     setRound(0);
     setCorrect(0);
     setSelected(null);
+    setStreak(0);
+    setLastComplexity(3);
     roundResults.current = [];
     setPhase("playing");
   }, []);
@@ -190,25 +217,55 @@ export default function SpatialGame({
     (index: number) => {
       if (phase !== "playing") return;
       const isRight = roundData.options[index].isCorrect;
+      const isPractice = round < PRACTICE_ROUNDS;
       setSelected(index);
       setWasCorrect(isRight);
-      if (isRight) setCorrect((c) => c + 1);
+      if (isRight && !isPractice) setCorrect((c) => c + 1);
       roundResults.current.push(isRight);
       setPhase("feedback");
+
+      // Click feedback immediately
+      playSound("click", 0.15);
+
+      // Feedback reveal after 300ms (audio + particles + shake)
+      feedbackTimeoutRef.current = setTimeout(() => {
+        if (isRight) {
+          playSound("success");
+          setBurstTrigger((n) => n + 1);
+          setStreak((s) => s + 1);
+        } else {
+          playSound("error");
+          shake();
+          setStreak(0);
+        }
+      }, 300);
 
       timeoutRef.current = setTimeout(() => {
         const nextRound = round + 1;
         if (nextRound >= TOTAL_ROUNDS) {
-          const finalCorrect = roundResults.current.filter(Boolean).length;
+          // Exclude practice rounds from scored results
+          const scoredResults = roundResults.current.slice(PRACTICE_ROUNDS);
+          const finalCorrect = scoredResults.filter(Boolean).length;
           setPhase("done");
+          playSound("success");
+          setEndBurstTrigger((n) => n + 1);
           onComplete({
             rawScore: finalCorrect,
             durationMs: Date.now() - startTimeRef.current,
             metadata: {
-              rounds: TOTAL_ROUNDS,
-              results: roundResults.current,
+              rounds: SCORED_ROUNDS,
+              practiceRounds: PRACTICE_ROUNDS,
+              results: scoredResults,
             },
           });
+        } else if (nextRound === PRACTICE_ROUNDS) {
+          // Transition from practice to scored phase
+          setPhase("practice-done");
+          setTimeout(() => {
+            setRound(nextRound);
+            setSelected(null);
+            setPhase("playing");
+          }, 1000);
         } else {
           setRound(nextRound);
           setSelected(null);
@@ -216,19 +273,32 @@ export default function SpatialGame({
         }
       }, 800);
     },
-    [phase, round, roundData, onComplete]
+    [phase, round, roundData, onComplete, shake]
   );
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full">
+    <div className="flex flex-col items-center gap-4 w-full relative" style={shakeStyle}>
       <div className="flex justify-between w-full max-w-lg text-sm text-muted-foreground px-2">
         <span>
-          {isZh ? `第 ${round + 1}/${TOTAL_ROUNDS} 轮` : `Round ${round + 1}/${TOTAL_ROUNDS}`}
+          {round < PRACTICE_ROUNDS
+            ? isZh
+              ? `练习 ${round + 1}/${PRACTICE_ROUNDS}`
+              : `Practice ${round + 1}/${PRACTICE_ROUNDS}`
+            : isZh
+              ? `第 ${round + 1 - PRACTICE_ROUNDS}/${SCORED_ROUNDS} 轮`
+              : `Round ${round + 1 - PRACTICE_ROUNDS}/${SCORED_ROUNDS}`}
         </span>
-        <span>
-          {isZh ? "正确:" : "Correct:"} {correct}/{round + (phase === "feedback" || phase === "done" ? 1 : 0)}
-        </span>
+        {round < PRACTICE_ROUNDS ? (
+          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-md text-xs">
+            {isZh ? "练习 — 不计分" : "Practice — not scored"}
+          </span>
+        ) : (
+          <span>
+            {isZh ? "正确:" : "Correct:"} {correct}/{Math.max(0, round - PRACTICE_ROUNDS + (phase === "feedback" || phase === "done" ? 1 : 0))}
+          </span>
+        )}
       </div>
+      <ComboCounter combo={streak} x={200} y={20} enabled={phase === "feedback" || phase === "playing"} />
 
       {phase === "idle" && (
         <div className="w-full max-w-lg bg-slate-800 rounded-xl p-8 text-center">
@@ -244,6 +314,14 @@ export default function SpatialGame({
           >
             {isZh ? "开始测试" : "Start Test"}
           </button>
+        </div>
+      )}
+
+      {phase === "practice-done" && (
+        <div className="w-full max-w-lg bg-slate-800 rounded-xl p-8 text-center animate-pulse">
+          <p className="text-xl font-bold text-primary">
+            {isZh ? "开始计分..." : "Now scoring..."}
+          </p>
         </div>
       )}
 
@@ -264,9 +342,10 @@ export default function SpatialGame({
           </p>
 
           {/* Options */}
-          <div className="grid grid-cols-2 gap-3 w-full">
+          <div className="relative grid grid-cols-2 gap-3 w-full">
             {roundData.options.map((opt, i) => {
               let borderClass = "border-slate-600 hover:border-slate-400";
+              const isSelectedFeedback = phase === "feedback" && i === selected;
               if (phase === "feedback") {
                 if (opt.isCorrect) {
                   borderClass = "border-green-500 bg-green-500/10";
@@ -283,9 +362,13 @@ export default function SpatialGame({
                   onClick={() => handleSelect(i)}
                   disabled={phase === "feedback"}
                   className={`border-2 rounded-xl p-3 flex items-center justify-center transition-all ${borderClass} ${
-                    phase === "feedback"
-                      ? "cursor-default"
-                      : "cursor-pointer"
+                    phase === "feedback" ? "cursor-default" : "cursor-pointer"
+                  } ${
+                    isSelectedFeedback && wasCorrect
+                      ? "animate-pulse ring-2 ring-green-400"
+                      : isSelectedFeedback && !wasCorrect
+                        ? "animate-pulse ring-2 ring-red-400"
+                        : ""
                   }`}
                 >
                   <ShapeSVG
@@ -296,6 +379,14 @@ export default function SpatialGame({
                 </button>
               );
             })}
+            <ParticleBurst
+              trigger={burstTrigger}
+              x={240}
+              y={100}
+              color="#00D4AA"
+              count={16}
+              enabled={burstTrigger > 0}
+            />
           </div>
 
           {phase === "feedback" && (
@@ -309,12 +400,20 @@ export default function SpatialGame({
       )}
 
       {phase === "done" && (
-        <div className="w-full max-w-lg bg-slate-800 rounded-xl p-8 text-center">
+        <div className="relative w-full max-w-lg bg-slate-800 rounded-xl p-8 text-center">
           <p className="text-2xl font-bold mb-2">{isZh ? "测试完成!" : "Test Complete!"}</p>
           <p className="text-4xl font-bold text-blue-400">
-            {correct}/{TOTAL_ROUNDS}
+            {correct}/{SCORED_ROUNDS}
           </p>
           <p className="text-sm text-muted-foreground mt-2">{isZh ? "正确回答" : "Correct Answers"}</p>
+          <ParticleBurst
+            trigger={endBurstTrigger}
+            x={240}
+            y={80}
+            color="#FFB800"
+            count={Math.max(20, correct * 5)}
+            enabled={endBurstTrigger > 0}
+          />
         </div>
       )}
 

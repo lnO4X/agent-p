@@ -9,6 +9,14 @@ const INITIAL_SEQ_LENGTH = 3;
 const FLASH_DURATION = 500; // ms per tile flash
 const FLASH_GAP = 200; // ms between flashes
 
+// NOTE: No practice phase added here.
+// Corsi uses a ceiling mechanic (game ends on first mistake, measures max sequence
+// length reached). A practice sequence would either:
+//   (a) inflate scores artificially if the player remembers patterns, or
+//   (b) end the game prematurely if they fail practice.
+// The initial 3-tile sequence already serves as an easy warmup — the mechanic
+// is self-explanatory after the first trial. Intentionally omitting practice.
+
 export default function MemoryGame({
   onComplete,
   onAbort,

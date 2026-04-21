@@ -19,8 +19,11 @@ const COLORS = [
   { name: "黄", nameEn: "YELLOW", hex: "#eab308", key: "y" },
 ] as const;
 
-const TOTAL_TRIALS = 40;
+const PRACTICE_TRIALS = 5;
+const SCORED_TRIALS = 40;
+const TOTAL_TRIALS = PRACTICE_TRIALS + SCORED_TRIALS;
 const CONGRUENT_RATIO = 0.5;
+const PRACTICE_DONE_MS = 1000;
 
 interface Trial {
   wordIndex: number;
@@ -29,26 +32,41 @@ interface Trial {
 }
 
 function generateTrials(): Trial[] {
-  const trials: Trial[] = [];
-  const congruentCount = Math.round(TOTAL_TRIALS * CONGRUENT_RATIO);
+  const scored: Trial[] = [];
+  const congruentCount = Math.round(SCORED_TRIALS * CONGRUENT_RATIO);
 
   for (let i = 0; i < congruentCount; i++) {
     const idx = Math.floor(Math.random() * COLORS.length);
-    trials.push({ wordIndex: idx, inkIndex: idx, congruent: true });
+    scored.push({ wordIndex: idx, inkIndex: idx, congruent: true });
   }
 
-  for (let i = 0; i < TOTAL_TRIALS - congruentCount; i++) {
+  for (let i = 0; i < SCORED_TRIALS - congruentCount; i++) {
     const wordIdx = Math.floor(Math.random() * COLORS.length);
     let inkIdx = Math.floor(Math.random() * (COLORS.length - 1));
     if (inkIdx >= wordIdx) inkIdx++;
-    trials.push({ wordIndex: wordIdx, inkIndex: inkIdx, congruent: false });
+    scored.push({ wordIndex: wordIdx, inkIndex: inkIdx, congruent: false });
   }
 
-  for (let i = trials.length - 1; i > 0; i--) {
+  for (let i = scored.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [trials[i], trials[j]] = [trials[j], trials[i]];
+    [scored[i], scored[j]] = [scored[j], scored[i]];
   }
-  return trials;
+
+  // Practice trials: mix congruent and incongruent
+  const practice: Trial[] = [];
+  for (let i = 0; i < PRACTICE_TRIALS; i++) {
+    const isCongruent = i % 2 === 0;
+    const wordIdx = Math.floor(Math.random() * COLORS.length);
+    if (isCongruent) {
+      practice.push({ wordIndex: wordIdx, inkIndex: wordIdx, congruent: true });
+    } else {
+      let inkIdx = Math.floor(Math.random() * (COLORS.length - 1));
+      if (inkIdx >= wordIdx) inkIdx++;
+      practice.push({ wordIndex: wordIdx, inkIndex: inkIdx, congruent: false });
+    }
+  }
+
+  return [...practice, ...scored];
 }
 
 export default function StroopGame({
@@ -57,7 +75,7 @@ export default function StroopGame({
 }: GameComponentProps) {
   const { locale } = useI18n();
   const isZh = locale === "zh";
-  const [phase, setPhase] = useState<"idle" | "fixation" | "stimulus" | "feedback" | "done">("idle");
+  const [phase, setPhase] = useState<"idle" | "fixation" | "stimulus" | "feedback" | "practice-done" | "done">("idle");
   const [trialIndex, setTrialIndex] = useState(0);
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
 
@@ -95,8 +113,9 @@ export default function StroopGame({
 
       const rt = performance.now() - trialStartRef.current;
       const isCorrect = selectedInkIndex === currentTrial.inkIndex;
+      const isPractice = trialIndex < PRACTICE_TRIALS;
 
-      if (isCorrect) {
+      if (isCorrect && !isPractice) {
         correctCount.current++;
         if (currentTrial.congruent) {
           congruentRTs.current.push(rt);
@@ -129,10 +148,18 @@ export default function StroopGame({
               stroopEffect: Math.round(stroopEffect),
               meanCongruent: Math.round(meanCong),
               meanIncongruent: Math.round(meanIncong),
-              accuracy: correctCount.current / TOTAL_TRIALS,
-              totalTrials: TOTAL_TRIALS,
+              accuracy: correctCount.current / SCORED_TRIALS,
+              totalTrials: SCORED_TRIALS,
+              practiceTrials: PRACTICE_TRIALS,
             },
           });
+        } else if (next === PRACTICE_TRIALS) {
+          // Transition from practice to scored phase
+          setPhase("practice-done");
+          timerRef.current = setTimeout(() => {
+            setTrialIndex(next);
+            showNextTrial();
+          }, PRACTICE_DONE_MS);
         } else {
           setTrialIndex(next);
           showNextTrial();
@@ -193,11 +220,23 @@ export default function StroopGame({
     );
   }
 
+  const isPractice = trialIndex < PRACTICE_TRIALS;
+
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-lg mx-auto">
       <div className="flex justify-between w-full text-sm text-muted-foreground px-2">
-        <span>{isZh ? `第 ${trialIndex + 1}/${TOTAL_TRIALS} 题` : `Trial ${trialIndex + 1}/${TOTAL_TRIALS}`}</span>
-        <span>{isZh ? "正确:" : "Correct:"} {correctCount.current}</span>
+        <span>
+          {isPractice
+            ? isZh ? `练习 ${trialIndex + 1}/${PRACTICE_TRIALS}` : `Practice ${trialIndex + 1}/${PRACTICE_TRIALS}`
+            : isZh ? `第 ${trialIndex + 1 - PRACTICE_TRIALS}/${SCORED_TRIALS} 题` : `Trial ${trialIndex + 1 - PRACTICE_TRIALS}/${SCORED_TRIALS}`}
+        </span>
+        {isPractice ? (
+          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-md text-xs">
+            {isZh ? "练习 — 不计分" : "Practice — not scored"}
+          </span>
+        ) : (
+          <span>{isZh ? "正确:" : "Correct:"} {correctCount.current}</span>
+        )}
       </div>
 
       <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
@@ -214,6 +253,11 @@ export default function StroopGame({
         {phase === "feedback" && (
           <div className={`text-2xl font-bold ${lastCorrect ? "text-green-400" : "text-red-400"}`}>
             {lastCorrect ? "✓" : "✗"}
+          </div>
+        )}
+        {phase === "practice-done" && (
+          <div className="text-xl font-bold text-primary animate-pulse">
+            {isZh ? "开始计分..." : "Now scoring..."}
           </div>
         )}
       </div>

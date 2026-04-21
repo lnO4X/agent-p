@@ -6,6 +6,7 @@ import memory from "./memory";
 import strategy from "./strategy";
 import rhythm from "./rhythm";
 import pattern from "./pattern";
+import posner from "./posner";
 import multitask from "./multitask";
 import decision from "./decision";
 import emotional from "./emotional";
@@ -25,6 +26,7 @@ const allGames = [
   strategy,
   rhythm,
   pattern,
+  posner,
   multitask,
   decision,
   emotional,

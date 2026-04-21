@@ -4,7 +4,9 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
 import { useI18n } from "@/i18n/context";
 
-const GAME_DURATION = 20_000; // 20 seconds
+const GAME_DURATION = 23_000; // 23 seconds total (3s practice + 20s scored)
+const PRACTICE_DURATION = 3_000; // First 3s are unscored "get ready" practice
+const SCORED_DURATION = GAME_DURATION - PRACTICE_DURATION;
 const TARGET_RADIUS = 30;
 const CANVAS_W = 600;
 const CANVAS_H = 400;
@@ -24,8 +26,9 @@ export default function HandEyeGame({
   const { locale } = useI18n();
   const isZh = locale === "zh";
   const [phase, setPhase] = useState<"idle" | "playing" | "done">("idle");
-  const [timeLeft, setTimeLeft] = useState(GAME_DURATION / 1000);
+  const [timeLeft, setTimeLeft] = useState(SCORED_DURATION / 1000);
   const [trackPct, setTrackPct] = useState(0);
+  const [isPracticePhase, setIsPracticePhase] = useState(true);
 
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const targetRef = useRef<TargetPos>({
@@ -57,8 +60,17 @@ export default function HandEyeGame({
     if (!ctx) return;
 
     const elapsed = Date.now() - gameStartRef.current;
-    const remaining = Math.max(0, GAME_DURATION - elapsed);
+    const inPractice = elapsed < PRACTICE_DURATION;
+    // Once out of practice, remaining is the scored time left
+    const remaining = inPractice
+      ? Math.max(0, GAME_DURATION - elapsed)
+      : Math.max(0, GAME_DURATION - elapsed);
     setTimeLeft(Math.ceil(remaining / 1000));
+
+    // Transition from practice to scored phase
+    if (!inPractice && isPracticePhase) {
+      setIsPracticePhase(false);
+    }
 
     if (remaining <= 0) {
       const pct =
@@ -75,6 +87,7 @@ export default function HandEyeGame({
         metadata: {
           framesOnTarget: framesOnTarget.current,
           totalFrames: totalFrames.current,
+          practiceDurationMs: PRACTICE_DURATION,
         },
       });
       return;
@@ -101,12 +114,15 @@ export default function HandEyeGame({
     }
 
     // Check if mouse is on target
-    totalFrames.current++;
     const mx = mouseRef.current.x;
     const my = mouseRef.current.y;
     const dist = Math.sqrt((mx - t.x) ** 2 + (my - t.y) ** 2);
     const isOnTarget = dist <= TARGET_RADIUS;
-    if (isOnTarget) framesOnTarget.current++;
+    // Only count frames AFTER practice period
+    if (!inPractice) {
+      totalFrames.current++;
+      if (isOnTarget) framesOnTarget.current++;
+    }
 
     // Update live percentage display
     const livePct =
@@ -150,19 +166,46 @@ export default function HandEyeGame({
     ctx.stroke();
 
     animRef.current = requestAnimationFrame(gameLoop);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [onComplete, pickNewDirection]);
+
+  const updatePointerPos = useCallback((clientX: number, clientY: number) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = CANVAS_W / rect.width;
+    const scaleY = CANVAS_H / rect.height;
+    mouseRef.current.x = (clientX - rect.left) * scaleX;
+    mouseRef.current.y = (clientY - rect.top) * scaleY;
+  }, []);
 
   const handleMouseMove = useCallback(
     (e: React.MouseEvent<HTMLCanvasElement>) => {
-      const canvas = canvasRef.current;
-      if (!canvas) return;
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = CANVAS_W / rect.width;
-      const scaleY = CANVAS_H / rect.height;
-      mouseRef.current.x = (e.clientX - rect.left) * scaleX;
-      mouseRef.current.y = (e.clientY - rect.top) * scaleY;
+      updatePointerPos(e.clientX, e.clientY);
     },
-    []
+    [updatePointerPos]
+  );
+
+  // Touch handlers: translate finger position to the same pointer ref so the
+  // pursuit-rotor paradigm works on mobile. Measurement precision is lower on
+  // touch (finger obscures the target, less sub-pixel accuracy) but the
+  // percent-on-target metric still scores the player's tracking ability.
+  const handleTouchMove = useCallback(
+    (e: React.TouchEvent<HTMLCanvasElement>) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      if (touch) updatePointerPos(touch.clientX, touch.clientY);
+    },
+    [updatePointerPos]
+  );
+
+  const handleTouchStart = useCallback(
+    (e: React.TouchEvent<HTMLCanvasElement>) => {
+      e.preventDefault();
+      const touch = e.touches[0];
+      if (touch) updatePointerPos(touch.clientX, touch.clientY);
+    },
+    [updatePointerPos]
   );
 
   const startGame = useCallback(() => {
@@ -171,6 +214,7 @@ export default function HandEyeGame({
     gameStartRef.current = Date.now();
     framesOnTarget.current = 0;
     totalFrames.current = 0;
+    setIsPracticePhase(true);
     targetRef.current = {
       x: CANVAS_W / 2,
       y: CANVAS_H / 2,
@@ -191,19 +235,31 @@ export default function HandEyeGame({
     <div className="flex flex-col items-center gap-4 w-full">
       <div className="flex justify-between w-full max-w-[600px] text-sm text-muted-foreground px-2">
         <span>{isZh ? "追踪率:" : "Tracking:"} {trackPct}%</span>
-        {phase === "playing" && <span>{isZh ? "剩余:" : "Remaining:"} {timeLeft}s</span>}
+        {phase === "playing" && isPracticePhase && (
+          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-md text-xs">
+            {isZh ? "准备中 — 不计分" : "Get ready — not scored"}
+          </span>
+        )}
+        {phase === "playing" && !isPracticePhase && <span>{isZh ? "剩余:" : "Remaining:"} {timeLeft}s</span>}
       </div>
 
       {phase === "idle" && (
         <div className="w-full max-w-[600px] flex flex-col items-center gap-4">
           <div className="bg-slate-800 rounded-xl p-8 text-center">
             <p className="text-lg mb-4">
-              {isZh ? "保持鼠标/光标在移动的红色目标圆上" : "Keep your cursor on the moving red target"}
+              {isZh
+                ? "保持鼠标/手指在移动的红色目标圆上"
+                : "Keep your cursor or finger on the moving red target"}
             </p>
             <p className="text-sm text-muted-foreground mb-6">
               {isZh
                 ? "目标会在画布内随机移动，持续20秒。追踪率越高分数越高。"
                 : "The target moves randomly for 20 seconds. Higher tracking = higher score."}
+            </p>
+            <p className="text-xs text-muted-foreground mb-4 md:hidden">
+              {isZh
+                ? "提示：手指触控可玩，但在电脑上用鼠标精度更高。"
+                : "Tip: Works on touch, but mouse on PC gives higher precision."}
             </p>
             <button
               onClick={startGame}
@@ -221,7 +277,9 @@ export default function HandEyeGame({
           width={CANVAS_W}
           height={CANVAS_H}
           onMouseMove={handleMouseMove}
-          className="rounded-xl cursor-none w-full max-w-[600px]"
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          className="rounded-xl cursor-none w-full max-w-[600px] touch-none select-none"
           style={{ aspectRatio: `${CANVAS_W}/${CANVAS_H}` }}
         />
       )}

@@ -2,43 +2,32 @@ import type { GameScorer } from "@/types/game";
 import { percentileNormalize } from "@/lib/scoring";
 
 /**
- * Posner Cueing Task scorer.
+ * Color-discrimination accuracy scorer ("Find the Odd One").
  *
- * Primary metric: Validity Effect = mean RT(invalid) - mean RT(valid) in ms.
- * Lower effect = more efficient attention reorienting (better score).
+ * Metric: correct / 15 (ratio of correct identifications across 15 rounds).
+ * Distribution: typical adult gets 10-12 correct (~70-80%). The difficulty
+ * curve (shrinking lightness delta per round) makes a perfect 15/15 unlikely.
  *
- * @normSource Posner 1980; MacLeod 1991 review; typical healthy-adult
- *   validity effect is 30-60ms (mean ~40, SD ~20).
+ * Note: this is the Quick-tier entry-funnel game. The Pro tier uses Posner
+ * Cueing (src/games/posner/) for a research-grade pattern_recog measure.
+ * The mean/SD here is an internal estimate, not a published norm.
  */
 export const patternScorer: GameScorer = {
-  perfectRawScore: 0, // minimum validity effect (attention perfectly efficient)
-  higherIsBetter: false, // lower effect = better
+  perfectRawScore: 15,
+  higherIsBetter: true,
   distribution: {
-    mean: 40, // ms
-    stdDev: 20,
+    mean: 10.5,
+    stdDev: 2.5,
   },
-  normalize(
-    rawScore: number,
-    _durationMs?: number,
-    metadata?: Record<string, unknown>
-  ): number {
-    // rawScore = validity effect in ms (lower is better)
-    // Clamp extreme values. Negative effects can arise from noise but are
-    // theoretically unusual; allow a modest negative floor.
-    const clamped = Math.max(-50, Math.min(200, rawScore));
-    const normalized = percentileNormalize(
+  normalize(rawScore: number): number {
+    const clamped = Math.max(0, Math.min(15, rawScore));
+    return percentileNormalize(
       clamped,
       this.distribution.mean,
       this.distribution.stdDev,
-      false
+      true
     );
-
-    // If accuracy < 70%, cap score at 30 (likely guessing)
-    const accuracy = metadata?.accuracy as number | undefined;
-    if (accuracy !== undefined && accuracy < 0.7) {
-      return Math.min(normalized, 30);
-    }
-
-    return normalized;
   },
 };
+
+export default patternScorer;

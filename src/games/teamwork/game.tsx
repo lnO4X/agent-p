@@ -1,8 +1,14 @@
 "use client";
 
-import { useState, useRef, useCallback } from "react";
+import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
 import { useI18n } from "@/i18n/context";
+import { playSound } from "@/lib/audio-fx";
+import {
+  ParticleBurst,
+  ComboCounter,
+  useScreenShake,
+} from "@/components/game-fx";
 
 /**
  * Perspective Taking — Visual perspective / Theory of Mind (Michelon & Zacks 2006)
@@ -13,8 +19,11 @@ import { useI18n } from "@/i18n/context";
  * Measures social cognition: understanding another's viewpoint.
  */
 
-const TOTAL_TRIALS = 16;
+const PRACTICE_TRIALS = 2;
+const SCORED_TRIALS = 16;
+const TOTAL_TRIALS = PRACTICE_TRIALS + SCORED_TRIALS;
 const GRID_SIZE = 4; // 4x4
+const PRACTICE_DONE_MS = 1000;
 
 interface GridObject {
   row: number;
@@ -92,26 +101,39 @@ export default function PerspectiveGame({
 }: GameComponentProps) {
   const { locale } = useI18n();
   const isZh = locale === "zh";
-  const [phase, setPhase] = useState<"idle" | "playing" | "feedback" | "done">("idle");
+  const [phase, setPhase] = useState<"idle" | "playing" | "feedback" | "practice-done" | "done">("idle");
   const [trialIndex, setTrialIndex] = useState(0);
   const [trial, setTrial] = useState<Trial | null>(null);
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
   const [correct, setCorrect] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [burstTrigger, setBurstTrigger] = useState(0);
+  const [endBurstTrigger, setEndBurstTrigger] = useState(0);
 
   const startTimeRef = useRef(0);
   const trialStartRef = useRef(0);
   const resultsRef = useRef<{ correct: boolean; rt: number }[]>([]);
   const timerRef = useRef<ReturnType<typeof setTimeout>>(null!);
+  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout>>(null!);
+  const { trigger: shake, style: shakeStyle } = useScreenShake();
 
   const startGame = useCallback(() => {
     startTimeRef.current = Date.now();
     resultsRef.current = [];
     setCorrect(0);
+    setStreak(0);
     setTrialIndex(0);
     const t = generateTrial(0);
     setTrial(t);
     trialStartRef.current = performance.now();
     setPhase("playing");
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (timerRef.current) clearTimeout(timerRef.current);
+      if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
+    };
   }, []);
 
   const handleAnswer = useCallback(
@@ -120,16 +142,34 @@ export default function PerspectiveGame({
 
       const rt = performance.now() - trialStartRef.current;
       const isCorrect = answer === trial.answer;
+      const isPractice = trialIndex < PRACTICE_TRIALS;
       resultsRef.current.push({ correct: isCorrect, rt });
 
       setLastCorrect(isCorrect);
-      if (isCorrect) setCorrect((c) => c + 1);
+      if (isCorrect && !isPractice) setCorrect((c) => c + 1);
       setPhase("feedback");
+
+      // Click feedback immediately
+      playSound("click", 0.15);
+
+      // Feedback reveal ~300ms
+      feedbackTimerRef.current = setTimeout(() => {
+        if (isCorrect) {
+          playSound("success");
+          setBurstTrigger((n) => n + 1);
+          setStreak((s) => s + 1);
+        } else {
+          playSound("error");
+          shake();
+          setStreak(0);
+        }
+      }, 300);
 
       timerRef.current = setTimeout(() => {
         const next = trialIndex + 1;
         if (next >= TOTAL_TRIALS) {
-          const results = resultsRef.current;
+          // Exclude practice trials from scored results
+          const results = resultsRef.current.slice(PRACTICE_TRIALS);
           const correctResults = results.filter((r) => r.correct);
           const accuracy = correctResults.length / results.length;
           const avgRT =
@@ -141,16 +181,29 @@ export default function PerspectiveGame({
           const rawScore = accuracy * 100 - avgRT * 0.01;
 
           setPhase("done");
+          playSound("success");
+          setEndBurstTrigger((n) => n + 1);
           onComplete({
             rawScore: Math.max(0, rawScore),
             durationMs: Date.now() - startTimeRef.current,
             metadata: {
               accuracy: Math.round(accuracy * 100),
               avgRT: Math.round(avgRT),
-              totalTrials: TOTAL_TRIALS,
+              totalTrials: SCORED_TRIALS,
+              practiceTrials: PRACTICE_TRIALS,
               correctCount: correctResults.length,
             },
           });
+        } else if (next === PRACTICE_TRIALS) {
+          // Transition from practice to scored phase
+          setPhase("practice-done");
+          timerRef.current = setTimeout(() => {
+            setTrialIndex(next);
+            const t = generateTrial(next);
+            setTrial(t);
+            trialStartRef.current = performance.now();
+            setPhase("playing");
+          }, PRACTICE_DONE_MS);
         } else {
           setTrialIndex(next);
           const t = generateTrial(next);
@@ -160,7 +213,7 @@ export default function PerspectiveGame({
         }
       }, 500);
     },
-    [phase, trial, trialIndex, onComplete]
+    [phase, trial, trialIndex, onComplete, shake]
   );
 
   if (phase === "idle") {
@@ -191,21 +244,50 @@ export default function PerspectiveGame({
     );
   }
 
+  const isPractice = trialIndex < PRACTICE_TRIALS;
+
   return (
-    <div className="flex flex-col items-center gap-3 w-full max-w-lg mx-auto">
+    <div className="relative flex flex-col items-center gap-3 w-full max-w-lg mx-auto" style={shakeStyle}>
       <div className="flex justify-between w-full text-sm text-muted-foreground px-2">
-        <span>{isZh ? `第 ${trialIndex + 1}/${TOTAL_TRIALS} 题` : `Trial ${trialIndex + 1}/${TOTAL_TRIALS}`}</span>
-        <span>{isZh ? "正确:" : "Correct:"} {correct}</span>
+        <span>
+          {isPractice
+            ? isZh ? `练习 ${trialIndex + 1}/${PRACTICE_TRIALS}` : `Practice ${trialIndex + 1}/${PRACTICE_TRIALS}`
+            : isZh ? `第 ${trialIndex + 1 - PRACTICE_TRIALS}/${SCORED_TRIALS} 题` : `Trial ${trialIndex + 1 - PRACTICE_TRIALS}/${SCORED_TRIALS}`}
+        </span>
+        {isPractice ? (
+          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-md text-xs">
+            {isZh ? "练习 — 不计分" : "Practice — not scored"}
+          </span>
+        ) : (
+          <span>{isZh ? "正确:" : "Correct:"} {correct}</span>
+        )}
       </div>
+      <ComboCounter combo={streak} x={200} y={20} enabled={phase === "feedback" || phase === "playing"} />
 
       <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
         <div className="h-full bg-primary transition-all" style={{ width: `${((trialIndex + 1) / TOTAL_TRIALS) * 100}%` }} />
       </div>
 
+      {phase === "practice-done" && (
+        <div className="w-full text-center py-8 animate-pulse">
+          <p className="text-xl font-bold text-primary">
+            {isZh ? "开始计分..." : "Now scoring..."}
+          </p>
+        </div>
+      )}
+
       {trial && (phase === "playing" || phase === "feedback") && (
         <>
           {/* Director indicator */}
           <div className="relative w-[280px] h-[280px] mx-auto">
+            <ParticleBurst
+              trigger={burstTrigger}
+              x={140}
+              y={140}
+              color="#00D4AA"
+              count={14}
+              enabled={burstTrigger > 0}
+            />
             {/* Director label */}
             {trial.directorSide === "top" && (
               <div className="absolute -top-6 left-1/2 -translate-x-1/2 text-xs text-blue-400 font-bold">
@@ -234,6 +316,13 @@ export default function PerspectiveGame({
                   isWall = col === GRID_SIZE - 1 - trial.wallRow;
                 }
 
+                const feedbackRing =
+                  phase === "feedback" && isQuestionObj
+                    ? lastCorrect
+                      ? "ring-2 ring-green-400 bg-green-500/20 border-green-400"
+                      : "ring-2 ring-red-400 bg-red-500/20 border-red-400"
+                    : "";
+
                 return (
                   <div
                     key={idx}
@@ -241,7 +330,7 @@ export default function PerspectiveGame({
                       isWall
                         ? "bg-stone-600 border-2 border-stone-500"
                         : isQuestionObj
-                          ? "bg-yellow-500/20 border-2 border-yellow-400 animate-pulse"
+                          ? `bg-yellow-500/20 border-2 border-yellow-400 animate-pulse ${feedbackRing}`
                           : obj
                             ? "bg-slate-800/80 border border-slate-700"
                             : "bg-slate-900/50 border border-slate-800/30"
@@ -290,6 +379,15 @@ export default function PerspectiveGame({
           )}
         </>
       )}
+
+      <ParticleBurst
+        trigger={endBurstTrigger}
+        x={240}
+        y={140}
+        color="#FFB800"
+        count={Math.max(20, correct * 4)}
+        enabled={endBurstTrigger > 0}
+      />
 
       <button onClick={onAbort} className="text-sm text-muted-foreground hover:text-foreground mt-1">
         {isZh ? "放弃测试" : "Abort Test"}

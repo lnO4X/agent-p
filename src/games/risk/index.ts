@@ -16,6 +16,7 @@ const plugin: GamePlugin = {
   icon: "🎈",
   scorer: riskScorer,
   component: RiskGame,
+  mobileCompatible: true,
 };
 
 export default plugin;

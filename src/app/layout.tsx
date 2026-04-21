@@ -42,11 +42,11 @@ export const metadata: Metadata = {
     template: "%s | GameTan",
   },
   description:
-    "3 mini-games measure your reaction speed, pattern recognition, and decision-making against pro player benchmarks. Discover your esports talent tier.",
+    "Cognitive assessment for gamers. 3 mini-games measure reaction speed, pattern recognition, and decision-making — ranked against published gamer cognitive profiles (Dale 2017; Kowal 2018).",
   keywords: [
     "esports talent test",
-    "pro player benchmark",
-    "gaming talent detection",
+    "cognitive assessment for gamers",
+    "gaming cognitive test",
     "reaction speed test",
     "gaming talent test",
     "game recommendation",
@@ -79,7 +79,7 @@ export const metadata: Metadata = {
     siteName: "GameTan",
     title: "GameTan — Test Your Esports Talent",
     description:
-      "3 mini-games measure your gaming talent against pro player benchmarks. Discover your esports talent tier.",
+      "Cognitive assessment for gamers. 3 mini-games measure the cognitive abilities behind gaming performance — based on published research.",
     locale: "en_US",
     alternateLocale: "zh_CN",
     images: [
@@ -95,7 +95,7 @@ export const metadata: Metadata = {
     card: "summary_large_image",
     title: "GameTan — Test Your Esports Talent",
     description:
-      "3 mini-games measure your gaming talent against pro player benchmarks.",
+      "Cognitive assessment for gamers — 3 mini-games measure reaction, pattern, and decision-making based on published research.",
   },
   robots: {
     index: true,
@@ -144,14 +144,14 @@ export default function RootLayout({
                 name: "GameTan",
                 url: "https://gametan.ai",
                 logo: "https://gametan.ai/icons/icon-512.png",
-                description: "Esports talent detection — 3 mini-games measure your reaction speed, pattern recognition, and decision-making against pro player benchmarks.",
+                description: "Cognitive assessment for gamers — 3 mini-games measure reaction speed, pattern recognition, and decision-making, based on published cognitive science paradigms.",
               },
               {
                 "@context": "https://schema.org",
                 "@type": "WebSite",
                 name: "GameTan",
                 url: "https://gametan.ai",
-                description: "Test your esports talent against pro player benchmarks",
+                description: "Test your esports cognitive abilities against published gamer cognitive profiles",
                 potentialAction: {
                   "@type": "SearchAction",
                   target: "https://gametan.ai/archetype?q={search_term_string}",
@@ -163,7 +163,7 @@ export default function RootLayout({
                 "@type": "Quiz",
                 name: "Esports Talent Test",
                 url: "https://gametan.ai/quiz",
-                description: "3 mini-games measuring reaction speed, pattern recognition, and risk decision-making. Compare your scores against pro player benchmarks.",
+                description: "3 mini-games measuring reaction speed, pattern recognition, and risk decision-making. Scores are ranked against literature norms from published gamer cognitive studies.",
                 about: { "@type": "Thing", name: "Esports Talent" },
                 educationalLevel: "beginner",
                 timeRequired: "PT3M",
@@ -173,7 +173,7 @@ export default function RootLayout({
                 "@context": "https://schema.org",
                 "@type": "Product",
                 name: "GameTan Pro Assessment",
-                description: "Full 17-dimension esports talent analysis with AI coaching, PDF report, pro player comparison, and 365 days access.",
+                description: "Full 17-dimension cognitive assessment for gamers — all validated paradigms, AI coaching, PDF report with citations, literature-based percentile ranking, and 365 days access.",
                 url: "https://gametan.ai/quiz",
                 brand: { "@type": "Brand", name: "GameTan" },
                 offers: {

@@ -3,6 +3,12 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
 import { useI18n } from "@/i18n/context";
+import { playSound } from "@/lib/audio-fx";
+import {
+  ParticleBurst,
+  ScorePopup,
+  useScreenShake,
+} from "@/components/game-fx";
 
 /**
  * Simplified Iowa Gambling Task (IGT).
@@ -109,28 +115,65 @@ export default function DecisionGame({ onComplete, onAbort }: GameComponentProps
   const [phase, setPhase] = useState<"idle" | "playing" | "reveal" | "done">("idle");
   const [trial, setTrial] = useState(0); // 0-indexed next trial
   const [balance, setBalance] = useState(STARTING_BALANCE);
+  const [displayBalance, setDisplayBalance] = useState(STARTING_BALANCE);
   const [lastResult, setLastResult] = useState<{
     deck: DeckId;
     gain: number;
     loss: number;
   } | null>(null);
   const [flippingDeck, setFlippingDeck] = useState<DeckId | null>(null);
+  const [gainPopup, setGainPopup] = useState<{ value: number; trigger: number }>({ value: 0, trigger: 0 });
+  const [lossPopup, setLossPopup] = useState<{ value: number; trigger: number }>({ value: 0, trigger: 0 });
+  const [endBurstTrigger, setEndBurstTrigger] = useState(0);
 
   const startTimeRef = useRef(0);
   const picksRef = useRef<PickRecord[]>([]);
   const balanceRef = useRef(STARTING_BALANCE);
   const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  const balanceAnimRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const { trigger: shake, style: shakeStyle } = useScreenShake();
 
   const startGame = useCallback(() => {
     startTimeRef.current = Date.now();
     picksRef.current = [];
     balanceRef.current = STARTING_BALANCE;
     setBalance(STARTING_BALANCE);
+    setDisplayBalance(STARTING_BALANCE);
     setTrial(0);
     setLastResult(null);
     setFlippingDeck(null);
     setPhase("playing");
   }, []);
+
+  // Animated balance count-up — tween displayBalance toward balance.
+  useEffect(() => {
+    if (balance === displayBalance) return;
+    if (balanceAnimRef.current) clearInterval(balanceAnimRef.current);
+    const start = displayBalance;
+    const end = balance;
+    const delta = end - start;
+    const steps = 15;
+    let i = 0;
+    balanceAnimRef.current = setInterval(() => {
+      i += 1;
+      if (i >= steps) {
+        setDisplayBalance(end);
+        if (balanceAnimRef.current) {
+          clearInterval(balanceAnimRef.current);
+          balanceAnimRef.current = null;
+        }
+      } else {
+        setDisplayBalance(Math.round(start + (delta * i) / steps));
+      }
+    }, 25);
+    return () => {
+      if (balanceAnimRef.current) {
+        clearInterval(balanceAnimRef.current);
+        balanceAnimRef.current = null;
+      }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [balance]);
 
   const finishGame = useCallback(() => {
     const picks = picksRef.current;
@@ -153,6 +196,14 @@ export default function DecisionGame({ onComplete, onAbort }: GameComponentProps
     const bFullCount = picks.filter((p) => p.deck === "B").length;
     const cFullCount = picks.filter((p) => p.deck === "C").length;
     const dFullCount = picks.filter((p) => p.deck === "D").length;
+
+    // Celebrate — scale intensity by net score. Negative net = muted.
+    if (netScore > 0) {
+      playSound("success");
+      setEndBurstTrigger((n) => n + 1);
+    } else {
+      playSound("click", 0.2);
+    }
 
     onComplete({
       rawScore: netScore,
@@ -203,6 +254,24 @@ export default function DecisionGame({ onComplete, onAbort }: GameComponentProps
       setBalance(newBalance);
       setPhase("reveal");
 
+      // Click sound immediately
+      playSound("click", 0.15);
+
+      // Reveal polish: gain popup + coin sound immediately, loss popup +
+      // shake shortly after so they don't stack. Reveal window is 900ms.
+      setGainPopup({ value: result.gain, trigger: Date.now() });
+      playSound("coin", 0.25);
+
+      if (result.loss < 0) {
+        timeoutsRef.current.push(
+          setTimeout(() => {
+            setLossPopup({ value: result.loss, trigger: Date.now() });
+            playSound("pop", 0.3);
+            shake();
+          }, 350)
+        );
+      }
+
       timeoutsRef.current.push(
         setTimeout(() => {
           const nextTrial = trialIdx + 1;
@@ -218,7 +287,7 @@ export default function DecisionGame({ onComplete, onAbort }: GameComponentProps
         }, 900)
       );
     },
-    [phase, trial, finishGame]
+    [phase, trial, finishGame, shake]
   );
 
   // Keyboard: A/B/C/D to pick decks quickly.
@@ -298,20 +367,42 @@ export default function DecisionGame({ onComplete, onAbort }: GameComponentProps
   const progressPct = (trial / TOTAL_TRIALS) * 100;
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full max-w-lg mx-auto">
+    <div className="relative flex flex-col items-center gap-4 w-full max-w-lg mx-auto" style={shakeStyle}>
       {/* Balance */}
-      <div className="w-full flex flex-col items-center gap-1 py-2">
+      <div className="relative w-full flex flex-col items-center gap-1 py-2">
         <span className="text-xs uppercase tracking-wide text-muted-foreground">
           {isZh ? "余额" : "Balance"}
         </span>
         <span
           className={`text-3xl font-mono font-bold ${
-            balance >= STARTING_BALANCE ? "text-emerald-400" : "text-rose-400"
+            displayBalance >= STARTING_BALANCE ? "text-emerald-400" : "text-rose-400"
           }`}
         >
-          ${balance.toLocaleString()}
+          ${displayBalance.toLocaleString()}
         </span>
+        <ScorePopup
+          value={gainPopup.value}
+          x={120}
+          y={30}
+          trigger={gainPopup.trigger}
+          enabled={gainPopup.trigger > 0}
+        />
+        <ScorePopup
+          value={lossPopup.value}
+          x={220}
+          y={30}
+          trigger={lossPopup.trigger}
+          enabled={lossPopup.trigger > 0}
+        />
       </div>
+      <ParticleBurst
+        trigger={endBurstTrigger}
+        x={240}
+        y={60}
+        color="#FFB800"
+        count={24}
+        enabled={endBurstTrigger > 0}
+      />
 
       {/* Progress */}
       <div className="flex justify-between w-full text-sm text-muted-foreground px-1">

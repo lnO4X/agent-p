@@ -15,6 +15,7 @@ const plugin: GamePlugin = {
   icon: "🔄",
   scorer: spatialScorer,
   component: SpatialGame,
+  mobileCompatible: true,
 };
 
 export default plugin;

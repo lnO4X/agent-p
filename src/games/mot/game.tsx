@@ -10,6 +10,7 @@ type Phase =
   | "tracking"
   | "select"
   | "feedback"
+  | "practice-done"
   | "done";
 
 interface Circle {
@@ -23,17 +24,23 @@ interface Circle {
 
 const TOTAL_CIRCLES = 8;
 const CIRCLE_RADIUS = 24;
-const TOTAL_TRIALS = 8;
+const PRACTICE_TRIALS = 1;
+const SCORED_TRIALS = 8;
+const TOTAL_TRIALS = PRACTICE_TRIALS + SCORED_TRIALS;
 const HIGHLIGHT_MS = 2000;
 const TRACKING_MS = 5000;
 const SPEED = 2; // px per frame at 60fps
 const CANVAS_W = 400;
 const CANVAS_H = 400;
+const PRACTICE_DONE_MS = 1000;
 
-// Difficulty schedule: how many targets per trial (1-indexed trial)
+// Difficulty schedule: how many targets per trial (1-indexed trial, practice counts as trial 0)
+// Practice trial uses 1 target (easy warmup). Scored trials 1-8 use original schedule.
 function targetsForTrial(trial: number): number {
-  if (trial <= 3) return 3;
-  if (trial <= 6) return 4;
+  if (trial <= PRACTICE_TRIALS) return 1; // practice: 1 target
+  const scoredTrial = trial - PRACTICE_TRIALS;
+  if (scoredTrial <= 3) return 3;
+  if (scoredTrial <= 6) return 4;
   return 5;
 }
 
@@ -179,19 +186,29 @@ export default function MOTGame({ onComplete, onAbort }: GameComponentProps) {
 
     timerRef.current = setTimeout(() => {
       if (newResults.length >= TOTAL_TRIALS) {
-        // All done
+        // All done — exclude practice trial from scored avg
+        const scoredResults = newResults.slice(PRACTICE_TRIALS);
         const avgAccuracy =
-          newResults.reduce((a, b) => a + b, 0) / newResults.length;
+          scoredResults.reduce((a, b) => a + b, 0) / scoredResults.length;
         setPhase("done");
         onComplete({
           rawScore: Math.round(avgAccuracy * 10) / 10,
           durationMs: Date.now() - startTimeRef.current,
           metadata: {
-            trialResults: newResults,
-            trials: TOTAL_TRIALS,
+            trialResults: scoredResults,
+            trials: SCORED_TRIALS,
+            practiceTrials: PRACTICE_TRIALS,
             avgAccuracy: Math.round(avgAccuracy * 10) / 10,
           },
         });
+      } else if (newResults.length === PRACTICE_TRIALS) {
+        // Transition from practice to scored phase
+        setPhase("practice-done");
+        timerRef.current = setTimeout(() => {
+          const nextTrial = trial + 1;
+          setTrial(nextTrial);
+          startTrial(nextTrial);
+        }, PRACTICE_DONE_MS);
       } else {
         const nextTrial = trial + 1;
         setTrial(nextTrial);
@@ -276,16 +293,26 @@ export default function MOTGame({ onComplete, onAbort }: GameComponentProps) {
   const lastResult =
     trialResults.length > 0 ? trialResults[trialResults.length - 1] : null;
 
+  const isPractice = trial <= PRACTICE_TRIALS;
+
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-lg mx-auto">
       {/* Progress */}
       <div className="flex justify-between w-full text-sm text-muted-foreground px-1">
         <span>
-          {isZh ? `第 ${trial}/${TOTAL_TRIALS} 轮` : `Trial ${trial}/${TOTAL_TRIALS}`}
+          {isPractice
+            ? isZh ? `练习 — 简单热身` : `Practice — easy warmup`
+            : isZh ? `第 ${trial - PRACTICE_TRIALS}/${SCORED_TRIALS} 轮` : `Trial ${trial - PRACTICE_TRIALS}/${SCORED_TRIALS}`}
         </span>
-        <span>
-          {isZh ? `目标: ${numTargets} 个` : `Targets: ${numTargets}`}
-        </span>
+        {isPractice ? (
+          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-md text-xs">
+            {isZh ? "练习 — 不计分" : "Practice — not scored"}
+          </span>
+        ) : (
+          <span>
+            {isZh ? `目标: ${numTargets} 个` : `Targets: ${numTargets}`}
+          </span>
+        )}
       </div>
 
       {/* Progress bar */}
@@ -326,6 +353,11 @@ export default function MOTGame({ onComplete, onAbort }: GameComponentProps) {
               : isZh
                 ? `正确率: ${Math.round(lastResult)}%`
                 : `Accuracy: ${Math.round(lastResult)}%`}
+          </span>
+        )}
+        {phase === "practice-done" && (
+          <span className="text-primary font-bold animate-pulse">
+            {isZh ? "开始计分..." : "Now scoring..."}
           </span>
         )}
       </div>

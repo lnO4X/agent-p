@@ -4,7 +4,9 @@ import { useState, useRef, useCallback } from "react";
 import type { GameComponentProps } from "@/types/game";
 import { useI18n } from "@/i18n/context";
 
-const TOTAL_ROUNDS = 20;
+const PRACTICE_ROUNDS = 2;
+const SCORED_ROUNDS = 20;
+const TOTAL_ROUNDS = PRACTICE_ROUNDS + SCORED_ROUNDS;
 const SAFE_PUMPS = 2; // First 2 pumps per round guaranteed safe
 const POP_INCREMENT = 0.06; // After safe zone: 6%, 12%, 18%, ...
 
@@ -14,7 +16,7 @@ export default function RiskGame({
 }: GameComponentProps) {
   const { locale } = useI18n();
   const isZh = locale === "zh";
-  const [phase, setPhase] = useState<"idle" | "pumping" | "banked" | "popped" | "done">("idle");
+  const [phase, setPhase] = useState<"idle" | "pumping" | "banked" | "popped" | "practice-done" | "done">("idle");
   const [round, setRound] = useState(1);
   const [pumps, setPumps] = useState(0);
   const [currentPot, setCurrentPot] = useState(0);
@@ -72,36 +74,55 @@ export default function RiskGame({
   const bank = useCallback(() => {
     if (phase !== "pumping" || currentPot === 0) return;
 
-    setTotalBanked((t) => t + currentPot);
+    const isPractice = round <= PRACTICE_ROUNDS;
+    if (!isPractice) {
+      setTotalBanked((t) => t + currentPot);
+    }
     setRoundHistory((h) => [
       ...h,
       { pumps, earned: currentPot, popped: false },
     ]);
     setPhase("banked");
-  }, [phase, currentPot, pumps]);
+  }, [phase, currentPot, pumps, round]);
 
   const nextRound = useCallback(() => {
     const nextR = round + 1;
     if (nextR > TOTAL_ROUNDS) {
       setPhase("done");
 
+      // Exclude practice rounds from scored metadata
+      const scoredRounds = roundHistory.slice(PRACTICE_ROUNDS);
       onComplete({
         rawScore: totalBanked,
         durationMs: Date.now() - startTimeRef.current,
         metadata: {
           totalBanked,
-          rounds: roundHistory,
+          rounds: scoredRounds,
+          practiceRounds: PRACTICE_ROUNDS,
           avgPumps:
-            roundHistory.length > 0
+            scoredRounds.length > 0
               ? Math.round(
-                  (roundHistory.reduce((a, r) => a + r.pumps, 0) /
-                    roundHistory.length) *
+                  (scoredRounds.reduce((a, r) => a + r.pumps, 0) /
+                    scoredRounds.length) *
                     10
                 ) / 10
               : 0,
-          poppedCount: roundHistory.filter((r) => r.popped).length,
+          poppedCount: scoredRounds.filter((r) => r.popped).length,
         },
       });
+      return;
+    }
+
+    // Show "Now scoring..." transition when moving from practice to scored
+    if (nextR === PRACTICE_ROUNDS + 1) {
+      setPhase("practice-done");
+      setTimeout(() => {
+        setRound(nextR);
+        setPumps(0);
+        setCurrentPot(0);
+        setBalloonScale(1.0);
+        setPhase("pumping");
+      }, 1000);
       return;
     }
 
@@ -110,7 +131,7 @@ export default function RiskGame({
     setCurrentPot(0);
     setBalloonScale(1.0);
     setPhase("pumping");
-  }, [round, totalBanked, roundHistory, onComplete, phase]);
+  }, [round, totalBanked, roundHistory, onComplete]);
 
   // Display the pop chance for the NEXT pump
   const nextPumpNum = pumps + 1;
@@ -150,17 +171,31 @@ export default function RiskGame({
     );
   }
 
+  const isPractice = round <= PRACTICE_ROUNDS;
+
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-md mx-auto">
       {/* Header */}
       <div className="flex justify-between w-full text-sm px-1">
         <span className="text-muted-foreground">
-          {isZh ? `第 ${round}/${TOTAL_ROUNDS} 轮` : `Round ${round}/${TOTAL_ROUNDS}`}
+          {isPractice
+            ? isZh
+              ? `练习 ${round}/${PRACTICE_ROUNDS}`
+              : `Practice ${round}/${PRACTICE_ROUNDS}`
+            : isZh
+              ? `第 ${round - PRACTICE_ROUNDS}/${SCORED_ROUNDS} 轮`
+              : `Round ${round - PRACTICE_ROUNDS}/${SCORED_ROUNDS}`}
         </span>
-        <span className="text-muted-foreground">
-          {isZh ? "已收:" : "Banked:"} <span className="text-green-400 font-bold">{totalBanked}</span>{" "}
-          {isZh ? "分" : "pts"}
-        </span>
+        {isPractice ? (
+          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-md text-xs">
+            {isZh ? "练习 — 不计分" : "Practice — not scored"}
+          </span>
+        ) : (
+          <span className="text-muted-foreground">
+            {isZh ? "已收:" : "Banked:"} <span className="text-green-400 font-bold">{totalBanked}</span>{" "}
+            {isZh ? "分" : "pts"}
+          </span>
+        )}
       </div>
 
       {/* Progress */}
@@ -175,7 +210,13 @@ export default function RiskGame({
 
       {/* Balloon area */}
       <div className="relative w-full h-56 flex items-center justify-center">
-        {phase === "popped" ? (
+        {phase === "practice-done" ? (
+          <div className="text-center animate-pulse">
+            <div className="text-xl font-bold text-primary">
+              {isZh ? "开始计分..." : "Now scoring..."}
+            </div>
+          </div>
+        ) : phase === "popped" ? (
           <div
             className={`text-center ${shakeAnim ? "animate-pulse" : ""}`}
           >

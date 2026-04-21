@@ -16,6 +16,7 @@ const plugin: GamePlugin = {
   icon: "🎵",
   scorer: rhythmScorer,
   component: RhythmGame,
+  mobileCompatible: true,
 };
 
 export default plugin;

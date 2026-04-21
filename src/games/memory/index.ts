@@ -15,6 +15,7 @@ const plugin: GamePlugin = {
   icon: "🧠",
   scorer: memoryScorer,
   component: MemoryGame,
+  mobileCompatible: true,
 };
 
 export default plugin;

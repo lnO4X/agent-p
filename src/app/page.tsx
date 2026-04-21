@@ -25,27 +25,27 @@ export default function Home() {
       q: t("home.faq.q1"),
       a: t("home.faq.a1"),
       aJsx: isZh ? (
-        <>GameTan 通过互动小游戏测量 13 项真实游戏天赋维度——反应速度、模式识别、战略思维、多任务处理等。不是性格问卷。你的分数会与职业电竞选手基准对比。<Link href="/quiz" className={linkClass}>立即测试</Link>。</>
+        <>GameTan 通过互动小游戏测量 13 项与电竞表现相关的认知维度——反应速度、模式识别、战略思维、多任务处理等——全部基于<Link href="/methodology" className={linkClass}>已发表的研究范式</Link>（Stroop、Flanker、N-Back、Corsi、UFOV）。不是性格问卷。你的分数会与已发表的玩家认知研究文献数据对比。<Link href="/quiz" className={linkClass}>立即测试</Link>。</>
       ) : (
-        <>GameTan measures 13 real gaming talent dimensions — reaction speed, pattern recognition, strategic thinking, multitasking, and more — through interactive mini-games. No personality quizzes. Your scores are compared against pro esports player benchmarks. <Link href="/quiz" className={linkClass}>Take the test now</Link>.</>
+        <>GameTan measures 13 cognitive dimensions tied to gaming performance — reaction speed, pattern recognition, strategic thinking, multitasking, and more — through interactive mini-games built on <Link href="/methodology" className={linkClass}>published research paradigms</Link> (Stroop, Flanker, N-Back, Corsi, UFOV). No personality quizzes. Your scores are ranked against literature norms from published gamer cognitive studies. <Link href="/quiz" className={linkClass}>Take the test now</Link>.</>
       ),
     },
     {
       q: t("home.faq.q2"),
       a: t("home.faq.a2"),
       aJsx: isZh ? (
-        <>每个小游戏都针对竞技游戏中的特定认知或运动技能设计。你的结果会与 FPS、MOBA 和策略游戏的职业电竞运动员数据进行排名对比。</>
+        <>每个小游戏都实现了一个同行评审的认知科学范式，隔离出一项与游戏表现相关的认知技能。你的结果会以百分位排名的方式与已发表的玩家群体研究文献数据对比（Dale &amp; Green 2017；Green &amp; Bavelier 2003；Kowal et al. 2018）。GameTan 没有自己的职业选手数据库——详见 <Link href="/about" className={linkClass}>About</Link> 和 <Link href="/methodology" className={linkClass}>methodology</Link> 页。</>
       ) : (
-        <>Each mini-game is designed to isolate a specific cognitive or motor skill used in competitive gaming. Your results are ranked against data from professional esports athletes across FPS, MOBA, and strategy genres.</>
+        <>Each mini-game implements a paradigm from peer-reviewed cognitive science and isolates a specific cognitive skill that correlates with gaming performance. Your results are percentile-ranked against literature norms from published gamer-population studies (Dale &amp; Green 2017; Green &amp; Bavelier 2003; Kowal et al. 2018). GameTan does not have a proprietary pro player database — see our <Link href="/about" className={linkClass}>About</Link> and <Link href="/methodology" className={linkClass}>methodology</Link> pages.</>
       ),
     },
     {
       q: t("home.faq.q3"),
       a: t("home.faq.a3"),
       aJsx: isZh ? (
-        <>是的，核心天赋测试完全免费。完成 3 分钟<Link href="/quiz" className={linkClass}>测试</Link>后，你可以立即获得完整的 13 维度分数分析、原型分类和职业对比。</>
+        <>是的，核心天赋测试完全免费。完成 3 分钟<Link href="/quiz" className={linkClass}>测试</Link>后，你可以立即获得完整的 13 维度分数分析、原型分类和基于文献的百分位排名。</>
       ) : (
-        <>Yes, the core talent test is 100% free. You get your full 13-dimension score breakdown, archetype classification, and pro comparison instantly after completing the 3-minute <Link href="/quiz" className={linkClass}>test</Link>.</>
+        <>Yes, the core talent test is 100% free. You get your full 13-dimension score breakdown, archetype classification, and a literature-based percentile ranking instantly after completing the 3-minute <Link href="/quiz" className={linkClass}>test</Link>.</>
       ),
     },
     {
@@ -79,9 +79,9 @@ export default function Home() {
       q: t("home.faq.q7"),
       a: t("home.faq.a7"),
       aJsx: isZh ? (
-        <>参加 GameTan <Link href="/quiz" className={linkClass}>Pro 评估</Link>获取天赋等级。职业精英（前 0.5%）和职业水平（前 5%）表示与职业选手相当的天赋。但天赋只是一部分——职业选手还需每天训练 8-12 小时。</>
+        <>GameTan 无法预测职业成功——我们测量的是认知能力，不是竞技结果。参加 <Link href="/quiz" className={linkClass}>Pro 评估</Link>看看你的认知画像与文献数据对比处于什么位置。某个维度进入前 5% 意味着你在该任务上的原始认知能力与<Link href="/methodology" className={linkClass}>已发表研究</Link>中的顶尖玩家画像相当。但职业成功还取决于训练时间、心理素质和机会——认知天赋只是一部分。</>
       ) : (
-        <>Take the GameTan <Link href="/quiz" className={linkClass}>Pro Assessment</Link> to get your talent tier. Pro Elite (top 0.5%) and Pro Level (top 5%) indicate talent comparable to pros. But talent is only part — pros also train 8-12 hours daily for years.</>
+        <>GameTan cannot predict pro success — we measure cognitive abilities, not competitive outcome. Take the <Link href="/quiz" className={linkClass}>Pro Assessment</Link> to see where your cognitive profile ranks against <Link href="/methodology" className={linkClass}>literature norms</Link>. Scoring in the top 5% on a dimension means your raw cognitive ability is comparable to top-tier published gamer profiles — but pro success also depends on practice, mental toughness, and opportunity.</>
       ),
     },
     {

@@ -3,8 +3,10 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
 import { useI18n } from "@/i18n/context";
+import { playSound } from "@/lib/audio-fx";
+import { ParticleBurst, ComboCounter } from "@/components/game-fx";
 
-type Phase = "idle" | "playing" | "feedback" | "done";
+type Phase = "idle" | "playing" | "feedback" | "practice-done" | "done";
 type RuleType = "magnitude" | "parity";
 
 interface Trial {
@@ -14,9 +16,12 @@ interface Trial {
   correctAnswer: boolean; // true = Yes, false = No
 }
 
-const TOTAL_TRIALS = 32;
+const PRACTICE_TRIALS = 8; // 4 of each rule, 2 blocks of 4
+const SCORED_TRIALS = 32;
+const TOTAL_TRIALS = PRACTICE_TRIALS + SCORED_TRIALS;
 const BLOCK_SIZE = 4;
 const FEEDBACK_MS = 300;
+const PRACTICE_DONE_MS = 1000;
 
 // Generate a number 1-9 excluding 5
 function randomNumber(): number {
@@ -70,6 +75,9 @@ export default function TaskSwitchGame({
   const [currentTrial, setCurrentTrial] = useState<Trial | null>(null);
   const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
   const [correctCount, setCorrectCount] = useState(0);
+  // Polish state — switch-trial streak + block-end celebration
+  const [switchStreak, setSwitchStreak] = useState(0);
+  const [celebrateTrigger, setCelebrateTrigger] = useState(0);
 
   const trialsRef = useRef<Trial[]>([]);
   const startTimeRef = useRef(0);
@@ -95,6 +103,7 @@ export default function TaskSwitchGame({
     allTimesRef.current = [];
     correctCountRef.current = 0;
     setCorrectCount(0);
+    setSwitchStreak(0);
     startTimeRef.current = Date.now();
     showTrial(0);
   }, [showTrial]);
@@ -105,14 +114,19 @@ export default function TaskSwitchGame({
 
       const rt = performance.now() - trialStartRef.current;
       const correct = answer === currentTrial.correctAnswer;
+      const isPractice = trialIndex < PRACTICE_TRIALS;
 
-      if (correct) {
+      // Click sound at response time (Tier B safe — the response event itself)
+      playSound("click");
+
+      if (correct && !isPractice) {
         correctCountRef.current++;
         setCorrectCount(correctCountRef.current);
       }
 
       // Only record RT for correct responses (standard in switch-cost research)
-      if (correct) {
+      // and exclude practice trials
+      if (correct && !isPractice) {
         if (currentTrial.isSwitch) {
           switchTimesRef.current.push(rt);
         } else {
@@ -120,14 +134,31 @@ export default function TaskSwitchGame({
         }
       }
 
-      allTimesRef.current.push({
-        rt,
-        isSwitch: currentTrial.isSwitch,
-        correct,
-      });
+      if (!isPractice) {
+        allTimesRef.current.push({
+          rt,
+          isSwitch: currentTrial.isSwitch,
+          correct,
+        });
+      }
+
+      // Switch-trial bonus: 3 consecutive correct switches → combo chime
+      let newSwitchStreak = switchStreak;
+      if (currentTrial.isSwitch) {
+        newSwitchStreak = correct ? switchStreak + 1 : 0;
+        setSwitchStreak(newSwitchStreak);
+        if (correct && newSwitchStreak > 0 && newSwitchStreak % 3 === 0) {
+          playSound("coin");
+        }
+      } else if (!correct) {
+        // Incorrect on repeat trial still breaks switch streak
+        setSwitchStreak(0);
+      }
 
       setLastCorrect(correct);
       setPhase("feedback");
+      // Feedback-phase audio
+      playSound(correct ? "success" : "error");
 
       timerRef.current = setTimeout(() => {
         setLastCorrect(null);
@@ -147,6 +178,9 @@ export default function TaskSwitchGame({
           const switchCost = Math.max(0, meanSwitch - meanRepeat);
 
           setPhase("done");
+          // Block-end celebration: particle burst + success chime
+          setCelebrateTrigger((t) => t + 1);
+          playSound("success");
           onComplete({
             rawScore: Math.round(switchCost),
             durationMs: Date.now() - startTimeRef.current,
@@ -156,21 +190,26 @@ export default function TaskSwitchGame({
               meanRepeatRt: Math.round(meanRepeat),
               accuracy:
                 Math.round(
-                  (correctCountRef.current / TOTAL_TRIALS) * 1000
+                  (correctCountRef.current / SCORED_TRIALS) * 1000
                 ) / 10,
               correct: correctCountRef.current,
-              total: TOTAL_TRIALS,
+              total: SCORED_TRIALS,
+              practiceTrials: PRACTICE_TRIALS,
               switchTrials: switchTimesRef.current.length,
               repeatTrials: repeatTimesRef.current.length,
               allTrials: allTimesRef.current,
             },
           });
+        } else if (nextIndex === PRACTICE_TRIALS) {
+          // Transition from practice to scored phase
+          setPhase("practice-done");
+          timerRef.current = setTimeout(() => showTrial(nextIndex), PRACTICE_DONE_MS);
         } else {
           showTrial(nextIndex);
         }
       }, FEEDBACK_MS);
     },
-    [phase, currentTrial, trialIndex, showTrial, onComplete]
+    [phase, currentTrial, trialIndex, showTrial, onComplete, switchStreak]
   );
 
   // Keyboard controls
@@ -260,19 +299,41 @@ export default function TaskSwitchGame({
         : "Is it even?";
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full max-w-lg mx-auto">
+    <div className="relative flex flex-col items-center gap-4 w-full max-w-lg mx-auto">
+      {/* Combo counter — only during feedback on switch-streak milestones */}
+      <ComboCounter
+        combo={switchStreak}
+        x={200}
+        y={240}
+        enabled={phase === "feedback" && switchStreak >= 3}
+      />
+      {/* Block-end particle burst — only at done */}
+      <ParticleBurst
+        trigger={celebrateTrigger}
+        x={200}
+        y={280}
+        color="#FFB800"
+        count={28}
+        enabled={phase === "done" && celebrateTrigger > 0}
+      />
       {/* Progress */}
       <div className="flex justify-between w-full text-sm text-muted-foreground px-1">
         <span>
-          {isZh
-            ? `第 ${trialIndex + 1}/${TOTAL_TRIALS} 轮`
-            : `Trial ${trialIndex + 1}/${TOTAL_TRIALS}`}
+          {trialIndex < PRACTICE_TRIALS
+            ? isZh ? `练习 ${trialIndex + 1}/${PRACTICE_TRIALS}` : `Practice ${trialIndex + 1}/${PRACTICE_TRIALS}`
+            : isZh ? `第 ${trialIndex + 1 - PRACTICE_TRIALS}/${SCORED_TRIALS} 轮` : `Trial ${trialIndex + 1 - PRACTICE_TRIALS}/${SCORED_TRIALS}`}
         </span>
-        <span>
-          {isZh
-            ? `正确: ${correctCount}`
-            : `Correct: ${correctCount}`}
-        </span>
+        {trialIndex < PRACTICE_TRIALS ? (
+          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-md text-xs">
+            {isZh ? "练习 — 不计分" : "Practice — not scored"}
+          </span>
+        ) : (
+          <span>
+            {isZh
+              ? `正确: ${correctCount}`
+              : `Correct: ${correctCount}`}
+          </span>
+        )}
       </div>
 
       {/* Progress bar */}
@@ -294,20 +355,28 @@ export default function TaskSwitchGame({
         {ruleText}
       </div>
 
-      {/* Number display */}
-      <div
-        className={`w-48 h-48 rounded-2xl flex items-center justify-center ${bgColor} transition-colors duration-150 ${
-          lastCorrect === true
-            ? "ring-4 ring-green-400"
-            : lastCorrect === false
-              ? "ring-4 ring-red-400"
-              : ""
-        }`}
-      >
-        <span className="text-7xl font-bold text-white select-none">
-          {currentTrial?.number}
-        </span>
-      </div>
+      {/* Number display (or practice-done transition) */}
+      {phase === "practice-done" ? (
+        <div className="w-48 h-48 rounded-2xl flex items-center justify-center bg-slate-800 animate-pulse">
+          <span className="text-xl font-bold text-primary text-center px-2">
+            {isZh ? "开始计分..." : "Now scoring..."}
+          </span>
+        </div>
+      ) : (
+        <div
+          className={`w-48 h-48 rounded-2xl flex items-center justify-center ${bgColor} transition-colors duration-150 ${
+            lastCorrect === true
+              ? "ring-4 ring-green-400"
+              : lastCorrect === false
+                ? "ring-4 ring-red-400"
+                : ""
+          }`}
+        >
+          <span className="text-7xl font-bold text-white select-none">
+            {currentTrial?.number}
+          </span>
+        </div>
+      )}
 
       {/* Switch indicator */}
       {currentTrial?.isSwitch && (

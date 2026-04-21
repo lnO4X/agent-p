@@ -31,7 +31,7 @@ async function getUserTier(userId: string): Promise<TierInfo> {
 }
 
 /**
- * Ensure Talent Coach coach (slot=0) exists for user. Lazily created on first access.
+ * Ensure Results Explainer coach (slot=0) exists for user. Lazily created on first access.
  * Uses INSERT ... ON CONFLICT DO NOTHING — safe for concurrent calls.
  */
 async function ensureCoach(userId: string) {
@@ -41,7 +41,7 @@ async function ensureCoach(userId: string) {
       id: nanoid(),
       userId,
       slot: 0,
-      name: "Talent Coach",
+      name: "Results Explainer",
       avatar: "Brain",
       definition: COACH_DEFINITION,
       memory: "",
@@ -49,14 +49,14 @@ async function ensureCoach(userId: string) {
     .onConflictDoNothing();
 }
 
-// GET /api/partners — List user's partners (auto-creates Talent Coach)
+// GET /api/partners — List user's partners (auto-creates Results Explainer)
 export async function GET() {
   const auth = await getAuthFromCookie();
   if (!auth) {
     return NextResponse.json({ success: false, error: "Unauthorized" }, { status: 401 });
   }
 
-  // Ensure Talent Coach coach exists
+  // Ensure Results Explainer coach exists
   await ensureCoach(auth.sub);
 
   const [result, tierInfo] = await Promise.all([
@@ -81,9 +81,9 @@ export async function GET() {
   const { tier, tierExpiresAt } = tierInfo;
   const maxSlots = 1 + SLOT_LIMITS[tier]; // 1 (coach) + custom slots
 
-  // Fix legacy "Weda" name in DB — always return "Talent Coach" for built-in coach (slot 0)
+  // Fix legacy "Weda" name in DB — always return "Results Explainer" for built-in coach (slot 0)
   const fixedResult = result.map((p) =>
-    p.slot === 0 && p.name !== "Talent Coach" ? { ...p, name: "Talent Coach" } : p
+    p.slot === 0 && p.name !== "Results Explainer" ? { ...p, name: "Results Explainer" } : p
   );
 
   return NextResponse.json({

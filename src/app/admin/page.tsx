@@ -14,6 +14,7 @@ import {
   ArrowRight,
   Gamepad2,
   Star,
+  PercentCircle,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -74,11 +75,33 @@ interface EventCount {
   uniqueUsers: number;
 }
 
+interface GameFunnelRow {
+  gameId: string;
+  starts: number;
+  completes: number;
+  aborts: number;
+  completionPct: number;
+}
+
+interface TierFunnelRow {
+  tier: string;
+  quizStarts: number;
+  quizCompletes: number;
+  completionPct: number;
+}
+
+interface CompletionFunnel {
+  windowDays: number;
+  perGame: GameFunnelRow[];
+  perTier: TierFunnelRow[];
+}
+
 export default function AdminDashboard() {
   const [stats, setStats] = useState<Stats | null>(null);
   const [analytics, setAnalytics] = useState<Analytics | null>(null);
   const [modelStats, setModelStats] = useState<ModelStat[]>([]);
   const [eventCounts, setEventCounts] = useState<EventCount[]>([]);
+  const [funnel, setFunnel] = useState<CompletionFunnel | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -92,12 +115,14 @@ export default function AdminDashboard() {
       safeFetch("/api/admin/analytics"),
       safeFetch("/api/admin/chat-model-stats"),
       safeFetch("/api/analytics"),
+      safeFetch("/api/admin/analytics/funnel"),
     ])
-      .then(([statsData, analyticsData, modelData, eventsData]) => {
+      .then(([statsData, analyticsData, modelData, eventsData, funnelData]) => {
         if (statsData.success) setStats(statsData.data);
         if (analyticsData.success) setAnalytics(analyticsData.data);
         if (modelData.success) setModelStats(modelData.data?.models || []);
         if (eventsData.success) setEventCounts(eventsData.data?.eventCounts || []);
+        if (funnelData.success) setFunnel(funnelData.data);
       })
       .finally(() => setLoading(false));
   }, []);
@@ -249,6 +274,86 @@ export default function AdminDashboard() {
                 </div>
               </div>
             ))}
+          </div>
+        </div>
+      )}
+
+      {/* Completion Rate — per-game + per-tier funnel */}
+      {funnel && (funnel.perGame.length > 0 || funnel.perTier.some((t) => t.quizStarts > 0)) && (
+        <div className="rounded-2xl border border-foreground/5 bg-muted/10 p-4">
+          <div className="flex items-center gap-2 mb-4">
+            <PercentCircle className="w-4 h-4 text-primary" />
+            <h2 className="text-sm font-semibold">
+              完成率 Completion Rate ({funnel.windowDays}d)
+            </h2>
+          </div>
+
+          {/* Per-tier */}
+          <div className="mb-5">
+            <div className="text-xs text-muted-foreground mb-2">Per-tier</div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-xs">
+                <thead>
+                  <tr className="text-muted-foreground">
+                    <th className="text-left font-normal pb-1">Tier</th>
+                    <th className="text-right font-normal pb-1">quiz_start</th>
+                    <th className="text-right font-normal pb-1">quiz_complete</th>
+                    <th className="text-right font-normal pb-1">Completion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {funnel.perTier.map((t) => (
+                    <tr key={t.tier} className="border-t border-foreground/5">
+                      <td className="py-1.5 font-mono capitalize">{t.tier}</td>
+                      <td className="py-1.5 text-right tabular-nums">{t.quizStarts}</td>
+                      <td className="py-1.5 text-right tabular-nums">{t.quizCompletes}</td>
+                      <td className="py-1.5 text-right tabular-nums font-medium">
+                        {t.quizStarts > 0 ? `${t.completionPct.toFixed(1)}%` : "—"}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
+          {/* Per-game */}
+          <div>
+            <div className="text-xs text-muted-foreground mb-2">Per-game</div>
+            {funnel.perGame.length === 0 ? (
+              <p className="text-xs text-muted-foreground py-2">
+                暂无数据 No game events yet
+              </p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs">
+                  <thead>
+                    <tr className="text-muted-foreground">
+                      <th className="text-left font-normal pb-1">Game</th>
+                      <th className="text-right font-normal pb-1">Starts</th>
+                      <th className="text-right font-normal pb-1">Completes</th>
+                      <th className="text-right font-normal pb-1">Aborts</th>
+                      <th className="text-right font-normal pb-1">Completion</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {funnel.perGame.map((g) => (
+                      <tr key={g.gameId} className="border-t border-foreground/5">
+                        <td className="py-1.5 font-mono">{g.gameId}</td>
+                        <td className="py-1.5 text-right tabular-nums">{g.starts}</td>
+                        <td className="py-1.5 text-right tabular-nums">{g.completes}</td>
+                        <td className="py-1.5 text-right tabular-nums text-red-400/80">
+                          {g.aborts}
+                        </td>
+                        <td className="py-1.5 text-right tabular-nums font-medium">
+                          {g.starts > 0 ? `${g.completionPct.toFixed(1)}%` : "—"}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}

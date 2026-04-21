@@ -6,6 +6,7 @@ import { eq, sql } from "drizzle-orm";
 import { z } from "zod";
 import { randomUUID } from "crypto";
 import { logger } from "@/lib/logger";
+import { FUNNEL_EVENTS, funnelPropsSchema } from "@/lib/analytics-schema";
 
 const eventSchema = z.object({
   event: z.string().min(1).max(50),
@@ -26,6 +27,20 @@ export async function POST(request: NextRequest) {
     const parsed = eventSchema.safeParse(body);
     if (!parsed.success) return NextResponse.json({ success: true });
 
+    // Funnel events get an extra props-shape check — if the caller sent
+    // gameId/tier/atRound/durationMs, we validate them so downstream queries
+    // can trust the shape. Unknown extra keys are still accepted (catchall).
+    let props = parsed.data.props ?? null;
+    if ((FUNNEL_EVENTS as readonly string[]).includes(parsed.data.event) && props) {
+      const propsCheck = funnelPropsSchema.safeParse(props);
+      if (!propsCheck.success) {
+        // Drop the invalid structured fields but keep the event recorded.
+        props = { ...(props as Record<string, unknown>), _invalid_props: true };
+      } else {
+        props = propsCheck.data;
+      }
+    }
+
     const auth = await getAuthFromCookie().catch(() => null);
     const ua = request.headers.get("user-agent") || undefined;
 
@@ -33,7 +48,7 @@ export async function POST(request: NextRequest) {
       .values({
         id: randomUUID(),
         event: parsed.data.event,
-        props: parsed.data.props ?? null,
+        props,
         userId: auth?.sub ?? null,
         sessionId: parsed.data.sessionId ?? null,
         page: parsed.data.page ?? null,

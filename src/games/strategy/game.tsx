@@ -13,7 +13,9 @@ import { useI18n } from "@/i18n/context";
  * Metrics: Commission errors (pressing on No-Go), Go RT, d-prime
  */
 
-const TOTAL_TRIALS = 40;
+const PRACTICE_TRIALS = 5;
+const SCORED_TRIALS = 40;
+const TOTAL_TRIALS = PRACTICE_TRIALS + SCORED_TRIALS;
 const GO_RATIO = 0.75;
 const STIMULUS_MS = 800;
 const FIXATION_MIN_MS = 400;
@@ -42,7 +44,7 @@ export default function GoNoGoGame({
 }: GameComponentProps) {
   const { locale } = useI18n();
   const isZh = locale === "zh";
-  const [phase, setPhase] = useState<"idle" | "fixation" | "stimulus" | "feedback" | "done">("idle");
+  const [phase, setPhase] = useState<"idle" | "fixation" | "stimulus" | "feedback" | "practice-done" | "done">("idle");
   const [trialIndex, setTrialIndex] = useState(0);
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackOk, setFeedbackOk] = useState(true);
@@ -65,10 +67,10 @@ export default function GoNoGoGame({
         goRTs.current.length > 0
           ? goRTs.current.reduce((a, b) => a + b, 0) / goRTs.current.length
           : 600;
-      const goTrials = Math.round(TOTAL_TRIALS * GO_RATIO);
-      const noGoTrials = TOTAL_TRIALS - goTrials;
-      const hitRate = goRTs.current.length / goTrials;
-      const falseAlarmRate = commissionErrors.current / noGoTrials;
+      const scoredGoTrials = Math.round(SCORED_TRIALS * GO_RATIO);
+      const scoredNoGoTrials = SCORED_TRIALS - scoredGoTrials;
+      const hitRate = goRTs.current.length / scoredGoTrials;
+      const falseAlarmRate = commissionErrors.current / scoredNoGoTrials;
 
       // d-prime approximation: Z(hitRate) - Z(falseAlarmRate)
       // We use composite score: lower is better
@@ -85,9 +87,38 @@ export default function GoNoGoGame({
           omissionErrors: omissionErrors.current,
           hitRate: Math.round(hitRate * 100),
           falseAlarmRate: Math.round(falseAlarmRate * 100),
-          totalTrials: TOTAL_TRIALS,
+          totalTrials: SCORED_TRIALS,
+          practiceTrials: PRACTICE_TRIALS,
         },
       });
+    } else if (next === PRACTICE_TRIALS) {
+      // Transition from practice to scored phase
+      setPhase("practice-done");
+      timerRef.current = setTimeout(() => {
+        setTrialIndex(next);
+        respondedRef.current = false;
+        setPhase("fixation");
+        const fixDuration = FIXATION_MIN_MS + Math.random() * FIXATION_VAR_MS;
+        timerRef.current = setTimeout(() => {
+          stimStartRef.current = performance.now();
+          setPhase("stimulus");
+          timerRef.current = setTimeout(() => {
+            if (!respondedRef.current) {
+              const trial = trialsRef.current[next];
+              if (trial?.isGo) {
+                omissionErrors.current++;
+                setFeedbackText(isZh ? "太慢!" : "Too slow!");
+                setFeedbackOk(false);
+              } else {
+                setFeedbackText(isZh ? "✓ 正确抑制" : "✓ Correct inhibition");
+                setFeedbackOk(true);
+              }
+              setPhase("feedback");
+              timerRef.current = setTimeout(() => advanceToNext(), 300);
+            }
+          }, STIMULUS_MS);
+        }, fixDuration);
+      }, 1000);
     } else {
       setTrialIndex(next);
       respondedRef.current = false;
@@ -101,7 +132,7 @@ export default function GoNoGoGame({
           if (!respondedRef.current) {
             const trial = trialsRef.current[next];
             if (trial?.isGo) {
-              omissionErrors.current++;
+              if (next >= PRACTICE_TRIALS) omissionErrors.current++;
               setFeedbackText(isZh ? "太慢!" : "Too slow!");
               setFeedbackOk(false);
             } else {
@@ -133,7 +164,7 @@ export default function GoNoGoGame({
         if (!respondedRef.current) {
           const trial = trialsRef.current[0];
           if (trial?.isGo) {
-            omissionErrors.current++;
+            // Trial 0 is always practice, don't count errors
             setFeedbackText(isZh ? "太慢!" : "Too slow!");
             setFeedbackOk(false);
           } else {
@@ -153,20 +184,21 @@ export default function GoNoGoGame({
     clearTimeout(timerRef.current);
 
     const rt = performance.now() - stimStartRef.current;
+    const isPractice = trialIndex < PRACTICE_TRIALS;
 
     if (currentTrial?.isGo) {
-      goRTs.current.push(rt);
+      if (!isPractice) goRTs.current.push(rt);
       setFeedbackText(`${Math.round(rt)}ms`);
       setFeedbackOk(true);
     } else {
-      commissionErrors.current++;
+      if (!isPractice) commissionErrors.current++;
       setFeedbackText(isZh ? "✗ 不该按!" : "✗ Should not press!");
       setFeedbackOk(false);
     }
 
     setPhase("feedback");
     timerRef.current = setTimeout(() => advanceToNext(), 400);
-  }, [phase, currentTrial, advanceToNext, isZh]);
+  }, [phase, currentTrial, advanceToNext, isZh, trialIndex]);
 
   const handleKeyDown = useCallback(
     (e: KeyboardEvent) => {
@@ -216,11 +248,23 @@ export default function GoNoGoGame({
     );
   }
 
+  const isPractice = trialIndex < PRACTICE_TRIALS;
+
   return (
     <div className="flex flex-col items-center gap-4 w-full max-w-lg mx-auto">
       <div className="flex justify-between w-full text-sm text-muted-foreground px-2">
-        <span>{isZh ? `第 ${trialIndex + 1}/${TOTAL_TRIALS} 题` : `Trial ${trialIndex + 1}/${TOTAL_TRIALS}`}</span>
-        <span>{isZh ? "误按:" : "Errors:"} {commissionErrors.current}</span>
+        <span>
+          {isPractice
+            ? isZh ? `练习 ${trialIndex + 1}/${PRACTICE_TRIALS}` : `Practice ${trialIndex + 1}/${PRACTICE_TRIALS}`
+            : isZh ? `第 ${trialIndex + 1 - PRACTICE_TRIALS}/${SCORED_TRIALS} 题` : `Trial ${trialIndex + 1 - PRACTICE_TRIALS}/${SCORED_TRIALS}`}
+        </span>
+        {isPractice ? (
+          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-md text-xs">
+            {isZh ? "练习 — 不计分" : "Practice — not scored"}
+          </span>
+        ) : (
+          <span>{isZh ? "误按:" : "Errors:"} {commissionErrors.current}</span>
+        )}
       </div>
 
       <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
@@ -246,6 +290,11 @@ export default function GoNoGoGame({
         {phase === "feedback" && (
           <div className={`text-2xl font-bold ${feedbackOk ? "text-green-400" : "text-red-400"}`}>
             {feedbackText}
+          </div>
+        )}
+        {phase === "practice-done" && (
+          <div className="text-xl font-bold text-primary animate-pulse">
+            {isZh ? "开始计分..." : "Now scoring..."}
           </div>
         )}
       </div>

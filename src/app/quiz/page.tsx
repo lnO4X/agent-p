@@ -1,8 +1,8 @@
 "use client";
 
-import { useState, useCallback, useMemo } from "react";
+import { useState, useCallback, useMemo, useRef, useEffect } from "react";
 import { useRouter } from "next/navigation";
-import { trackEvent as track } from "@/lib/analytics";
+import { trackGameEvent } from "@/lib/analytics";
 import { Button } from "@/components/ui/button";
 import { useI18n } from "@/i18n/context";
 import { gameRegistry } from "@/games";
@@ -49,6 +49,11 @@ export default function QuizPage() {
   const [gameIndex, setGameIndex] = useState(0);
   const [scores, setScores] = useState<number[]>([]);
 
+  // Funnel instrumentation: timestamp when current game mounted (for durationMs)
+  // and a guard so we only fire game_start once per (gameId, attempt).
+  const gameStartMs = useRef<number | null>(null);
+  const lastTrackedStartKey = useRef<string | null>(null);
+
   const tierConfig = TIER_CONFIGS[selectedTier];
   const gameIds = tierConfig.gameIds;
   const currentGameId = gameIds[gameIndex];
@@ -58,9 +63,38 @@ export default function QuizPage() {
   );
   const GameComponent = currentPlugin?.component ?? null;
 
+  // Fire game_start once per game mount. The key dedupes React strict-mode
+  // double-invocation and re-renders that keep the same (phase, index).
+  useEffect(() => {
+    if (phase !== "playing" || !currentGameId) return;
+    const key = `${selectedTier}:${gameIndex}:${currentGameId}`;
+    if (lastTrackedStartKey.current === key) return;
+    lastTrackedStartKey.current = key;
+    gameStartMs.current = Date.now();
+    trackGameEvent("game_start", {
+      gameId: currentGameId,
+      tier: selectedTier,
+      atRound: gameIndex,
+    });
+  }, [phase, currentGameId, gameIndex, selectedTier]);
+
   const handleComplete = useCallback(
     (result: GameRawResult) => {
       if (!currentPlugin) return;
+      // Prefer the wall-clock time since game_start (matches funnel semantics).
+      // Fall back to the game's internal durationMs if we missed the start.
+      const durationMs =
+        gameStartMs.current !== null
+          ? Date.now() - gameStartMs.current
+          : result.durationMs;
+      trackGameEvent("game_complete", {
+        gameId: currentGameId,
+        tier: selectedTier,
+        atRound: gameIndex,
+        durationMs,
+      });
+      gameStartMs.current = null;
+
       const normalized = currentPlugin.scorer.normalize(
         result.rawScore,
         result.durationMs,
@@ -76,16 +110,26 @@ export default function QuizPage() {
         router.push(`/quiz/result?s=${encoded}&own=1&tier=${selectedTier}`);
       }
     },
-    [currentPlugin, scores, gameIndex, gameIds, router, selectedTier]
+    [currentPlugin, scores, gameIndex, gameIds, router, selectedTier, currentGameId]
   );
 
   const handleAbort = useCallback(() => {
+    trackGameEvent("game_abort", {
+      gameId: currentGameId,
+      tier: selectedTier,
+      atRound: gameIndex,
+    });
+    gameStartMs.current = null;
+    lastTrackedStartKey.current = null;
     setPhase("select");
     setGameIndex(0);
     setScores([]);
-  }, []);
+  }, [currentGameId, selectedTier, gameIndex]);
 
   const startTest = (tier: TestTier) => {
+    // New attempt → clear the start-key guard so game_start fires for round 0.
+    lastTrackedStartKey.current = null;
+    gameStartMs.current = null;
     const config = TIER_CONFIGS[tier];
     if (config.requiresAuth) {
       setSelectedTier(tier);
@@ -104,7 +148,7 @@ export default function QuizPage() {
           }
           setGameIndex(0);
           setScores([]);
-          track("quiz_start", { mode: tier });
+          trackGameEvent("quiz_start", { mode: tier, tier });
           setPhase("playing");
         })
         .catch(() => router.push(`/login?next=/quiz&tier=${tier}`));
@@ -113,7 +157,7 @@ export default function QuizPage() {
     setSelectedTier(tier);
     setGameIndex(0);
     setScores([]);
-    track("quiz_start", { mode: tier });
+    trackGameEvent("quiz_start", { mode: tier, tier });
     setPhase("playing");
   };
 

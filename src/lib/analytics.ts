@@ -61,3 +61,52 @@ export function trackEvent(
     // Never throw
   }
 }
+
+// ═══════════════════════════════════════════════════
+// Game funnel instrumentation (Sprint 3)
+// ═══════════════════════════════════════════════════
+
+/** Tiers of the quiz test — matches TIER_CONFIGS in lib/test-tiers.ts. */
+export type AnalyticsTier = "quick" | "standard" | "pro";
+
+/** Known game-funnel event names — mirrors FUNNEL_EVENTS in /api/analytics. */
+export type GameFunnelEvent =
+  | "game_start"
+  | "game_complete"
+  | "game_abort"
+  | "quiz_start"
+  | "quiz_complete";
+
+/** Structured props for funnel events. All fields optional but validated server-side. */
+export interface GameEventProps {
+  gameId?: string;
+  sessionId?: string;
+  tier?: AnalyticsTier;
+  /** For game_abort: 0-indexed position of the game in the current quiz session. */
+  atRound?: number;
+  /** For game_complete: ms elapsed between game_start and game_complete. */
+  durationMs?: number;
+  /** For quiz_start: "quick" | "standard" | "pro" | "scenario" | "questionnaire" | "game". */
+  mode?: string;
+  archetype?: string;
+  [key: string]: unknown;
+}
+
+/**
+ * Track a per-game funnel event. Fire-and-forget.
+ *
+ * Thin wrapper around `trackEvent` that narrows the event name to the known
+ * funnel set so the compiler catches typos, and documents the expected props
+ * shape without adding a second code path.
+ *
+ * @example
+ *   trackGameEvent("game_start", { gameId: "reaction-speed", tier: "quick", atRound: 0 });
+ *   trackGameEvent("game_complete", { gameId: "reaction-speed", tier: "quick", durationMs: 12345 });
+ *   trackGameEvent("game_abort", { gameId: "reaction-speed", tier: "quick", atRound: 1 });
+ */
+export function trackGameEvent(
+  event: GameFunnelEvent,
+  props?: GameEventProps
+): void {
+  trackEvent(event, props as Record<string, unknown> | undefined);
+}

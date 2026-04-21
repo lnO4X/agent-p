@@ -1,87 +1,92 @@
 "use client";
 
-import { useState, useRef, useCallback, useEffect } from "react";
+import { useState, useRef, useCallback, useEffect, useMemo } from "react";
 import type { GameComponentProps } from "@/types/game";
 import { useI18n } from "@/i18n/context";
+import { playSound } from "@/lib/audio-fx";
+import {
+  ComboCounter,
+  ParticleBurst,
+  useScreenShake,
+} from "@/components/game-fx";
 
 /**
- * Posner Cueing Task (Posner 1980; Posner & Petersen 1990).
+ * "Find the Odd One" — color-discrimination Quick-tier entry-funnel game.
  *
- * Trial structure:
- *   1. Fixation  (500ms): center "+"
- *   2. Cue       (100ms): arrow or flash at left/right box
- *   3. SOA       (200ms): fixation only
- *   4. Target    (up to 2000ms): "*" appears in left or right box
- *   5. Response  : user presses LEFT/RIGHT arrow or taps box
- *   6. ITI       (800-1200ms jittered): inter-trial interval
+ * Design:
+ * - 4x4 grid (16 tiles). One tile's lightness differs from the others.
+ * - 15 rounds, no practice phase (self-explanatory mechanic).
+ * - Each round samples a random base HSL; the odd tile differs by `delta` in L.
+ * - Difficulty ramp: delta starts at ~22 and decreases by ~1.3 per round (min 3).
+ * - Correct click -> success sound, particle burst, combo increment, next round.
+ * - Wrong click -> error sound, screen shake, combo reset, reveal + next round.
+ * - Block-end celebration: big particle burst + success chime on completion.
  *
- * 4 practice trials (NOT scored) + 40 scored trials (32 valid + 8 invalid).
+ * Measures: a light proxy for pattern/visual-feature discrimination
+ * (pattern_recog). Tier A polish is safe here because this is an accuracy game
+ * without precision-RT requirements — feedback audio/visual is purely additive.
+ *
+ * Note: a research-grade pattern_recog measure (Posner Cueing) lives in
+ * src/games/posner/ and is included in the Pro tier.
  */
 
-type Phase =
-  | "waiting"
-  | "practice-intro"
-  | "fixation"
-  | "cue"
-  | "soa"
-  | "target"
-  | "feedback"
-  | "iti"
-  | "done";
+type Phase = "round" | "feedback" | "practice-done" | "done";
 
-type Side = "left" | "right";
-type TrialType = "valid" | "invalid";
+const PRACTICE_ROUNDS = 2;
+const SCORED_ROUNDS = 15;
+const TOTAL_ROUNDS = PRACTICE_ROUNDS + SCORED_ROUNDS;
+const GRID_SIZE = 16; // 4x4
+const FEEDBACK_MS = 500;
+const ROUND_TRANSITION_MS = 800;
+const PRACTICE_DONE_MS = 1000;
 
-interface TrialSpec {
-  cueSide: Side;
-  targetSide: Side;
-  type: TrialType;
+// Difficulty: initial lightness delta and per-round shrink rate.
+const DELTA_START = 22;
+const DELTA_STEP = 1.3;
+const DELTA_MIN = 3;
+
+interface RoundSpec {
+  /** 0..15, index of the odd-colored tile in the 4x4 grid. */
+  oddIndex: number;
+  /** Base hue (0..360). */
+  hue: number;
+  /** Base lightness (0..100). */
+  baseLightness: number;
+  /** Signed lightness delta applied to the odd tile. */
+  delta: number;
+  /** Base saturation (0..100). */
+  saturation: number;
 }
 
-interface TrialResult extends TrialSpec {
-  rt: number; // ms from target onset to response; MAX_RT_MS if timeout
+interface RoundResult {
+  roundIndex: number;
   correct: boolean;
-  responded: boolean;
+  rtMs: number;
+  delta: number;
+  clickedIndex: number | null;
 }
 
-const PRACTICE_TRIALS = 4;
-const SCORED_TRIALS = 40;
-const VALID_RATIO = 0.8;
-
-const FIXATION_MS = 500;
-const CUE_MS = 100;
-const SOA_MS = 200;
-const MAX_RT_MS = 2000;
-const FEEDBACK_MS = 300;
-const ITI_MIN_MS = 800;
-const ITI_MAX_MS = 1200;
-
-/** Build a shuffled trial list with the requested valid/invalid ratio */
-function buildTrialList(count: number, validRatio: number): TrialSpec[] {
-  const validCount = Math.round(count * validRatio);
-  const invalidCount = count - validCount;
-  const trials: TrialSpec[] = [];
-
-  for (let i = 0; i < validCount; i++) {
-    const side: Side = Math.random() < 0.5 ? "left" : "right";
-    trials.push({ cueSide: side, targetSide: side, type: "valid" });
-  }
-  for (let i = 0; i < invalidCount; i++) {
-    const cue: Side = Math.random() < 0.5 ? "left" : "right";
-    const target: Side = cue === "left" ? "right" : "left";
-    trials.push({ cueSide: cue, targetSide: target, type: "invalid" });
-  }
-
-  // Fisher-Yates shuffle
-  for (let i = trials.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [trials[i], trials[j]] = [trials[j], trials[i]];
-  }
-  return trials;
+function buildRound(roundIndex: number): RoundSpec {
+  // Hue: sample a varied set, avoiding neon-pure primaries that hurt eyes.
+  const hue = Math.floor(Math.random() * 360);
+  // Base lightness in a mid-range zone (keeps contrast readable in dark theme).
+  const baseLightness = 45 + Math.floor(Math.random() * 15); // 45..60
+  const saturation = 55 + Math.floor(Math.random() * 25); // 55..80
+  // Delta shrinks over rounds, then floors.
+  const deltaMag = Math.max(
+    DELTA_MIN,
+    DELTA_START - roundIndex * DELTA_STEP
+  );
+  // Randomize direction (lighter or darker than base) for variety.
+  const direction = Math.random() < 0.5 ? 1 : -1;
+  const delta = deltaMag * direction;
+  const oddIndex = Math.floor(Math.random() * GRID_SIZE);
+  return { oddIndex, hue, baseLightness, delta, saturation };
 }
 
-function jitter(min: number, max: number): number {
-  return min + Math.floor(Math.random() * (max - min + 1));
+function hsl(hue: number, saturation: number, lightness: number): string {
+  const L = Math.max(0, Math.min(100, lightness));
+  return `hsl(${hue}, ${saturation}%, ${L}%)`;
 }
 
 export default function PatternGame({
@@ -91,483 +96,319 @@ export default function PatternGame({
   const { locale } = useI18n();
   const isZh = locale === "zh";
 
-  const [phase, setPhase] = useState<Phase>("waiting");
-  const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
-  const [cueSide, setCueSide] = useState<Side>("left");
-  const [targetSide, setTargetSide] = useState<Side>("left");
-  // Displayed counters — mirror the refs below for UI rendering
-  const [scoredCount, setScoredCount] = useState(0);
+  const [phase, setPhase] = useState<Phase>("round");
+  const [roundIndex, setRoundIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
-  const [practiceDone, setPracticeDone] = useState(0);
-  const [isPracticeDisplay, setIsPracticeDisplay] = useState(true);
+  const [streak, setStreak] = useState(0);
+  const [lastClickedIndex, setLastClickedIndex] = useState<number | null>(null);
+  const [lastCorrect, setLastCorrect] = useState<boolean | null>(null);
+  const [roundSpec, setRoundSpec] = useState<RoundSpec>(() => buildRound(0));
+  // Effects triggers
+  const [correctBurstTrigger, setCorrectBurstTrigger] = useState(0);
+  const [finalBurstTrigger, setFinalBurstTrigger] = useState(0);
+  const [burstPos, setBurstPos] = useState<{ x: number; y: number }>({
+    x: 120,
+    y: 120,
+  });
 
-  // Authoritative mutable state — survives closure staleness
-  const trialListRef = useRef<TrialSpec[]>([]);
-  const trialIndexRef = useRef(0);
-  const isPracticeRef = useRef(true);
-  const practiceCountRef = useRef(0);
-  const scoredResultsRef = useRef<TrialResult[]>([]);
-  const currentTrialRef = useRef<TrialSpec | null>(null);
-  const targetOnsetRef = useRef(0);
-  const respondedRef = useRef(false);
+  const { trigger: triggerShake, style: shakeStyle } = useScreenShake();
+
+  // Refs
   const startTimeRef = useRef(Date.now());
-  const lastResponseTimeRef = useRef(0);
+  const roundStartRef = useRef(performance.now());
+  const resultsRef = useRef<RoundResult[]>([]);
   const finishedRef = useRef(false);
+  const advanceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
 
-  // Multiple timers — all cleaned up on unmount
-  const fixationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const cueTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const soaTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const timeoutTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const feedbackTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const itiTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const totalRounds = TOTAL_ROUNDS;
 
-  const clearAllTimers = useCallback(() => {
-    if (fixationTimerRef.current) clearTimeout(fixationTimerRef.current);
-    if (cueTimerRef.current) clearTimeout(cueTimerRef.current);
-    if (soaTimerRef.current) clearTimeout(soaTimerRef.current);
-    if (timeoutTimerRef.current) clearTimeout(timeoutTimerRef.current);
-    if (feedbackTimerRef.current) clearTimeout(feedbackTimerRef.current);
-    if (itiTimerRef.current) clearTimeout(itiTimerRef.current);
+  const clearTimers = useCallback(() => {
+    if (advanceTimerRef.current) {
+      clearTimeout(advanceTimerRef.current);
+      advanceTimerRef.current = null;
+    }
   }, []);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => {
-      clearAllTimers();
+      clearTimers();
     };
-  }, [clearAllTimers]);
+  }, [clearTimers]);
 
-  /**
-   * Compute validity effect and fire onComplete.
-   * Guarded by ref flag to prevent double-fires (React Strict Mode etc).
-   */
   const finishGame = useCallback(() => {
     if (finishedRef.current) return;
     finishedRef.current = true;
-    const allResults = scoredResultsRef.current;
-
-    const validCorrect = allResults.filter(
-      (t) => t.type === "valid" && t.correct && t.responded
-    );
-    const invalidCorrect = allResults.filter(
-      (t) => t.type === "invalid" && t.correct && t.responded
-    );
-
-    const meanValidRT =
-      validCorrect.length > 0
-        ? validCorrect.reduce((s, t) => s + t.rt, 0) / validCorrect.length
+    // Exclude practice rounds from scored results
+    const results = resultsRef.current.slice(PRACTICE_ROUNDS);
+    const correct = results.filter((r) => r.correct).length;
+    const meanRt =
+      results.length > 0
+        ? results.reduce((s, r) => s + r.rtMs, 0) / results.length
         : 0;
-    const meanInvalidRT =
-      invalidCorrect.length > 0
-        ? invalidCorrect.reduce((s, t) => s + t.rt, 0) / invalidCorrect.length
-        : 0;
-
-    const validityEffect = meanInvalidRT - meanValidRT;
-    const totalCorrect = allResults.filter((t) => t.correct).length;
-    const totalResponded = allResults.filter((t) => t.responded).length;
-    const accuracy =
-      allResults.length > 0 ? totalCorrect / allResults.length : 0;
 
     onComplete({
-      rawScore: Math.round(validityEffect),
+      rawScore: correct,
       durationMs: Date.now() - startTimeRef.current,
       metadata: {
-        validityEffect: Math.round(validityEffect),
-        meanValidRT: Math.round(meanValidRT),
-        meanInvalidRT: Math.round(meanInvalidRT),
-        accuracy,
-        totalCorrect,
-        totalResponded,
-        totalTrials: allResults.length,
-        validTrials: allResults.filter((t) => t.type === "valid").length,
-        invalidTrials: allResults.filter((t) => t.type === "invalid").length,
-        allTrials: allResults,
+        correctCount: correct,
+        totalRounds: results.length,
+        accuracy: results.length > 0 ? correct / results.length : 0,
+        meanRt: Math.round(meanRt),
+        results,
+        practiceRounds: PRACTICE_ROUNDS,
       },
     });
   }, [onComplete]);
 
-  /** Run a single trial: fixation -> cue -> SOA -> target */
-  const startTrial = useCallback((index: number) => {
-    respondedRef.current = false;
-    const trial = trialListRef.current[index];
-    currentTrialRef.current = trial;
-    trialIndexRef.current = index;
-    setCueSide(trial.cueSide);
-    setTargetSide(trial.targetSide);
-
-    // 1. Fixation
-    setPhase("fixation");
-    fixationTimerRef.current = setTimeout(() => {
-      // 2. Cue
-      setPhase("cue");
-      cueTimerRef.current = setTimeout(() => {
-        // 3. SOA (back to fixation-only state)
-        setPhase("soa");
-        soaTimerRef.current = setTimeout(() => {
-          // 4. Target
-          setPhase("target");
-          targetOnsetRef.current = performance.now();
-          timeoutTimerRef.current = setTimeout(() => {
-            if (!respondedRef.current) {
-              respondedRef.current = true;
-              handleResponseRef.current(null);
-            }
-          }, MAX_RT_MS);
-        }, SOA_MS);
-      }, CUE_MS);
-    }, FIXATION_MS);
-  }, []);
-
-  /** Move to the next trial; transitions practice -> scored when appropriate */
-  const advanceTrial = useCallback(() => {
-    const nextIndex = trialIndexRef.current + 1;
-    if (isPracticeRef.current && nextIndex >= PRACTICE_TRIALS) {
-      // Transition: practice complete, prepare scored block
-      isPracticeRef.current = false;
-      setIsPracticeDisplay(false);
-      trialListRef.current = buildTrialList(SCORED_TRIALS, VALID_RATIO);
-      trialIndexRef.current = 0;
-      setPhase("practice-intro");
+  const advanceRound = useCallback(() => {
+    const next = resultsRef.current.length;
+    // Show "Now scoring..." transition after practice phase ends
+    if (next === PRACTICE_ROUNDS) {
+      setPhase("practice-done");
+      advanceTimerRef.current = setTimeout(() => {
+        setRoundIndex(next);
+        setRoundSpec(buildRound(next));
+        setLastClickedIndex(null);
+        setLastCorrect(null);
+        setPhase("round");
+        roundStartRef.current = performance.now();
+      }, PRACTICE_DONE_MS);
       return;
     }
-    startTrial(nextIndex);
-  }, [startTrial]);
+    if (next >= totalRounds) {
+      setPhase("done");
+      playSound("success");
+      setFinalBurstTrigger((t) => t + 1);
+      advanceTimerRef.current = setTimeout(() => {
+        finishGame();
+      }, 900);
+      return;
+    }
+    setRoundIndex(next);
+    setRoundSpec(buildRound(next));
+    setLastClickedIndex(null);
+    setLastCorrect(null);
+    setPhase("round");
+    roundStartRef.current = performance.now();
+  }, [finishGame, totalRounds]);
 
-  /** Handle a response (from keyboard/tap) or a timeout (chosenSide=null) */
-  const handleResponse = useCallback(
-    (chosenSide: Side | null) => {
-      const trial = currentTrialRef.current;
-      if (!trial) return;
-      const responded = chosenSide !== null;
-      const rt = responded
-        ? performance.now() - targetOnsetRef.current
-        : MAX_RT_MS;
-      const correct = chosenSide === trial.targetSide;
+  const handleTileClick = useCallback(
+    (index: number, e: React.MouseEvent<HTMLButtonElement>) => {
+      if (phase !== "round") return;
+      const rtMs = Math.round(performance.now() - roundStartRef.current);
+      const correct = index === roundSpec.oddIndex;
 
-      const result: TrialResult = {
-        ...trial,
-        rt: Math.round(rt),
-        correct,
-        responded,
-      };
+      // Capture click position (relative to game container) for particle burst.
+      const container = containerRef.current;
+      if (container) {
+        const rect = container.getBoundingClientRect();
+        setBurstPos({
+          x: e.clientX - rect.left,
+          y: e.clientY - rect.top,
+        });
+      }
 
+      setLastClickedIndex(index);
       setLastCorrect(correct);
       setPhase("feedback");
 
-      feedbackTimerRef.current = setTimeout(() => {
-        if (!isPracticeRef.current) {
-          // Scored trial
-          scoredResultsRef.current = [...scoredResultsRef.current, result];
-          setScoredCount(scoredResultsRef.current.length);
-          if (correct) {
-            setCorrectCount((c) => c + 1);
-          }
+      resultsRef.current = [
+        ...resultsRef.current,
+        {
+          roundIndex: roundSpec ? resultsRef.current.length : 0,
+          correct,
+          rtMs,
+          delta: roundSpec.delta,
+          clickedIndex: index,
+        },
+      ];
 
-          if (scoredResultsRef.current.length >= SCORED_TRIALS) {
-            setPhase("done");
-            itiTimerRef.current = setTimeout(() => {
-              finishGame();
-            }, 400);
-            return;
-          }
-        } else {
-          // Practice trial
-          practiceCountRef.current += 1;
-          setPracticeDone(practiceCountRef.current);
-        }
-
-        // Schedule next trial after jittered ITI
-        const iti = jitter(ITI_MIN_MS, ITI_MAX_MS);
-        setPhase("iti");
-        itiTimerRef.current = setTimeout(() => {
-          advanceTrial();
-        }, iti);
-      }, FEEDBACK_MS);
-    },
-    [advanceTrial, finishGame]
-  );
-
-  // Stable ref for handleResponse so timer callbacks inside startTrial
-  // always reach the latest implementation even after state changes.
-  const handleResponseRef = useRef(handleResponse);
-  useEffect(() => {
-    handleResponseRef.current = handleResponse;
-  }, [handleResponse]);
-
-  const handleSide = useCallback(
-    (side: Side) => {
-      if (phase !== "target" || respondedRef.current) return;
-      const now = performance.now();
-      if (now - lastResponseTimeRef.current < 150) return;
-      respondedRef.current = true;
-      lastResponseTimeRef.current = now;
-      if (timeoutTimerRef.current) clearTimeout(timeoutTimerRef.current);
-      handleResponseRef.current(side);
-    },
-    [phase]
-  );
-
-  // Keyboard support
-  useEffect(() => {
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "ArrowLeft") {
-        e.preventDefault();
-        handleSide("left");
-      } else if (e.key === "ArrowRight") {
-        e.preventDefault();
-        handleSide("right");
+      const isPracticeRound = roundIndex < PRACTICE_ROUNDS;
+      if (correct) {
+        if (!isPracticeRound) setCorrectCount((c) => c + 1);
+        setStreak((s) => s + 1);
+        playSound("success");
+        setCorrectBurstTrigger((t) => t + 1);
+      } else {
+        setStreak(0);
+        playSound("error");
+        triggerShake();
       }
-    };
-    window.addEventListener("keydown", onKeyDown);
-    return () => window.removeEventListener("keydown", onKeyDown);
-  }, [handleSide]);
 
-  const handleStartPractice = useCallback(() => {
-    startTimeRef.current = Date.now();
-    trialListRef.current = buildTrialList(PRACTICE_TRIALS, VALID_RATIO);
-    isPracticeRef.current = true;
-    practiceCountRef.current = 0;
-    scoredResultsRef.current = [];
-    finishedRef.current = false;
-    setIsPracticeDisplay(true);
-    setPracticeDone(0);
-    setScoredCount(0);
-    setCorrectCount(0);
-    trialIndexRef.current = 0;
-    startTrial(0);
-  }, [startTrial]);
+      advanceTimerRef.current = setTimeout(() => {
+        advanceRound();
+      }, correct ? ROUND_TRANSITION_MS : FEEDBACK_MS + 300);
+    },
+    [advanceRound, phase, roundIndex, roundSpec, triggerShake]
+  );
 
-  const handleStartScored = useCallback(() => {
-    // trialListRef was already reset to the scored list in advanceTrial
-    startTrial(0);
-  }, [startTrial]);
+  // Precompute tile colors for this round
+  const tileColors = useMemo(() => {
+    const colors: string[] = [];
+    for (let i = 0; i < GRID_SIZE; i++) {
+      const L =
+        i === roundSpec.oddIndex
+          ? roundSpec.baseLightness + roundSpec.delta
+          : roundSpec.baseLightness;
+      colors.push(hsl(roundSpec.hue, roundSpec.saturation, L));
+    }
+    return colors;
+  }, [roundSpec]);
 
-  const progress = scoredCount / SCORED_TRIALS;
-
-  /** Render left/right boxes. Cue visibility and target visibility are controlled. */
-  const renderBoxes = (opts: {
-    showCue: boolean;
-    showTarget: boolean;
-    cueSideDisplay?: Side;
-    targetSideDisplay?: Side;
-  }) => {
-    const {
-      showCue,
-      showTarget,
-      cueSideDisplay,
-      targetSideDisplay,
-    } = opts;
-    return (
-      <div className="flex items-center justify-center gap-8 sm:gap-16 w-full">
-        {(["left", "right"] as Side[]).map((side) => {
-          const isCued = showCue && cueSideDisplay === side;
-          const hasTarget = showTarget && targetSideDisplay === side;
-          return (
-            <button
-              key={side}
-              onClick={() => handleSide(side)}
-              disabled={phase !== "target"}
-              aria-label={
-                side === "left"
-                  ? isZh
-                    ? "\u5DE6\u76EE\u6807"
-                    : "left target"
-                  : isZh
-                    ? "\u53F3\u76EE\u6807"
-                    : "right target"
-              }
-              className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-xl border-2 transition-all ${
-                isCued
-                  ? "border-yellow-300 bg-yellow-300/20 shadow-[0_0_20px_rgba(253,224,71,0.6)]"
-                  : "border-slate-500 bg-slate-700/40"
-              } ${phase === "target" ? "cursor-pointer hover:border-slate-300 active:scale-95" : "cursor-default"}`}
-            >
-              {hasTarget && (
-                <span className="absolute inset-0 flex items-center justify-center text-white text-4xl sm:text-5xl font-bold">
-                  *
-                </span>
-              )}
-            </button>
-          );
-        })}
-      </div>
-    );
-  };
+  const progress = Math.min(1, resultsRef.current.length / totalRounds);
+  const isPractice = roundIndex < PRACTICE_ROUNDS;
 
   return (
     <div className="flex flex-col items-center gap-4 w-full">
-      {/* Progress bar (only during scored trials) */}
-      {!isPracticeDisplay &&
-        phase !== "practice-intro" &&
-        phase !== "waiting" && (
-          <>
-            <div className="flex justify-between w-full max-w-lg text-sm text-muted-foreground px-2">
-              <span>
-                {scoredCount}/{SCORED_TRIALS}
-              </span>
-              <span>
-                {isZh ? "\u6B63\u786E" : "Correct"}: {correctCount}
-              </span>
-            </div>
-            <div className="w-full max-w-lg h-2 bg-muted rounded-full overflow-hidden">
-              <div
-                className="h-full bg-primary transition-all duration-300"
-                style={{ width: `${progress * 100}%` }}
-              />
-            </div>
-          </>
+      {/* Header: round + correct count */}
+      <div className="flex justify-between w-full max-w-lg text-sm text-muted-foreground px-2">
+        <span>
+          {isPractice
+            ? isZh
+              ? `\u7EC3\u4E60 ${roundIndex + 1}/${PRACTICE_ROUNDS}`
+              : `Practice ${roundIndex + 1}/${PRACTICE_ROUNDS}`
+            : isZh
+              ? `\u7B2C ${Math.min(roundIndex + 1 - PRACTICE_ROUNDS, SCORED_ROUNDS)}/${SCORED_ROUNDS} \u8F6E`
+              : `Round ${Math.min(roundIndex + 1 - PRACTICE_ROUNDS, SCORED_ROUNDS)}/${SCORED_ROUNDS}`}
+        </span>
+        {isPractice && (
+          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-md text-xs">
+            {isZh ? "\u7EC3\u4E60 \u2014 \u4E0D\u8BA1\u5206" : "Practice \u2014 not scored"}
+          </span>
         )}
+        {!isPractice && (
+          <span>
+            {isZh ? "\u6B63\u786E" : "Correct"}: {correctCount}
+          </span>
+        )}
+      </div>
 
-      {/* Practice header */}
-      {isPracticeDisplay && phase !== "waiting" && (
-        <div className="w-full max-w-lg flex justify-between text-sm px-2">
-          <span className="font-bold text-yellow-400">
-            {isZh
-              ? "\u7EC3\u4E60 \u2014 \u4E0D\u8BA1\u5206"
-              : "Practice \u2014 not scored"}
-          </span>
-          <span className="text-muted-foreground">
-            {practiceDone}/{PRACTICE_TRIALS}
-          </span>
-        </div>
-      )}
+      {/* Progress bar */}
+      <div className="w-full max-w-lg h-2 bg-muted rounded-full overflow-hidden">
+        <div
+          className="h-full bg-primary transition-all duration-300"
+          style={{ width: `${progress * 100}%` }}
+        />
+      </div>
 
       {/* Game area */}
-      <div className="w-full max-w-lg aspect-video rounded-xl flex flex-col items-center justify-center bg-slate-800 select-none relative overflow-hidden">
-        {phase === "waiting" && (
-          <div className="text-center px-4 py-6">
-            <div className="text-4xl mb-3">{"\uD83C\uDFAF"}</div>
-            <p className="text-white text-lg font-bold mb-2">
-              {isZh
-                ? "\u6CE8\u610F\u529B\u805A\u7126\u6D4B\u8BD5"
-                : "Attention Focus Test"}
-            </p>
-            <p className="text-muted-foreground text-sm mb-1">
-              {isZh
-                ? "\u76EE\u89C6\u4E2D\u95F4\u7684\u201C+\u201D\uFF0C\u53E6\u4E00\u4E2A\u65B9\u5757\u4F1A\u95EA\u5149\u3002"
-                : 'Keep your eyes on the "+" in the center. A box will briefly flash (cue).'}
-            </p>
-            <p className="text-muted-foreground text-sm mb-1">
-              {isZh
-                ? "\u7136\u540E\u201C*\u201D\u4F1A\u51FA\u73B0\u5728\u5DE6\u6216\u53F3\u65B9\u5757\u3002"
-                : 'Then a "*" appears in the left or right box.'}
-            </p>
-            <p className="text-muted-foreground text-sm mb-4">
-              {isZh
-                ? "\u6309 \u2190 \u6216 \u2192 \uFF08\u6216\u70B9\u51FB\u65B9\u5757\uFF09\u6307\u793A\u201C*\u201D\u7684\u4F4D\u7F6E\u3002\u7EBF\u7D22\u4F1A\u8BEF\u5BFC\u4F60\u2014\u5FFD\u7565\u5B83\u3002"
-                : 'Press \u2190 or \u2192 (or tap a box) to indicate where the "*" is. The cue may mislead \u2014 ignore it.'}
-            </p>
-            <button
-              onClick={handleStartPractice}
-              className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-lg hover:opacity-90 transition-opacity"
-            >
-              {isZh ? "\u5F00\u59CB\u7EC3\u4E60" : "Start Practice"}
-            </button>
-          </div>
-        )}
+      <div
+        ref={containerRef}
+        className="relative w-full max-w-lg aspect-square rounded-xl bg-slate-800 p-3 sm:p-4 select-none overflow-hidden"
+        style={shakeStyle}
+      >
+        {/* Effects overlays */}
+        <ComboCounter
+          combo={streak}
+          x={80}
+          y={30}
+          enabled={phase === "feedback" && streak >= 3}
+        />
+        <ParticleBurst
+          trigger={correctBurstTrigger}
+          x={burstPos.x}
+          y={burstPos.y}
+          color="#00D4AA"
+          count={18}
+          enabled={correctBurstTrigger > 0}
+        />
+        <ParticleBurst
+          trigger={finalBurstTrigger}
+          x={220}
+          y={220}
+          color="#FFB800"
+          count={36}
+          enabled={phase === "done" && finalBurstTrigger > 0}
+        />
 
-        {phase === "practice-intro" && (
-          <div className="text-center px-4 py-6">
-            <div className="text-3xl mb-3">{"\u2705"}</div>
-            <p className="text-white text-lg font-bold mb-2">
-              {isZh ? "\u7EC3\u4E60\u5B8C\u6210" : "Practice Complete"}
-            </p>
-            <p className="text-muted-foreground text-sm mb-4">
-              {isZh
-                ? `\u73B0\u5728\u5F00\u59CB\u6B63\u5F0F\u6D4B\u8BD5\uFF1A${SCORED_TRIALS} \u8BD5\u6B21`
-                : `Now starting the real test: ${SCORED_TRIALS} trials.`}
-            </p>
-            <button
-              onClick={handleStartScored}
-              className="px-6 py-3 bg-primary text-primary-foreground font-bold rounded-lg hover:opacity-90 transition-opacity"
-            >
-              {isZh ? "\u5F00\u59CB\u6D4B\u8BD5" : "Start Test"}
-            </button>
-          </div>
-        )}
-
-        {(phase === "fixation" ||
-          phase === "cue" ||
-          phase === "soa" ||
-          phase === "target" ||
-          phase === "iti") && (
-          <div className="relative flex flex-col items-center justify-center w-full h-full">
-            <div className="text-white text-4xl sm:text-5xl font-bold mb-4">
-              +
+        {phase === "practice-done" ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4 animate-pulse">
+            <div className="text-xl font-bold mb-2 text-primary">
+              {isZh ? "\u5F00\u59CB\u8BA1\u5206..." : "Now scoring..."}
             </div>
-            {renderBoxes({
-              showCue: phase === "cue",
-              showTarget: phase === "target",
-              cueSideDisplay: cueSide,
-              targetSideDisplay: targetSide,
+          </div>
+        ) : phase === "done" ? (
+          <div className="absolute inset-0 flex flex-col items-center justify-center text-white text-center px-4">
+            <div className="text-5xl mb-3">{"\uD83C\uDFAF"}</div>
+            <div className="text-xl font-bold mb-2">
+              {isZh ? "\u6D4B\u8BD5\u5B8C\u6210\uFF01" : "Test Complete!"}
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {isZh
+                ? `\u6B63\u786E\uFF1A${correctCount} / ${SCORED_ROUNDS}`
+                : `Correct: ${correctCount} / ${SCORED_ROUNDS}`}
+            </div>
+          </div>
+        ) : (
+          <div className="grid grid-cols-4 gap-2 sm:gap-3 w-full h-full">
+            {tileColors.map((color, i) => {
+              const isOdd = i === roundSpec.oddIndex;
+              const isClicked = lastClickedIndex === i;
+              // Only reveal correctness on feedback phase for the clicked tile
+              // or the correct tile if the user was wrong.
+              const showReveal = phase === "feedback";
+              const highlightCorrect =
+                showReveal && isOdd && lastCorrect === false;
+              const highlightWrong =
+                showReveal && isClicked && lastCorrect === false;
+              return (
+                <button
+                  key={`${roundIndex}-${i}`}
+                  onClick={(e) => handleTileClick(i, e)}
+                  disabled={phase !== "round"}
+                  aria-label={
+                    isZh
+                      ? `\u65B9\u5757 ${i + 1}`
+                      : `Tile ${i + 1}`
+                  }
+                  className={`relative rounded-lg transition-transform ${
+                    phase === "round"
+                      ? "cursor-pointer hover:brightness-110 active:scale-95"
+                      : "cursor-default"
+                  } ${
+                    highlightCorrect
+                      ? "ring-4 ring-green-400 ring-offset-2 ring-offset-slate-800"
+                      : ""
+                  } ${
+                    highlightWrong
+                      ? "ring-4 ring-red-400 ring-offset-2 ring-offset-slate-800"
+                      : ""
+                  }`}
+                  style={{ backgroundColor: color, aspectRatio: "1 / 1" }}
+                />
+              );
             })}
           </div>
         )}
 
-        {phase === "feedback" && (
-          <div className="relative flex flex-col items-center justify-center w-full h-full">
-            <div className="text-white text-4xl sm:text-5xl font-bold mb-4">
-              +
-            </div>
-            {renderBoxes({
-              showCue: false,
-              showTarget: false,
-            })}
-            <div
-              className={`absolute bottom-4 text-lg font-bold ${
-                lastCorrect ? "text-green-400" : "text-red-400"
-              }`}
-            >
-              {lastCorrect
-                ? isZh
-                  ? "\u2713 \u6B63\u786E"
-                  : "\u2713 Correct"
-                : isZh
-                  ? "\u2717 \u9519\u8BEF"
-                  : "\u2717 Wrong"}
-            </div>
-          </div>
-        )}
-
-        {phase === "done" && (
-          <div className="text-white text-xl font-bold">
-            {isZh ? "\u6D4B\u8BD5\u5B8C\u6210\uFF01" : "Test Complete!"}
+        {/* Feedback label */}
+        {phase === "feedback" && lastCorrect !== null && (
+          <div
+            className={`absolute top-2 left-1/2 -translate-x-1/2 px-3 py-1 rounded-full text-sm font-bold ${
+              lastCorrect
+                ? "bg-green-500/90 text-white"
+                : "bg-red-500/90 text-white"
+            }`}
+          >
+            {lastCorrect
+              ? isZh
+                ? "\u2713 \u627E\u5230\u4E86\uFF01"
+                : "\u2713 Found it!"
+              : isZh
+                ? "\u2717 \u4E0D\u662F\u90A3\u4E2A"
+                : "\u2717 Not that one"}
           </div>
         )}
       </div>
 
-      {/* Mobile tap buttons — shown while test is active */}
-      {(phase === "fixation" ||
-        phase === "cue" ||
-        phase === "soa" ||
-        phase === "target" ||
-        phase === "feedback" ||
-        phase === "iti") && (
-        <div className="flex gap-4 w-full max-w-lg">
-          <button
-            onClick={() => handleSide("left")}
-            disabled={phase !== "target"}
-            className={`flex-1 py-4 text-white text-2xl font-bold rounded-xl transition-all ${
-              phase === "target"
-                ? "bg-slate-700 hover:bg-slate-600 active:scale-[0.97]"
-                : "bg-slate-800 opacity-50 cursor-not-allowed"
-            }`}
-          >
-            {"\u2190"}
-          </button>
-          <button
-            onClick={() => handleSide("right")}
-            disabled={phase !== "target"}
-            className={`flex-1 py-4 text-white text-2xl font-bold rounded-xl transition-all ${
-              phase === "target"
-                ? "bg-slate-700 hover:bg-slate-600 active:scale-[0.97]"
-                : "bg-slate-800 opacity-50 cursor-not-allowed"
-            }`}
-          >
-            {"\u2192"}
-          </button>
-        </div>
+      {/* Instruction line */}
+      {phase === "round" && (
+        <p className="text-sm text-muted-foreground text-center px-4">
+          {isZh
+            ? "\u627E\u51FA\u989C\u8272\u7565\u5FAE\u4E0D\u540C\u7684\u65B9\u5757"
+            : "Find the tile with a slightly different color"}
+        </p>
       )}
 
       <button

@@ -4,7 +4,7 @@ import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
 import { useI18n } from "@/i18n/context";
 
-type Phase = "waiting" | "fixation" | "stimulus" | "feedback" | "done";
+type Phase = "waiting" | "fixation" | "stimulus" | "feedback" | "practice-done" | "done";
 type Direction = "left" | "right";
 type Condition = "congruent" | "incongruent";
 
@@ -16,19 +16,22 @@ interface Trial {
   correct: boolean;
 }
 
-const TOTAL_TRIALS = 40;
+const PRACTICE_TRIALS = 5;
+const SCORED_TRIALS = 40;
+const TOTAL_TRIALS = PRACTICE_TRIALS + SCORED_TRIALS;
 const CONGRUENT_COUNT = 20;
 const FIXATION_MS = 500;
 const FEEDBACK_MS = 400;
 const MAX_RT_MS = 2000;
+const PRACTICE_DONE_MS = 1000;
 
-/** Build a shuffled trial list: 20 congruent + 20 incongruent */
+/** Build a shuffled trial list: PRACTICE_TRIALS practice + 20 congruent + 20 incongruent scored */
 function buildTrialList(): Array<{
   condition: Condition;
   targetDirection: Direction;
   flankerDirection: Direction;
 }> {
-  const trials: Array<{
+  const scored: Array<{
     condition: Condition;
     targetDirection: Direction;
     flankerDirection: Direction;
@@ -36,23 +39,40 @@ function buildTrialList(): Array<{
 
   for (let i = 0; i < CONGRUENT_COUNT; i++) {
     const dir: Direction = Math.random() < 0.5 ? "left" : "right";
-    trials.push({ condition: "congruent", targetDirection: dir, flankerDirection: dir });
+    scored.push({ condition: "congruent", targetDirection: dir, flankerDirection: dir });
   }
 
-  const incongruentCount = TOTAL_TRIALS - CONGRUENT_COUNT;
+  const incongruentCount = SCORED_TRIALS - CONGRUENT_COUNT;
   for (let i = 0; i < incongruentCount; i++) {
     const target: Direction = Math.random() < 0.5 ? "left" : "right";
     const flanker: Direction = target === "left" ? "right" : "left";
-    trials.push({ condition: "incongruent", targetDirection: target, flankerDirection: flanker });
+    scored.push({ condition: "incongruent", targetDirection: target, flankerDirection: flanker });
   }
 
-  // Fisher-Yates shuffle
-  for (let i = trials.length - 1; i > 0; i--) {
+  // Fisher-Yates shuffle for scored trials
+  for (let i = scored.length - 1; i > 0; i--) {
     const j = Math.floor(Math.random() * (i + 1));
-    [trials[i], trials[j]] = [trials[j], trials[i]];
+    [scored[i], scored[j]] = [scored[j], scored[i]];
   }
 
-  return trials;
+  // Practice trials: mix congruent and incongruent for the player to learn both
+  const practice: Array<{
+    condition: Condition;
+    targetDirection: Direction;
+    flankerDirection: Direction;
+  }> = [];
+  for (let i = 0; i < PRACTICE_TRIALS; i++) {
+    const target: Direction = Math.random() < 0.5 ? "left" : "right";
+    const isCongruent = i % 2 === 0;
+    const flanker: Direction = isCongruent ? target : (target === "left" ? "right" : "left");
+    practice.push({
+      condition: isCongruent ? "congruent" : "incongruent",
+      targetDirection: target,
+      flankerDirection: flanker,
+    });
+  }
+
+  return [...practice, ...scored];
 }
 
 function arrowChar(dir: Direction): string {
@@ -140,7 +160,8 @@ export default function FlankerGame({
           // All trials done — compute flanker effect
           setPhase("done");
           setTimeout(() => {
-            finishGame(updated);
+            // Only pass scored trials (exclude practice) to finishGame
+            finishGame(updated.slice(PRACTICE_TRIALS));
           }, 800);
         }
 
@@ -149,11 +170,23 @@ export default function FlankerGame({
 
       if (index + 1 < TOTAL_TRIALS) {
         setPhase("feedback");
-        timerRef.current = setTimeout(() => {
-          const nextIndex = index + 1;
-          setTrialIndex(nextIndex);
-          startTrial(nextIndex);
-        }, FEEDBACK_MS);
+        // After last practice trial, show "Now scoring..." transition
+        if (index + 1 === PRACTICE_TRIALS) {
+          timerRef.current = setTimeout(() => {
+            setPhase("practice-done");
+            timerRef.current = setTimeout(() => {
+              const nextIndex = index + 1;
+              setTrialIndex(nextIndex);
+              startTrial(nextIndex);
+            }, PRACTICE_DONE_MS);
+          }, FEEDBACK_MS);
+        } else {
+          timerRef.current = setTimeout(() => {
+            const nextIndex = index + 1;
+            setTrialIndex(nextIndex);
+            startTrial(nextIndex);
+          }, FEEDBACK_MS);
+        }
       }
     },
     [startTrial]
@@ -245,18 +278,28 @@ export default function FlankerGame({
   }, [startTrial]);
 
   const progress = results.length / TOTAL_TRIALS;
-  const correctCount = results.filter((r) => r.correct).length;
+  const scoredResults = results.slice(PRACTICE_TRIALS);
+  const correctCount = scoredResults.filter((r) => r.correct).length;
+  const isPractice = trialIndex < PRACTICE_TRIALS;
 
   return (
     <div className="flex flex-col items-center gap-4 w-full">
       {/* Progress bar */}
       <div className="flex justify-between w-full max-w-lg text-sm text-muted-foreground px-2">
         <span>
-          {results.length}/{TOTAL_TRIALS}
+          {isPractice
+            ? isZh ? `练习 ${trialIndex + 1}/${PRACTICE_TRIALS}` : `Practice ${trialIndex + 1}/${PRACTICE_TRIALS}`
+            : `${Math.max(0, results.length - PRACTICE_TRIALS)}/${SCORED_TRIALS}`}
         </span>
-        <span>
-          {isZh ? "正确" : "Correct"}: {correctCount}
-        </span>
+        {isPractice ? (
+          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-md text-xs">
+            {isZh ? "练习 — 不计分" : "Practice — not scored"}
+          </span>
+        ) : (
+          <span>
+            {isZh ? "正确" : "Correct"}: {correctCount}
+          </span>
+        )}
       </div>
       <div className="w-full max-w-lg h-2 bg-muted rounded-full overflow-hidden">
         <div
@@ -314,6 +357,12 @@ export default function FlankerGame({
               : isZh
                 ? "\u2717 \u9519\u8BEF"
                 : "\u2717 Wrong"}
+          </div>
+        )}
+
+        {phase === "practice-done" && (
+          <div className="text-xl font-bold text-primary animate-pulse">
+            {isZh ? "开始计分..." : "Now scoring..."}
           </div>
         )}
 

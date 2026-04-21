@@ -24,7 +24,7 @@ describe("TIER_CONFIGS", () => {
     expect(pro.requiresAuth).toBe(true);
     expect(pro.requiresPayment).toBe(true);
     expect(pro.priceUsd).toBe(3.99);
-    expect(pro.gameIds).toHaveLength(17);
+    expect(pro.gameIds).toHaveLength(18);
   });
 
   it("all tier game IDs exist in the game registry", () => {

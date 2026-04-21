@@ -3,6 +3,12 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useI18n } from "@/i18n/context";
 import type { GameComponentProps } from "@/types/game";
+import { playSound } from "@/lib/audio-fx";
+import {
+  ParticleBurst,
+  ComboCounter,
+  useScreenShake,
+} from "@/components/game-fx";
 
 /**
  * Sensorimotor Synchronization (SMS) tapping task.
@@ -74,6 +80,11 @@ export default function RhythmGame({ onComplete, onAbort }: GameComponentProps) 
   const [tapFlash, setTapFlash] = useState<TapFlash>("none");
   const [resultMs, setResultMs] = useState<number | null>(null);
   const [missedCount, setMissedCount] = useState(0);
+  const [streak, setStreak] = useState(0);
+  const [burstTrigger, setBurstTrigger] = useState(0);
+  const [burstPos, setBurstPos] = useState<{ x: number; y: number }>({ x: 144, y: 144 });
+  const [endBurstTrigger, setEndBurstTrigger] = useState(0);
+  const { trigger: shake, style: shakeStyle } = useScreenShake();
 
   // Refs for audio + timing (avoid re-renders breaking scheduling)
   const audioCtxRef = useRef<AudioContext | null>(null);
@@ -116,6 +127,10 @@ export default function RhythmGame({ onComplete, onAbort }: GameComponentProps) 
     setResultMs(rounded);
     setMissedCount(missed);
     setPhase("done");
+
+    // Celebration burst scaled to mean deviation (smaller dev = bigger burst).
+    playSound("success");
+    setEndBurstTrigger((n) => n + 1);
 
     onComplete({
       rawScore: rounded,
@@ -172,51 +187,75 @@ export default function RhythmGame({ onComplete, onAbort }: GameComponentProps) 
   // Handle a tap (keyboard or click). Record the audio-time and, if in the
   // scored window, match it to the nearest scored beat within the attribution
   // window and log the asynchrony (signed: negative = early, positive = late).
-  const handleTap = useCallback(() => {
-    const ctx = audioCtxRef.current;
-    if (!ctx || completedRef.current) return;
+  const handleTap = useCallback(
+    (eventX?: number, eventY?: number) => {
+      const ctx = audioCtxRef.current;
+      if (!ctx || completedRef.current) return;
 
-    const tapAudioTime = ctx.currentTime;
-    tapsRef.current.push(tapAudioTime);
+      const tapAudioTime = ctx.currentTime;
+      tapsRef.current.push(tapAudioTime);
 
-    const beats = beatsRef.current;
-    if (beats.length === 0) return;
+      const beats = beatsRef.current;
+      if (beats.length === 0) return;
 
-    // Find nearest beat overall (for visual feedback only; practice beats
-    // also flash accurate/late). But only scored beats update asynchronies.
-    let nearestIdx = 0;
-    let nearestDelta = Infinity;
-    for (let i = 0; i < beats.length; i++) {
-      const delta = tapAudioTime - beats[i].audioTime; // seconds, signed
-      if (Math.abs(delta) < Math.abs(nearestDelta)) {
-        nearestDelta = delta;
-        nearestIdx = i;
+      // Find nearest beat overall (for visual feedback only; practice beats
+      // also flash accurate/late). But only scored beats update asynchronies.
+      let nearestIdx = 0;
+      let nearestDelta = Infinity;
+      for (let i = 0; i < beats.length; i++) {
+        const delta = tapAudioTime - beats[i].audioTime; // seconds, signed
+        if (Math.abs(delta) < Math.abs(nearestDelta)) {
+          nearestDelta = delta;
+          nearestIdx = i;
+        }
       }
-    }
 
-    const nearestDeltaMs = nearestDelta * 1000;
-    const absMs = Math.abs(nearestDeltaMs);
+      const nearestDeltaMs = nearestDelta * 1000;
+      const absMs = Math.abs(nearestDeltaMs);
 
-    // Visual feedback: green if accurate (< 60ms, within typical adult range),
-    // red/amber otherwise.
-    const flash: TapFlash = absMs <= 60 ? "accurate" : "late";
-    setTapFlash(flash);
-    if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
-    flashTimeoutRef.current = setTimeout(() => setTapFlash("none"), TAP_FLASH_MS);
+      // Visual feedback: green if accurate (< 60ms, within typical adult range),
+      // red/amber otherwise.
+      const flash: TapFlash = absMs <= 60 ? "accurate" : "late";
+      setTapFlash(flash);
+      if (flashTimeoutRef.current) clearTimeout(flashTimeoutRef.current);
+      flashTimeoutRef.current = setTimeout(() => setTapFlash("none"), TAP_FLASH_MS);
 
-    // Score only taps attributable to a SCORED beat (indexes 12..43 inclusive).
-    // Also enforce that each scored beat is matched at most once — if the
-    // subject taps twice near the same beat, the second tap is dropped.
-    if (
-      nearestIdx >= SCORED_START_INDEX &&
-      nearestIdx < SCORED_END_INDEX &&
-      absMs <= MAX_MATCH_WINDOW_MS &&
-      !matchedBeatsRef.current.has(nearestIdx)
-    ) {
-      matchedBeatsRef.current.add(nearestIdx);
-      asynchroniesRef.current.push(nearestDeltaMs);
-    }
-  }, []);
+      // Score only taps attributable to a SCORED beat (indexes 12..43 inclusive).
+      // Also enforce that each scored beat is matched at most once — if the
+      // subject taps twice near the same beat, the second tap is dropped.
+      if (
+        nearestIdx >= SCORED_START_INDEX &&
+        nearestIdx < SCORED_END_INDEX &&
+        absMs <= MAX_MATCH_WINDOW_MS &&
+        !matchedBeatsRef.current.has(nearestIdx)
+      ) {
+        matchedBeatsRef.current.add(nearestIdx);
+        asynchroniesRef.current.push(nearestDeltaMs);
+      }
+
+      // Polish: only during scored phase so metronome-time audio doesn't
+      // confound practice/listen feedback.
+      if (nearestIdx >= SCORED_START_INDEX) {
+        if (typeof eventX === "number" && typeof eventY === "number") {
+          setBurstPos({ x: eventX, y: eventY });
+        }
+
+        if (absMs < 30) {
+          playSound("success", 0.2);
+          setBurstTrigger((n) => n + 1);
+          setStreak((s) => s + 1);
+        } else if (absMs < 60) {
+          playSound("click", 0.15);
+          setStreak((s) => s + 1);
+        } else if (nearestDeltaMs > 100 || absMs > MAX_MATCH_WINDOW_MS) {
+          playSound("error", 0.2);
+          shake();
+          setStreak(0);
+        }
+      }
+    },
+    [shake]
+  );
 
   // Keyboard listener — space bar triggers tap during the playing phase.
   useEffect(() => {
@@ -332,7 +371,7 @@ export default function RhythmGame({ onComplete, onAbort }: GameComponentProps) 
   const pulseScale = pulseActive || tapFlash !== "none" ? "scale-110" : "scale-100";
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full">
+    <div className="flex flex-col items-center gap-4 w-full" style={shakeStyle}>
       {phase === "idle" && (
         <div className="w-full max-w-sm bg-slate-800 rounded-xl p-6 md:p-8 text-center">
           <p className="text-lg font-semibold mb-3">
@@ -378,20 +417,34 @@ export default function RhythmGame({ onComplete, onAbort }: GameComponentProps) 
             />
           </div>
 
-          <button
-            type="button"
-            onClick={handleTap}
-            aria-label={isZh ? "敲击" : "Tap"}
-            className="relative w-64 h-64 md:w-72 md:h-72 rounded-full bg-slate-800 flex items-center justify-center cursor-pointer select-none touch-none focus:outline-none"
-          >
-            <div
-              className={`absolute inset-0 rounded-full border-4 transition-all duration-100 ease-out ${ringGlow} ${pulseScale}`}
+          <div className="relative">
+            <button
+              type="button"
+              onClick={(e) => {
+                const rect = e.currentTarget.getBoundingClientRect();
+                handleTap(e.clientX - rect.left, e.clientY - rect.top);
+              }}
+              aria-label={isZh ? "敲击" : "Tap"}
+              className="relative w-64 h-64 md:w-72 md:h-72 rounded-full bg-slate-800 flex items-center justify-center cursor-pointer select-none touch-none focus:outline-none"
+            >
+              <div
+                className={`absolute inset-0 rounded-full border-4 transition-all duration-100 ease-out ${ringGlow} ${pulseScale}`}
+              />
+              <div className="relative z-10 text-center text-white">
+                <div className="text-3xl font-bold">120</div>
+                <div className="text-xs opacity-70">BPM</div>
+              </div>
+            </button>
+            <ParticleBurst
+              trigger={burstTrigger}
+              x={burstPos.x}
+              y={burstPos.y}
+              color="#00D4AA"
+              count={12}
+              enabled={burstTrigger > 0}
             />
-            <div className="relative z-10 text-center text-white">
-              <div className="text-3xl font-bold">120</div>
-              <div className="text-xs opacity-70">BPM</div>
-            </div>
-          </button>
+            <ComboCounter combo={streak} x={144} y={20} />
+          </div>
 
           <p className="text-xs text-muted-foreground">
             {isZh
@@ -402,7 +455,7 @@ export default function RhythmGame({ onComplete, onAbort }: GameComponentProps) 
       )}
 
       {phase === "done" && resultMs !== null && (
-        <div className="w-full max-w-sm bg-slate-800 rounded-xl p-6 md:p-8 text-center">
+        <div className="relative w-full max-w-sm bg-slate-800 rounded-xl p-6 md:p-8 text-center">
           <p className="text-2xl font-bold mb-2">
             {isZh ? "测试完成!" : "Test Complete!"}
           </p>
@@ -415,6 +468,14 @@ export default function RhythmGame({ onComplete, onAbort }: GameComponentProps) 
               ? `命中 ${SCORED_BEATS - missedCount}/${SCORED_BEATS} 拍`
               : `Matched ${SCORED_BEATS - missedCount}/${SCORED_BEATS} beats`}
           </p>
+          <ParticleBurst
+            trigger={endBurstTrigger}
+            x={180}
+            y={100}
+            color="#FFB800"
+            count={Math.max(20, Math.round(60 - resultMs / 2))}
+            enabled={endBurstTrigger > 0}
+          />
         </div>
       )}
 

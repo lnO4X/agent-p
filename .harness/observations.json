@@ -1,22 +1,27 @@
 {
-  "timestamp": "2026-04-19T16:30:00Z",
+  "timestamp": "2026-04-22T00:30:00Z",
   "health": 200,
   "traffic": {
-    "last24h": { "pageViews": 1, "uniqueSessions": 1 },
-    "last7d": { "pageViews": 8, "uniqueSessions": 4 }
+    "last24h": { "pageViews": 0, "uniqueSessions": 0 },
+    "last7d": { "pageViews": 1, "uniqueSessions": 1 },
+    "topReferrers": ["google.com"]
   },
-  "topReferrers": [{ "referrer": "https://www.google.com/", "views": "1" }],
-  "funnel": {
-    "pageViews_7d": 8,
-    "quizStarts_7d": 1
+  "stats": {
+    "totalUsers": 10,
+    "premiumUsers": 0,
+    "registeredToday": 0,
+    "totalSessions": 5,
+    "totalPartners": 11
   },
-  "users": { "total": 10, "premium": 0, "registeredToday": 0 },
-  "partners": 11,
-  "lastEvalScore": { "specImplemented": 5, "noRegressions": 5, "productQuality": 4 },
-  "consecutiveSkips": 31,
-  "residualProblems": [
-    "0 premium users",
-    "~280 games missing descriptions",
-    "Traffic flat — external growth bottleneck"
-  ]
+  "pipelineHistory": "Last 5 runs: all SKIP",
+  "lastEval": {
+    "action": "SKIP",
+    "consecutiveSkips": "40+",
+    "scores": { "specImplemented": 5, "noRegressions": 5, "productQuality": 4 },
+    "residualProblems": [
+      "0 premium users",
+      "~280 games missing descriptions",
+      "Traffic flat — external growth bottleneck"
+    ]
+  }
 }

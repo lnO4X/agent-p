@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
 
-// Import all 13 scorers
+// Import all game scorers
 import { reactionSpeedScorer } from "@/games/reaction-speed/scorer";
 import { handEyeScorer } from "@/games/hand-eye/scorer";
 import { spatialScorer } from "@/games/spatial/scorer";
@@ -8,6 +8,7 @@ import { memoryScorer } from "@/games/memory/scorer";
 import { strategyScorer } from "@/games/strategy/scorer";
 import { rhythmScorer } from "@/games/rhythm/scorer";
 import { patternScorer } from "@/games/pattern/scorer";
+import { posnerScorer } from "@/games/posner/scorer";
 import { multitaskScorer } from "@/games/multitask/scorer";
 import { decisionScorer } from "@/games/decision/scorer";
 import { emotionalScorer } from "@/games/emotional/scorer";
@@ -22,7 +23,8 @@ const scorers = [
   { name: "memory", scorer: memoryScorer, sampleScores: [3, 5, 6, 8, 12] },
   { name: "strategy", scorer: strategyScorer, sampleScores: [10, 30, 50, 75, 95] },
   { name: "rhythm", scorer: rhythmScorer, sampleScores: [80, 60, 30, 20, 10] },
-  { name: "pattern", scorer: patternScorer, sampleScores: [0, 20, 40, 60, 100] },
+  { name: "pattern", scorer: patternScorer, sampleScores: [0, 5, 10, 12, 15] },
+  { name: "posner", scorer: posnerScorer, sampleScores: [0, 20, 40, 60, 100] },
   { name: "multitask", scorer: multitaskScorer, sampleScores: [15, 35, 55, 75, 95] },
   { name: "decision", scorer: decisionScorer, sampleScores: [-30, -10, 0, 12, 30] },
   { name: "emotional", scorer: emotionalScorer, sampleScores: [0.4, 0.7, 0.8, 1.0, 1.15] },
@@ -31,7 +33,7 @@ const scorers = [
   { name: "resource", scorer: resourceScorer, sampleScores: [10, 35, 55, 75, 95] },
 ];
 
-describe("All 13 game scorers", () => {
+describe("All game scorers", () => {
   for (const { name, scorer, sampleScores } of scorers) {
     describe(`${name} scorer`, () => {
       it("has valid configuration", () => {
@@ -174,33 +176,60 @@ describe("Specific scorer edge cases", () => {
     expect(capLow).toBeCloseTo(capLowest, 1);
   });
 
-  // ---- Posner Cueing Task (pattern) ----
+  // ---- Pattern (Find the Odd One) — Quick-tier color discrimination ----
 
-  it("pattern (Posner): validity effect of 0ms scores high", () => {
-    // A 0ms validity effect means attention reorients instantly — ~2 SDs better than mean.
-    const perfect = patternScorer.normalize(0);
-    expect(perfect).toBeGreaterThan(80);
-  });
-
-  it("pattern (Posner): typical 40ms validity effect normalizes to ~50th percentile", () => {
-    const typical = patternScorer.normalize(40);
+  it("pattern (Find the Odd One): typical 10-11/15 correct normalizes near 50th percentile", () => {
+    const typical = patternScorer.normalize(10.5);
     expect(typical).toBeGreaterThan(45);
     expect(typical).toBeLessThan(55);
   });
 
-  it("pattern (Posner): 80ms validity effect (slow reorienting) scores below average", () => {
-    const slow = patternScorer.normalize(80);
+  it("pattern (Find the Odd One): perfect 15/15 scores near the top", () => {
+    const perfect = patternScorer.normalize(15);
+    expect(perfect).toBeGreaterThan(80);
+  });
+
+  it("pattern (Find the Odd One): low 5/15 scores well below average", () => {
+    const low = patternScorer.normalize(5);
+    expect(low).toBeLessThan(30);
+  });
+
+  it("pattern (Find the Odd One): clamps raw scores outside [0, 15]", () => {
+    const hiClamp = patternScorer.normalize(500);
+    const hiMax = patternScorer.normalize(15);
+    expect(hiClamp).toBeCloseTo(hiMax, 1);
+    const loClamp = patternScorer.normalize(-10);
+    const loMin = patternScorer.normalize(0);
+    expect(loClamp).toBeCloseTo(loMin, 1);
+  });
+
+  // ---- Posner Cueing Task — Pro-tier attention orienting ----
+
+  it("posner: validity effect of 0ms scores high", () => {
+    // A 0ms validity effect means attention reorients instantly — ~2 SDs better than mean.
+    const perfect = posnerScorer.normalize(0);
+    expect(perfect).toBeGreaterThan(80);
+  });
+
+  it("posner: typical 40ms validity effect normalizes to ~50th percentile", () => {
+    const typical = posnerScorer.normalize(40);
+    expect(typical).toBeGreaterThan(45);
+    expect(typical).toBeLessThan(55);
+  });
+
+  it("posner: 80ms validity effect (slow reorienting) scores below average", () => {
+    const slow = posnerScorer.normalize(80);
     expect(slow).toBeLessThan(30);
   });
 
-  it("pattern (Posner): low accuracy (<70%) caps score at 30", () => {
+  it("posner: low accuracy (<70%) caps score at 30", () => {
     // Even with a perfect 0ms validity effect, <70% accuracy signals guessing.
-    const capped = patternScorer.normalize(0, undefined, { accuracy: 0.5 });
+    const capped = posnerScorer.normalize(0, undefined, { accuracy: 0.5 });
     expect(capped).toBeLessThanOrEqual(30);
   });
 
-  it("pattern (Posner): good accuracy (>=70%) does NOT trigger the cap", () => {
-    const notCapped = patternScorer.normalize(0, undefined, { accuracy: 0.9 });
+  it("posner: good accuracy (>=70%) does NOT trigger the cap", () => {
+    const notCapped = posnerScorer.normalize(0, undefined, { accuracy: 0.9 });
     expect(notCapped).toBeGreaterThan(30);
   });
 });

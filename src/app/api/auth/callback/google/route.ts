@@ -169,6 +169,8 @@ export async function GET(request: NextRequest) {
         tier: "free" as const,
         tierExpiresAt: null,
         personalityType: null,
+        lastRetestReminderAt: null,
+        lastRetestReminderWindow: null,
         createdAt: now,
         updatedAt: now,
       };

@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { useI18n } from "@/i18n/context";
-import { trackEvent as track } from "@/lib/analytics";
+import { trackGameEvent } from "@/lib/analytics";
 import { getGameQuiz, getAllGameQuizzes } from "@/lib/game-quizzes";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft, ArrowRight, Gamepad2 } from "lucide-react";
@@ -90,7 +90,7 @@ export default function GameQuizIntroPage() {
             size="lg"
             className="w-full h-14 text-lg bg-accent hover:bg-accent/90 text-accent-foreground pressable"
             onClick={() => {
-              track("quiz_start", { mode: "game", gameId });
+              trackGameEvent("quiz_start", { mode: "game", gameId });
               router.push("/quiz");
             }}
           >

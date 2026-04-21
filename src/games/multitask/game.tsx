@@ -3,6 +3,8 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
 import { useI18n } from "@/i18n/context";
+import { playSound } from "@/lib/audio-fx";
+import { ParticleBurst } from "@/components/game-fx";
 
 /**
  * Dual-Task — Attention allocation paradigm (Pashler 1994)
@@ -13,14 +15,17 @@ import { useI18n } from "@/i18n/context";
  * Both tasks run simultaneously. Measures dual-task cost.
  */
 
-const TOTAL_TRIALS = 24;
-const SINGLE_TRIALS = 8; // first 8 single-task, then 16 dual
+const PRACTICE_TRIALS = 8; // 8 single-task practice trials, not scored
+const SCORED_TOTAL = 24;
+const TOTAL_TRIALS = PRACTICE_TRIALS + SCORED_TOTAL;
+const SINGLE_TRIALS_AFTER_PRACTICE = 8; // scored single-task (indices PRACTICE_TRIALS..PRACTICE_TRIALS+SINGLE_TRIALS_AFTER_PRACTICE)
 const TRIAL_DURATION_MS = 3000;
+const PRACTICE_DONE_MS = 1000;
 
-type TaskPhase = "idle" | "single-visual" | "single-classify" | "dual" | "response" | "feedback" | "done";
+type TaskPhase = "idle" | "practice-visual" | "practice-classify" | "single-visual" | "single-classify" | "dual" | "response" | "feedback" | "practice-done" | "done";
 
 interface TrialResult {
-  type: "single-visual" | "single-classify" | "dual";
+  type: "practice-visual" | "practice-classify" | "single-visual" | "single-classify" | "dual";
   visualCorrect: boolean | null;
   classifyCorrect: boolean | null;
   visualRT: number | null;
@@ -46,6 +51,12 @@ export default function DualTaskGame({
   const [showClassify, setShowClassify] = useState(false);
   const [feedbackText, setFeedbackText] = useState("");
   const [feedbackOk, setFeedbackOk] = useState(true);
+  const [endBurstTrigger, setEndBurstTrigger] = useState(0);
+  const [finalStats, setFinalStats] = useState<{
+    visual: number;
+    classify: number;
+    overall: number;
+  } | null>(null);
 
   const startTimeRef = useRef(0);
   const trialStartRef = useRef(0);
@@ -67,9 +78,14 @@ export default function DualTaskGame({
     return id;
   }, []);
 
-  const getTrialType = (idx: number): "single-visual" | "single-classify" | "dual" => {
-    if (idx < 4) return "single-visual";
-    if (idx < SINGLE_TRIALS) return "single-classify";
+  const getTrialType = (idx: number): "practice-visual" | "practice-classify" | "single-visual" | "single-classify" | "dual" => {
+    // First PRACTICE_TRIALS are unscored practice: 4 visual + 4 classify
+    if (idx < 4) return "practice-visual";
+    if (idx < PRACTICE_TRIALS) return "practice-classify";
+    // Then scored: SINGLE_TRIALS_AFTER_PRACTICE (4 visual + 4 classify), then dual
+    const scoredIdx = idx - PRACTICE_TRIALS;
+    if (scoredIdx < 4) return "single-visual";
+    if (scoredIdx < SINGLE_TRIALS_AFTER_PRACTICE) return "single-classify";
     return "dual";
   };
 
@@ -102,8 +118,8 @@ export default function DualTaskGame({
       visualRespondedRef.current = false;
       classifyRespondedRef.current = false;
 
-      const hasVisual = type === "single-visual" || type === "dual";
-      const hasClassify = type === "single-classify" || type === "dual";
+      const hasVisual = type === "single-visual" || type === "dual" || type === "practice-visual";
+      const hasClassify = type === "single-classify" || type === "dual" || type === "practice-classify";
 
       if (hasVisual) {
         startDotMovement();
@@ -156,6 +172,10 @@ export default function DualTaskGame({
           const next = idx + 1;
           if (next >= TOTAL_TRIALS) {
             finishGame();
+          } else if (next === PRACTICE_TRIALS) {
+            // Transition from practice to scored phase
+            setPhase("practice-done");
+            scheduleTimer(() => runTrial(next), PRACTICE_DONE_MS);
           } else {
             runTrial(next);
           }
@@ -167,7 +187,10 @@ export default function DualTaskGame({
 
   const finishGame = useCallback(() => {
     setPhase("done");
-    const results = resultsRef.current;
+    // Exclude practice trials from analytics
+    const results = resultsRef.current.filter(
+      (r) => r.type !== "practice-visual" && r.type !== "practice-classify"
+    );
 
     const singleVisual = results.filter((r) => r.type === "single-visual");
     const singleClassify = results.filter((r) => r.type === "single-classify");
@@ -194,6 +217,17 @@ export default function DualTaskGame({
     // Higher dual accuracy = better multitasking
     const rawScore = avgDualAcc * 100;
 
+    // Tier C minimal polish — block-end only. Dual-task measurement is fragile;
+    // no audio or visuals fire during trials. Here at the end, one success sound
+    // + one particle burst + final stats per-task breakdown.
+    playSound("success");
+    setEndBurstTrigger((n) => n + 1);
+    setFinalStats({
+      visual: Math.round(dualVisualAcc * 100),
+      classify: Math.round(dualClassifyAcc * 100),
+      overall: Math.round(rawScore),
+    });
+
     onComplete({
       rawScore,
       durationMs: Date.now() - startTimeRef.current,
@@ -204,7 +238,8 @@ export default function DualTaskGame({
         dualClassifyAcc: Math.round(dualClassifyAcc * 100),
         visualCost: Math.round(visualCost * 100),
         classifyCost: Math.round(classifyCost * 100),
-        totalTrials: TOTAL_TRIALS,
+        totalTrials: SCORED_TOTAL,
+        practiceTrials: PRACTICE_TRIALS,
       },
     });
   }, [onComplete]);
@@ -259,8 +294,8 @@ export default function DualTaskGame({
   }, [runTrial]);
 
   const trialType = getTrialType(trialIndex);
-  const hasVisual = trialType === "single-visual" || trialType === "dual";
-  const hasClassify = trialType === "single-classify" || trialType === "dual";
+  const hasVisual = trialType === "single-visual" || trialType === "dual" || trialType === "practice-visual";
+  const hasClassify = trialType === "single-classify" || trialType === "dual" || trialType === "practice-classify";
 
   if (phase === "idle") {
     return (
@@ -288,15 +323,27 @@ export default function DualTaskGame({
     );
   }
 
+  const isPracticeTrial = trialIndex < PRACTICE_TRIALS;
+
   return (
     <div className="flex flex-col items-center gap-3 w-full max-w-lg mx-auto">
       <div className="flex justify-between w-full text-sm text-muted-foreground px-2">
-        <span>{isZh ? "第" : "Trial"} {trialIndex + 1}/{TOTAL_TRIALS} {isZh ? "轮" : ""}</span>
-        <span className={`text-xs px-2 py-0.5 rounded ${
-          trialType === "dual" ? "bg-purple-500/20 text-purple-400" : "bg-blue-500/20 text-blue-400"
-        }`}>
-          {trialType === "single-visual" ? (isZh ? "单: 视觉" : "Single: Visual") : trialType === "single-classify" ? (isZh ? "单: 分类" : "Single: Classify") : (isZh ? "双任务" : "Dual-Task")}
+        <span>
+          {isPracticeTrial
+            ? isZh ? `练习 ${trialIndex + 1}/${PRACTICE_TRIALS}` : `Practice ${trialIndex + 1}/${PRACTICE_TRIALS}`
+            : isZh ? `第 ${trialIndex + 1 - PRACTICE_TRIALS}/${SCORED_TOTAL} 轮` : `Trial ${trialIndex + 1 - PRACTICE_TRIALS}/${SCORED_TOTAL}`}
         </span>
+        {isPracticeTrial ? (
+          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-md text-xs">
+            {isZh ? "练习 — 不计分" : "Practice — not scored"}
+          </span>
+        ) : (
+          <span className={`text-xs px-2 py-0.5 rounded ${
+            trialType === "dual" ? "bg-purple-500/20 text-purple-400" : "bg-blue-500/20 text-blue-400"
+          }`}>
+            {trialType === "single-visual" ? (isZh ? "单: 视觉" : "Single: Visual") : trialType === "single-classify" ? (isZh ? "单: 分类" : "Single: Classify") : (isZh ? "双任务" : "Dual-Task")}
+          </span>
+        )}
       </div>
 
       <div className="w-full h-1 bg-muted rounded-full overflow-hidden">
@@ -359,6 +406,46 @@ export default function DualTaskGame({
       {phase === "feedback" && (
         <div className={`text-xl font-bold py-8 ${feedbackOk ? "text-green-400" : "text-red-400"}`}>
           {feedbackText}
+        </div>
+      )}
+
+      {phase === "practice-done" && (
+        <div className="text-xl font-bold py-8 text-primary animate-pulse">
+          {isZh ? "开始计分..." : "Now scoring..."}
+        </div>
+      )}
+
+      {phase === "done" && finalStats && (
+        <div className="relative w-full max-w-sm bg-slate-800 rounded-xl p-6 text-center">
+          <p className="text-2xl font-bold mb-2">
+            {isZh ? "测试完成!" : "Test Complete!"}
+          </p>
+          <p className="text-4xl font-bold text-primary">{finalStats.overall}%</p>
+          <p className="text-xs text-muted-foreground mt-1">
+            {isZh ? "双任务综合准确率" : "Dual-Task Overall Accuracy"}
+          </p>
+          <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+            <div className="bg-slate-900/50 rounded p-2">
+              <div className="text-xs text-muted-foreground">
+                {isZh ? "视觉" : "Visual"}
+              </div>
+              <div className="font-bold text-blue-400">{finalStats.visual}%</div>
+            </div>
+            <div className="bg-slate-900/50 rounded p-2">
+              <div className="text-xs text-muted-foreground">
+                {isZh ? "分类" : "Classify"}
+              </div>
+              <div className="font-bold text-amber-400">{finalStats.classify}%</div>
+            </div>
+          </div>
+          <ParticleBurst
+            trigger={endBurstTrigger}
+            x={180}
+            y={80}
+            color="#FFB800"
+            count={Math.max(16, Math.round(finalStats.overall / 3))}
+            enabled={endBurstTrigger > 0}
+          />
         </div>
       )}
 

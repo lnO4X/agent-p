@@ -78,7 +78,7 @@ export async function GET() {
               display: "flex",
             }}
           >
-            3 mini-games · Pro player benchmarks · Instant results
+            3 mini-games · Published research · Instant results
           </div>
 
           {/* Stats row */}

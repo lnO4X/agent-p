@@ -3,10 +3,17 @@
 import { useState, useRef, useCallback, useEffect } from "react";
 import type { GameComponentProps } from "@/types/game";
 import { useI18n } from "@/i18n/context";
+import { playSound } from "@/lib/audio-fx";
+import { ParticleBurst, ComboCounter } from "@/components/game-fx";
 
 const GRID_SIZE = 3;
 const N = 2; // 2-back
+// First N trials are unscored "practice" (no n-back reference exists yet).
+// The scorer already slices these off via allResults.slice(N).
+// Keeping TOTAL_TRIALS=30 (includes the 2 practice trials); scored = 28.
+const PRACTICE_TRIALS = N;
 const TOTAL_TRIALS = 30;
+const SCORED_TRIALS = TOTAL_TRIALS - PRACTICE_TRIALS;
 const TRIAL_DURATION_MS = 1500;
 const MATCH_RATIO = 0.33; // ~33% of scorable trials are matches
 
@@ -60,6 +67,10 @@ export default function NBackGame({
     "correct" | "incorrect" | null
   >(null);
   const [results, setResults] = useState<TrialResult[]>([]);
+  // Polish state — consecutive-correct streak + accuracy-scaled block-end celebration
+  const [streak, setStreak] = useState(0);
+  const [celebrateTrigger1, setCelebrateTrigger1] = useState(0);
+  const [celebrateTrigger2, setCelebrateTrigger2] = useState(0);
 
   const sequenceRef = useRef<number[]>([]);
   const trialTimerRef = useRef<ReturnType<typeof setTimeout>>(null!);
@@ -94,6 +105,19 @@ export default function NBackGame({
       const falseAlarmRate = nonMatches.length > 0
         ? falseAlarms / nonMatches.length
         : 0;
+
+      // Block-end celebration scaled to accuracy
+      if (accuracy >= 80) {
+        setCelebrateTrigger1((t) => t + 1);
+        playSound("success");
+      }
+      if (accuracy >= 90) {
+        // Second burst for ≥ 90% accuracy
+        setTimeout(() => {
+          setCelebrateTrigger2((t) => t + 1);
+          playSound("coin");
+        }, 250);
+      }
 
       onComplete({
         rawScore: accuracy,
@@ -153,10 +177,17 @@ export default function NBackGame({
         if (isScorable && isMatch) {
           setFeedbackType("incorrect");
           setPhase("feedback");
+          // Missed match = incorrect → error chime + reset streak
+          playSound("error");
+          setStreak(0);
           feedbackTimerRef.current = setTimeout(() => {
             advanceTrial(updated);
           }, 400);
         } else {
+          // Correct rejection (non-match, no response) — bump streak silently if scorable
+          if (isScorable) {
+            setStreak((s) => s + 1);
+          }
           advanceTrial(updated);
         }
       }, TRIAL_DURATION_MS);
@@ -170,6 +201,7 @@ export default function NBackGame({
     startTimeRef.current = Date.now();
     setResults([]);
     setTrialIndex(0);
+    setStreak(0);
     advanceTrial([]);
   }, [advanceTrial]);
 
@@ -178,6 +210,9 @@ export default function NBackGame({
       if (phase !== "showing") return;
       if (respondedRef.current) return;
       respondedRef.current = true;
+
+      // Click sound at response time (Tier B safe — the response event itself)
+      playSound("click");
 
       clearTimeout(trialTimerRef.current);
 
@@ -203,9 +238,13 @@ export default function NBackGame({
       const updated = [...results, result];
       setResults(updated);
 
-      // Show feedback
+      // Show feedback + feedback-phase audio + streak
       setFeedbackType(responseCorrect ? "correct" : "incorrect");
       setPhase("feedback");
+      if (isScorable) {
+        playSound(responseCorrect ? "success" : "error");
+        setStreak((s) => (responseCorrect ? s + 1 : 0));
+      }
 
       feedbackTimerRef.current = setTimeout(() => {
         advanceTrial(updated);
@@ -246,17 +285,48 @@ export default function NBackGame({
   const isScorable = trialIndex >= N;
 
   return (
-    <div className="flex flex-col items-center gap-4 w-full">
+    <div className="relative flex flex-col items-center gap-4 w-full">
+      {/* Combo counter — only during feedback when streak >= 3 */}
+      <ComboCounter
+        combo={streak}
+        x={180}
+        y={60}
+        enabled={phase === "feedback" && streak >= 3}
+      />
+      {/* Block-end particle bursts — scaled to accuracy (≥80% = 1 burst, ≥90% = 2 bursts) */}
+      <ParticleBurst
+        trigger={celebrateTrigger1}
+        x={180}
+        y={200}
+        color="#FFB800"
+        count={28}
+        enabled={phase === "done" && celebrateTrigger1 > 0}
+      />
+      <ParticleBurst
+        trigger={celebrateTrigger2}
+        x={180}
+        y={200}
+        color="#00D4AA"
+        count={24}
+        enabled={phase === "done" && celebrateTrigger2 > 0}
+      />
       {/* Header */}
       <div className="flex justify-between w-full max-w-sm text-sm text-muted-foreground px-2">
         <span>
-          {isZh ? "试次" : "Trial"} {Math.min(trialIndex + 1, TOTAL_TRIALS)}/
-          {TOTAL_TRIALS}
+          {trialIndex < PRACTICE_TRIALS
+            ? isZh ? `练习 ${trialIndex + 1}/${PRACTICE_TRIALS}` : `Practice ${trialIndex + 1}/${PRACTICE_TRIALS}`
+            : isZh ? `试次 ${Math.min(trialIndex + 1 - PRACTICE_TRIALS, SCORED_TRIALS)}/${SCORED_TRIALS}` : `Trial ${Math.min(trialIndex + 1 - PRACTICE_TRIALS, SCORED_TRIALS)}/${SCORED_TRIALS}`}
         </span>
-        <span>
-          {isZh ? "2-Back" : "2-Back"}
-          {scorableResults.length > 0 && ` · ${currentAccuracy}%`}
-        </span>
+        {trialIndex < PRACTICE_TRIALS && phase !== "idle" && phase !== "done" ? (
+          <span className="px-2 py-0.5 bg-yellow-500/20 text-yellow-400 rounded-md text-xs">
+            {isZh ? "练习 — 不计分" : "Practice — not scored"}
+          </span>
+        ) : (
+          <span>
+            {isZh ? "2-Back" : "2-Back"}
+            {scorableResults.length > 0 && ` · ${currentAccuracy}%`}
+          </span>
+        )}
       </div>
 
       {/* 3x3 Grid */}

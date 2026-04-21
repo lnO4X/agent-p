@@ -28,6 +28,10 @@ export const users = pgTable(
     tier: text("tier", { enum: ["free", "premium"] }).notNull().default("free"),
     tierExpiresAt: timestamp("tier_expires_at"),
     personalityType: text("personality_type"), // "INTJ", "ENFP", etc. nullable — Jungian personality type
+    // Most recent retest reminder email sent (used to dedupe cron sends within a single window).
+    // Bumped by POST /api/cron/retest-reminders after a successful Resend dispatch.
+    lastRetestReminderAt: timestamp("last_retest_reminder_at"),
+    lastRetestReminderWindow: text("last_retest_reminder_window"), // "30-day" | "quarterly" | "half-year"
     createdAt: timestamp("created_at").defaultNow().notNull(),
     updatedAt: timestamp("updated_at").defaultNow().notNull(),
   },

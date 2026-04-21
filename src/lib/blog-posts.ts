@@ -42,7 +42,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "What Your Score Actually Means",
-        body: "Your talent tier is determined by your average across all three dimensions:\n\n- **Pro Elite (92+)**: Top 0.5% — you have exceptional raw talent\n- **Pro Level (78+)**: Top 5% — talent comparable to professional players\n- **Pro Potential (68+)**: Top 15% — significant talent that could be developed\n- **Above Average (55+)**: Top 35% — better than most, but far from pro\n- **Developing (<55)**: Where 65% of players fall — and that's completely normal\n\nRemember: talent is just one piece of the puzzle. Pro players also train 8-12 hours daily for 3-5 years.",
+        body: "Your talent tier is determined by your average across all three dimensions, ranked against literature norms from published gamer cognitive studies (Dale & Green 2017; Kowal et al. 2018):\n\n- **Elite (92+)**: Top 0.5% against published norms — exceptional raw cognitive ability\n- **Top-Tier (78+)**: Top 5% against published norms — comparable to top gamer profiles documented in literature\n- **Above-Average (68+)**: Top 15% — strong cognitive ability that could be developed further\n- **Average (55+)**: Top 35% — better than most, but not near top-tier literature norms\n- **Developing (<55)**: Where ~65% of test-takers fall — and that's completely normal\n\nImportant: GameTan does not have a proprietary database of pro players. The percentile comparisons are against published research norms on gamer populations, not raw pro-player data. And cognitive ability is just one piece of the puzzle — pro players also train 8-12 hours daily for 3-5 years.",
       },
       {
         heading: "Take the Test",
@@ -64,7 +64,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "你的分数意味着什么",
-        body: "你的天赋等级由三个维度的平均值决定：\n\n- **职业精英 (92+)**：前 0.5% — 你有卓越的原始天赋\n- **职业水平 (78+)**：前 5% — 天赋可与职业选手相比\n- **职业潜力 (68+)**：前 15% — 可以培养的显著天赋\n- **高于平均 (55+)**：前 35% — 比大多数人强，但离职业还远\n- **成长中 (<55)**：65% 的玩家在这里 — 这完全正常\n\n记住：天赋只是拼图的一部分。职业选手还需要每天训练 8-12 小时，持续 3-5 年。",
+        body: "你的天赋等级由三个维度的平均值决定，与已发表的玩家认知研究文献数据对比（Dale & Green 2017；Kowal et al. 2018）：\n\n- **精英 (92+)**：对比文献数据前 0.5% — 卓越的原始认知能力\n- **顶尖 (78+)**：对比文献数据前 5% — 与文献中报告的顶尖玩家画像相当\n- **高于平均 (68+)**：前 15% — 较强认知能力，可以进一步培养\n- **平均 (55+)**：前 35% — 比大多数人强，但未达到文献中的顶尖水平\n- **成长中 (<55)**：约 65% 的测试者在这里 — 这完全正常\n\n重要：GameTan 没有自己的职业选手数据库。百分位对比是基于已发表研究中的玩家群体数据，而不是原始职业选手数据。而且认知能力只是拼图的一部分——职业选手还需要每天训练 8-12 小时，持续 3-5 年。",
       },
       {
         heading: "来测试吧",
@@ -150,7 +150,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "Test Your Reaction Speed Now",
-        body: "GameTan's reaction speed test uses 10 rounds of visual stimuli to measure your average response time, then normalizes it against a database of pro player benchmarks.\n\nUnlike simple click-when-green tests, GameTan also measures your pattern recognition and decision-making — giving you a complete picture of your gaming talent, not just one number.\n\nThe test takes 3 minutes and is completely free. You'll see exactly where your reaction speed ranks among 10,000 simulated players.",
+        body: "GameTan's reaction speed test uses 10 rounds of visual stimuli to measure your average response time, then percentile-ranks it against population norms from Human Benchmark's 81M+ data points plus published gamer cognitive studies (Dale & Green 2017).\n\nUnlike simple click-when-green tests, GameTan also measures your pattern recognition and decision-making — giving you a complete picture of your cognitive profile, not just one number.\n\nThe test takes 3 minutes and is completely free. You'll see exactly where your reaction speed ranks against literature norms.",
       },
     ],
     sectionsZh: [
@@ -168,7 +168,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "现在测试你的反应速度",
-        body: "GameTan 的反应速度测试使用 10 轮视觉刺激来测量你的平均响应时间，然后对照职业选手基准数据库进行归一化。\n\n与简单的「变绿就点」测试不同，GameTan 还测量你的模式识别和决策能力——给你一个完整的游戏天赋图景，而不仅仅是一个数字。\n\n测试需要 3 分钟，完全免费。你将看到你的反应速度在 10,000 名模拟玩家中的排名。",
+        body: "GameTan 的反应速度测试使用 10 轮视觉刺激来测量你的平均响应时间，然后与 Human Benchmark 的 8100 万+ 数据点以及已发表的玩家认知研究（Dale & Green 2017）进行百分位对比。\n\n与简单的「变绿就点」测试不同，GameTan 还测量你的模式识别和决策能力——给你一个完整的认知画像，而不仅仅是一个数字。\n\n测试需要 3 分钟，完全免费。你将看到你的反应速度在文献数据中的百分位排名。",
       },
     ],
   },
@@ -200,7 +200,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "Take the First Step: Know Where You Stand",
-        body: "GameTan's esports talent test gives you an objective measurement of your gaming talent across three dimensions. In 3 minutes, you'll know:\n\n- Your talent tier (from Developing to Pro Elite)\n- How you compare against actual pro player benchmarks\n- Your estimated rank among 10,000 players\n- Which of your skills is strongest and weakest\n\nIt won't tell you whether to go pro — that's a life decision only you can make. But it will give you the data to make that decision with clear eyes instead of wishful thinking.",
+        body: "GameTan's esports talent test gives you an objective measurement of your cognitive abilities across three dimensions. In 3 minutes, you'll know:\n\n- Your talent tier (from Developing to Elite) against literature norms\n- How your percentile compares to published gamer cognitive profiles\n- Your estimated rank among 10,000 simulated test-takers\n- Which of your skills is strongest and weakest\n\nIt won't tell you whether to go pro — that's a life decision only you can make, and GameTan cannot predict competitive outcomes. But it will give you the cognitive baseline data to make that decision with clear eyes instead of wishful thinking.",
       },
     ],
     sectionsZh: [
@@ -222,7 +222,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "第一步：知道自己在哪里",
-        body: "GameTan 的电竞天赋测试在三个维度上给你一个客观的游戏天赋测量。3 分钟内你会知道：\n\n- 你的天赋等级（从成长中到职业精英）\n- 你与实际职业选手基准的比较\n- 你在 10,000 名玩家中的估计排名\n- 你最强和最弱的技能是哪个\n\n它不会告诉你是否应该打职业——那是只有你自己能做的人生决定。但它会给你数据，让你用清醒的眼睛而不是一厢情愿来做这个决定。",
+        body: "GameTan 的电竞天赋测试在三个维度上给你一个客观的认知能力测量。3 分钟内你会知道：\n\n- 你的天赋等级（从成长中到精英）对比文献数据\n- 你的百分位与已发表的玩家认知画像的对比\n- 你在 10,000 名模拟测试者中的估计排名\n- 你最强和最弱的技能是哪个\n\n它不会告诉你是否应该打职业——那是只有你自己能做的人生决定，GameTan 也无法预测竞技结果。但它会给你认知基线数据，让你用清醒的眼睛而不是一厢情愿来做这个决定。",
       },
     ],
   },
@@ -308,7 +308,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "Measure Your Baseline First",
-        body: "You can't improve what you can't measure. Before starting any training program, establish your baseline across all three dimensions.\n\nGameTan's 3-minute talent test measures reaction speed, pattern recognition, and decision-making against pro player benchmarks. Your results show exactly which dimension needs the most work — so you can focus your training where it matters most.\n\nTake the free test, save your scores, then re-test after 30 days of focused training to see your improvement.",
+        body: "You can't improve what you can't measure. Before starting any training program, establish your baseline across all three dimensions.\n\nGameTan's 3-minute talent test measures reaction speed, pattern recognition, and decision-making, then percentile-ranks your scores against literature norms from published gamer cognitive studies. Your results show exactly which dimension needs the most work — so you can focus your training where it matters most.\n\nTake the free test, save your scores, then re-test after 30 days of focused training to see your improvement.",
       },
     ],
     sectionsZh: [
@@ -330,7 +330,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "先测量你的基线",
-        body: "你无法提升你无法测量的东西。在开始任何训练计划之前，在所有三个维度建立你的基线。\n\nGameTan 的 3 分钟天赋测试测量反应速度、模式识别和决策能力，与职业选手基准对比。你的结果精确显示哪个维度最需要提升——这样你可以把训练集中在最重要的地方。\n\n做完免费测试，保存分数，30 天专注训练后重新测试看看你的进步。",
+        body: "你无法提升你无法测量的东西。在开始任何训练计划之前，在所有三个维度建立你的基线。\n\nGameTan 的 3 分钟天赋测试测量反应速度、模式识别和决策能力，然后与已发表的玩家认知研究文献数据进行百分位对比。你的结果精确显示哪个维度最需要提升——这样你可以把训练集中在最重要的地方。\n\n做完免费测试，保存分数，30 天专注训练后重新测试看看你的进步。",
       },
     ],
   },
@@ -362,7 +362,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "Discover Your Gaming DNA",
-        body: "Traditional sports have combines, tryouts, and scouting. Esports has... ranked mode? That's not a talent assessment. That's a performance metric mixed with team luck, champion picks, and internet connection quality.\n\nGameTan isolates the three core cognitive skills and measures them independently of any specific game. In 3 minutes, you get an objective talent profile — your reaction speed, pattern recognition, and decision-making scored against pro player benchmarks.\n\nThink of it as the esports equivalent of a sports combine. Except it's free, takes 3 minutes, and you can do it from your chair.",
+        body: "Traditional sports have combines, tryouts, and scouting. Esports has... ranked mode? That's not a talent assessment. That's a performance metric mixed with team luck, champion picks, and internet connection quality.\n\nGameTan isolates the three core cognitive skills and measures them independently of any specific game. In 3 minutes, you get an objective cognitive profile — your reaction speed, pattern recognition, and decision-making percentile-ranked against literature norms from published gamer cognitive studies.\n\nThink of it as the esports equivalent of a sports combine — but for cognition, not physical attributes. Free, takes 3 minutes, and you can do it from your chair.",
       },
     ],
     sectionsZh: [
@@ -384,7 +384,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "发现你的游戏 DNA",
-        body: "传统体育有选拔赛、试训和球探。电竞有什么？排位赛？那不是天赋评估。那是混合了团队运气、英雄选择和网络连接质量的表现指标。\n\nGameTan 隔离三项核心认知技能，独立于任何特定游戏来测量。3 分钟内你得到一个客观的天赋画像——反应速度、模式识别和决策能力与职业选手基准的对比分数。\n\n把它想象成电竞版的体育选拔测试。只不过它是免费的，只需 3 分钟，你可以坐在椅子上完成。",
+        body: "传统体育有选拔赛、试训和球探。电竞有什么？排位赛？那不是天赋评估。那是混合了团队运气、英雄选择和网络连接质量的表现指标。\n\nGameTan 隔离三项核心认知技能，独立于任何特定游戏来测量。3 分钟内你得到一个客观的认知画像——反应速度、模式识别和决策能力与已发表的玩家认知研究文献数据的百分位对比。\n\n把它想象成电竞版的体育选拔测试——只不过测的是认知能力，而不是身体属性。免费，只需 3 分钟，你可以坐在椅子上完成。",
       },
     ],
   },
@@ -458,7 +458,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "Test Your Actual Reaction Time",
-        body: "Most online reaction tests are flawed because they measure click speed on a simple color change. Real gaming reaction involves:\n\n1. **Visual recognition** — Identifying what you're seeing (enemy, ability, projectile)\n2. **Decision processing** — Choosing the correct response\n3. **Motor execution** — Physically performing the action\n\nSimple click tests only measure #1 and #3, skipping the most important part. This is why your online reaction test score of 180ms doesn't translate to 180ms in-game.\n\nGameTan's reaction test is designed to include a minimal decision component — you need to identify the correct target, not just click when something appears. This gives a more realistic measure of your gaming-relevant reaction speed.\n\nTake the 3-minute test to see where you actually stand against pro player benchmarks.",
+        body: "Most online reaction tests are flawed because they measure click speed on a simple color change. Real gaming reaction involves:\n\n1. **Visual recognition** — Identifying what you're seeing (enemy, ability, projectile)\n2. **Decision processing** — Choosing the correct response\n3. **Motor execution** — Physically performing the action\n\nSimple click tests only measure #1 and #3, skipping the most important part. This is why your online reaction test score of 180ms doesn't translate to 180ms in-game.\n\nGameTan's reaction test is designed to include a minimal decision component — you need to identify the correct target, not just click when something appears. This gives a more realistic measure of your gaming-relevant reaction speed.\n\nTake the 3-minute test to see where you actually stand against literature norms.",
       },
     ],
     sectionsZh: [
@@ -476,7 +476,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "测试你的真实反应速度",
-        body: "大多数在线反应测试都有缺陷，因为它们只测量对简单颜色变化的点击速度。真实的游戏反应涉及：\n\n1. **视觉识别** — 识别你看到的是什么（敌人、技能、弹道）\n2. **决策处理** — 选择正确的应对方式\n3. **运动执行** — 实际执行操作\n\n简单的点击测试只测量第 1 和第 3 项，跳过了最重要的部分。这就是为什么你在线反应测试 180ms 的成绩在游戏中并不等于 180ms。\n\nGameTan 的反应测试包含一个最小决策成分——你需要识别正确的目标，而不仅仅是看到东西就点击。这给出了更真实的游戏相关反应速度测量。\n\n花 3 分钟测试一下，看看你与职业选手基准相比实际处于什么水平。",
+        body: "大多数在线反应测试都有缺陷，因为它们只测量对简单颜色变化的点击速度。真实的游戏反应涉及：\n\n1. **视觉识别** — 识别你看到的是什么（敌人、技能、弹道）\n2. **决策处理** — 选择正确的应对方式\n3. **运动执行** — 实际执行操作\n\n简单的点击测试只测量第 1 和第 3 项，跳过了最重要的部分。这就是为什么你在线反应测试 180ms 的成绩在游戏中并不等于 180ms。\n\nGameTan 的反应测试包含一个最小决策成分——你需要识别正确的目标，而不仅仅是看到东西就点击。这给出了更真实的游戏相关反应速度测量。\n\n花 3 分钟测试一下，看看你与文献数据相比实际处于什么水平。",
       },
     ],
   },
@@ -596,7 +596,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "What This Means for Your Gaming Journey",
-        body: "If you are in your late 20s or 30s and wondering whether it is too late to compete, the science says: your biology is not the problem.\n\nYour reaction time at 30 is still faster than 90% of 18-year-olds who do not actively train it. Your pattern recognition and decision-making are likely better than they were at 22. Your biggest challenge is finding the time and motivation to train, not fighting cognitive decline.\n\nGameTan measures your current cognitive abilities regardless of age. We have seen 35-year-old players score in the Pro Elite tier because their pattern recognition and decision-making compensate for slightly slower raw reactions. The talent profile matters more than any single number.\n\nTake the test to see where you stand right now — not where your age says you should be.",
+        body: "If you are in your late 20s or 30s and wondering whether it is too late to compete, the science says: your biology is not the problem.\n\nYour reaction time at 30 is still faster than 90% of 18-year-olds who do not actively train it. Your pattern recognition and decision-making are likely better than they were at 22. Your biggest challenge is finding the time and motivation to train, not fighting cognitive decline.\n\nGameTan measures your current cognitive abilities regardless of age. We have seen 35-year-old players score in the Elite tier (top 0.5% against literature norms) because their pattern recognition and decision-making compensate for slightly slower raw reactions. The cognitive profile matters more than any single number.\n\nTake the test to see where you stand right now — not where your age says you should be.",
       },
     ],
     sectionsZh: [
@@ -614,7 +614,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "这对你的游戏旅程意味着什么",
-        body: "如果你快 30 岁或已经 30 多岁，在想竞技是不是太晚了，科学告诉你：你的生物学不是问题。\n\n你 30 岁的反应时间仍然比 90% 没有主动训练的 18 岁人要快。你的模式识别和决策能力很可能比 22 岁时更好。你最大的挑战是找到训练的时间和动力，而不是对抗认知衰退。\n\nGameTan 衡量你当前的认知能力，不考虑年龄。我们见过 35 岁的玩家进入 Pro Elite 等级，因为他们的模式识别和决策能力弥补了稍慢的原始反应。天赋画像比任何单一数字都重要。\n\n参加测试，看看你现在的水平——而不是你的年龄说你应该在什么水平。",
+        body: "如果你快 30 岁或已经 30 多岁，在想竞技是不是太晚了，科学告诉你：你的生物学不是问题。\n\n你 30 岁的反应时间仍然比 90% 没有主动训练的 18 岁人要快。你的模式识别和决策能力很可能比 22 岁时更好。你最大的挑战是找到训练的时间和动力，而不是对抗认知衰退。\n\nGameTan 衡量你当前的认知能力，不考虑年龄。我们见过 35 岁的玩家进入精英等级（对比文献数据前 0.5%），因为他们的模式识别和决策能力弥补了稍慢的原始反应。认知画像比任何单一数字都重要。\n\n参加测试，看看你现在的水平——而不是你的年龄说你应该在什么水平。",
       },
     ],
   },
@@ -680,7 +680,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "The 5 Cognitive Skills Behind Valorant Performance",
-        body: "Based on cognitive science research and pro player data, five measurable skills predict Valorant performance:\n\n**1. Reaction Speed (180-220ms pro range)** — The time between seeing a target and clicking. Valorant's TTK (time to kill) is among the shortest in competitive FPS. A 50ms advantage in reaction time means you win the duel when both players spot each other simultaneously.\n\n**2. Visual Tracking** — Following a moving target smoothly. This maps directly to tracking an enemy strafing through your crosshair. Pro players maintain 85%+ tracking accuracy at high speeds.\n\n**3. Pattern Recognition** — Spotting the agent peeking through smoke, identifying the default vs. fake setup, reading eco rounds. Pattern recognition under time pressure is what game sense actually is.\n\n**4. Selective Attention** — Filtering relevant info from noise. In a post-plant retake, you are processing footstep audio, minimap pings, ability cooldowns, and teammate positions simultaneously. Selective attention determines how much of that you actually use vs. miss.\n\n**5. Risk Decision-Making** — Push or hold? Rotate or anchor? Save or force buy? These are real-time probability calculations under pressure. Players with strong risk assessment climb faster because they convert uncertain situations into advantageous ones.",
+        body: "Based on published cognitive science research (Dale & Green 2017; Kowal et al. 2018) and publicly reported pro reaction-time data, five measurable skills predict Valorant performance:\n\n**1. Reaction Speed (180-220ms pro range, per published norms)** — The time between seeing a target and clicking. Valorant's TTK (time to kill) is among the shortest in competitive FPS. A 50ms advantage in reaction time means you win the duel when both players spot each other simultaneously.\n\n**2. Visual Tracking** — Following a moving target smoothly. This maps directly to tracking an enemy strafing through your crosshair. Action video gamers show superior visual tracking in published studies (Green & Bavelier 2003).\n\n**3. Pattern Recognition** — Spotting the agent peeking through smoke, identifying the default vs. fake setup, reading eco rounds. Pattern recognition under time pressure is what game sense actually is.\n\n**4. Selective Attention** — Filtering relevant info from noise. In a post-plant retake, you are processing footstep audio, minimap pings, ability cooldowns, and teammate positions simultaneously. Selective attention determines how much of that you actually use vs. miss.\n\n**5. Risk Decision-Making** — Push or hold? Rotate or anchor? Save or force buy? These are real-time probability calculations under pressure. Players with strong risk assessment climb faster because they convert uncertain situations into advantageous ones.",
       },
       {
         heading: "How Pros Compare: TenZ vs. Average Immortal",
@@ -692,7 +692,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "Test Your Valorant Talent Now",
-        body: "Stop guessing whether you have what it takes. GameTan's esports talent test takes 3 minutes and gives you a percentile rank for each cognitive dimension — compared against the general population and pro player benchmarks.\n\nYour results will show you exactly where your cognitive strengths and weaknesses lie. Maybe your reaction time is Radiant-level but your pattern recognition is holding you back. Maybe your decision-making is elite but your tracking needs work.\n\nKnowing your cognitive profile does not replace practice — but it tells you where to focus your practice for maximum rank improvement. Take the free test and find out where you stand.",
+        body: "Stop guessing whether you have what it takes. GameTan's esports talent test takes 3 minutes and gives you a percentile rank for each cognitive dimension — compared against general population norms and published gamer cognitive profiles (Dale & Green 2017; Kowal et al. 2018).\n\nYour results will show you exactly where your cognitive strengths and weaknesses lie. Maybe your reaction time is Radiant-level but your pattern recognition is holding you back. Maybe your decision-making is elite but your tracking needs work.\n\nKnowing your cognitive profile does not replace practice — but it tells you where to focus your practice for maximum rank improvement. Take the free test and find out where you stand.",
       },
     ],
     sectionsZh: [
@@ -702,7 +702,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "Valorant 表现背后的 5 项认知技能",
-        body: "基于认知科学研究和职业选手数据，五项可测量的技能预测 Valorant 表现：\n\n**1. 反应速度（职业范围 180-220ms）** — 从看到目标到点击的时间。Valorant 的 TTK（击杀时间）是竞技 FPS 中最短的之一。50ms 的反应优势意味着当双方同时发现对方时你赢得对枪。\n\n**2. 视觉追踪** — 平滑地跟随移动目标。这直接对应追踪一个闪避中的敌人。职业选手在高速下保持 85%+ 的追踪精度。\n\n**3. 模式识别** — 识别烟雾中探头的特工、分辨默认布防和假布防、看穿 eco 回合。时间压力下的模式识别就是所谓的「游戏意识」。\n\n**4. 选择性注意力** — 从噪声中过滤相关信息。在后植回防中，你同时处理脚步声、小地图信号、技能冷却和队友位置。选择性注意力决定了你实际利用多少信息 vs 遗漏多少。\n\n**5. 风险决策** — 推还是守？转点还是蹲守？省钱还是强买？这些是压力下的实时概率计算。风险评估能力强的玩家上分更快，因为他们把不确定局面转化为有利局面。",
+        body: "基于已发表的认知科学研究（Dale & Green 2017；Kowal et al. 2018）和公开报道的职业选手反应时间数据，五项可测量的技能预测 Valorant 表现：\n\n**1. 反应速度（文献报告的职业范围 180-220ms）** — 从看到目标到点击的时间。Valorant 的 TTK（击杀时间）是竞技 FPS 中最短的之一。50ms 的反应优势意味着当双方同时发现对方时你赢得对枪。\n\n**2. 视觉追踪** — 平滑地跟随移动目标。这直接对应追踪一个闪避中的敌人。动作类游戏玩家在已发表研究中显示出更强的视觉追踪能力（Green & Bavelier 2003）。\n\n**3. 模式识别** — 识别烟雾中探头的特工、分辨默认布防和假布防、看穿 eco 回合。时间压力下的模式识别就是所谓的「游戏意识」。\n\n**4. 选择性注意力** — 从噪声中过滤相关信息。在后植回防中，你同时处理脚步声、小地图信号、技能冷却和队友位置。选择性注意力决定了你实际利用多少信息 vs 遗漏多少。\n\n**5. 风险决策** — 推还是守？转点还是蹲守？省钱还是强买？这些是压力下的实时概率计算。风险评估能力强的玩家上分更快，因为他们把不确定局面转化为有利局面。",
       },
       {
         heading: "职业选手对比：TenZ vs 普通不朽段位",
@@ -714,7 +714,7 @@ export const BLOG_POSTS: BlogPost[] = [
       },
       {
         heading: "立即测试你的 Valorant 天赋",
-        body: "别再猜测你是否有实力了。GameTan 电竞天赋测试只需 3 分钟，给你每个认知维度的百分位排名——与普通人群和职业选手基准对比。\n\n你的结果会精确显示认知优势和劣势在哪里。也许你的反应时间是超凡入圣水平但模式识别拖了后腿。也许你的决策能力很精英但追踪需要加强。\n\n了解你的认知画像不能替代练习——但它告诉你应该把练习集中在哪里，以获得最大的段位提升。参加免费测试，看看你到底在什么水平。",
+        body: "别再猜测你是否有实力了。GameTan 电竞天赋测试只需 3 分钟，给你每个认知维度的百分位排名——与普通人群常模和已发表的玩家认知画像对比（Dale & Green 2017；Kowal et al. 2018）。\n\n你的结果会精确显示认知优势和劣势在哪里。也许你的反应时间是超凡入圣水平但模式识别拖了后腿。也许你的决策能力很精英但追踪需要加强。\n\n了解你的认知画像不能替代练习——但它告诉你应该把练习集中在哪里，以获得最大的段位提升。参加免费测试，看看你到底在什么水平。",
       },
     ],
   },

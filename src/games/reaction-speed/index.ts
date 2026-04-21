@@ -15,6 +15,7 @@ const plugin: GamePlugin = {
   icon: "⚡",
   scorer: reactionSpeedScorer,
   component: ReactionSpeedGame,
+  mobileCompatible: true,
 };
 
 export default plugin;
