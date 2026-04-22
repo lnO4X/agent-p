@@ -1,10 +1,14 @@
 {
-  "timestamp": "2026-04-22T00:30:00Z",
-  "health": 200,
+  "timestamp": "2026-04-22T08:30:00Z",
+  "health": {
+    "httpStatus": 200,
+    "siteUp": true
+  },
   "traffic": {
     "last24h": { "pageViews": 0, "uniqueSessions": 0 },
     "last7d": { "pageViews": 1, "uniqueSessions": 1 },
-    "topReferrers": ["google.com"]
+    "topReferrers": [{ "referrer": "https://www.google.com/", "views": 1 }],
+    "dailyTrend": [{ "day": "2026-04-18", "views": 1, "sessions": 1 }]
   },
   "stats": {
     "totalUsers": 10,
@@ -13,15 +17,18 @@
     "totalSessions": 5,
     "totalPartners": 11
   },
-  "pipelineHistory": "Last 5 runs: all SKIP",
+  "pipelineHistory": {
+    "last5": "all SKIP",
+    "consecutiveSkips": "42+"
+  },
   "lastEval": {
     "action": "SKIP",
-    "consecutiveSkips": "40+",
-    "scores": { "specImplemented": 5, "noRegressions": 5, "productQuality": 4 },
+    "score": { "specImplemented": 5, "noRegressions": 5, "productQuality": 4 },
     "residualProblems": [
       "0 premium users",
       "~280 games missing descriptions",
-      "Traffic flat — external growth bottleneck"
-    ]
+      "Traffic flat: external bottleneck"
+    ],
+    "doNotRepeat": ["SEO micro-optimizations", "enrich-games batching"]
   }
 }

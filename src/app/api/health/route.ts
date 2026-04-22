@@ -25,7 +25,9 @@ interface HealthResponse {
   checks: Record<string, HealthCheck>;
 }
 
-const EXPECTED_GAME_COUNT = 17;
+// 18 games: 17 original + posner (added in M5 when Pattern was split into Quick-tier
+// "Find the Odd One" + Pro-tier Posner Cueing for research-grade pattern_recog).
+const EXPECTED_GAME_COUNT = 18;
 
 async function checkDatabase(): Promise<HealthCheck> {
   try {

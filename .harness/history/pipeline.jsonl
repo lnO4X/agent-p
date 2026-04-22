@@ -323,3 +323,13 @@
 {"ts":"2026-04-21T14:42:36Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
 {"ts":"2026-04-21T15:21:13Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":2}
 {"ts":"2026-04-22T00:30:00Z","action":"SKIP","spec":"no-action","traffic_24h":0,"users":10,"duration_min":2}
+{"ts":"2026-04-21T16:46:08Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":3}
+{"ts":"2026-04-21T17:25:37Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":4}
+{"ts":"2026-04-21T18:51:17Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":5}
+{"ts":"2026-04-21T19:31:11Z","action":"SKIP","spec":"?","traffic_24h":0,"users":10,"duration_min":5}
+{"ts":"2026-04-22T04:30:00Z","action":"SKIP","spec":"no-action","traffic_24h":0,"users":10,"duration_min":2}
+{"ts":"2026-04-21T20:56:37Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":5}
+{"ts":"2026-04-21T21:36:48Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":5}
+{"ts":"2026-04-21T23:00:37Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":3}
+{"ts":"2026-04-21T23:41:49Z","action":"SKIP","spec":"?","traffic_24h":0,"users":0,"duration_min":5}
+{"ts":"2026-04-22T08:30:00Z","action":"SKIP","spec":"no-action","traffic_24h":0,"users":10,"duration_min":2}
